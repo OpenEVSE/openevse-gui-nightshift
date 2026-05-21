@@ -1,0 +1,23 @@
+{
+  "name": "Garage EVSE",
+  "state": 3,
+  "evse_connected": true,
+  "limit": false,
+  "amp": 32,
+  "pilot": 32,
+  "voltage": 240,
+  "wattpower": 7680,
+  "watthour": 12500,
+  "session_elapsed": 5820,
+  "temperature": 28.5,
+  "ipaddress": "192.168.1.100",
+  "time": "2026-05-21T10:00:00Z",
+  "config_version": 1,
+  "schedule_version": 1,
+  "schedule_plan_version": 1,
+  "claims_version": 1,
+  "override_version": 1,
+  "limit_version": 1,
+  "divert_update": 0,
+  "vehicle_state_update": 0
+}

@@ -1,0 +1,15 @@
+{
+  "firmware": "5.1.0",
+  "lang": "en",
+  "time_zone": "America/New_York",
+  "hostname": "garage-evse",
+  "ssid": "HomeNetwork",
+  "max_current_hard": 40,
+  "max_current": 32,
+  "min_current": 6,
+  "service": 2,
+  "divert_enabled": false,
+  "mqtt_enabled": false,
+  "emoncms_enabled": false,
+  "sntp_hostname": "pool.ntp.org"
+}
