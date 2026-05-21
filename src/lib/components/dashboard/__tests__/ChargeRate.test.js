@@ -22,4 +22,12 @@ describe('ChargeRate', () => {
     await fireEvent.change(input)
     expect(onchange).toHaveBeenCalledWith(32)
   })
+  it('shows the claimedBy tag when provided', () => {
+    const { getByText } = render(ChargeRate, { props: { amps: 24, max: 48, claimedBy: 'solar' } })
+    expect(getByText('dashboard.rate.claimed')).toBeInTheDocument()
+  })
+  it('does not show the claimed tag when claimedBy is empty', () => {
+    const { queryByText } = render(ChargeRate, { props: { amps: 24, max: 48 } })
+    expect(queryByText('dashboard.rate.claimed')).not.toBeInTheDocument()
+  })
 })
