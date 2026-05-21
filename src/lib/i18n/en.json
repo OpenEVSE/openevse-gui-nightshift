@@ -27,5 +27,64 @@
     "monitoring": "Monitoring",
     "history": "History",
     "notfound": "Page not found"
+  },
+  "dashboard": {
+    "status": {
+      "starting": "Starting",
+      "charging": "Charging",
+      "idle": "Ready",
+      "connected": "Connected",
+      "error": "Fault"
+    },
+    "car_connected": "Car connected",
+    "not_charging": "Not charging",
+    "ring": {
+      "starting": "Starting",
+      "ready": "Ready",
+      "ready_sub": "Plug in your car to start",
+      "paused": "Paused"
+    },
+    "reason": {
+      "off": "Mode is Off — switch to Auto or On",
+      "waiting": "Waiting · {time}",
+      "not_charging": "Not charging"
+    },
+    "kw_max": "of {max} kW max",
+    "chips": {
+      "session": "Session kWh",
+      "elapsed": "Elapsed",
+      "current": "Current",
+      "voltage": "Voltage",
+      "temp": "Temp",
+      "pilot": "Pilot"
+    },
+    "summary": { "today": "Today", "total": "Total" },
+    "mode": {
+      "label": "Charge mode",
+      "auto": "Auto",
+      "on": "On",
+      "off": "Off",
+      "locked": "Controlled by {client}"
+    },
+    "rate": { "label": "Charge rate", "claimed": "Set by {client}" },
+    "limit": {
+      "label": "Charge limit",
+      "none": "None set",
+      "set": "Set limit",
+      "left": "left",
+      "clear": "Clear limit",
+      "type": "Limit type",
+      "type_none": "None",
+      "type_time": "Time",
+      "type_energy": "Energy",
+      "type_soc": "Battery %",
+      "type_range": "Range",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "energy_value": "Energy (kWh)",
+      "save": "Set limit"
+    },
+    "eco": "Eco",
+    "shaper": "Shaper"
   }
 }
