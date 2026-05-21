@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store'
-import {httpAPI, dedup} from '../api/httpAPI.js'
+import { httpAPI } from '../api/httpAPI.js'
+import { dedup } from '../utils.js'
 
 function createHistoryStore() {
     const P  = writable()
