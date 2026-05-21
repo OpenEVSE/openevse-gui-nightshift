@@ -4,7 +4,8 @@ import { render } from '@testing-library/svelte'
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
   t.subscribe = (fn) => { fn(t); return () => {} }
-  return { _: t, register: vi.fn(), init: vi.fn(), getLocaleFromNavigator: () => 'en' }
+  const isLoading = { subscribe: (fn) => { fn(false); return () => {} } }
+  return { _: t, isLoading, register: vi.fn(), init: vi.fn(), getLocaleFromNavigator: () => 'en' }
 })
 vi.mock('../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.resolve('error')) }))
 

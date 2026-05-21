@@ -9,7 +9,7 @@
   import WebSocket from './lib/data/WebSocket.svelte'
   import DataManager from './lib/data/DataManager.svelte'
   import { uistates_store } from './lib/stores/uistates.js'
-  import { _ } from 'svelte-i18n'
+  import { _, isLoading } from 'svelte-i18n'
 
   setupI18n()
 
@@ -20,7 +20,10 @@
   onMount(() => theme.init())
 </script>
 
-{#if !loaded}
+{#if $isLoading}
+  <!-- Wait for the i18n catalog before rendering anything that uses $_ -->
+  <Loader {progress} />
+{:else if !loaded}
   <Loader {progress} />
   <FetchData
     onProgress={(p) => (progress = p)}
