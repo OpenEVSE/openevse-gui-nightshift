@@ -1,5 +1,5 @@
 <script>
-  import GearMark from '../../assets/GearMark.svelte'
+  import GearMark from '../../../assets/GearMark.svelte'
   import ProgressBar from './ProgressBar.svelte'
   let { progress = 0 } = $props()
 </script>
