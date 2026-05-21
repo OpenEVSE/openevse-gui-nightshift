@@ -2,6 +2,23 @@
   "app": "OpenEVSE",
   "loading": "Loading…",
   "notification": "Notification",
+  "logs-states": {
+    "loading": "Starting",
+    "active-nocar": "Active - Car not connected",
+    "active-car": "Active - Car connected",
+    "active-charge": "Charging",
+    "error": "Error",
+    "error-vent": "Ventilation required",
+    "error-diode": "Diode check failed",
+    "error-relay": "Stuck Relay",
+    "error-gfi": "GFCI fault",
+    "error-gfitest": "GFCI self-test failed",
+    "error-ground": "Earth Ground check failed",
+    "error-temp": "Over Temperature",
+    "error-current": "Over Current",
+    "sleeping": "Disabled - Sleeping",
+    "disabled": "Disabled"
+  },
   "config": {
     "network": {
       "con-ok": "Connected — new address: "
