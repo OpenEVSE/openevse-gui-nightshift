@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+test-results/
+dev-dist/
+.env
+.env.local
+.superpowers/
+*.local
+.DS_Store
