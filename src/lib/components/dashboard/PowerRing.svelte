@@ -51,7 +51,7 @@
       <div class="relative h-full w-full">
         <!-- "Paused": centered both axes within the ring -->
         <div class="absolute inset-0 grid place-items-center">
-          <div class="text-xl font-extrabold leading-none text-warning">
+          <div class="text-[22px] font-extrabold leading-none text-warning">
             {$_('dashboard.ring.paused')}
           </div>
         </div>
