@@ -1,6 +1,7 @@
 // src/routes/settings/__tests__/Mqtt.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, fireEvent } from '@testing-library/svelte'
+import { get } from 'svelte/store'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
@@ -54,5 +55,17 @@ describe('MQTT page', () => {
     await fireEvent.input(input, { target: { value: 'broker.local' } })
     await fireEvent.blur(input)
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_server: 'broker.local' }))
+  })
+
+  it('surfaces the write-error alert on a failed save', async () => {
+    httpAPI.mockResolvedValue('error')
+    config_store.set({ mqtt_enabled: true, mqtt_protocol: 'mqtt', mqtt_server: 'old', mqtt_supported_protocols: ['mqtt'] })
+    const { getByDisplayValue } = render(Mqtt)
+    const input = getByDisplayValue('old')
+    await fireEvent.input(input, { target: { value: 'broker.local' } })
+    await fireEvent.blur(input)
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
   })
 })

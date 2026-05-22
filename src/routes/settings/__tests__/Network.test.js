@@ -42,7 +42,6 @@ describe('Network page', () => {
   it('hides the AP block until the setup wizard has passed', () => {
     const { queryByText } = render(Network)
     expect(queryByText('config.network.apssid')).not.toBeInTheDocument()
-    config_store.set({ hostname: 'openevse-1', wizard_passed: true })
   })
 
   it('shows the AP block when wizard_passed', () => {

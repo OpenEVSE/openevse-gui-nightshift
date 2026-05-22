@@ -1,6 +1,7 @@
 // src/routes/settings/__tests__/Ocpp.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, fireEvent } from '@testing-library/svelte'
+import { get } from 'svelte/store'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
@@ -52,5 +53,17 @@ describe('OCPP page', () => {
     await fireEvent.input(input, { target: { value: 'wss://x' } })
     await fireEvent.blur(input)
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ ocpp_server: 'wss://x' }))
+  })
+
+  it('surfaces the write-error alert on a failed save', async () => {
+    httpAPI.mockResolvedValue('error')
+    config_store.set({ ocpp_enabled: true, ocpp_server: 'old', ocpp_auth_auto: false })
+    const { getByDisplayValue } = render(Ocpp)
+    const input = getByDisplayValue('old')
+    await fireEvent.input(input, { target: { value: 'wss://x' } })
+    await fireEvent.blur(input)
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
   })
 })
