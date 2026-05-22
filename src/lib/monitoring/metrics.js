@@ -1,0 +1,130 @@
+/** Pure helpers for the Monitoring screen. Self-contained — no store/DOM/utils imports. */
+
+/** Round `value` to `p` decimals; null for missing / non-numeric input. */
+export function round(value, p = 0) {
+  if (value === null || value === undefined || value === '' || typeof value === 'boolean') return null
+  const n = Number(value)
+  if (!Number.isFinite(n)) return null
+  const m = Math.pow(10, p)
+  return Math.round(n * m) / m
+}
+
+/** Format a duration in seconds as HH:MM:SS. */
+function hms(sec) {
+  const s = Number(sec)
+  if (!Number.isFinite(s) || s < 0) return '00:00:00'
+  const pad = (n) => String(Math.floor(n)).padStart(2, '0')
+  return `${pad(s / 3600)}:${pad((s % 3600) / 60)}:${pad(s % 60)}`
+}
+
+/** Tenths-of-°C → °C (1 dp); null when the sensor reports no real number. */
+function tempC(raw) {
+  if (typeof raw !== 'number' || !Number.isFinite(raw)) return null
+  return round(raw / 10, 1)
+}
+
+export function energyMetrics(status) {
+  const s = status ?? {}
+  return {
+    titleKey: 'monitoring.group.energy',
+    rows: [
+      { labelKey: 'monitoring.energy.session', value: round((s.session_energy ?? 0) / 1000, 1), unit: 'units.kwh' },
+      { labelKey: 'monitoring.energy.total', value: round(s.total_energy, 1), unit: 'units.kwh' },
+      { labelKey: 'monitoring.energy.day', value: round(s.total_day, 1), unit: 'units.kwh' },
+      { labelKey: 'monitoring.energy.week', value: round(s.total_week, 1), unit: 'units.kwh' },
+      { labelKey: 'monitoring.energy.month', value: round(s.total_month, 1), unit: 'units.kwh' },
+      { labelKey: 'monitoring.energy.year', value: round(s.total_year, 1), unit: 'units.kwh' },
+    ],
+  }
+}
+
+export function sensorMetrics(status, config) {
+  const s = status ?? {}
+  const c = config ?? {}
+  const rows = [
+    { labelKey: 'monitoring.sensor.pilot', value: round(s.pilot, 0), unit: 'units.amp' },
+    { labelKey: 'monitoring.sensor.current', value: round((s.amp ?? 0) / 1000, 1), unit: 'units.amp' },
+    { labelKey: 'monitoring.sensor.voltage', value: round(s.voltage, 0), unit: 'units.volt' },
+    { labelKey: 'monitoring.sensor.evsetemp', value: tempC(s.temp), unit: 'units.celsius' },
+  ]
+  ;[s.temp1, s.temp2, s.temp3, s.temp4].forEach((raw, i) => {
+    const v = tempC(raw)
+    if (v !== null) rows.push({ labelKey: `monitoring.sensor.temp${i + 1}`, value: v, unit: 'units.celsius' })
+  })
+  rows.push({ labelKey: 'monitoring.sensor.scale', value: c.scale ?? null, unit: '' })
+  rows.push({ labelKey: 'monitoring.sensor.offset', value: c.offset ?? null, unit: '' })
+  return { titleKey: 'monitoring.group.sensors', rows }
+}
+
+export function serviceMetrics(status, config) {
+  const s = status ?? {}
+  const c = config ?? {}
+  return {
+    titleKey: 'monitoring.group.service',
+    rows: [
+      { labelKey: 'monitoring.service.level', value: s.service_level ?? null, unit: '' },
+      { labelKey: 'monitoring.service.min', value: c.min_current_hard ?? null, unit: 'units.amp' },
+      { labelKey: 'monitoring.service.max', value: c.max_current_soft ?? null, unit: 'units.amp' },
+    ],
+  }
+}
+
+export function vehicleMetrics(status, config) {
+  const s = status ?? {}
+  const c = config ?? {}
+  return {
+    titleKey: 'monitoring.group.vehicle',
+    rows: [
+      { labelKey: 'monitoring.vehicle.updated', value: hms(s.vehicle_state_update), unit: '' },
+      { labelKey: 'monitoring.vehicle.battery', value: s.battery_level ?? null, unit: 'units.percent' },
+      { labelKey: 'monitoring.vehicle.range', value: s.battery_range ?? null, unit: c.mqtt_vehicle_range_miles ? 'units.miles' : 'units.km' },
+      { labelKey: 'monitoring.vehicle.timeleft', value: hms(s.time_to_full_charge), unit: '' },
+    ],
+  }
+}
+
+/** Whether the Vehicle metric group should render. */
+export function showVehicle(status, config) {
+  const s = status ?? {}
+  const c = config ?? {}
+  return s.battery_level !== undefined || s.battery_range !== undefined || !!c.time_to_full_charge
+}
+
+/** 'ok' | 'warning' | 'error' for a count against warning / alert thresholds. */
+export function countSeverity(count, warning, alert) {
+  const n = Number(count)
+  if (!Number.isFinite(n)) return 'ok'
+  if (n > alert) return 'error'
+  if (n > warning) return 'warning'
+  return 'ok'
+}
+
+/** Build the Safety-tab rows. The fault row carries `state` for getStateDesc. */
+export function safetyData(status, hasError) {
+  const s = status ?? {}
+  const countRow = (key, count) => ({
+    key,
+    count: count ?? 0,
+    severity: (count ?? 0) === 0 ? 'ok' : 'error',
+  })
+  const errors = []
+  if (hasError) errors.push({ key: 'fault', state: s.state, severity: 'error' })
+  errors.push(countRow('gfci', s.gfcicount))
+  errors.push(countRow('noground', s.nogndcount))
+  errors.push(countRow('stuck', s.stuckcount))
+  const switches = s.total_switches ?? 0
+  const infos = [{ key: 'switches', count: switches, severity: countSeverity(switches, 20000, 40000) }]
+  return { errors, infos }
+}
+
+/** One row per entry in `claims_target.claims`. */
+export function claimRows(claimsTarget) {
+  const ct = claimsTarget ?? {}
+  const claims = ct.claims ?? {}
+  const properties = ct.properties ?? {}
+  return Object.keys(claims).map((property) => ({
+    property,
+    clientId: claims[property],
+    value: properties[property],
+  }))
+}
