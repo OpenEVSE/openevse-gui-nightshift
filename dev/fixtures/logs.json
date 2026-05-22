@@ -1,0 +1,8 @@
+[
+  { "time": "2026-05-21T18:30:00Z", "type": "information", "evseState": 3, "energy": 7400, "temperature": 28.5 },
+  { "time": "2026-05-21T14:10:00Z", "type": "notification", "evseState": 2, "energy": 0, "temperature": 26.1 },
+  { "time": "2026-05-20T22:05:00Z", "type": "warning", "evseState": 8, "energy": 0, "temperature": 41.2 },
+  { "time": "2026-05-20T08:00:00Z", "type": "information", "evseState": 3, "energy": 11200, "temperature": 30.0 },
+  { "time": "2026-05-19T19:45:00Z", "type": "information", "evseState": 1, "energy": 0, "temperature": 24.8 },
+  { "time": "2026-05-18T07:30:00Z", "type": "information", "evseState": 3, "energy": 9800, "temperature": 27.3 }
+]

@@ -53,6 +53,19 @@ export function mockPlugin() {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0] // strip query string
 
+        // History log endpoints (dynamic — not in the exact-match table)
+        if (url === '/api/logs') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ min: 1, max: 1 }))
+          return
+        }
+        if (url && url.startsWith('/api/logs/')) {
+          const idx = url.slice('/api/logs/'.length)
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(idx === '1' ? loadFixture('logs.json') : '[]')
+          return
+        }
+
         if (url && Object.prototype.hasOwnProperty.call(fixtures, url)) {
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(fixtures[url])

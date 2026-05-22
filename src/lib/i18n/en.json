@@ -208,5 +208,17 @@
     "mqtt": "MQTT",
     "shaper": "Load shaper",
     "null": "—"
+  },
+  "history": {
+    "loading": "Loading history…",
+    "empty": "No history yet",
+    "error_title": "Couldn't load history",
+    "error_body": "The charger didn't return the log. Please try again.",
+    "retry": "Retry",
+    "types": {
+      "information": "Information",
+      "notification": "Notification",
+      "warning": "Warning"
+    }
   }
 }
