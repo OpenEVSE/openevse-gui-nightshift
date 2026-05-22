@@ -78,7 +78,9 @@
 <section class="p-4">
   <div class="mb-3 flex items-baseline justify-between">
     <h1 class="text-lg font-semibold text-text">{$_('screen.schedule')}</h1>
-    <span class="text-xs text-text-dim">{timers.length} / {MAX_TIMERS}</span>
+    <span class="text-xs text-text-dim">
+      {$_('schedule.count', { values: { n: timers.length, max: MAX_TIMERS } })}
+    </span>
   </div>
 
   <TimerList

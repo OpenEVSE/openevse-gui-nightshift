@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n'
   import Card from '../ui/Card.svelte'
   import IconButton from '../ui/IconButton.svelte'
+  import Icon from '../../icons/Icon.svelte'
   import { displayTime } from '../../utils.js'
   import { formatDayChips } from '../../schedule/timers.js'
 
@@ -41,12 +42,18 @@
       {disabled}
       onclick={onedit}
     />
-    <IconButton
-      icon="mdi:trash-can-outline"
-      size={16}
-      label={$_('schedule.delete')}
-      disabled={disabled || removing}
-      onclick={ondelete}
-    />
+    {#if removing}
+      <span class="grid place-items-center p-2 text-text-dim">
+        <Icon icon="mdi:loading" size={16} class="animate-spin" />
+      </span>
+    {:else}
+      <IconButton
+        icon="mdi:trash-can-outline"
+        size={16}
+        label={$_('schedule.delete')}
+        {disabled}
+        onclick={ondelete}
+      />
+    {/if}
   </div>
 </Card>
