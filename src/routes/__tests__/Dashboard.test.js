@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render } from '@testing-library/svelte'
+import { render, fireEvent } from '@testing-library/svelte'
+import { get } from 'svelte/store'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
@@ -8,9 +9,12 @@ vi.mock('svelte-i18n', () => {
 })
 vi.mock('../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.resolve({})) }))
 
+import { httpAPI } from '../../lib/api/httpAPI.js'
 import { status_store } from '../../lib/stores/status.js'
 import { config_store } from '../../lib/stores/config.js'
 import { claims_target_store } from '../../lib/stores/claims_target.js'
+import { override_store } from '../../lib/stores/override.js'
+import { uistates_store } from '../../lib/stores/uistates.js'
 import { EvseClients } from '../../lib/vars.js'
 import Dashboard from '../Dashboard.svelte'
 
@@ -18,6 +22,10 @@ describe('Dashboard', () => {
   beforeEach(() => {
     config_store.set({ max_current_soft: 48, divert_enabled: false, current_shaper_enabled: false })
     claims_target_store.set({ properties: {}, claims: { state: null } })
+    override_store.set(undefined)
+    uistates_store.resetAlertBox()
+    httpAPI.mockReset()
+    httpAPI.mockResolvedValue({})
   })
 
   it('renders the charging composition when state is 3', () => {
@@ -36,12 +44,31 @@ describe('Dashboard', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     claims_target_store.set({ properties: {}, claims: { state: EvseClients.rfid.id } })
     const { getAllByRole } = render(Dashboard)
-    // ModeSelector renders buttons with aria-pressed via SegmentedControl
     const buttons = getAllByRole('button')
     const modeButtons = buttons.filter((btn) => btn.hasAttribute('aria-pressed'))
     expect(modeButtons.length).toBeGreaterThan(0)
     modeButtons.forEach((btn) => {
       expect(btn).toBeDisabled()
+    })
+  })
+
+  it('surfaces the global alert when a mode write fails', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    httpAPI.mockResolvedValue('error')
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.mode.on'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
+  })
+
+  it('drives /divertmode when the Eco toggle is switched on', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    config_store.set({ max_current_soft: 48, divert_enabled: true, current_shaper_enabled: false })
+    const { getByLabelText } = render(Dashboard)
+    await fireEvent.click(getByLabelText('dashboard.eco'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/divertmode', 'divertmode=2', 'text')
     })
   })
 })

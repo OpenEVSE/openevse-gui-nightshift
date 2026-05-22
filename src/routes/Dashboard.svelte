@@ -7,9 +7,11 @@
   import { claims_target_store } from '../lib/stores/claims_target.js'
   import { plan_store } from '../lib/stores/plan.js'
   import { uistates_store } from '../lib/stores/uistates.js'
+  import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { EvseClients } from '../lib/vars.js'
   import { sec2time, temp_round, round, clientid2name, getStateDesc } from '../lib/utils.js'
+  import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
 
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
@@ -23,6 +25,7 @@
 
   let limitModalOpen = $state(false)
   let busy = $state(false)
+  let rateNonce = $state(0)
 
   // ── derived view-model ──────────────────────────────────────────────────
   let display = $derived(displayState($status_store))
@@ -87,14 +90,16 @@
     if (busy) return
     busy = true
     try {
+      let ok
       if (m === 0) {
-        await serialQueue.add(() => override_store.clear())
+        ok = await serialQueue.add(() => override_store.clear())
       } else {
         const data = { state: m === 1 ? 'active' : 'disabled' }
         const cur = override_store.get(override_store)?.charge_current
         data.charge_current = cur ?? $config_store?.max_current_soft
-        await serialQueue.add(() => override_store.upload(data))
+        ok = await serialQueue.add(() => override_store.upload(data))
       }
+      if (!ok) showWriteError()
     } finally {
       busy = false
     }
@@ -108,8 +113,38 @@
         await serialQueue.add(() => override_store.removeProp('charge_current'))
       } else {
         const current = override_store.get(override_store) ?? {}
-        await serialQueue.add(() => override_store.upload({ ...current, charge_current: val }))
+        const ok = await serialQueue.add(() => override_store.upload({ ...current, charge_current: val }))
+        if (!ok) {
+          showWriteError()
+          rateNonce++ // remount ChargeRate so the slider reverts to the confirmed value
+        }
       }
+    } finally {
+      busy = false
+    }
+  }
+
+  async function setEco(on) {
+    if (busy) return
+    busy = true
+    try {
+      const res = await serialQueue.add(() =>
+        httpAPI('POST', '/divertmode', `divertmode=${on ? 2 : 1}`, 'text'),
+      )
+      if (res === 'error') showWriteError()
+    } finally {
+      busy = false
+    }
+  }
+
+  async function setShaper(on) {
+    if (busy) return
+    busy = true
+    try {
+      const res = await serialQueue.add(() =>
+        httpAPI('POST', '/shaper', `shaper=${on ? 1 : 0}`, 'text'),
+      )
+      if (res === 'error') showWriteError()
     } finally {
       busy = false
     }
@@ -117,12 +152,17 @@
 
   async function saveLimit(limit) {
     limitModalOpen = false
-    await serialQueue.add(() => limit_store.upload(limit))
-    await serialQueue.add(() => limit_store.download())
+    const ok = await serialQueue.add(() => limit_store.upload(limit))
+    if (ok) {
+      await serialQueue.add(() => limit_store.download())
+    } else {
+      showWriteError()
+    }
   }
 
   async function clearLimit() {
-    await serialQueue.add(() => limit_store.remove())
+    const ok = await serialQueue.add(() => limit_store.remove())
+    if (!ok) showWriteError()
   }
 </script>
 
@@ -143,21 +183,23 @@
 
   {#if display !== 'error'}
     <EcoShaperToggles
-      {showEco} {ecoOn} onEco={() => {}}
-      {showShaper} {shaperOn} onShaper={() => {}}
+      {showEco} {ecoOn} onEco={setEco}
+      {showShaper} {shaperOn} onShaper={setShaper}
       disabled={busy}
     />
 
     <ModeSelector {mode} disabled={busy || modeLocked} onmode={setMode} />
 
-    <ChargeRate
-      amps={chargeAmps}
-      min={6}
-      max={maxAmps}
-      disabled={busy || ecoOn}
-      claimedBy={rateClaimedBy}
-      onchange={setChargeAmps}
-    />
+    {#key rateNonce}
+      <ChargeRate
+        amps={chargeAmps}
+        min={6}
+        max={maxAmps}
+        disabled={busy || ecoOn}
+        claimedBy={rateClaimedBy}
+        onchange={setChargeAmps}
+      />
+    {/key}
 
     <ChargeLimitCard
       limit={$limit_store}
