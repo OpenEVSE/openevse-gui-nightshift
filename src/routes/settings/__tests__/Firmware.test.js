@@ -71,4 +71,31 @@ describe('Firmware page', () => {
       expect(getByText('config.firmware.channel_release')).toBeInTheDocument()
     })
   })
+
+  it('calls /update with the asset URL when install online is clicked', async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            { tag_name: 'v9.9.9', name: 'v9.9.9', prerelease: false, assets: [
+              { name: 'adafruit_featheresp32.bin', browser_download_url: 'https://example/fw.bin' },
+            ] },
+          ]),
+      }),
+    )
+    config_store.set({ firmware: '7.1.3', version: 'v1.0.0', buildenv: 'adafruit_featheresp32' })
+    const { getByText } = render(Firmware)
+    await vi.waitFor(() => {
+      expect(getByText('config.firmware.channel_release')).toBeInTheDocument()
+    })
+    await fireEvent.click(getByText('config.firmware.install_online'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST',
+        '/update',
+        JSON.stringify({ url: 'https://example/fw.bin' }),
+      )
+    })
+  })
 })

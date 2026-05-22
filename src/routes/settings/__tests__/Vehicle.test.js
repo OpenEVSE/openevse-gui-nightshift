@@ -87,4 +87,40 @@ describe('Vehicle page', () => {
     expect(getByText('config.vehicle.logout')).toBeInTheDocument()
     await vi.waitFor(() => expect(getByText('config.vehicle.select_vehicle')).toBeInTheDocument())
   })
+
+  it('calls the login endpoint and saves tokens on success', async () => {
+    httpAPI.mockImplementation((m, url) => {
+      if (url === 'https://auth.openevse.com/login')
+        return Promise.resolve({ ok: true, access_token: 'a', refresh_token: 'r', created_at: 1700000000, expires_in: 3600 })
+      return Promise.resolve({ msg: 'done' })
+    })
+    config_store.set({ vehicle_data_src: 1 })
+    const { getByLabelText, getByText } = render(Vehicle)
+    await fireEvent.input(getByLabelText('config.vehicle.username'), { target: { value: 'user@example.com' } })
+    await fireEvent.input(getByLabelText('config.vehicle.password'), { target: { value: 'secret' } })
+    await fireEvent.click(getByText('config.vehicle.login'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST',
+        'https://auth.openevse.com/login',
+        JSON.stringify({ username: 'user@example.com', password: 'secret' }),
+      )
+    })
+  })
+
+  it('shows login_failed when the login endpoint returns ok: false', async () => {
+    httpAPI.mockImplementation((m, url) => {
+      if (url === 'https://auth.openevse.com/login')
+        return Promise.resolve({ ok: false })
+      return Promise.resolve({ msg: 'done' })
+    })
+    config_store.set({ vehicle_data_src: 1 })
+    const { getByLabelText, getByText } = render(Vehicle)
+    await fireEvent.input(getByLabelText('config.vehicle.username'), { target: { value: 'user@example.com' } })
+    await fireEvent.input(getByLabelText('config.vehicle.password'), { target: { value: 'wrong' } })
+    await fireEvent.click(getByText('config.vehicle.login'))
+    await vi.waitFor(() => {
+      expect(getByText('config.vehicle.login_failed')).toBeInTheDocument()
+    })
+  })
 })

@@ -182,6 +182,19 @@
     {/if}
   </ConfigSection>
 
+  {#if otaState}
+    <div class="mt-3">
+      <ProgressBar value={otaProgress} />
+      <p class="mt-1 text-xs text-text-dim">
+        {#if reloadCountdown > 0}
+          {$_('config.firmware.ota_reload')}
+        {:else}
+          {$_('config.firmware.ota_' + otaState)}
+        {/if}
+      </p>
+    </div>
+  {/if}
+
   <ConfigSection title={$_('config.firmware.update')}>
     <p class="mb-2 text-xs text-text-dim">{$_('config.firmware.update_desc')}</p>
     <input
@@ -199,18 +212,6 @@
         onclick={uploadFirmware}
       />
     </div>
-    {#if otaState}
-      <div class="mt-3">
-        <ProgressBar value={otaProgress} />
-        <p class="mt-1 text-xs text-text-dim">
-          {#if reloadCountdown > 0}
-            {$_('config.firmware.ota_reload')}
-          {:else}
-            {$_('config.firmware.ota_' + otaState)}
-          {/if}
-        </p>
-      </div>
-    {/if}
   </ConfigSection>
 
   <ConfigSection title={$_('config.firmware.backup')}>

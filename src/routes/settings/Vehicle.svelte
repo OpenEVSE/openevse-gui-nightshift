@@ -1,7 +1,6 @@
 <!-- src/routes/settings/Vehicle.svelte -->
 <script>
   import { _ } from 'svelte-i18n'
-  import { onMount } from 'svelte'
   import { config_store } from '../../lib/stores/config.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { serialQueue } from '../../lib/queue.js'
@@ -47,8 +46,13 @@
   let vehicles = $state([])
   let vehiclesError = $state(false)
 
+  let vehiclesLoaded = $state(false)
   $effect(() => {
-    if (src === 1 && loggedIn) loadVehicles()
+    if (src === 1 && loggedIn && !vehiclesLoaded) {
+      vehiclesLoaded = true
+      loadVehicles()
+    }
+    if (!loggedIn) vehiclesLoaded = false
   })
 
   async function loadVehicles() {
