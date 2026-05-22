@@ -10,6 +10,12 @@
   import ReadOnlyRow from '../../lib/components/config/ReadOnlyRow.svelte'
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import PasswordInput from '../../lib/components/ui/PasswordInput.svelte'
+  import { serialQueue } from '../../lib/queue.js'
+  import { httpAPI } from '../../lib/api/httpAPI.js'
+  import { showWriteError } from '../../lib/alerts.js'
+  import { normalizeNetworks, signalIcon, isSecured } from '../../lib/config/wifi.js'
+  import Icon from '../../lib/icons/Icon.svelte'
+  import Button from '../../lib/components/ui/Button.svelte'
 
   const form = createConfigForm()
   const ss = form.saveState
@@ -17,6 +23,51 @@
   let connected = $derived(
     !!($status_store?.wifi_client_connected || $status_store?.eth_connected === 1),
   )
+
+  // ── WiFi scan / join ────────────────────────────────────────────────────
+  let networks = $state([])
+  let scanning = $state(false)
+  let scanError = $state(false)
+  let selected = $state(null) // the picked network object
+  let wifiPass = $state('')
+  let joining = $state(false)
+  let joined = $state(false)
+
+  async function scanWifi() {
+    if (scanning) return
+    scanning = true
+    scanError = false
+    networks = []
+    selected = null
+    const res = await serialQueue.add(() => httpAPI('GET', '/scan'))
+    scanning = false
+    if (!res || res === 'error' || !Array.isArray(res)) {
+      scanError = true
+      return
+    }
+    networks = normalizeNetworks(res)
+  }
+
+  function pickNetwork(n) {
+    selected = n
+    wifiPass = ''
+  }
+
+  async function joinWifi() {
+    if (joining || !selected) return
+    joining = true
+    const ok = await serialQueue.add(() =>
+      config_store.upload({ ssid: selected.ssid, pass: wifiPass }),
+    )
+    joining = false
+    if (ok) {
+      joined = true
+      networks = []
+      selected = null
+    } else {
+      showWriteError()
+    }
+  }
 </script>
 
 <ConfigPage title={$_('config.pages.network')}>
@@ -34,6 +85,67 @@
     {#if $config_store?.ssid}
       <ReadOnlyRow label={$_('config.network.ssid')} value={$config_store.ssid} />
       <ReadOnlyRow label={$_('config.network.signal')} value={$status_store?.srssi} />
+    {/if}
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.network.wifi')}>
+    {#if joined}
+      <p class="py-2 text-sm text-text-dim">{$_('config.network.connecting')}</p>
+    {:else}
+      <div class="py-1">
+        <Button
+          label={scanning ? $_('config.network.scanning') : $_('config.network.scan')}
+          variant="ghost"
+          disabled={scanning}
+          onclick={scanWifi}
+        />
+      </div>
+
+      {#if scanError}
+        <p class="py-2 text-sm text-error">{$_('config.network.scan_error')}</p>
+      {:else if networks.length > 0}
+        <ul class="divide-y divide-border">
+          {#each networks as n (n.ssid)}
+            <li>
+              <button
+                type="button"
+                onclick={() => pickNetwork(n)}
+                class="flex w-full items-center gap-3 py-2 text-left text-sm
+                       {selected?.ssid === n.ssid ? 'text-accent' : 'text-text'}"
+              >
+                <Icon icon={signalIcon(n.rssi)} size={18} class="text-text-dim" />
+                <span class="flex-1">{n.ssid}</span>
+                {#if isSecured(n)}
+                  <Icon icon="mdi:lock-outline" size={14} class="text-text-dim" />
+                {/if}
+              </button>
+
+              {#if selected?.ssid === n.ssid}
+                <div class="flex items-end gap-2 pb-3 pl-7">
+                  {#if isSecured(n)}
+                    <input
+                      type="password"
+                      placeholder={$_('config.network.wifi_password')}
+                      aria-label={$_('config.network.wifi_password')}
+                      value={wifiPass}
+                      oninput={(e) => (wifiPass = e.currentTarget.value)}
+                      class="flex-1 rounded-xl border border-border bg-surface-2 px-3 py-2
+                             text-sm text-text focus:border-accent focus:outline-none"
+                    />
+                  {/if}
+                  <div class="shrink-0">
+                    <Button
+                      label={joining ? $_('config.network.connecting_btn') : $_('config.network.connect')}
+                      disabled={joining}
+                      onclick={joinWifi}
+                    />
+                  </div>
+                </div>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+      {/if}
     {/if}
   </ConfigSection>
 

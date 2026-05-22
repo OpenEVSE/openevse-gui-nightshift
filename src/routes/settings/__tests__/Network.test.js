@@ -60,4 +60,41 @@ describe('Network page', () => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
   })
+
+  it('lists scanned networks strongest-first', async () => {
+    httpAPI.mockImplementation((m, url) =>
+      url === '/scan'
+        ? Promise.resolve([
+            { ssid: 'Weak', rssi: -80 },
+            { ssid: 'Strong', rssi: -45, encryption: 'wpa2' },
+          ])
+        : Promise.resolve({ msg: 'done' }),
+    )
+    const { getByText } = render(Network)
+    await fireEvent.click(getByText('config.network.scan'))
+    await vi.waitFor(() => {
+      expect(getByText('Strong')).toBeInTheDocument()
+      expect(getByText('Weak')).toBeInTheDocument()
+    })
+  })
+
+  it('joins a picked network with ssid + pass', async () => {
+    httpAPI.mockImplementation((m, url) =>
+      url === '/scan'
+        ? Promise.resolve([{ ssid: 'Home', rssi: -50, encryption: 'wpa2' }])
+        : Promise.resolve({ msg: 'done' }),
+    )
+    const { getByText, getByLabelText } = render(Network)
+    await fireEvent.click(getByText('config.network.scan'))
+    await vi.waitFor(() => getByText('Home'))
+    await fireEvent.click(getByText('Home'))
+    const pass = getByLabelText('config.network.wifi_password')
+    await fireEvent.input(pass, { target: { value: 'secret' } })
+    await fireEvent.click(getByText('config.network.connect'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST', '/config', JSON.stringify({ ssid: 'Home', pass: 'secret' }),
+      )
+    })
+  })
 })
