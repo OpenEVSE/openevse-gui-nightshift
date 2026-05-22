@@ -28,12 +28,6 @@ describe('Vehicle page', () => {
     expect(getByText('config.vehicle.topic_soc')).toBeInTheDocument()
   })
 
-  it('shows Tesla token fields when the source is Tesla', () => {
-    config_store.set({ vehicle_data_src: 1 })
-    const { getByText } = render(Vehicle)
-    expect(getByText('config.vehicle.access_token')).toBeInTheDocument()
-  })
-
   it('shows the HTTP info block when the source is HTTP', () => {
     config_store.set({ vehicle_data_src: 3 })
     const { getByText } = render(Vehicle)
@@ -62,5 +56,35 @@ describe('Vehicle page', () => {
     await vi.waitFor(() => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
+  })
+
+  it('shows the Tesla login form when logged out', () => {
+    config_store.set({ vehicle_data_src: 1 })
+    const { getByText } = render(Vehicle)
+    expect(getByText('config.vehicle.login')).toBeInTheDocument()
+  })
+
+  it('reveals the manual token fields under Advanced', async () => {
+    config_store.set({ vehicle_data_src: 1 })
+    const { getByText, queryByText } = render(Vehicle)
+    expect(queryByText('config.vehicle.access_token')).not.toBeInTheDocument()
+    await fireEvent.click(getByText('config.vehicle.advanced'))
+    expect(getByText('config.vehicle.access_token')).toBeInTheDocument()
+  })
+
+  it('shows the vehicle picker and logout when credentials are present', async () => {
+    httpAPI.mockImplementation((m, url) =>
+      url === '/tesla/vehicles'
+        ? Promise.resolve({ count: 1, vehicles: [{ id: 'v1', name: 'My Tesla' }] })
+        : Promise.resolve({ msg: 'done' }),
+    )
+    config_store.set({
+      vehicle_data_src: 1,
+      tesla_access_token: 'a', tesla_refresh_token: 'r',
+      tesla_created_at: 1700000000, tesla_expires_in: 3600,
+    })
+    const { getByText } = render(Vehicle)
+    expect(getByText('config.vehicle.logout')).toBeInTheDocument()
+    await vi.waitFor(() => expect(getByText('config.vehicle.select_vehicle')).toBeInTheDocument())
   })
 })
