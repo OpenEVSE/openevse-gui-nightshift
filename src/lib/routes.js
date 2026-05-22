@@ -19,6 +19,10 @@ import Solar from '../routes/settings/Solar.svelte'
 import Shaper from '../routes/settings/Shaper.svelte'
 import Emoncms from '../routes/settings/Emoncms.svelte'
 import Ohmconnect from '../routes/settings/Ohmconnect.svelte'
+import Firmware from '../routes/settings/Firmware.svelte'
+import Certificates from '../routes/settings/Certificates.svelte'
+import Terminal from '../routes/settings/Terminal.svelte'
+import About from '../routes/settings/About.svelte'
 
 export const routes = {
   '/': Dashboard,
@@ -52,5 +56,11 @@ routes['/settings/solar'] = Solar
 routes['/settings/shaper'] = Shaper
 routes['/settings/emoncms'] = Emoncms
 routes['/settings/ohmconnect'] = Ohmconnect
+
+// System pages — override the placeholders set above.
+routes['/settings/firmware'] = Firmware
+routes['/settings/certificates'] = Certificates
+routes['/settings/terminal'] = Terminal
+routes['/settings/about'] = About
 
 export { NotFound }
