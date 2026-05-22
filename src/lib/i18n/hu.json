@@ -35,7 +35,15 @@
       "ap": "Hozzáférési pont",
       "apdefault": "A töltő saját WiFi hálózata, beállításhoz és tartalékként használva.",
       "apssid": "AP hálózatnév",
-      "appass": "AP jelszó"
+      "appass": "AP jelszó",
+      "wifi": "WiFi hálózat",
+      "scan": "Hálózatok keresése",
+      "scanning": "Keresés…",
+      "scan_error": "Nem sikerült hálózatokat keresni.",
+      "wifi_password": "WiFi jelszó",
+      "connect": "Csatlakozás",
+      "connecting_btn": "Csatlakozás…",
+      "connecting": "Csatlakozás folyamatban — a töltő újra csatlakozik a hálózathoz. Előfordulhat, hogy új címen kell újratöltenie ezt az oldalt."
     },
     "http": {
       "auth": "Webes felület jelszava",
@@ -188,7 +196,18 @@
       "topic_soc": "Töltöttségi állapot téma",
       "topic_range": "Hatótávolság téma",
       "topic_eta": "Töltési idő téma",
-      "http_info": "Járműadatokat küldhet a töltőre HTTP POST kéréssel:"
+      "http_info": "Járműadatokat küldhet a töltőre HTTP POST kéréssel:",
+      "via_openevse": "A bejelentkezés az OpenEVSE szerverén keresztül történik, amely elvégzi a Tesla azonosítást. Az Irányítópult megnyitásával közvetlenül is beilleszthet API tokeneket.",
+      "username": "Tesla fiók e-mail cím",
+      "password": "Tesla fiók jelszava",
+      "login": "Bejelentkezés",
+      "logging_in": "Bejelentkezés…",
+      "logout": "Kijelentkezés",
+      "login_failed": "A bejelentkezés sikertelen. Ellenőrizze a hitelesítő adatokat.",
+      "advanced": "Irányítópult — tokenek kézi megadása",
+      "select_vehicle": "Jármű",
+      "fetching_vehicles": "Járművek lekérdezése…",
+      "no_vehicles": "Nem sikerült betölteni a járműveket."
     },
     "solar": {
       "enable": "Napenergia-eltérítés engedélyezése",
@@ -308,7 +327,16 @@
       "restart_gateway": "WiFi átjáró újraindítása",
       "reset": "Gyári visszaállítás",
       "reset_desc": "Törli az összes beállítást és WiFi hitelesítő adatot.",
-      "reset_confirm": "Ez törli az összes beállítást. Biztosan folytatja?"
+      "reset_confirm": "Ez törli az összes beállítást. Biztosan folytatja?",
+      "online": "Online frissítések",
+      "checking": "GitHub ellenőrzése…",
+      "github_error": "Ehhez az eszközhöz nincs elérhető verzió, vagy a GitHub nem érhető el.",
+      "update_found": "Elérhető egy frissítés.",
+      "up_to_date": "A legújabb stabil verziót használja.",
+      "channel_release": "Stabil",
+      "channel_prerelease": "Előzetes",
+      "channel_daily": "Fejlesztői",
+      "install_online": "Telepítés"
     }
   },
   "nav": {

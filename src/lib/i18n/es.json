@@ -35,7 +35,15 @@
       "ap": "Punto de acceso",
       "apdefault": "Red WiFi propia del cargador, usada para configuración y como respaldo.",
       "apssid": "Nombre de red AP",
-      "appass": "Contraseña AP"
+      "appass": "Contraseña AP",
+      "wifi": "Red WiFi",
+      "scan": "Buscar redes",
+      "scanning": "Buscando…",
+      "scan_error": "No se pudieron buscar redes.",
+      "wifi_password": "Contraseña WiFi",
+      "connect": "Conectar",
+      "connecting_btn": "Conectando…",
+      "connecting": "Conectando — el cargador se unirá de nuevo a tu red. Es posible que tengas que recargar esta página en su nueva dirección."
     },
     "http": {
       "auth": "Contraseña de la interfaz web",
@@ -188,7 +196,18 @@
       "topic_soc": "Topic de estado de carga",
       "topic_range": "Topic de rango",
       "topic_eta": "Topic de tiempo hasta carga completa",
-      "http_info": "Envía datos del vehículo al cargador mediante HTTP POST:"
+      "http_info": "Envía datos del vehículo al cargador mediante HTTP POST:",
+      "via_openevse": "El inicio de sesión se realiza a través del servidor de OpenEVSE, que gestiona el acceso a Tesla. También puedes abrir Avanzado para pegar los tokens de API directamente.",
+      "username": "Correo electrónico de la cuenta Tesla",
+      "password": "Contraseña de la cuenta Tesla",
+      "login": "Iniciar sesión",
+      "logging_in": "Iniciando sesión…",
+      "logout": "Cerrar sesión",
+      "login_failed": "Error al iniciar sesión. Comprueba tus credenciales.",
+      "advanced": "Avanzado — introducir tokens manualmente",
+      "select_vehicle": "Vehículo",
+      "fetching_vehicles": "Obteniendo vehículos…",
+      "no_vehicles": "No se pudieron cargar tus vehículos."
     },
     "solar": {
       "enable": "Activar desvío solar",
@@ -308,7 +327,16 @@
       "restart_gateway": "Reiniciar gateway WiFi",
       "reset": "Restablecer de fábrica",
       "reset_desc": "Borra todos los ajustes y credenciales WiFi.",
-      "reset_confirm": "Esto borrará todos los ajustes. ¿Estás seguro?"
+      "reset_confirm": "Esto borrará todos los ajustes. ¿Estás seguro?",
+      "online": "Actualizaciones en línea",
+      "checking": "Comprobando GitHub…",
+      "github_error": "No hay versión para este dispositivo o GitHub no está disponible.",
+      "update_found": "Hay una actualización disponible.",
+      "up_to_date": "Tienes la última versión estable.",
+      "channel_release": "Estable",
+      "channel_prerelease": "Preversión",
+      "channel_daily": "Desarrollo",
+      "install_online": "Instalar"
     }
   },
   "nav": {

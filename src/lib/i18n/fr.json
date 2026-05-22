@@ -35,7 +35,15 @@
       "ap": "Point d'accès",
       "apdefault": "Réseau WiFi propre au chargeur, utilisé pour la configuration et en secours.",
       "apssid": "Nom du réseau AP",
-      "appass": "Mot de passe AP"
+      "appass": "Mot de passe AP",
+      "wifi": "Réseau WiFi",
+      "scan": "Rechercher des réseaux",
+      "scanning": "Recherche en cours…",
+      "scan_error": "Impossible de rechercher des réseaux.",
+      "wifi_password": "Mot de passe WiFi",
+      "connect": "Connecter",
+      "connecting_btn": "Connexion…",
+      "connecting": "Connexion en cours — le chargeur va rejoindre votre réseau. Vous devrez peut-être recharger cette page à sa nouvelle adresse."
     },
     "http": {
       "auth": "Mot de passe de l'interface web",
@@ -188,7 +196,18 @@
       "topic_soc": "Sujet état de charge (SOC)",
       "topic_range": "Sujet autonomie",
       "topic_eta": "Sujet temps de charge",
-      "http_info": "Envoyez les données véhicule au chargeur via HTTP POST :"
+      "http_info": "Envoyez les données véhicule au chargeur via HTTP POST :",
+      "via_openevse": "La connexion passe par le serveur OpenEVSE, qui effectue l'authentification Tesla. Vous pouvez aussi ouvrir Avancé pour coller directement vos tokens API.",
+      "username": "Adresse e-mail du compte Tesla",
+      "password": "Mot de passe du compte Tesla",
+      "login": "Se connecter",
+      "logging_in": "Connexion…",
+      "logout": "Se déconnecter",
+      "login_failed": "Échec de la connexion. Vérifiez vos identifiants.",
+      "advanced": "Avancé — saisir les tokens manuellement",
+      "select_vehicle": "Véhicule",
+      "fetching_vehicles": "Récupération des véhicules…",
+      "no_vehicles": "Impossible de charger vos véhicules."
     },
     "solar": {
       "enable": "Activer la production solaire",
@@ -308,7 +327,16 @@
       "restart_gateway": "Redémarrer la passerelle WiFi",
       "reset": "Réinitialisation usine",
       "reset_desc": "Efface tous les paramètres et identifiants WiFi.",
-      "reset_confirm": "Cela efface tous les paramètres. Êtes-vous sûr ?"
+      "reset_confirm": "Cela efface tous les paramètres. Êtes-vous sûr ?",
+      "online": "Mises à jour en ligne",
+      "checking": "Vérification sur GitHub…",
+      "github_error": "Aucune version pour cet appareil, ou GitHub est inaccessible.",
+      "update_found": "Une mise à jour est disponible.",
+      "up_to_date": "Vous disposez de la dernière version stable.",
+      "channel_release": "Stable",
+      "channel_prerelease": "Pré-version",
+      "channel_daily": "Développement",
+      "install_online": "Installer"
     }
   },
   "nav": {

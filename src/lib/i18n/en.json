@@ -35,7 +35,15 @@
       "ap": "Access point",
       "apdefault": "The charger's own WiFi network, used for setup and as a fallback.",
       "apssid": "AP network name",
-      "appass": "AP password"
+      "appass": "AP password",
+      "wifi": "WiFi network",
+      "scan": "Scan for networks",
+      "scanning": "Scanning…",
+      "scan_error": "Couldn't scan for networks.",
+      "wifi_password": "WiFi password",
+      "connect": "Connect",
+      "connecting_btn": "Connecting…",
+      "connecting": "Connecting — the charger will rejoin your network. You may need to reload this page at its new address."
     },
     "http": {
       "auth": "Web interface password",
@@ -188,7 +196,18 @@
       "topic_soc": "State-of-charge topic",
       "topic_range": "Range topic",
       "topic_eta": "Time-to-charge topic",
-      "http_info": "Push vehicle data to the charger with an HTTP POST:"
+      "http_info": "Push vehicle data to the charger with an HTTP POST:",
+      "via_openevse": "Login goes through OpenEVSE's server, which performs the Tesla sign-in. Or open Advanced to paste API tokens directly.",
+      "username": "Tesla account email",
+      "password": "Tesla account password",
+      "login": "Log in",
+      "logging_in": "Logging in…",
+      "logout": "Log out",
+      "login_failed": "Login failed. Check your credentials.",
+      "advanced": "Advanced — enter tokens manually",
+      "select_vehicle": "Vehicle",
+      "fetching_vehicles": "Fetching vehicles…",
+      "no_vehicles": "Couldn't load your vehicles."
     },
     "solar": {
       "enable": "Enable solar divert",
@@ -308,7 +327,16 @@
       "restart_gateway": "Restart WiFi gateway",
       "reset": "Factory reset",
       "reset_desc": "Erases all settings and WiFi credentials.",
-      "reset_confirm": "This erases all settings. Are you sure?"
+      "reset_confirm": "This erases all settings. Are you sure?",
+      "online": "Online updates",
+      "checking": "Checking GitHub…",
+      "github_error": "No build for this device, or GitHub is unreachable.",
+      "update_found": "An update is available.",
+      "up_to_date": "You're on the latest stable release.",
+      "channel_release": "Stable",
+      "channel_prerelease": "Pre-release",
+      "channel_daily": "Development",
+      "install_online": "Install"
     }
   },
   "nav": {
