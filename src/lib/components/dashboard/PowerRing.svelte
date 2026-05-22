@@ -48,10 +48,22 @@
       <div class="text-lg font-extrabold text-text-dim">{$_('dashboard.ring.ready')}</div>
       <div class="px-6 text-[9px] text-text-dim">{$_('dashboard.ring.ready_sub')}</div>
     {:else if display === 'connected'}
-      <div class="text-lg font-extrabold text-warning">{$_('dashboard.ring.paused')}</div>
-      {#if reasonKey}
-        <div class="px-5 text-[9px] text-text-dim">{$_(reasonKey, { values: reasonValues })}</div>
-      {/if}
+      <div class="relative h-full w-full">
+        <!-- "Paused": centered both axes within the ring -->
+        <div class="absolute inset-0 grid place-items-center">
+          <div class="text-xl font-extrabold leading-none text-warning">
+            {$_('dashboard.ring.paused')}
+          </div>
+        </div>
+        <!-- reason: stacked just below the centered word -->
+        {#if reasonKey}
+          <div class="absolute inset-x-0 top-1/2 flex flex-col items-center pt-7">
+            <div class="px-5 text-center text-[9px] text-text-dim">
+              {$_(reasonKey, { values: reasonValues })}
+            </div>
+          </div>
+        {/if}
+      </div>
     {:else if display === 'error'}
       <div class="text-2xl text-error">⚠</div>
       <div class="px-5 text-[9px] text-error">{faultText}</div>

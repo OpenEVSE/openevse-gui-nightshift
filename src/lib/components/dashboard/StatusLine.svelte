@@ -3,17 +3,19 @@
 
   let { display = 'starting' } = $props()
 
+  // A connected-but-paused car is a normal resting state, not a caution —
+  // keep its label neutral. The power ring still shows amber for "paused".
   const color = {
     starting: 'text-text-dim',
     idle: 'text-text-dim',
-    connected: 'text-warning',
+    connected: 'text-text-dim',
     charging: 'text-accent',
     error: 'text-error',
   }
   const dot = {
     starting: 'bg-text-dim',
     idle: 'bg-text-dim',
-    connected: 'bg-warning',
+    connected: 'bg-text-dim',
     charging: 'bg-accent',
     error: 'bg-error',
   }
