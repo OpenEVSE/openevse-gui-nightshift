@@ -65,8 +65,15 @@
         {/if}
       </div>
     {:else if display === 'error'}
-      <div class="text-2xl text-error">⚠</div>
-      <div class="px-5 text-[9px] text-error">{faultText}</div>
+      <div class="flex flex-col items-center">
+        <div class="text-4xl leading-none text-error">⚠</div>
+        <div class="mt-1 text-xl font-extrabold tracking-wide text-error">
+          {$_('dashboard.ring.fault')}
+        </div>
+        {#if faultText}
+          <div class="mt-1 px-5 text-center text-[9px] text-text-dim">{faultText}</div>
+        {/if}
+      </div>
     {:else}
       <div class="text-lg font-extrabold text-text-dim">{$_('dashboard.ring.starting')}</div>
     {/if}

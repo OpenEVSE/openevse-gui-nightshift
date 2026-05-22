@@ -375,7 +375,8 @@
       "starting": "Starting",
       "ready": "Ready",
       "ready_sub": "Plug in your car to start",
-      "paused": "Paused"
+      "paused": "Paused",
+      "fault": "FAULT"
     },
     "reason": {
       "off": "Mode is Off — switch to Auto or On",
