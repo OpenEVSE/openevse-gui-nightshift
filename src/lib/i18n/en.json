@@ -251,6 +251,63 @@
       "hour": "Ohm hour",
       "key": "Ohm key",
       "key_desc": "Your OhmConnect account key."
+    },
+    "about": {
+      "versions": "Versions",
+      "firmware": "OpenEVSE firmware",
+      "gateway": "WiFi gateway firmware",
+      "links": "Links",
+      "docs": "Documentation",
+      "repo_wifi": "WiFi firmware on GitHub",
+      "repo_evse": "EVSE firmware on GitHub",
+      "credit": "Powered by OpenEVSE and OpenEnergyMonitor"
+    },
+    "certificates": {
+      "installed": "Installed certificates",
+      "empty": "No certificates installed.",
+      "add": "Add certificate",
+      "delete": "Delete certificate",
+      "type": "Type",
+      "root": "Root",
+      "client": "Client",
+      "name": "Name",
+      "certificate": "Certificate",
+      "private_key": "Private key",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "terminal": {
+      "rapi": "RAPI command console",
+      "command": "Command",
+      "send": "Send",
+      "clear": "Clear",
+      "consoles": "Live consoles",
+      "debug": "Debug console",
+      "evse": "EVSE console",
+      "connecting": "Connecting…",
+      "unavailable": "Console unavailable."
+    },
+    "firmware": {
+      "versions": "Installed versions",
+      "evse": "OpenEVSE firmware",
+      "gateway": "WiFi gateway firmware",
+      "update": "Firmware update",
+      "update_desc": "Upload a .bin or .hex firmware file to update the WiFi gateway.",
+      "choose_file": "Choose firmware file",
+      "install": "Install firmware",
+      "ota_started": "Update in progress…",
+      "ota_completed": "Update complete.",
+      "ota_failed": "Update failed.",
+      "backup": "Configuration backup",
+      "backup_desc": "Download the current configuration, secrets removed.",
+      "backup_export": "Download backup",
+      "backup_import": "Restore from file",
+      "maintenance": "Maintenance",
+      "restart_evse": "Restart EVSE",
+      "restart_gateway": "Restart WiFi gateway",
+      "reset": "Factory reset",
+      "reset_desc": "Erases all settings and WiFi credentials.",
+      "reset_confirm": "This erases all settings. Are you sure?"
     }
   },
   "nav": {

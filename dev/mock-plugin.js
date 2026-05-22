@@ -60,6 +60,51 @@ export function mockPlugin() {
           return
         }
 
+        // System page mock routes
+        if (url === '/api/restart' && req.method === 'POST') {
+          let body = ''
+          req.on('data', (chunk) => { body += chunk })
+          req.on('end', () => {
+            let device = 'gateway'
+            try { device = JSON.parse(body).device ?? 'gateway' } catch { /* ignore */ }
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ msg: 'restart ' + device }))
+          })
+          return
+        }
+
+        if (url === '/api/reset' && req.method === 'GET') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ msg: 'done' }))
+          return
+        }
+
+        if (url === '/api/update' && req.method === 'POST') {
+          res.writeHead(200, { 'Content-Type': 'text/plain' })
+          res.end('OK')
+          return
+        }
+
+        if (url === '/api/r') {
+          const rapiParam = req.url?.match(/[?&]rapi=([^&]*)/)
+          const rapi = rapiParam ? decodeURIComponent(rapiParam[1]) : ''
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ cmd: rapi, ret: '$OK^20' }))
+          return
+        }
+
+        if (url === '/api/certificates' && req.method === 'POST') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ msg: 'done', id: String(Date.now()) }))
+          return
+        }
+
+        if (url && url.startsWith('/api/certificates/') && req.method === 'DELETE') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ msg: 'done' }))
+          return
+        }
+
         // History log endpoints (dynamic — not in the exact-match table)
         if (url === '/api/logs') {
           res.writeHead(200, { 'Content-Type': 'application/json' })
