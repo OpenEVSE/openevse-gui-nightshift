@@ -18,8 +18,8 @@
 <div class="flex justify-center py-1">
   <ProgressRing {fill} {color}>
     {#if display === 'charging'}
-      <div class="text-4xl font-extrabold text-text">{kw}</div>
-      <div class="text-[11px] font-semibold tracking-widest text-accent">KW</div>
+      <div class="text-5xl font-extrabold leading-none text-text">{kw}</div>
+      <div class="mt-1 text-[11px] font-semibold tracking-widest text-accent">KW</div>
       {#if maxKw}
         <div class="mt-0.5 text-[9px] text-text-dim">{$_('dashboard.kw_max', { values: { max: maxKw } })}</div>
       {/if}
