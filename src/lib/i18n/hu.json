@@ -348,6 +348,7 @@
     "settings": "Beállítások"
   },
   "connection": {
+    "connected": "Csatlakoztatva",
     "lost": "Kapcsolat megszakadt",
     "lost_body": "Újracsatlakozás a töltőhöz…",
     "evse_missing": "EVSE nincs csatlakoztatva",

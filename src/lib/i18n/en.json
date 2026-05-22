@@ -348,6 +348,7 @@
     "settings": "Settings"
   },
   "connection": {
+    "connected": "Connected",
     "lost": "Connection lost",
     "lost_body": "Trying to reconnect to the charger…",
     "evse_missing": "EVSE not connected",

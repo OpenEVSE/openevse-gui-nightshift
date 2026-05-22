@@ -348,6 +348,7 @@
     "settings": "Ajustes"
   },
   "connection": {
+    "connected": "Conectado",
     "lost": "Conexión perdida",
     "lost_body": "Intentando reconectar con el cargador…",
     "evse_missing": "EVSE no conectado",
