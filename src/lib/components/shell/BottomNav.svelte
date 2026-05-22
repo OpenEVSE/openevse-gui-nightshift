@@ -23,6 +23,7 @@
       aria-label={$_(item.key)}
       aria-current={path === item.href ? 'page' : undefined}
       class="flex flex-1 flex-col items-center justify-center gap-1 text-[10px]
+             sm:flex-none sm:py-4
              {path === item.href ? 'text-accent' : 'text-text-dim'}"
     >
       <Icon icon={item.icon} size={22} />
