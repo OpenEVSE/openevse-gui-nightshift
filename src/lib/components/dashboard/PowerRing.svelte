@@ -57,8 +57,8 @@
         </div>
         <!-- reason: stacked just below the centered word -->
         {#if reasonKey}
-          <div class="absolute inset-x-0 top-1/2 flex flex-col items-center pt-7">
-            <div class="px-5 text-center text-[11px] text-text-dim">
+          <div class="absolute inset-x-0 top-1/2 flex flex-col items-center pt-6">
+            <div class="px-7 text-center text-[11px] leading-tight text-text-dim">
               {$_(reasonKey, { values: reasonValues })}
             </div>
           </div>

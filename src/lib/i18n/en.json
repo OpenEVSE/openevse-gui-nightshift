@@ -379,7 +379,7 @@
       "fault": "FAULT"
     },
     "reason": {
-      "off": "Mode is Off — switch to Auto or On",
+      "off": "Switch to Auto or On",
       "waiting": "Waiting · {time}",
       "not_charging": "Not charging"
     },
