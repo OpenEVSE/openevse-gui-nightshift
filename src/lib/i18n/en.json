@@ -195,6 +195,7 @@
       "production": "Solar production",
       "grid": "Grid import/export",
       "charge_rate": "Charge rate",
+      "smoothed": "Smoothed available current",
       "mode": "Divert mode",
       "default_mode": "Default to eco mode on power-up",
       "default_mode_desc": "Eco follows available solar; fast charges at full rate.",

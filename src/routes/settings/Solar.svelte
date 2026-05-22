@@ -54,6 +54,12 @@
         value={`${divertType === 1 ? ($status_store?.grid_ie ?? 0) : ($status_store?.solar ?? 0)} W`}
       />
       <ReadOnlyRow label={$_('config.solar.charge_rate')} value={`${$status_store?.charge_rate ?? 0} A`} />
+      {#if $status_store?.divert_active}
+        <ReadOnlyRow
+          label={$_('config.solar.smoothed')}
+          value={`${$status_store?.smoothed_available_current ?? 0} A`}
+        />
+      {/if}
     {/if}
   </ConfigSection>
 
