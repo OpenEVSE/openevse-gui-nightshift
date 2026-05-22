@@ -83,6 +83,6 @@ describe('Schedule', () => {
     await vi.waitFor(() => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
-    expect(get(uistates_store).alertbox.title).toBe('schedule.error_title')
+    expect(get(uistates_store).alertbox.title).toBe('alert.write_failed_title')
   })
 })

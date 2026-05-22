@@ -1,8 +1,8 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { schedule_store } from '../lib/stores/schedule.js'
-  import { uistates_store } from '../lib/stores/uistates.js'
   import { serialQueue } from '../lib/queue.js'
+  import { showWriteError } from '../lib/alerts.js'
   import { nextTimerId } from '../lib/schedule/timers.js'
   import Button from '../lib/components/ui/Button.svelte'
   import TimerList from '../lib/components/schedule/TimerList.svelte'
@@ -16,18 +16,6 @@
   let removingId = $state(null)
 
   let timers = $derived(Array.isArray($schedule_store) ? $schedule_store : [])
-
-  function alertFail() {
-    uistates_store.setObject('alertbox', {
-      title: $_('schedule.error_title'),
-      body: $_('schedule.error_body'),
-      visible: true,
-      button: true,
-      closable: true,
-      component: undefined,
-      action: () => uistates_store.resetAlertBox(),
-    })
-  }
 
   function openAdd() {
     editingTimer = null
@@ -50,7 +38,7 @@
         editorOpen = false
         await serialQueue.add(() => schedule_store.download())
       } else {
-        alertFail()
+        showWriteError()
       }
     } finally {
       busy = false
@@ -66,7 +54,7 @@
       if (ok) {
         await serialQueue.add(() => schedule_store.download())
       } else {
-        alertFail()
+        showWriteError()
       }
     } finally {
       busy = false
