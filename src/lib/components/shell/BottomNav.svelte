@@ -9,6 +9,7 @@
     { href: '/schedule', key: 'nav.schedule', icon: 'mdi:calendar-clock-outline' },
     { href: '/monitoring', key: 'nav.monitoring', icon: 'mdi:chart-line' },
     { href: '/history', key: 'nav.history', icon: 'mdi:history' },
+    { href: '/settings', key: 'nav.settings', icon: 'mdi:cog-outline' },
   ]
 </script>
 

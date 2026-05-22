@@ -10,9 +10,9 @@ vi.mock('svelte-i18n', () => {
 import BottomNav from '../BottomNav.svelte'
 
 describe('BottomNav', () => {
-  it('renders a link for each of the four primary routes', () => {
+  it('renders a link for each of the five primary routes', () => {
     const { getAllByRole } = render(BottomNav, { props: { path: '/' } })
-    expect(getAllByRole('link')).toHaveLength(4)
+    expect(getAllByRole('link')).toHaveLength(5)
   })
 
   it('marks the active route with aria-current', () => {

@@ -22,13 +22,48 @@
   "config": {
     "network": {
       "con-ok": "Connected — new address: "
+    },
+    "title": "Settings",
+    "back": "Settings",
+    "coming_soon": "This page is coming soon.",
+    "sections": {
+      "connectivity": "Connectivity",
+      "charger": "Charger",
+      "energy": "Energy",
+      "system": "System"
+    },
+    "pages": {
+      "network": "Network",
+      "http": "HTTP",
+      "mqtt": "MQTT",
+      "ocpp": "OCPP",
+      "evse": "Charger",
+      "safety": "Safety",
+      "time": "Time & Date",
+      "rfid": "RFID",
+      "vehicle": "Vehicle",
+      "solar": "Self-production",
+      "shaper": "Load Shaper",
+      "emoncms": "EmonCMS",
+      "ohmconnect": "OhmConnect",
+      "firmware": "Firmware",
+      "certificates": "Certificates",
+      "terminal": "Terminal",
+      "about": "About"
+    },
+    "validation": {
+      "required": "Required",
+      "range": "Out of range",
+      "port": "Enter a port between 1 and 65535",
+      "hostname": "Invalid hostname"
     }
   },
   "nav": {
     "home": "Home",
     "schedule": "Schedule",
     "monitoring": "Monitoring",
-    "history": "History"
+    "history": "History",
+    "settings": "Settings"
   },
   "connection": {
     "lost": "Connection lost",
