@@ -1,5 +1,6 @@
 // src/routes/settings/__tests__/Time.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { get } from 'svelte/store'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -12,9 +13,11 @@ vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.res
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
 import { status_store } from '../../../lib/stores/status.js'
+import { uistates_store } from '../../../lib/stores/uistates.js'
 import Time from '../Time.svelte'
 
 beforeEach(() => {
+  uistates_store.resetAlertBox()
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ msg: 'done' })
   status_store.set({ time: '2026-05-22T10:00:00Z' })
@@ -45,5 +48,15 @@ describe('Time page', () => {
     await fireEvent.click(getByText('config.time.set_now'))
     expect(httpAPI).toHaveBeenCalled()
     expect(httpAPI.mock.calls[0][1]).toBe('/time')
+  })
+
+  it('shows the alert box when the set-clock call fails', async () => {
+    httpAPI.mockResolvedValue('error')
+    config_store.set({ sntp_enabled: false, time_zone: 'UTC|UTC0' })
+    const { getByText } = render(Time)
+    await fireEvent.click(getByText('config.time.set_now'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
   })
 })

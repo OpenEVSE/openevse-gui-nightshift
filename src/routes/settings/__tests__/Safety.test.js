@@ -1,5 +1,6 @@
 // src/routes/settings/__tests__/Safety.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { get } from 'svelte/store'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -55,5 +56,15 @@ describe('Safety page', () => {
     expect(httpAPI).toHaveBeenCalled()
     const [, , body] = httpAPI.mock.calls[0]
     expect(body).toBe(JSON.stringify({ gfci_check: false }))
+  })
+
+  it('shows the alert box when a save fails', async () => {
+    httpAPI.mockResolvedValue('error')
+    config_store.set({ ...ALL_ON })
+    const { getAllByRole } = render(Safety)
+    await fireEvent.click(getAllByRole('switch')[0])
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
   })
 })

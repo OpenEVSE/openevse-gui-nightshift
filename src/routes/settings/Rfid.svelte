@@ -6,6 +6,7 @@
   import { uistates_store } from '../../lib/stores/uistates.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { serialQueue } from '../../lib/queue.js'
+  import { showWriteError } from '../../lib/alerts.js'
   import { httpAPI } from '../../lib/api/httpAPI.js'
   import { parseTags, serializeTags, addTag, removeTag } from '../../lib/config/rfid.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
@@ -23,8 +24,9 @@
   let scanWaiting = $derived($uistates_store?.rfid_waiting ?? 0)
   let alreadyRegistered = $derived(scanned !== '' && tags.includes(scanned))
 
-  function scan() {
-    httpAPI('GET', '/rfid/add', null, 'txt', 60000)
+  async function scan() {
+    const res = await serialQueue.add(() => httpAPI('GET', '/rfid/add', null, 'txt', 60000))
+    if (!res || res === 'error') showWriteError()
   }
   function saveTags(next) {
     return form.saveField('rfid_storage', serializeTags(next))

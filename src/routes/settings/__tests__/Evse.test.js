@@ -1,5 +1,6 @@
 // src/routes/settings/__tests__/Evse.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { get } from 'svelte/store'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -11,6 +12,7 @@ vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.res
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
+import { uistates_store } from '../../../lib/stores/uistates.js'
 import Evse from '../Evse.svelte'
 
 const BASE = {
@@ -20,6 +22,7 @@ const BASE = {
 }
 
 beforeEach(() => {
+  uistates_store.resetAlertBox()
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ msg: 'done' })
 })
@@ -39,12 +42,37 @@ describe('EVSE page', () => {
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ max_current_soft: 16 }))
   })
 
-  it('shows the three-phase select only when the device reports it', () => {
+  it('shows the three-phase select only when the device reports it', async () => {
     config_store.set({ ...BASE })
     const { queryByText, rerender } = render(Evse)
     expect(queryByText('config.evse.threephase')).not.toBeInTheDocument()
     config_store.set({ ...BASE, is_threephase: false })
-    return rerender({})
+    await rerender({})
+    await vi.waitFor(() => {
+      expect(queryByText('config.evse.threephase')).toBeInTheDocument()
+    })
+  })
+
+  it('shows the default-state select only when the device reports it', async () => {
+    config_store.set({ ...BASE })
+    const { queryByText, rerender } = render(Evse)
+    expect(queryByText('config.evse.defaultstate')).not.toBeInTheDocument()
+    config_store.set({ ...BASE, default_state: false })
+    await rerender({})
+    await vi.waitFor(() => {
+      expect(queryByText('config.evse.defaultstate')).toBeInTheDocument()
+    })
+  })
+
+  it('shows the led-brightness slider only when the device reports it', async () => {
+    config_store.set({ ...BASE })
+    const { queryByText, rerender } = render(Evse)
+    expect(queryByText('config.evse.led_brightness')).not.toBeInTheDocument()
+    config_store.set({ ...BASE, led_brightness: 128 })
+    await rerender({})
+    await vi.waitFor(() => {
+      expect(queryByText('config.evse.led_brightness')).toBeInTheDocument()
+    })
   })
 
   it('saves the service level as a number', async () => {
@@ -54,5 +82,15 @@ describe('EVSE page', () => {
     const selects = getAllByRole('combobox')
     await fireEvent.change(selects[selects.length - 1], { target: { value: '2' } })
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ service: 2 }))
+  })
+
+  it('shows the alert box when a save fails', async () => {
+    httpAPI.mockResolvedValue('error')
+    config_store.set({ ...BASE })
+    const { getByRole } = render(Evse)
+    await fireEvent.change(getByRole('slider'), { target: { value: '16' } })
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
   })
 })

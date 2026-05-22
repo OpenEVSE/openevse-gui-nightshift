@@ -1,5 +1,6 @@
 // src/routes/settings/__tests__/Vehicle.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { get } from 'svelte/store'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -11,9 +12,11 @@ vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.res
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
+import { uistates_store } from '../../../lib/stores/uistates.js'
 import Vehicle from '../Vehicle.svelte'
 
 beforeEach(() => {
+  uistates_store.resetAlertBox()
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ msg: 'done' })
 })
@@ -49,5 +52,15 @@ describe('Vehicle page', () => {
     const { getByRole } = render(Vehicle)
     await fireEvent.change(getByRole('combobox'), { target: { value: '2' } })
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ vehicle_data_src: 2 }))
+  })
+
+  it('shows the alert box when a save fails', async () => {
+    httpAPI.mockResolvedValue('error')
+    config_store.set({ vehicle_data_src: 0 })
+    const { getByRole } = render(Vehicle)
+    await fireEvent.change(getByRole('combobox'), { target: { value: '2' } })
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
   })
 })

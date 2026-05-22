@@ -1,5 +1,6 @@
 // src/routes/settings/__tests__/Rfid.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { get } from 'svelte/store'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -55,5 +56,15 @@ describe('RFID page', () => {
     const { getByText } = render(Rfid)
     await fireEvent.click(getByText('config.rfid.register'))
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ rfid_storage: 'AA11,CC33' }))
+  })
+
+  it('shows the alert box when the scan call fails', async () => {
+    httpAPI.mockResolvedValue('error')
+    config_store.set({ rfid_enabled: true, rfid_storage: '' })
+    const { getByText } = render(Rfid)
+    await fireEvent.click(getByText('config.rfid.scan'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
   })
 })
