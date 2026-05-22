@@ -40,13 +40,13 @@
         <div class="absolute inset-x-0 top-1/2 flex flex-col items-center pt-6">
           <div class="text-[11px] font-semibold tracking-widest text-accent">KW</div>
           {#if maxKw}
-            <div class="mt-0.5 text-[9px] text-text-dim">{$_('dashboard.kw_max', { values: { max: maxKw } })}</div>
+            <div class="mt-0.5 text-[11px] text-text-dim">{$_('dashboard.kw_max', { values: { max: maxKw } })}</div>
           {/if}
         </div>
       </div>
     {:else if display === 'idle'}
       <div class="text-lg font-extrabold text-text-dim">{$_('dashboard.ring.ready')}</div>
-      <div class="px-6 text-[9px] text-text-dim">{$_('dashboard.ring.ready_sub')}</div>
+      <div class="px-6 text-[11px] text-text-dim">{$_('dashboard.ring.ready_sub')}</div>
     {:else if display === 'connected'}
       <div class="relative h-full w-full">
         <!-- "Paused": centered both axes within the ring -->
@@ -58,7 +58,7 @@
         <!-- reason: stacked just below the centered word -->
         {#if reasonKey}
           <div class="absolute inset-x-0 top-1/2 flex flex-col items-center pt-7">
-            <div class="px-5 text-center text-[9px] text-text-dim">
+            <div class="px-5 text-center text-[11px] text-text-dim">
               {$_(reasonKey, { values: reasonValues })}
             </div>
           </div>
@@ -71,7 +71,7 @@
           {$_('dashboard.ring.fault')}
         </div>
         {#if faultText}
-          <div class="mt-1 px-5 text-center text-[9px] text-text-dim">{faultText}</div>
+          <div class="mt-1 px-5 text-center text-[11px] text-text-dim">{faultText}</div>
         {/if}
       </div>
     {:else}
