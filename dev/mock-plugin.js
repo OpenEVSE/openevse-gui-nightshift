@@ -60,6 +60,18 @@ export function mockPlugin() {
           return
         }
 
+        if (url === '/api/scan' && req.method === 'GET') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(loadFixture('scan.json'))
+          return
+        }
+
+        if (url === '/api/tesla/vehicles' && req.method === 'GET') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(loadFixture('tesla-vehicles.json'))
+          return
+        }
+
         // System page mock routes
         if (url === '/api/restart' && req.method === 'POST') {
           let body = ''
