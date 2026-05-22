@@ -53,6 +53,13 @@ export function mockPlugin() {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0] // strip query string
 
+        // RFID scan acknowledgement
+        if (url === '/api/rfid/add') {
+          res.writeHead(200, { 'Content-Type': 'text/plain' })
+          res.end('1')
+          return
+        }
+
         // History log endpoints (dynamic — not in the exact-match table)
         if (url === '/api/logs') {
           res.writeHead(200, { 'Content-Type': 'application/json' })

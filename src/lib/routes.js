@@ -10,6 +10,11 @@ import Network from '../routes/settings/Network.svelte'
 import Http from '../routes/settings/Http.svelte'
 import Mqtt from '../routes/settings/Mqtt.svelte'
 import Ocpp from '../routes/settings/Ocpp.svelte'
+import Evse from '../routes/settings/Evse.svelte'
+import Safety from '../routes/settings/Safety.svelte'
+import Time from '../routes/settings/Time.svelte'
+import Rfid from '../routes/settings/Rfid.svelte'
+import Vehicle from '../routes/settings/Vehicle.svelte'
 
 export const routes = {
   '/': Dashboard,
@@ -30,5 +35,12 @@ routes['/settings/network'] = Network
 routes['/settings/http'] = Http
 routes['/settings/mqtt'] = Mqtt
 routes['/settings/ocpp'] = Ocpp
+
+// Charger pages — override the placeholders set above.
+routes['/settings/evse'] = Evse
+routes['/settings/safety'] = Safety
+routes['/settings/time'] = Time
+routes['/settings/rfid'] = Rfid
+routes['/settings/vehicle'] = Vehicle
 
 export { NotFound }
