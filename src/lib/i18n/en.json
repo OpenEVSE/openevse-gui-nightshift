@@ -209,6 +209,10 @@
     "shaper": "Load shaper",
     "null": "—"
   },
+  "alert": {
+    "write_failed_title": "Change not saved",
+    "write_failed_body": "The charger didn't accept the change. Please try again."
+  },
   "history": {
     "loading": "Loading history…",
     "empty": "No history yet",
