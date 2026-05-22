@@ -12,7 +12,7 @@
   <h1 class="mb-4 text-lg font-semibold text-text">{$_('config.title')}</h1>
 
   {#each groups as group}
-    <Card class="mb-4">
+    <Card class="mb-4 p-4">
       <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-text-dim">
         {$_('config.sections.' + group.section)}
       </h2>

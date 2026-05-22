@@ -4,7 +4,7 @@
   let { title = '', children } = $props()
 </script>
 
-<Card class="mb-4">
+<Card class="mb-4 p-4">
   {#if title}
     <h2 class="mb-1 text-sm font-semibold text-text-dim">{title}</h2>
   {/if}
