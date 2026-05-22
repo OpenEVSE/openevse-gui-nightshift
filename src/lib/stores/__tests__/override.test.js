@@ -70,6 +70,21 @@ describe('override_store', () => {
     expect(state.charge_current).toBe(32)
   })
 
+  it('returns false and leaves the store unchanged when the upload request fails', async () => {
+    override_store.set({ state: 'active', charge_current: 10 })
+    httpAPI.mockResolvedValue('error')
+
+    const result = await override_store.upload({ state: 'disabled', charge_current: 32 })
+    expect(result).toBe(false)
+    expect(get(override_store).charge_current).toBe(10)
+  })
+
+  it('returns true on a successful upload', async () => {
+    httpAPI.mockResolvedValue({ msg: 'done' })
+    const result = await override_store.upload({ charge_current: 20 })
+    expect(result).toBe(true)
+  })
+
   it('should toggle override', async () => {
     httpAPI.mockResolvedValue({ msg: 'Updated' })
     const result = await override_store.toggle()

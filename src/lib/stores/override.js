@@ -31,11 +31,15 @@ function createOverrideStore() {
         }
     }
     async function upload(data) {
-        // let override = get(P)
-		// let newoverridestore = {...override, ...data}
         let res = await httpAPI("POST", "/override", JSON.stringify(data))
-        P.update(() => data)
-        return P
+        // Update the store only on a confirmed success — never show an
+        // override the device did not accept. httpAPI yields "error" on a
+        // failed request; a msg:"error" body is also a failure.
+        if (res && res !== "error" && res?.msg !== "error") {
+            P.update(() => data)
+            return true
+        }
+        return false
     }
     async function clear() {
         if (get(override_store)) {
