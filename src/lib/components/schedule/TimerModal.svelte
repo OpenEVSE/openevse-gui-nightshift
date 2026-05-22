@@ -51,7 +51,7 @@
     <input
       type="time"
       bind:value={time}
-      class="w-full rounded-xl border border-border bg-surface-2 px-3 py-2 text-sm text-text"
+      class="block w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-2 px-3 py-2 text-sm text-text"
     />
   </label>
 
