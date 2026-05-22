@@ -52,4 +52,23 @@ describe('Firmware page', () => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
   })
+
+  it('shows the loading state then the channels from GitHub', async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            { tag_name: 'v9.9.9', name: 'v9.9.9', prerelease: false, assets: [
+              { name: 'adafruit_featheresp32.bin', browser_download_url: 'u' },
+            ] },
+          ]),
+      }),
+    )
+    config_store.set({ firmware: '7.1.3', version: 'v1.0.0', buildenv: 'adafruit_featheresp32' })
+    const { getByText } = render(Firmware)
+    await vi.waitFor(() => {
+      expect(getByText('config.firmware.channel_release')).toBeInTheDocument()
+    })
+  })
 })

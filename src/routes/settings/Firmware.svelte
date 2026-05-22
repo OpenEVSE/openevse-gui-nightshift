@@ -1,6 +1,9 @@
 <!-- src/routes/settings/Firmware.svelte -->
 <script>
-  import { _ } from 'svelte-i18n'
+  import { _, } from 'svelte-i18n'
+  import { onMount } from 'svelte'
+  import { classifyReleases, findAsset, updateAvailable, fetchReleases }
+    from '../../lib/config/firmware.js'
   import { config_store } from '../../lib/stores/config.js'
   import { status_store } from '../../lib/stores/status.js'
   import { serialQueue } from '../../lib/queue.js'
@@ -40,6 +43,50 @@
       }, 1000)
     }
   })
+
+  // ── online (GitHub) updates ─────────────────────────────────────────────
+  let releases = $state(null) // null = loading, [] = failed/empty
+  let buildenv = $derived($config_store?.buildenv ?? '')
+  let installed = $derived($config_store?.version ?? '')
+
+  let channels = $derived(() => {
+    if (!releases) return []
+    const c = classifyReleases(releases)
+    return [
+      { key: 'release', rel: c.release },
+      { key: 'prerelease', rel: c.prerelease },
+      { key: 'daily', rel: c.daily },
+    ]
+      .map(({ key, rel }) => ({
+        key,
+        version: rel?.name ?? rel?.tag_name ?? '',
+        asset: findAsset(rel, buildenv),
+      }))
+      .filter((ch) => ch.asset) // only channels with a build for this device
+  })
+
+  let hasUpdate = $derived(
+    channels().some(
+      (ch) => ch.key === 'release' && updateAvailable(ch.version, installed),
+    ),
+  )
+
+  onMount(async () => {
+    releases = await fetchReleases()
+  })
+
+  async function installOnline(asset) {
+    if (uploading) return
+    uploading = true
+    try {
+      const res = await serialQueue.add(() =>
+        httpAPI('POST', '/update', JSON.stringify({ url: asset.browser_download_url })),
+      )
+      if (!res || res === 'error') showWriteError()
+    } finally {
+      uploading = false
+    }
+  }
 
   async function restart(device) {
     if (busy) return
@@ -105,6 +152,34 @@
   <ConfigSection title={$_('config.firmware.versions')}>
     <ReadOnlyRow label={$_('config.firmware.evse')} value={$config_store?.firmware} />
     <ReadOnlyRow label={$_('config.firmware.gateway')} value={$config_store?.version} />
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.firmware.online')}>
+    {#if releases === null}
+      <p class="py-2 text-sm text-text-dim">{$_('config.firmware.checking')}</p>
+    {:else if channels().length === 0}
+      <p class="py-2 text-sm text-text-dim">{$_('config.firmware.github_error')}</p>
+    {:else}
+      {#if hasUpdate}
+        <p class="mb-1 text-sm text-accent">{$_('config.firmware.update_found')}</p>
+      {:else}
+        <p class="mb-1 text-sm text-text-dim">{$_('config.firmware.up_to_date')}</p>
+      {/if}
+      {#each channels() as ch}
+        <div class="flex items-center gap-3 py-2 text-sm">
+          <span class="flex-1 text-text">
+            {$_('config.firmware.channel_' + ch.key)}
+            <span class="text-text-dim">· {ch.version}</span>
+          </span>
+          <Button
+            label={$_('config.firmware.install_online')}
+            variant="ghost"
+            disabled={uploading}
+            onclick={() => installOnline(ch.asset)}
+          />
+        </div>
+      {/each}
+    {/if}
   </ConfigSection>
 
   <ConfigSection title={$_('config.firmware.update')}>
