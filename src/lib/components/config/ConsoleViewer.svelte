@@ -5,21 +5,32 @@
 
   let { mode = 'debug' } = $props()
 
-  let lines = $state([])
+  // The device's console WS streams output one character at a time. Rendering
+  // each message as its own <div> put every character on its own line, so we
+  // keep a single appended text buffer and let <pre> respect the embedded
+  // newlines from the stream itself.
+  let text = $state('')
   let failed = $state(false)
   let socket
   let containerEl
+
+  // Cap the buffer so a long-running console doesn't grow unbounded. Trims to
+  // the last ~80k chars on overflow — that's ~1000 typical log lines.
+  const MAX_CHARS = 100_000
+  const KEEP_CHARS = 80_000
 
   function connect() {
     try {
       const proto = location.protocol === 'https:' ? 'wss://' : 'ws://'
       socket = new WebSocket(`${proto}${location.host}/${mode}/console`)
       socket.addEventListener('message', (e) => {
-        lines = [...lines, String(e.data)].slice(-2000)
+        let next = text + String(e.data)
+        if (next.length > MAX_CHARS) next = next.slice(-KEEP_CHARS)
+        text = next
       })
       socket.addEventListener('error', () => (failed = true))
       socket.addEventListener('close', () => {
-        if (lines.length === 0) failed = true
+        if (text.length === 0) failed = true
       })
     } catch {
       failed = true
@@ -32,8 +43,7 @@
   })
 
   $effect(() => {
-    // depend on lines so this re-runs when new lines arrive
-    lines
+    text // re-run on new data
     tick().then(() => {
       if (containerEl) containerEl.scrollTop = containerEl.scrollHeight
     })
@@ -46,11 +56,9 @@
 >
   {#if failed}
     <p class="text-text-dim">{$_('config.terminal.unavailable')}</p>
-  {:else if lines.length === 0}
+  {:else if text.length === 0}
     <p class="text-text-dim">{$_('config.terminal.connecting')}</p>
   {:else}
-    {#each lines as line}
-      <div>{line}</div>
-    {/each}
+    <pre class="m-0 whitespace-pre-wrap break-all">{text}</pre>
   {/if}
 </div>
