@@ -40,7 +40,10 @@
   })
 </script>
 
-<div bind:this={containerEl} class="h-72 overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs text-text">
+<div
+  bind:this={containerEl}
+  class="h-[70vh] max-h-[700px] min-h-[260px] overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs text-text"
+>
   {#if failed}
     <p class="text-text-dim">{$_('config.terminal.unavailable')}</p>
   {:else if lines.length === 0}

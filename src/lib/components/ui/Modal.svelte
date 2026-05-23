@@ -1,5 +1,16 @@
 <script>
-  let { visible = false, closable = true, onclose = () => {}, children } = $props()
+  let {
+    visible = false,
+    closable = true,
+    size = 'sm', // 'sm' (default, dialogs) | 'lg' (live consoles, big content)
+    onclose = () => {},
+    children,
+  } = $props()
+
+  const widths = {
+    sm: 'max-w-sm',
+    lg: 'max-w-4xl',
+  }
 </script>
 
 {#if visible}
@@ -9,7 +20,7 @@
     role="presentation"
   >
     <div
-      class="w-full max-w-sm rounded-2xl bg-surface-2 p-5 shadow-xl"
+      class="w-full {widths[size]} rounded-2xl bg-surface-2 p-5 shadow-xl"
       role="dialog"
       aria-modal="true"
       onclick={(e) => e.stopPropagation()}

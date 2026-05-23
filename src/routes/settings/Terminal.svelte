@@ -89,7 +89,7 @@
   </ConfigSection>
 </ConfigPage>
 
-<Modal visible={consoleMode !== null} onclose={() => (consoleMode = null)}>
+<Modal visible={consoleMode !== null} size="lg" onclose={() => (consoleMode = null)}>
   <div class="p-4">
     <h2 class="mb-3 text-base font-semibold text-text">
       {consoleMode === 'evse' ? $_('config.terminal.evse') : $_('config.terminal.debug')}
