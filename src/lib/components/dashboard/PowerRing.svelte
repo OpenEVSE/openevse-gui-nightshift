@@ -13,22 +13,28 @@
   } = $props()
 
   // Ring colour tracks the charge state: accent while charging/idle,
-  // amber when paused (connected but not charging), red on a fault.
+  // amber when paused (connected but not charging), red on a fault,
+  // muted grey when the device is sleeping or manually off.
   let color = $derived(
     display === 'error'
       ? 'var(--error)'
       : display === 'connected'
         ? 'var(--warning)'
-        : 'var(--accent)',
+        : display === 'sleeping' || display === 'off'
+          ? 'var(--text-dim)'
+          : 'var(--accent)',
   )
-  // While charging the ring shows charge progress; in the paused and fault
-  // states it becomes a solid colour-coded indicator ring.
+  // While charging the ring shows charge progress; in the paused / fault /
+  // sleeping / off states it becomes a solid colour-coded indicator ring.
   let ringFill = $derived(
-    display === 'charging' ? fill : display === 'connected' || display === 'error' ? 1 : 0,
+    display === 'charging'
+      ? fill
+      : ['connected', 'error', 'sleeping', 'off'].includes(display) ? 1 : 0,
   )
-  // Breathe in passive (paused) and fault states so the ring feels alive
-  // and a fault catches the eye without being aggressive.
-  let pulse = $derived(display === 'connected' || display === 'error')
+  // Breathe in passive (paused) and fault states. Sleeping gets a light
+  // breath (it's also waiting on something). Off is a deliberate stop —
+  // a static ring reinforces that nothing is happening.
+  let pulse = $derived(['connected', 'error', 'sleeping'].includes(display))
 </script>
 
 <div class="flex justify-center py-1">
@@ -66,6 +72,14 @@
             </div>
           </div>
         {/if}
+      </div>
+    {:else if display === 'sleeping'}
+      <div class="text-[22px] font-extrabold leading-none text-text-dim">
+        {$_('dashboard.ring.sleeping')}
+      </div>
+    {:else if display === 'off'}
+      <div class="text-[22px] font-extrabold leading-none text-text-dim">
+        {$_('dashboard.ring.off')}
       </div>
     {:else if display === 'error'}
       <div class="flex flex-col items-center">

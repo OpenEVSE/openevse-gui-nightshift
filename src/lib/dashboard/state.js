@@ -7,8 +7,9 @@ export function displayState(status) {
   if (s === 1) return 'idle'
   if (s === 3) return 'charging'
   if (s >= 4 && s <= 11) return 'error'
-  // 2 (car connected), 254 (sleeping), 255 (disabled)
-  return 'connected'
+  if (s === 254) return 'sleeping' // device suspended itself (timer, etc.)
+  if (s === 255) return 'off'      // user manually disabled
+  return 'connected'               // 2: car plugged in, not charging
 }
 
 function clamp01(n) {

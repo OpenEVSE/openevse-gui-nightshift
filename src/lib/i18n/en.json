@@ -416,6 +416,8 @@
       "charging": "Charging",
       "idle": "Ready",
       "connected": "Car connected",
+      "sleeping": "Sleeping",
+      "off": "Off",
       "error": "Fault"
     },
     "car_connected": "Car connected",
@@ -425,6 +427,8 @@
       "ready": "Ready",
       "ready_sub": "Plug in your car to start",
       "paused": "Paused",
+      "sleeping": "Sleeping",
+      "off": "Off",
       "fault": "FAULT"
     },
     "reason": {

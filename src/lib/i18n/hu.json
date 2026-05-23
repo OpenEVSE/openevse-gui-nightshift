@@ -416,6 +416,8 @@
       "charging": "Töltés",
       "idle": "Kész",
       "connected": "Autó csatlakoztatva",
+      "sleeping": "Alvó",
+      "off": "Kikapcsolva",
       "error": "Hiba"
     },
     "car_connected": "Autó csatlakoztatva",
@@ -425,6 +427,8 @@
       "ready": "Kész",
       "ready_sub": "Csatlakoztassa az autóját a töltés megkezdéséhez",
       "paused": "Szünet",
+      "sleeping": "Alvó",
+      "off": "Kikapcsolva",
       "fault": "HIBA"
     },
     "reason": {

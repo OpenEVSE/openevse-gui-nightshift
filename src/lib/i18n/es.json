@@ -416,6 +416,8 @@
       "charging": "Cargando",
       "idle": "Listo",
       "connected": "Vehículo conectado",
+      "sleeping": "En reposo",
+      "off": "Apagado",
       "error": "Fallo"
     },
     "car_connected": "Vehículo conectado",
@@ -425,6 +427,8 @@
       "ready": "Listo",
       "ready_sub": "Conecta tu vehículo para comenzar",
       "paused": "En pausa",
+      "sleeping": "En reposo",
+      "off": "Apagado",
       "fault": "FALLO"
     },
     "reason": {

@@ -9,6 +9,8 @@
     starting: 'text-text-dim',
     idle: 'text-text-dim',
     connected: 'text-text-dim',
+    sleeping: 'text-text-dim',
+    off: 'text-text-dim',
     charging: 'text-accent',
     error: 'text-error',
   }
@@ -16,6 +18,8 @@
     starting: 'bg-text-dim',
     idle: 'bg-text-dim',
     connected: 'bg-text-dim',
+    sleeping: 'bg-text-dim',
+    off: 'bg-text-dim',
     charging: 'bg-accent',
     error: 'bg-error',
   }

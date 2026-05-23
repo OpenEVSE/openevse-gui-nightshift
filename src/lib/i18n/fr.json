@@ -416,6 +416,8 @@
       "charging": "Charge en cours",
       "idle": "Prêt",
       "connected": "Véhicule connecté",
+      "sleeping": "En veille",
+      "off": "Arrêté",
       "error": "Défaut"
     },
     "car_connected": "Véhicule connecté",
@@ -425,6 +427,8 @@
       "ready": "Prêt",
       "ready_sub": "Branchez votre véhicule pour démarrer",
       "paused": "En pause",
+      "sleeping": "En veille",
+      "off": "Arrêté",
       "fault": "DÉFAUT"
     },
     "reason": {

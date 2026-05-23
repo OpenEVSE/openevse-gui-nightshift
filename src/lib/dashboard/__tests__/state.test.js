@@ -10,8 +10,8 @@ describe('displayState', () => {
   it('maps EVSE state codes', () => {
     expect(displayState({ state: 1 })).toBe('idle')
     expect(displayState({ state: 2 })).toBe('connected')
-    expect(displayState({ state: 254 })).toBe('connected')
-    expect(displayState({ state: 255 })).toBe('connected')
+    expect(displayState({ state: 254 })).toBe('sleeping')
+    expect(displayState({ state: 255 })).toBe('off')
     expect(displayState({ state: 3 })).toBe('charging')
     expect(displayState({ state: 4 })).toBe('error')
     expect(displayState({ state: 9 })).toBe('error')
