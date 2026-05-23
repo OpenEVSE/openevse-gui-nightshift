@@ -347,6 +347,7 @@
       "channel_daily_desc": "Rolling build from the main branch. Cutting edge — may be unstable.",
       "install_online": "Install",
       "installed_badge": "Installed",
+      "no_build": "No build for this device",
       "install_confirm_title": "Install {channel}?",
       "install_confirm_body": "The charger will download {version}, flash it, and restart. Active charging will stop.",
       "install_confirm_yes": "Install",

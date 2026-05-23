@@ -347,6 +347,7 @@
       "channel_daily_desc": "Folyamatos build a main ágról. Bleeding edge — instabil lehet.",
       "install_online": "Telepítés",
       "installed_badge": "Telepítve",
+      "no_build": "Nincs verzió ehhez az eszközhöz",
       "install_confirm_title": "{channel} telepítése?",
       "install_confirm_body": "A töltő letölti a {version} verziót, telepíti és újraindul. A folyamatban lévő töltés leáll.",
       "install_confirm_yes": "Telepítés",

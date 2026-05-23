@@ -60,9 +60,11 @@
   let buildenv = $derived($config_store?.buildenv ?? '')
   let installed = $derived($config_store?.version ?? '')
 
-  // All channels that have a build for this device's buildenv. The page
-  // uses this to decide whether to show the "no build available" message.
-  let availableChannels = $derived(() => {
+  // Every channel GitHub returned (release / prerelease / daily). Each may
+  // or may not have an asset matching this device's buildenv — we still
+  // render the row so the user sees the channel exists; the right-side
+  // action just changes (Install / Installed badge / 'no build' note).
+  let channels = $derived(() => {
     if (!releases) return []
     const c = classifyReleases(releases)
     return [
@@ -70,18 +72,13 @@
       { key: 'prerelease', rel: c.prerelease },
       { key: 'daily', rel: c.daily },
     ]
+      .filter(({ rel }) => rel) // skip a channel entirely if GitHub had no release for it
       .map(({ key, rel }) => ({
         key,
         version: rel?.name ?? rel?.tag_name ?? '',
         asset: findAsset(rel, buildenv),
       }))
-      .filter((ch) => ch.asset)
   })
-
-  // Show every channel we have a build for. The row matching the
-  // currently-installed version renders an "Installed" badge instead of
-  // the Install button (see template).
-  let channels = $derived(() => availableChannels())
 
   /** True when this channel's published version matches what's installed. */
   function isInstalled(ch) {
@@ -89,7 +86,7 @@
   }
 
   let hasUpdate = $derived(
-    availableChannels().some(
+    channels().some(
       (ch) => ch.key === 'release' && updateAvailable(ch.version, installed),
     ),
   )
@@ -194,7 +191,7 @@
   <ConfigSection title={$_('config.firmware.online')}>
     {#if releases === null}
       <p class="py-2 text-sm text-text-dim">{$_('config.firmware.checking')}</p>
-    {:else if availableChannels().length === 0}
+    {:else if channels().length === 0}
       <p class="py-2 text-sm text-text-dim">{$_('config.firmware.github_error')}</p>
     {:else}
       {#if hasUpdate}
@@ -220,7 +217,7 @@
               >
                 {$_('config.firmware.installed_badge')}
               </span>
-            {:else}
+            {:else if ch.asset}
               <!-- Button is w-full by default; wrap so it sizes to its label
                    instead of fighting the version text for horizontal space. -->
               <Button
@@ -229,6 +226,12 @@
                 disabled={uploading}
                 onclick={() => requestInstall(ch)}
               />
+            {:else}
+              <!-- Channel exists but doesn't ship a build for this device's
+                   buildenv (common on Stable when running a pre-built dev). -->
+              <span class="inline-block text-xs text-text-dim">
+                {$_('config.firmware.no_build')}
+              </span>
             {/if}
           </div>
         </div>

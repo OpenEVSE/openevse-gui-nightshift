@@ -347,6 +347,7 @@
       "channel_daily_desc": "Compilation continue de la branche principale. À la pointe — peut être instable.",
       "install_online": "Installer",
       "installed_badge": "Installée",
+      "no_build": "Aucune version pour cet appareil",
       "install_confirm_title": "Installer la version {channel} ?",
       "install_confirm_body": "Le chargeur va télécharger {version}, l'installer et redémarrer. Toute charge en cours sera arrêtée.",
       "install_confirm_yes": "Installer",
