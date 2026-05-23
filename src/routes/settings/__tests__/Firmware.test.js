@@ -112,7 +112,7 @@ describe('Firmware page', () => {
     })
   })
 
-  it('hides the stable row once the device is on that version', async () => {
+  it('shows the stable row with an Installed badge instead of Install when on it', async () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
@@ -127,8 +127,9 @@ describe('Firmware page', () => {
     config_store.set({ firmware: '7.1.3', version: 'v1.0.0', buildenv: 'adafruit_featheresp32' })
     const { getByText, queryByText } = render(Firmware)
     await vi.waitFor(() => {
-      expect(getByText('config.firmware.up_to_date')).toBeInTheDocument()
+      expect(getByText('config.firmware.channel_release')).toBeInTheDocument()
     })
-    expect(queryByText('config.firmware.channel_release')).toBeNull()
+    expect(getByText('config.firmware.installed_badge')).toBeInTheDocument()
+    expect(queryByText('config.firmware.install_online')).toBeNull()
   })
 })

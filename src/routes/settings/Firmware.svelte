@@ -78,15 +78,15 @@
       .filter((ch) => ch.asset)
   })
 
-  // The rows actually rendered: drop the stable row when we're already on
-  // it — the "up to date" banner says everything; the Install button would
-  // just be a foot-gun. Kept as a function to match the existing call-site
-  // pattern (`channels()`).
-  let channels = $derived(() =>
-    availableChannels().filter(
-      (ch) => !(ch.key === 'release' && !updateAvailable(ch.version, installed)),
-    ),
-  )
+  // Show every channel we have a build for. The row matching the
+  // currently-installed version renders an "Installed" badge instead of
+  // the Install button (see template).
+  let channels = $derived(() => availableChannels())
+
+  /** True when this channel's published version matches what's installed. */
+  function isInstalled(ch) {
+    return ch.key === 'release' && !!installed && !updateAvailable(ch.version, installed)
+  }
 
   let hasUpdate = $derived(
     availableChannels().some(
@@ -213,15 +213,23 @@
               {$_('config.firmware.channel_' + ch.key + '_desc')}
             </p>
           </div>
-          <!-- Button is w-full by default; wrap so it sizes to its label
-               instead of fighting the version text for horizontal space. -->
           <div class="shrink-0">
-            <Button
-              label={$_('config.firmware.install_online')}
-              variant="ghost"
-              disabled={uploading}
-              onclick={() => requestInstall(ch)}
-            />
+            {#if isInstalled(ch)}
+              <span
+                class="inline-block rounded-2xl border border-border px-3 py-1.5 text-xs font-semibold text-text-dim"
+              >
+                {$_('config.firmware.installed_badge')}
+              </span>
+            {:else}
+              <!-- Button is w-full by default; wrap so it sizes to its label
+                   instead of fighting the version text for horizontal space. -->
+              <Button
+                label={$_('config.firmware.install_online')}
+                variant="ghost"
+                disabled={uploading}
+                onclick={() => requestInstall(ch)}
+              />
+            {/if}
           </div>
         </div>
       {/each}
