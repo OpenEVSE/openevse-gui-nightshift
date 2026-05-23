@@ -14,13 +14,19 @@
   let inner = $derived(size - thickness * 2)
 </script>
 
-<!-- Animation lives in src/app.css (.breathe + @keyframes breathe) so
-     the Tailwind/Vite pipeline emits it; a scoped <style> block here
-     was getting stripped. -->
+<!-- @keyframes breathe lives in src/app.css; the animation is wired
+     via an inline style here because the class:breathe directive was
+     producing no visible effect in the bundle, possibly due to HMR
+     keeping a stale CSS rule. Inline style is foolproof. -->
 <div
   class="grid place-items-center rounded-full"
-  class:breathe={pulse}
-  style="width:{size}px;height:{size}px;background:conic-gradient({color} {deg}deg, {track} {deg}deg);"
+  style="
+    width:{size}px;
+    height:{size}px;
+    background:conic-gradient({color} {deg}deg, {track} {deg}deg);
+    transform-origin:center;
+    {pulse ? 'animation: breathe 2.2s ease-in-out infinite;' : ''}
+  "
 >
   <div
     class="grid place-items-center rounded-full bg-surface text-center"
