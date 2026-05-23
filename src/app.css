@@ -55,16 +55,19 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Slow opacity breath used by the dashboard PowerRing when the EVSE is
-   paused or in a fault state. Whole-element fade so the ring + center
-   read as a single shape pulsing together. */
+/* Breath used by the dashboard PowerRing when the EVSE is paused or in
+   a fault state. Combines opacity + a small scale so it's unmistakably
+   alive even at small sizes. Whole-element so the ring + center read
+   as one shape pulsing together. */
 .breathe {
-  animation: breathe 2.6s ease-in-out infinite;
+  animation: breathe 2.2s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform, opacity;
 }
 @keyframes breathe {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.96); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .breathe { animation: none; }
+  .breathe { animation: none; transform: none; }
 }
