@@ -544,5 +544,46 @@
       "notification": "Notification",
       "warning": "Avertissement"
     }
+  },
+  "wizard": {
+    "step_count": "Étape {current} sur {total}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "finish": "Terminer",
+    "welcome": {
+      "title": "Bienvenue",
+      "kicker": "Bienvenue sur",
+      "heading": "Configurons votre chargeur",
+      "body": "Quelques étapes rapides et il sera prêt à l'emploi.",
+      "captive_hint": "Si ceci s'est ouvert dans une fenêtre de connexion, basculez d'abord vers votre vrai navigateur.",
+      "open_in_browser": "Ouvrir dans le navigateur"
+    },
+    "evse": {
+      "title": "Réglages du chargeur",
+      "intro": "Indiquez au chargeur les bases de votre installation. Vous pouvez tout modifier plus tard dans les Paramètres."
+    },
+    "wifi": {
+      "title": "WiFi",
+      "intro": "Choisissez le réseau auquel le chargeur doit se connecter.",
+      "current": "Réseau actuel",
+      "joined": "Demande de connexion envoyée. Le chargeur rejoindra le nouveau réseau dans quelques secondes.",
+      "empty": "Aucun réseau trouvé. Appuyez sur Scanner pour réessayer."
+    },
+    "time": {
+      "title": "Heure",
+      "intro": "Choisissez votre fuseau horaire et si le chargeur doit synchroniser l'heure automatiquement."
+    },
+    "firmware": {
+      "title": "Micrologiciel",
+      "intro": "Ce qui tourne sur ce chargeur aujourd'hui.",
+      "update_hint": "Les mises à jour du micrologiciel se trouvent dans Paramètres → Micrologiciel après la configuration."
+    },
+    "finish": {
+      "title": "Reconnectez-vous à votre WiFi domestique",
+      "body": "Le chargeur rejoint votre réseau domestique. Reconnectez cet appareil à votre WiFi, puis ouvrez le chargeur à :",
+      "address_label": "Adresse",
+      "copied": "Copié dans le presse-papiers.",
+      "dismiss": "Compris"
+    }
   }
 }

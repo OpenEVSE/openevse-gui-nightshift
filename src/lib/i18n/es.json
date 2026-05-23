@@ -544,5 +544,46 @@
       "notification": "Notificación",
       "warning": "Advertencia"
     }
+  },
+  "wizard": {
+    "step_count": "Paso {current} de {total}",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "welcome": {
+      "title": "Bienvenida",
+      "kicker": "Te damos la bienvenida a",
+      "heading": "Vamos a configurar tu cargador",
+      "body": "Solo unos pasos rápidos y estará listo para usar.",
+      "captive_hint": "Si esto se abrió en una ventana de inicio de sesión, cambia a tu navegador real primero.",
+      "open_in_browser": "Abrir en el navegador"
+    },
+    "evse": {
+      "title": "Cargador",
+      "intro": "Indica al cargador los datos básicos de tu instalación. Puedes cambiarlo todo más tarde en Ajustes."
+    },
+    "wifi": {
+      "title": "WiFi",
+      "intro": "Elige la red a la que debe conectarse el cargador.",
+      "current": "Red actual",
+      "joined": "Solicitud de conexión enviada. El cargador se unirá a la nueva red en unos segundos.",
+      "empty": "No se han encontrado redes. Toca Buscar para intentarlo de nuevo."
+    },
+    "time": {
+      "title": "Hora",
+      "intro": "Elige tu zona horaria y si el cargador debe sincronizar la hora automáticamente."
+    },
+    "firmware": {
+      "title": "Firmware",
+      "intro": "Esto es lo que se ejecuta hoy en este cargador.",
+      "update_hint": "Las actualizaciones de firmware están en Ajustes → Firmware después de la configuración."
+    },
+    "finish": {
+      "title": "Vuelve a conectarte a tu WiFi doméstica",
+      "body": "El cargador se está uniendo a tu red doméstica. Cambia este dispositivo de nuevo a tu WiFi y abre el cargador en:",
+      "address_label": "Dirección",
+      "copied": "Copiado al portapapeles.",
+      "dismiss": "Entendido"
+    }
   }
 }

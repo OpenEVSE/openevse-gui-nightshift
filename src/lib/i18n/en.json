@@ -544,5 +544,46 @@
       "notification": "Notification",
       "warning": "Warning"
     }
+  },
+  "wizard": {
+    "step_count": "Step {current} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish",
+    "welcome": {
+      "title": "Welcome",
+      "kicker": "Welcome to",
+      "heading": "Let's get set up",
+      "body": "A few quick steps and your charger will be ready to use.",
+      "captive_hint": "If this opened inside a sign-in window, switch to your real browser first.",
+      "open_in_browser": "Open in browser"
+    },
+    "evse": {
+      "title": "Charger basics",
+      "intro": "Set what the charger needs to know about your installation. You can change any of this later in Settings."
+    },
+    "wifi": {
+      "title": "WiFi",
+      "intro": "Pick the network the charger should join.",
+      "current": "Currently joined",
+      "joined": "Connection request sent. The charger will rejoin on the new network in a few seconds.",
+      "empty": "No networks found. Tap Scan to try again."
+    },
+    "time": {
+      "title": "Time",
+      "intro": "Pick your time zone and whether the charger should sync its clock automatically."
+    },
+    "firmware": {
+      "title": "Firmware",
+      "intro": "What's running on this charger today.",
+      "update_hint": "Full firmware updates live on Settings → Firmware after setup."
+    },
+    "finish": {
+      "title": "Reconnect to your home WiFi",
+      "body": "The charger is rejoining your home network. Switch this device back to your home WiFi, then reach the charger at:",
+      "address_label": "Address",
+      "copied": "Copied to clipboard.",
+      "dismiss": "Got it"
+    }
   }
 }

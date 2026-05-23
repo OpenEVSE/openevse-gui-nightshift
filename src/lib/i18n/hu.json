@@ -544,5 +544,46 @@
       "notification": "Értesítés",
       "warning": "Figyelmeztetés"
     }
+  },
+  "wizard": {
+    "step_count": "{current}. lépés / {total}",
+    "previous": "Vissza",
+    "next": "Tovább",
+    "finish": "Befejezés",
+    "welcome": {
+      "title": "Üdvözöljük",
+      "kicker": "Üdvözli az",
+      "heading": "Állítsuk be a töltőt",
+      "body": "Néhány gyors lépés, és a töltő használatra kész lesz.",
+      "captive_hint": "Ha ez egy bejelentkezési ablakban nyílt meg, először váltson át a valódi böngészőre.",
+      "open_in_browser": "Megnyitás böngészőben"
+    },
+    "evse": {
+      "title": "Töltő alapok",
+      "intro": "Állítsd be, amit a töltőnek tudnia kell a telepítésről. Bármit megváltoztathatsz később a Beállításokban."
+    },
+    "wifi": {
+      "title": "WiFi",
+      "intro": "Válaszd ki a hálózatot, amelyhez a töltő csatlakozzon.",
+      "current": "Jelenleg csatlakoztatva",
+      "joined": "Csatlakozási kérelem elküldve. A töltő néhány másodperc múlva csatlakozik az új hálózathoz.",
+      "empty": "Nem található hálózat. Érintsd meg a Keresés gombot az ismétléshez."
+    },
+    "time": {
+      "title": "Idő",
+      "intro": "Válaszd ki az időzónát, és hogy a töltő automatikusan szinkronizálja-e az időt."
+    },
+    "firmware": {
+      "title": "Firmware",
+      "intro": "Ez fut ma a töltőn.",
+      "update_hint": "A firmware-frissítések a beállítás után a Beállítások → Firmware menüben találhatók."
+    },
+    "finish": {
+      "title": "Csatlakozz vissza az otthoni WiFi-hez",
+      "body": "A töltő csatlakozik az otthoni hálózatodhoz. Állítsd vissza ezt a készüléket az otthoni WiFi-re, majd nyisd meg a töltőt itt:",
+      "address_label": "Cím",
+      "copied": "Vágólapra másolva.",
+      "dismiss": "Rendben"
+    }
   }
 }

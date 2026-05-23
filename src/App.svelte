@@ -4,10 +4,12 @@
   import { theme } from './lib/stores/theme.js'
   import Loader from './lib/components/ui/Loader.svelte'
   import AppShell from './lib/components/shell/AppShell.svelte'
+  import Wizard from './routes/Wizard.svelte'
   import AlertBox from './lib/components/ui/AlertBox.svelte'
   import FetchData from './lib/data/FetchData.svelte'
   import WebSocket from './lib/data/WebSocket.svelte'
   import DataManager from './lib/data/DataManager.svelte'
+  import { config_store } from './lib/stores/config.js'
   import { uistates_store } from './lib/stores/uistates.js'
   import { _, isLoading } from 'svelte-i18n'
 
@@ -39,6 +41,11 @@
     closable={false}
     action={() => location.reload()}
   />
+{:else if !$config_store?.wizard_passed}
+  <!-- First-run / unprovisioned device: gate the rest of the UI behind setup. -->
+  <Wizard />
+  <WebSocket />
+  <DataManager />
 {:else}
   <AppShell />
   <WebSocket />
