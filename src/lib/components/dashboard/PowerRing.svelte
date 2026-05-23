@@ -74,8 +74,21 @@
         {/if}
       </div>
     {:else if display === 'sleeping'}
-      <div class="text-[22px] font-extrabold leading-none text-text-dim">
-        {$_('dashboard.ring.sleeping')}
+      <div class="relative h-full w-full">
+        <!-- "Sleeping": centered both axes within the ring -->
+        <div class="absolute inset-0 grid place-items-center">
+          <div class="text-[22px] font-extrabold leading-none text-text-dim">
+            {$_('dashboard.ring.sleeping')}
+          </div>
+        </div>
+        <!-- reason (e.g. "Waiting · 00:00") sits just below the label -->
+        {#if reasonKey}
+          <div class="absolute inset-x-0 top-1/2 flex flex-col items-center pt-6">
+            <div class="px-7 text-center text-[11px] leading-tight text-text-dim">
+              {$_(reasonKey, { values: reasonValues })}
+            </div>
+          </div>
+        {/if}
       </div>
     {:else if display === 'off'}
       <div class="text-[22px] font-extrabold leading-none text-text-dim">

@@ -30,9 +30,9 @@
   let rateNonce = $state(0)
 
   // ── derived view-model ──────────────────────────────────────────────────
-  let display = $derived(displayState($status_store))
-  let charging = $derived(display === 'charging')
   let mode = $derived($uistates_store?.mode ?? 0)
+  let display = $derived(displayState($status_store, mode))
+  let charging = $derived(display === 'charging')
   let maxAmps = $derived($config_store?.max_current_soft ?? 48)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
   let reason = $derived(connectedReason(mode, $plan_store))

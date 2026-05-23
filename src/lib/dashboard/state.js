@@ -1,14 +1,22 @@
 /** Pure helpers for the Dashboard. No store or DOM access — fully unit-tested. */
 
-/** Map the raw OpenEVSE `state` code to a Dashboard display state. */
-export function displayState(status) {
+/**
+ * Map the raw OpenEVSE `state` code to a Dashboard display state.
+ *
+ * `mode` is the dashboard's derived mode (0 = Auto, 1 = On, 2 = Off).
+ * Picking Off only drops charge_current to 0 — the device then sits in
+ * the same state 254 it would be in if Auto were waiting on a timer.
+ * So we use mode to disambiguate: 254 + Off = 'off'; 254 + anything else
+ * = 'sleeping'.
+ */
+export function displayState(status, mode = 0) {
   const s = status?.state
   if (s === undefined || s === null || s === 0) return 'starting'
   if (s === 1) return 'idle'
   if (s === 3) return 'charging'
   if (s >= 4 && s <= 11) return 'error'
-  if (s === 254) return 'sleeping' // device suspended itself (timer, etc.)
-  if (s === 255) return 'off'      // user manually disabled
+  if (s === 254) return mode === 2 ? 'off' : 'sleeping'
+  if (s === 255) return 'off'      // device was already disabled at boot
   return 'connected'               // 2: car plugged in, not charging
 }
 

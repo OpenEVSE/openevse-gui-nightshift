@@ -13,6 +13,14 @@ describe('displayState', () => {
     expect(displayState({ state: 254 })).toBe('sleeping')
     expect(displayState({ state: 255 })).toBe('off')
     expect(displayState({ state: 3 })).toBe('charging')
+  })
+  it('treats state 254 with mode=Off (2) as off, not sleeping', () => {
+    // The "Off" mode just drops charge_current to 0 — device sits in
+    // sleeping (254). Without the mode hint, that's indistinguishable
+    // from auto-waiting-on-a-timer.
+    expect(displayState({ state: 254 }, 2)).toBe('off')
+    expect(displayState({ state: 254 }, 0)).toBe('sleeping')
+    expect(displayState({ state: 254 }, 1)).toBe('sleeping')
     expect(displayState({ state: 4 })).toBe('error')
     expect(displayState({ state: 9 })).toBe('error')
     expect(displayState({ state: 11 })).toBe('error')
