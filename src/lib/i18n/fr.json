@@ -128,7 +128,7 @@
       "defaultstate": "État par défaut au démarrage",
       "disabled": "Désactivé",
       "active": "Actif",
-      "threephase": "Alimentation triphasée",
+      "threephase": "Type d'alimentation",
       "singlephase": "Monophasé",
       "threephase_yes": "Triphasé",
       "service": "Niveau de service",
@@ -578,7 +578,7 @@
       "intro": "Ce qui tourne sur ce chargeur aujourd'hui.",
       "update_hint": "Les mises à jour du micrologiciel se trouvent dans Paramètres → Micrologiciel après la configuration."
     },
-    "finish": {
+    "reconnect": {
       "title": "Reconnectez-vous à votre WiFi domestique",
       "body": "Le chargeur rejoint votre réseau domestique. Reconnectez cet appareil à votre WiFi, puis ouvrez le chargeur à :",
       "address_label": "Adresse",

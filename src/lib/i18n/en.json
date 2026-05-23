@@ -128,7 +128,7 @@
       "defaultstate": "Default state on power-up",
       "disabled": "Disabled",
       "active": "Active",
-      "threephase": "Three-phase supply",
+      "threephase": "Supply type",
       "singlephase": "Single phase",
       "threephase_yes": "Three phase",
       "service": "Service level",
@@ -578,7 +578,7 @@
       "intro": "What's running on this charger today.",
       "update_hint": "Full firmware updates live on Settings → Firmware after setup."
     },
-    "finish": {
+    "reconnect": {
       "title": "Reconnect to your home WiFi",
       "body": "The charger is rejoining your home network. Switch this device back to your home WiFi, then reach the charger at:",
       "address_label": "Address",

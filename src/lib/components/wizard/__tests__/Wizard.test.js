@@ -64,7 +64,7 @@ describe('Wizard route', () => {
     expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
     // No reconnect dialog when we already have a routable IP — App.svelte
     // swaps to the dashboard once wizard_passed flips.
-    expect(queryByText('wizard.finish.title')).toBeNull()
+    expect(queryByText('wizard.reconnect.title')).toBeNull()
   })
 
   it('shows the reconnect dialog when finishing while still on the device AP', async () => {
@@ -74,6 +74,6 @@ describe('Wizard route', () => {
     await fireEvent.click(getByText('wizard.finish'))
 
     expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
-    expect(getByText('wizard.finish.title')).toBeInTheDocument()
+    expect(getByText('wizard.reconnect.title')).toBeInTheDocument()
   })
 })

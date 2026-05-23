@@ -128,7 +128,7 @@
       "defaultstate": "Alapértelmezett állapot bekapcsoláskor",
       "disabled": "Letiltva",
       "active": "Aktív",
-      "threephase": "Háromfázisú tápellátás",
+      "threephase": "Tápellátás típusa",
       "singlephase": "Egyfázisú",
       "threephase_yes": "Háromfázisú",
       "service": "Szolgáltatási szint",
@@ -578,7 +578,7 @@
       "intro": "Ez fut ma a töltőn.",
       "update_hint": "A firmware-frissítések a beállítás után a Beállítások → Firmware menüben találhatók."
     },
-    "finish": {
+    "reconnect": {
       "title": "Csatlakozz vissza az otthoni WiFi-hez",
       "body": "A töltő csatlakozik az otthoni hálózatodhoz. Állítsd vissza ezt a készüléket az otthoni WiFi-re, majd nyisd meg a töltőt itt:",
       "address_label": "Cím",

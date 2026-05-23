@@ -38,14 +38,14 @@
 
 <Modal {visible} closable={false}>
   <h2 class="mb-3 text-base font-semibold text-text">
-    {$_('wizard.finish.title')}
+    {$_('wizard.reconnect.title')}
   </h2>
-  <p class="mb-3 text-sm text-text-dim">{$_('wizard.finish.body')}</p>
+  <p class="mb-3 text-sm text-text-dim">{$_('wizard.reconnect.body')}</p>
 
   {#if displayHost}
     <div class="mb-4 rounded-xl border border-border bg-surface p-3">
       <p class="text-xs uppercase tracking-wider text-text-dim">
-        {$_('wizard.finish.address_label')}
+        {$_('wizard.reconnect.address_label')}
       </p>
       <button
         type="button"
@@ -55,10 +55,10 @@
         http://{displayHost}
       </button>
       {#if copied}
-        <p class="mt-1 text-xs text-text-dim">{$_('wizard.finish.copied')}</p>
+        <p class="mt-1 text-xs text-text-dim">{$_('wizard.reconnect.copied')}</p>
       {/if}
     </div>
   {/if}
 
-  <Button label={$_('wizard.finish.dismiss')} onclick={onclose} />
+  <Button label={$_('wizard.reconnect.dismiss')} onclick={onclose} />
 </Modal>

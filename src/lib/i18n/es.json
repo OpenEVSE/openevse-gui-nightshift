@@ -128,7 +128,7 @@
       "defaultstate": "Estado predeterminado al arrancar",
       "disabled": "Desactivado",
       "active": "Activo",
-      "threephase": "Suministro trifásico",
+      "threephase": "Tipo de suministro",
       "singlephase": "Monofásico",
       "threephase_yes": "Trifásico",
       "service": "Nivel de servicio",
@@ -578,7 +578,7 @@
       "intro": "Esto es lo que se ejecuta hoy en este cargador.",
       "update_hint": "Las actualizaciones de firmware están en Ajustes → Firmware después de la configuración."
     },
-    "finish": {
+    "reconnect": {
       "title": "Vuelve a conectarte a tu WiFi doméstica",
       "body": "El cargador se está uniendo a tu red doméstica. Cambia este dispositivo de nuevo a tu WiFi y abre el cargador en:",
       "address_label": "Dirección",

@@ -13,6 +13,7 @@
   import { config_store } from '../lib/stores/config.js'
   import { status_store } from '../lib/stores/status.js'
   import { serialQueue } from '../lib/queue.js'
+  import { navigate } from '../lib/router.js'
   import WizardShell from '../lib/components/wizard/WizardShell.svelte'
   import FinishDialog from '../lib/components/wizard/FinishDialog.svelte'
   import Welcome from '../lib/components/wizard/steps/Welcome.svelte'
@@ -56,8 +57,11 @@
       // Can't auto-redirect — user has to switch their WiFi first.
       finishDialog = true
     } else {
-      // Already on the home network — just collapse the wizard; App.svelte
-      // will switch to AppShell now that wizard_passed is true.
+      // Already on the home network — collapse the wizard. App.svelte
+      // switches to AppShell now that wizard_passed is true; force the
+      // hash to '/' so the Router lands on the Dashboard even if the
+      // user arrived here with a stale or hand-typed hash.
+      navigate('/')
     }
   }
 
