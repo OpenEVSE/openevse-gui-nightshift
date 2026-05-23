@@ -26,10 +26,13 @@
   let ringFill = $derived(
     display === 'charging' ? fill : display === 'connected' || display === 'error' ? 1 : 0,
   )
+  // Breathe in passive (paused) and fault states so the ring feels alive
+  // and a fault catches the eye without being aggressive.
+  let pulse = $derived(display === 'connected' || display === 'error')
 </script>
 
 <div class="flex justify-center py-1">
-  <ProgressRing fill={ringFill} {color}>
+  <ProgressRing fill={ringFill} {color} {pulse}>
     {#if display === 'charging'}
       <div class="relative h-full w-full">
         <!-- kW value: centered both axes within the ring -->
