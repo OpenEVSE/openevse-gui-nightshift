@@ -5,6 +5,7 @@
   import { config_store } from '../lib/stores/config.js'
   import { claims_target_store } from '../lib/stores/claims_target.js'
   import { uistates_store } from '../lib/stores/uistates.js'
+  import { uisettings_store } from '../lib/stores/uisettings.js'
   import {
     energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
     showVehicle, safetyData, claimRows,
@@ -24,7 +25,7 @@
 
   let groups = $derived([
     { group: energyMetrics($status_store), expanded: true },
-    { group: sensorMetrics($status_store, $config_store), expanded: false },
+    { group: sensorMetrics($status_store, $config_store, { tempUnit: $uisettings_store?.temp_unit }), expanded: false },
     ...(showVehicle($status_store, $config_store)
       ? [{ group: vehicleMetrics($status_store, $config_store), expanded: false }]
       : []),

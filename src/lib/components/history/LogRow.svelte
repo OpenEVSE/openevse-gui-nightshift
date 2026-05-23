@@ -1,11 +1,13 @@
 <script>
+  import { _ } from 'svelte-i18n'
   import Card from '../ui/Card.svelte'
   import Icon from '../../icons/Icon.svelte'
 
   let {
     stateIcon, stateTone = 'muted', stateDesc = '',
     typeIcon, typeTone = 'muted', typeLabel = '',
-    timeText = '', energyKwh = 0, tempC = 0,
+    timeText = '', energyKwh = 0,
+    temp = 0, tempUnit = 'units.celsius',
   } = $props()
 
   const toneClass = {
@@ -32,6 +34,6 @@
     <div class="text-sm font-bold text-text">
       {energyKwh.toFixed(1)}<span class="ml-1 text-xs font-normal text-text-dim">kWh</span>
     </div>
-    <div class="text-xs text-text-dim">{tempC.toFixed(1)} °C</div>
+    <div class="text-xs text-text-dim">{temp == null ? '—' : Number(temp).toFixed(1)} {$_(tempUnit)}</div>
   </div>
 </Card>

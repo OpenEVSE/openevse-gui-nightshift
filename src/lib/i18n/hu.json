@@ -280,7 +280,11 @@
       "repo_wifi": "WiFi firmware a GitHub-on",
       "repo_evse": "EVSE firmware a GitHub-on",
       "credit": "Az OpenEVSE és az OpenEnergyMonitor által működtetve",
-      "theme_by": "Nightshift gui: Andrew Rankin"
+      "theme_by": "Nightshift gui: Andrew Rankin",
+      "preferences": "Megjelenítési beállítások",
+      "temp_unit": "Hőmérséklet mértékegysége",
+      "temp_celsius": "Celsius",
+      "temp_fahrenheit": "Fahrenheit"
     },
     "certificates": {
       "installed": "Telepített tanúsítványok",
@@ -526,6 +530,7 @@
     "amp": "A",
     "volt": "V",
     "celsius": "°C",
+    "fahrenheit": "°F",
     "km": "km",
     "miles": "mérföld",
     "percent": "%"

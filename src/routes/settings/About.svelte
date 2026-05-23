@@ -2,9 +2,12 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { config_store } from '../../lib/stores/config.js'
+  import { uisettings_store } from '../../lib/stores/uisettings.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
   import ReadOnlyRow from '../../lib/components/config/ReadOnlyRow.svelte'
+  import FormField from '../../lib/components/config/FormField.svelte'
+  import SegmentedControl from '../../lib/components/ui/SegmentedControl.svelte'
   import Icon from '../../lib/icons/Icon.svelte'
 
   const links = [
@@ -12,12 +15,31 @@
     { labelKey: 'config.about.repo_wifi', href: 'https://github.com/OpenEVSE/ESP32_WiFi_V4.x', icon: 'mdi:github' },
     { labelKey: 'config.about.repo_evse', href: 'https://github.com/OpenEVSE/open_evse', icon: 'mdi:github' },
   ]
+
+  let tempUnitOptions = $derived([
+    { value: 'c', label: $_('config.about.temp_celsius') },
+    { value: 'f', label: $_('config.about.temp_fahrenheit') },
+  ])
+
+  function setTempUnit(unit) {
+    uisettings_store.update((s) => ({ ...s, temp_unit: unit }))
+  }
 </script>
 
 <ConfigPage title={$_('config.pages.about')}>
   <ConfigSection title={$_('config.about.versions')}>
     <ReadOnlyRow label={$_('config.about.firmware')} value={$config_store?.firmware} />
     <ReadOnlyRow label={$_('config.about.gateway')} value={$config_store?.version} />
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.about.preferences')}>
+    <FormField label={$_('config.about.temp_unit')}>
+      <SegmentedControl
+        options={tempUnitOptions}
+        value={$uisettings_store?.temp_unit ?? 'c'}
+        onchange={setTempUnit}
+      />
+    </FormField>
   </ConfigSection>
 
   <ConfigSection title={$_('config.about.links')}>

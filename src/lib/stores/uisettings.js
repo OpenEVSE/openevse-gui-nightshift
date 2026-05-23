@@ -7,5 +7,6 @@ export const uisettings_store = persisted('settings', {
 	tz : undefined,
 	mqtt_grid_ie: undefined,
 	mqtt_solar: undefined,
-	wizard_done: false
+	wizard_done: false,
+	temp_unit: 'c',     // 'c' | 'f' — display unit only; device always reports °C
   })

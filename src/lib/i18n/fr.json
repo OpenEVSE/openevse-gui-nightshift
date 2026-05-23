@@ -280,7 +280,11 @@
       "repo_wifi": "Micrologiciel WiFi sur GitHub",
       "repo_evse": "Micrologiciel EVSE sur GitHub",
       "credit": "Propulsé par OpenEVSE et OpenEnergyMonitor",
-      "theme_by": "Nightshift gui par Andrew Rankin"
+      "theme_by": "Nightshift gui par Andrew Rankin",
+      "preferences": "Préférences d'affichage",
+      "temp_unit": "Unité de température",
+      "temp_celsius": "Celsius",
+      "temp_fahrenheit": "Fahrenheit"
     },
     "certificates": {
       "installed": "Certificats installés",
@@ -526,6 +530,7 @@
     "amp": "A",
     "volt": "V",
     "celsius": "°C",
+    "fahrenheit": "°F",
     "km": "km",
     "miles": "mi",
     "percent": "%"

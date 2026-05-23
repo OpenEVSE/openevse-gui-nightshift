@@ -7,10 +7,12 @@
   import { claims_target_store } from '../lib/stores/claims_target.js'
   import { plan_store } from '../lib/stores/plan.js'
   import { uistates_store } from '../lib/stores/uistates.js'
+  import { uisettings_store } from '../lib/stores/uisettings.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { EvseClients } from '../lib/vars.js'
   import { sec2time, temp_round, round, clientid2name, getStateDesc } from '../lib/utils.js'
+  import { formatTemp } from '../lib/temperature.js'
   import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
 
@@ -38,12 +40,16 @@
   let kw = $derived((($status_store?.power ?? 0) / 1000).toFixed(1))
   let maxKw = $derived((maxAmps * ($status_store?.voltage ?? 0) / 1000).toFixed(1))
 
+  let tempDisplay = $derived(
+    formatTemp(temp_round($status_store?.temp), $uisettings_store?.temp_unit),
+  )
   let live = $derived({
     sessionKwh: (($status_store?.session_energy ?? 0) / 1000).toFixed(2),
     elapsed: sec2time($status_store?.session_elapsed ?? 0),
     currentA: (($status_store?.amp ?? 0) / 1000).toFixed(1),
     voltage: $status_store?.voltage ?? 0,
-    tempC: temp_round($status_store?.temp),
+    temp: tempDisplay.value,
+    tempUnit: tempDisplay.unitKey,
     pilotA: $status_store?.pilot ?? 0,
   })
   let summary = $derived({

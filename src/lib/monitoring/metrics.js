@@ -1,4 +1,5 @@
-/** Pure helpers for the Monitoring screen. Self-contained — no store/DOM/utils imports. */
+/** Pure helpers for the Monitoring screen. Self-contained — no store/DOM imports. */
+import { formatTemp } from '../temperature.js'
 
 /** Round `value` to `p` decimals; null for missing / non-numeric input. */
 export function round(value, p = 0) {
@@ -38,18 +39,21 @@ export function energyMetrics(status) {
   }
 }
 
-export function sensorMetrics(status, config) {
+export function sensorMetrics(status, config, { tempUnit = 'c' } = {}) {
   const s = status ?? {}
   const c = config ?? {}
+  const evseT = formatTemp(tempC(s.temp), tempUnit)
   const rows = [
     { labelKey: 'monitoring.sensor.pilot', value: round(s.pilot, 0), unit: 'units.amp' },
     { labelKey: 'monitoring.sensor.current', value: round((s.amp ?? 0) / 1000, 1), unit: 'units.amp' },
     { labelKey: 'monitoring.sensor.voltage', value: round(s.voltage, 0), unit: 'units.volt' },
-    { labelKey: 'monitoring.sensor.evsetemp', value: tempC(s.temp), unit: 'units.celsius' },
+    { labelKey: 'monitoring.sensor.evsetemp', value: evseT.value, unit: evseT.unitKey },
   ]
   ;[s.temp1, s.temp2, s.temp3, s.temp4].forEach((raw, i) => {
     const v = tempC(raw)
-    if (v !== null) rows.push({ labelKey: `monitoring.sensor.temp${i + 1}`, value: v, unit: 'units.celsius' })
+    if (v === null) return
+    const t = formatTemp(v, tempUnit)
+    rows.push({ labelKey: `monitoring.sensor.temp${i + 1}`, value: t.value, unit: t.unitKey })
   })
   rows.push({ labelKey: 'monitoring.sensor.scale', value: c.scale ?? null, unit: '' })
   rows.push({ labelKey: 'monitoring.sensor.offset', value: c.offset ?? null, unit: '' })

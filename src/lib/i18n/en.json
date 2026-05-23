@@ -280,7 +280,11 @@
       "repo_wifi": "WiFi firmware on GitHub",
       "repo_evse": "EVSE firmware on GitHub",
       "credit": "Powered by OpenEVSE and OpenEnergyMonitor",
-      "theme_by": "Nightshift gui by Andrew Rankin"
+      "theme_by": "Nightshift gui by Andrew Rankin",
+      "preferences": "Display preferences",
+      "temp_unit": "Temperature unit",
+      "temp_celsius": "Celsius",
+      "temp_fahrenheit": "Fahrenheit"
     },
     "certificates": {
       "installed": "Installed certificates",
@@ -526,6 +530,7 @@
     "amp": "A",
     "volt": "V",
     "celsius": "°C",
+    "fahrenheit": "°F",
     "km": "km",
     "miles": "mi",
     "percent": "%"

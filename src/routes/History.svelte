@@ -3,12 +3,14 @@
   import { onMount } from 'svelte'
   import { history_store } from '../lib/stores/history.js'
   import { config_store } from '../lib/stores/config.js'
+  import { uisettings_store } from '../lib/stores/uisettings.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { formatDate, getStateDesc } from '../lib/utils.js'
   import {
     pageRange, logTypeIcon, logTypeTone, logStateInfo, logEnergyKwh, logTempC,
   } from '../lib/history/logs.js'
+  import { formatTemp } from '../lib/temperature.js'
   import Card from '../lib/components/ui/Card.svelte'
   import Button from '../lib/components/ui/Button.svelte'
   import ProgressBar from '../lib/components/ui/ProgressBar.svelte'
@@ -20,6 +22,7 @@
   let rows = $derived(
     (Array.isArray($history_store) ? $history_store : []).map((e) => {
       const state = logStateInfo(e.evseState)
+      const t = formatTemp(logTempC(e), $uisettings_store?.temp_unit)
       return {
         stateIcon: state.icon,
         stateTone: state.tone,
@@ -29,7 +32,8 @@
         typeLabel: e.type ? $_('history.types.' + e.type, { default: e.type }) : '',
         timeText: e.time ? formatDate(e.time, $config_store?.time_zone, 'short') : '',
         energyKwh: logEnergyKwh(e),
-        tempC: logTempC(e),
+        temp: t.value,
+        tempUnit: t.unitKey,
       }
     }),
   )

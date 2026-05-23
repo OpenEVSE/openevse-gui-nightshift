@@ -17,7 +17,7 @@
     </div>
     <div class="flex justify-around border-b border-border pb-2 text-[9px] text-text-dim">
       <span>{$_('dashboard.chips.voltage')} <b class="text-text">{live.voltage} V</b></span>
-      <span>{$_('dashboard.chips.temp')} <b class="text-text">{live.tempC}°C</b></span>
+      <span>{$_('dashboard.chips.temp')} <b class="text-text">{live.temp}{$_(live.tempUnit)}</b></span>
       <span>{$_('dashboard.chips.pilot')} <b class="text-text">{live.pilotA} A</b></span>
     </div>
   {:else}
