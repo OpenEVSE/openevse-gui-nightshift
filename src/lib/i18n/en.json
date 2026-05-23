@@ -305,7 +305,11 @@
       "debug": "Debug console",
       "evse": "EVSE console",
       "connecting": "Connecting…",
-      "unavailable": "Console unavailable."
+      "unavailable": "Console unavailable.",
+      "diagnostics": "Diagnostics",
+      "diagnostics_desc": "Download a JSON snapshot of every store (config, status, schedule, claims…) for a bug report. Passwords and tokens are redacted.",
+      "diagnostics_export": "Download diagnostics",
+      "diagnostics_done": "Saved {file}."
     },
     "firmware": {
       "versions": "Installed versions",
@@ -411,7 +415,7 @@
     },
     "reason": {
       "off": "Switch to Auto or On",
-      "waiting": "Waiting · {time}",
+      "waiting": "Waiting · {time}",
       "not_charging": "Not charging"
     },
     "kw_max": "of {max} kW max",

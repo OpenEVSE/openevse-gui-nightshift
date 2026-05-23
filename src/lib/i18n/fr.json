@@ -305,7 +305,11 @@
       "debug": "Console de débogage",
       "evse": "Console EVSE",
       "connecting": "Connexion…",
-      "unavailable": "Console indisponible."
+      "unavailable": "Console indisponible.",
+      "diagnostics": "Diagnostic",
+      "diagnostics_desc": "Téléchargez un instantané JSON de tous les stores (config, état, planning, claims…) pour un rapport de bug. Les mots de passe et tokens sont masqués.",
+      "diagnostics_export": "Télécharger le diagnostic",
+      "diagnostics_done": "Enregistré {file}."
     },
     "firmware": {
       "versions": "Versions installées",
@@ -411,7 +415,7 @@
     },
     "reason": {
       "off": "Passer en Auto ou Marche",
-      "waiting": "En attente · {time}",
+      "waiting": "En attente · {time}",
       "not_charging": "Pas de charge"
     },
     "kw_max": "sur {max} kW max",

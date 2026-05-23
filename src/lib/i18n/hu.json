@@ -305,7 +305,11 @@
       "debug": "Debug konzol",
       "evse": "EVSE konzol",
       "connecting": "Csatlakozás…",
-      "unavailable": "Konzol nem elérhető."
+      "unavailable": "Konzol nem elérhető.",
+      "diagnostics": "Diagnosztika",
+      "diagnostics_desc": "Tölts le egy JSON-pillanatképet az összes store-ról (config, status, ütemezés, claims…) hibajelentéshez. A jelszavak és tokenek szerkesztve vannak.",
+      "diagnostics_export": "Diagnosztika letöltése",
+      "diagnostics_done": "Mentve: {file}."
     },
     "firmware": {
       "versions": "Telepített verziók",
@@ -411,7 +415,7 @@
     },
     "reason": {
       "off": "Váltson Auto vagy Be módra",
-      "waiting": "Várakozás · {time}",
+      "waiting": "Várakozás · {time}",
       "not_charging": "Nem tölt"
     },
     "kw_max": "max {max} kW-ból",

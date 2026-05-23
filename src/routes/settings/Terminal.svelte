@@ -7,11 +7,19 @@
   import ConsoleViewer from '../../lib/components/config/ConsoleViewer.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
   import Modal from '../../lib/components/ui/Modal.svelte'
+  import { downloadDiagnostics } from '../../lib/diagnostics.js'
 
   let command = $state('$')
   let results = $state([])
   let sending = $state(false)
   let consoleMode = $state(null) // 'debug' | 'evse' | null
+  let exportedFile = $state('')
+
+  function exportDiagnostics() {
+    exportedFile = downloadDiagnostics()
+    // Clear the "downloaded X" hint after a few seconds.
+    setTimeout(() => (exportedFile = ''), 4000)
+  }
 
   async function send() {
     if (sending || !command.trim()) return
@@ -64,6 +72,20 @@
       <Button label={$_('config.terminal.debug')} variant="ghost" onclick={() => (consoleMode = 'debug')} />
       <Button label={$_('config.terminal.evse')} variant="ghost" onclick={() => (consoleMode = 'evse')} />
     </div>
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.terminal.diagnostics')}>
+    <p class="mb-2 text-sm text-text-dim">{$_('config.terminal.diagnostics_desc')}</p>
+    <Button
+      label={$_('config.terminal.diagnostics_export')}
+      variant="ghost"
+      onclick={exportDiagnostics}
+    />
+    {#if exportedFile}
+      <p class="mt-2 text-xs text-text-dim">
+        {$_('config.terminal.diagnostics_done', { values: { file: exportedFile } })}
+      </p>
+    {/if}
   </ConfigSection>
 </ConfigPage>
 

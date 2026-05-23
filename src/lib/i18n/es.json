@@ -305,7 +305,11 @@
       "debug": "Consola de depuración",
       "evse": "Consola EVSE",
       "connecting": "Conectando…",
-      "unavailable": "Consola no disponible."
+      "unavailable": "Consola no disponible.",
+      "diagnostics": "Diagnóstico",
+      "diagnostics_desc": "Descarga una instantánea JSON de todos los almacenes (configuración, estado, programación, reclamaciones…) para un informe de error. Las contraseñas y tokens se redactan.",
+      "diagnostics_export": "Descargar diagnóstico",
+      "diagnostics_done": "Guardado {file}."
     },
     "firmware": {
       "versions": "Versiones instaladas",
@@ -411,7 +415,7 @@
     },
     "reason": {
       "off": "Cambia a Auto o Activado",
-      "waiting": "Esperando · {time}",
+      "waiting": "Esperando · {time}",
       "not_charging": "Sin carga"
     },
     "kw_max": "de {max} kW máx",
