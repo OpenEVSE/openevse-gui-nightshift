@@ -14,15 +14,17 @@
 
   // Ring colour tracks the charge state: accent while charging/idle,
   // amber when paused (connected but not charging), red on a fault,
-  // muted grey when the device is sleeping or manually off.
+  // a soft sleepy blue while sleeping, muted grey when manually off.
   let color = $derived(
     display === 'error'
       ? 'var(--error)'
       : display === 'connected'
         ? 'var(--warning)'
-        : display === 'sleeping' || display === 'off'
-          ? 'var(--text-dim)'
-          : 'var(--accent)',
+        : display === 'sleeping'
+          ? 'var(--sleep)'
+          : display === 'off'
+            ? 'var(--text-dim)'
+            : 'var(--accent)',
   )
   // While charging the ring shows charge progress; in the paused / fault /
   // sleeping / off states it becomes a solid colour-coded indicator ring.
@@ -77,7 +79,7 @@
       <div class="relative h-full w-full">
         <!-- "Sleeping": centered both axes within the ring -->
         <div class="absolute inset-0 grid place-items-center">
-          <div class="text-[22px] font-extrabold leading-none text-text-dim">
+          <div class="text-[22px] font-extrabold leading-none text-sleep">
             {$_('dashboard.ring.sleeping')}
           </div>
         </div>

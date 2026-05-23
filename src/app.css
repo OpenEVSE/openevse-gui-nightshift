@@ -13,6 +13,7 @@
   --color-charging: var(--charging);
   --color-error: var(--error);
   --color-warning: var(--warning);
+  --color-sleep: var(--sleep);
 }
 
 /* Light theme — also the fallback when no data-theme is set */
@@ -28,6 +29,7 @@
   --charging: #0f9b98;
   --error: #d6453d;
   --warning: #d98a2b;
+  --sleep: #6792b3;
   --accent-glow: 0 0 0 transparent;
   color-scheme: light;
 }
@@ -43,6 +45,7 @@
   --charging: #3cc6bd;
   --error: #f06e66;
   --warning: #e7a948;
+  --sleep: #7da7c8;
   --accent-glow: 0 0 8px rgba(60, 198, 189, 0.55);
   color-scheme: dark;
 }
