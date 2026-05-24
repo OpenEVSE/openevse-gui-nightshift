@@ -13,16 +13,17 @@
   ]
 </script>
 
-<!-- min-h instead of fixed h so the home-indicator inset on iPhone can
-     expand the nav downward without shrinking the button row. Side and
-     bottom safe-area insets pad the rounded screen corners. The sidebar
-     layout on sm+ doesn't need any of this. -->
+<!-- Total height = 56px button row + the home-indicator inset, with
+     padding-bottom reserving exactly the inset so the buttons still
+     get their full 56px. Without growing the height first, border-box
+     would shrink the button area instead of pushing the bar taller.
+     The sidebar layout on sm+ resets everything. -->
 <nav
-  class="flex min-h-14 items-stretch border-t border-border bg-surface-2
+  class="flex h-[calc(3.5rem+env(safe-area-inset-bottom))] items-stretch border-t border-border bg-surface-2
          pb-[env(safe-area-inset-bottom)]
          pl-[env(safe-area-inset-left)]
          pr-[env(safe-area-inset-right)]
-         sm:h-full sm:min-h-0 sm:w-20 sm:flex-col sm:border-r sm:border-t-0
+         sm:h-full sm:w-20 sm:flex-col sm:border-r sm:border-t-0
          sm:pb-0 sm:pl-0 sm:pr-0"
 >
   {#each items as item}
