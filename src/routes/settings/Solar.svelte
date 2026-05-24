@@ -109,7 +109,10 @@
     </ConfigSection>
 
     <ConfigSection title={$_('config.solar.tuning')}>
-      <FormField label={$_('config.solar.preset')}>
+      <FormField
+        label={$_('config.solar.preset')}
+        description={$_('config.solar.preset_' + activePreset + '_desc')}
+      >
         <SegmentedControl
           options={presetOptions}
           value={activePreset}
