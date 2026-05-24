@@ -25,6 +25,7 @@
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
   import ChargeLimitModal from '../lib/components/dashboard/ChargeLimitModal.svelte'
   import EcoShaperToggles from '../lib/components/dashboard/EcoShaperToggles.svelte'
+  import BoostButton from '../lib/components/dashboard/BoostButton.svelte'
 
   let limitModalOpen = $state(false)
   let busy = $state(false)
@@ -178,6 +179,34 @@
     const ok = await serialQueue.add(() => limit_store.remove())
     if (!ok) showWriteError()
   }
+
+  // Boost: force-active override + auto-releasing time limit. When the
+  // limit expires, the device drops the limit claim and stays in the
+  // "active" override (so charging would resume) — v1 quirk; the user
+  // can flip mode back manually. See BoostButton for the rationale.
+  async function boost(minutes) {
+    if (busy) return
+    busy = true
+    try {
+      const ok = await serialQueue.add(() =>
+        override_store.upload({ state: 'active', charge_current: $config_store?.max_current_soft }),
+      )
+      if (!ok) {
+        showWriteError()
+        return
+      }
+      const lim = await serialQueue.add(() =>
+        limit_store.upload({ type: 'time', value: minutes, auto_release: true }),
+      )
+      if (!lim) {
+        showWriteError()
+        return
+      }
+      await serialQueue.add(() => limit_store.download())
+    } finally {
+      busy = false
+    }
+  }
 </script>
 
 <section class="px-4 pb-4">
@@ -226,6 +255,11 @@
       summary={limitSummary}
       onopen={() => (limitModalOpen = true)}
       onclear={clearLimit}
+    />
+
+    <BoostButton
+      disabled={busy || ($limit_store?.type && $limit_store.type !== 'none')}
+      onboost={boost}
     />
   {/if}
 </section>

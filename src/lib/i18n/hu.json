@@ -477,7 +477,15 @@
       "save": "Korlát beállítása"
     },
     "eco": "Eco",
-    "shaper": "Terheléscsökkentő"
+    "shaper": "Terheléscsökkentő",
+    "boost": {
+      "label": "Boost",
+      "title": "Gyors töltés",
+      "body": "Erőltetett töltés a kiválasztott időtartamra. A töltés automatikusan leáll, amikor lejár az idő.",
+      "minutes": "{n} perc",
+      "hour": "1 óra",
+      "cancel": "Mégse"
+    }
   },
   "monitoring": {
     "tab": { "data": "Adat", "safety": "Biztonság", "manager": "Kezelő" },

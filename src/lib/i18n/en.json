@@ -477,7 +477,15 @@
       "save": "Set limit"
     },
     "eco": "Eco",
-    "shaper": "Shaper"
+    "shaper": "Shaper",
+    "boost": {
+      "label": "Boost",
+      "title": "Boost charge",
+      "body": "Force charging now for the selected duration. Charging stops automatically when the time is up.",
+      "minutes": "{n} min",
+      "hour": "1 hr",
+      "cancel": "Cancel"
+    }
   },
   "monitoring": {
     "tab": { "data": "Data", "safety": "Safety", "manager": "Manager" },

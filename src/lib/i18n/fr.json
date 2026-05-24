@@ -477,7 +477,15 @@
       "save": "Définir la limite"
     },
     "eco": "Éco",
-    "shaper": "Délestage"
+    "shaper": "Délestage",
+    "boost": {
+      "label": "Boost",
+      "title": "Charge boost",
+      "body": "Force la charge pendant la durée choisie. La charge s'arrête automatiquement à la fin.",
+      "minutes": "{n} min",
+      "hour": "1 h",
+      "cancel": "Annuler"
+    }
   },
   "monitoring": {
     "tab": { "data": "Données", "safety": "Sécurité", "manager": "Commandes" },
