@@ -13,6 +13,7 @@
   import { EvseClients } from '../lib/vars.js'
   import { sec2time, temp_round, round, clientid2name, getStateDesc } from '../lib/utils.js'
   import { formatTemp } from '../lib/temperature.js'
+  import { formatCost } from '../lib/cost.js'
   import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
 
@@ -56,6 +57,13 @@
     todayKwh: round($status_store?.total_day ?? 0, 1),
     totalKwh: round($status_store?.total_energy ?? 0, 0),
   })
+  let sessionCost = $derived(
+    formatCost(
+      ($status_store?.session_energy ?? 0) / 1000,
+      $uisettings_store?.energy_rate,
+      $uisettings_store?.currency_symbol,
+    ),
+  )
 
   let chargeAmps = $derived(
     $claims_target_store?.properties?.charge_current
@@ -185,7 +193,7 @@
     faultText={getStateDesc($status_store?.state) ?? ''}
   />
 
-  <StatChips {charging} {live} {summary} />
+  <StatChips {charging} {live} {summary} {sessionCost} />
 
   <!-- The eco/shaper and mode controls stay in place during a fault —
        visible but disabled — so the layout doesn't reflow. -->

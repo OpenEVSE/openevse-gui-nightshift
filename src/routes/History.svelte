@@ -11,6 +11,7 @@
     pageRange, logTypeIcon, logTypeTone, logStateInfo, logEnergyKwh, logTempC,
   } from '../lib/history/logs.js'
   import { formatTemp } from '../lib/temperature.js'
+  import { formatCost } from '../lib/cost.js'
   import Card from '../lib/components/ui/Card.svelte'
   import Button from '../lib/components/ui/Button.svelte'
   import ProgressBar from '../lib/components/ui/ProgressBar.svelte'
@@ -23,6 +24,7 @@
     (Array.isArray($history_store) ? $history_store : []).map((e) => {
       const state = logStateInfo(e.evseState)
       const t = formatTemp(logTempC(e), $uisettings_store?.temp_unit)
+      const kWh = logEnergyKwh(e)
       return {
         stateIcon: state.icon,
         stateTone: state.tone,
@@ -31,7 +33,12 @@
         typeTone: logTypeTone(e.type),
         typeLabel: e.type ? $_('history.types.' + e.type, { default: e.type }) : '',
         timeText: e.time ? formatDate(e.time, $config_store?.time_zone, 'short') : '',
-        energyKwh: logEnergyKwh(e),
+        energyKwh: kWh,
+        costText: formatCost(
+          kWh,
+          $uisettings_store?.energy_rate,
+          $uisettings_store?.currency_symbol,
+        ),
         temp: t.value,
         tempUnit: t.unitKey,
       }

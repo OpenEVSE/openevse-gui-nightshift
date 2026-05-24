@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n'
   import StatChip from '../ui/StatChip.svelte'
 
-  let { charging = false, live = {}, summary = {} } = $props()
+  let { charging = false, live = {}, summary = {}, sessionCost = null } = $props()
 </script>
 
 <!-- Fixed-height band: the charging layout (chips + sensor row) is taller
@@ -11,7 +11,7 @@
 <div class="flex min-h-[96px] flex-col justify-center">
   {#if charging}
     <div class="grid grid-cols-3 gap-2 py-2">
-      <StatChip value={live.sessionKwh} label={$_('dashboard.chips.session')} />
+      <StatChip value={live.sessionKwh} label={$_('dashboard.chips.session')} sub={sessionCost} />
       <StatChip value={live.elapsed} label={$_('dashboard.chips.elapsed')} />
       <StatChip value={`${live.currentA} A`} label={$_('dashboard.chips.current')} />
     </div>

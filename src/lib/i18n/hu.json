@@ -52,7 +52,10 @@
       "lang": "Nyelv",
       "temp_unit": "Hőmérséklet mértékegysége",
       "temp_celsius": "Celsius",
-      "temp_fahrenheit": "Fahrenheit"
+      "temp_fahrenheit": "Fahrenheit",
+      "energy_rate": "Energiaár (kWh-ként)",
+      "energy_rate_desc": "A munkamenet becsült költségéhez. 0 elrejti a költség kijelzését.",
+      "currency": "Pénznem szimbólum"
     },
     "mqtt": {
       "enable": "MQTT engedélyezése",

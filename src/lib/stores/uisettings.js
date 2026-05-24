@@ -9,4 +9,6 @@ export const uisettings_store = persisted('settings', {
 	mqtt_solar: undefined,
 	wizard_done: false,
 	temp_unit: 'c',     // 'c' | 'f' — display unit only; device always reports °C
+	energy_rate: 0,     // local-only tariff in <currency> per kWh; 0 hides cost UI
+	currency_symbol: '$',
   })

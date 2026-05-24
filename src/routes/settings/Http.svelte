@@ -10,6 +10,7 @@
   import FormField from '../../lib/components/config/FormField.svelte'
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import PasswordInput from '../../lib/components/ui/PasswordInput.svelte'
+  import NumberInput from '../../lib/components/ui/NumberInput.svelte'
   import Select from '../../lib/components/ui/Select.svelte'
   import SegmentedControl from '../../lib/components/ui/SegmentedControl.svelte'
   import Toggle from '../../lib/components/ui/Toggle.svelte'
@@ -42,6 +43,26 @@
   function setTempUnit(unit) {
     uisettings_store.update((s) => ({ ...s, temp_unit: unit }))
   }
+
+  function setEnergyRate(rate) {
+    uisettings_store.update((s) => ({ ...s, energy_rate: rate ?? 0 }))
+  }
+
+  function setCurrency(symbol) {
+    uisettings_store.update((s) => ({ ...s, currency_symbol: symbol || '$' }))
+  }
+
+  // Curated list — enough symbols to cover the obvious cases without
+  // needing a text input. Picked first because they fit a single glyph
+  // in the chip layouts that consume them.
+  const currencyOptions = [
+    { value: '$', label: '$' },
+    { value: '€', label: '€' },
+    { value: '£', label: '£' },
+    { value: '¥', label: '¥' },
+    { value: '₹', label: '₹' },
+    { value: 'kr', label: 'kr' },
+  ]
 </script>
 
 <ConfigPage title={$_('config.pages.http')}>
@@ -83,6 +104,26 @@
         options={tempUnitOptions}
         value={$uisettings_store?.temp_unit ?? 'c'}
         onchange={setTempUnit}
+      />
+    </FormField>
+    <!-- Local-only tariff — used to show cost on Dashboard + History.
+         Rate of 0 hides the cost UI everywhere. -->
+    <FormField
+      label={$_('config.http.energy_rate')}
+      description={$_('config.http.energy_rate_desc')}
+    >
+      <NumberInput
+        value={$uisettings_store?.energy_rate ?? 0}
+        min={0}
+        step={0.01}
+        onchange={setEnergyRate}
+      />
+    </FormField>
+    <FormField label={$_('config.http.currency')}>
+      <Select
+        options={currencyOptions}
+        value={$uisettings_store?.currency_symbol ?? '$'}
+        onchange={setCurrency}
       />
     </FormField>
   </ConfigSection>

@@ -8,6 +8,7 @@
     typeIcon, typeTone = 'muted', typeLabel = '',
     timeText = '', energyKwh = 0,
     temp = 0, tempUnit = 'units.celsius',
+    costText = null,
   } = $props()
 
   const toneClass = {
@@ -34,6 +35,9 @@
     <div class="text-sm font-bold text-text">
       {energyKwh.toFixed(1)}<span class="ml-1 text-xs font-normal text-text-dim">kWh</span>
     </div>
+    {#if costText}
+      <div class="text-xs text-accent">{costText}</div>
+    {/if}
     <div class="text-xs text-text-dim">{temp == null ? '—' : Number(temp).toFixed(1)} {$_(tempUnit)}</div>
   </div>
 </Card>

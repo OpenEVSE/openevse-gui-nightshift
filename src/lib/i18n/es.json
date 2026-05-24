@@ -52,7 +52,10 @@
       "lang": "Idioma",
       "temp_unit": "Unidad de temperatura",
       "temp_celsius": "Celsius",
-      "temp_fahrenheit": "Fahrenheit"
+      "temp_fahrenheit": "Fahrenheit",
+      "energy_rate": "Tarifa de energía (por kWh)",
+      "energy_rate_desc": "Se usa para estimar el coste por sesión. 0 oculta la visualización del coste.",
+      "currency": "Símbolo de moneda"
     },
     "mqtt": {
       "enable": "Activar MQTT",
