@@ -110,9 +110,17 @@
       if (m === 0) {
         ok = await serialQueue.add(() => override_store.clear())
       } else {
-        const data = { state: m === 1 ? 'active' : 'disabled' }
-        const cur = override_store.get(override_store)?.charge_current
-        data.charge_current = cur ?? $config_store?.max_current_soft
+        // auto_release: false — same reason as Boost: when omitted the device
+        // defaults to true, the manual override is released, and a lower-
+        // priority claim (timer/schedule, divert, etc.) takes over with
+        // state=disabled. The user then sees "Sleeping · waiting for
+        // schedule" even though they just picked On.
+        const cur = $override_store?.charge_current
+        const data = {
+          state: m === 1 ? 'active' : 'disabled',
+          charge_current: cur ?? $config_store?.max_current_soft,
+          auto_release: false,
+        }
         ok = await serialQueue.add(() => override_store.upload(data))
       }
       if (!ok) showWriteError()
@@ -128,8 +136,11 @@
       if (val >= maxAmps) {
         await serialQueue.add(() => override_store.removeProp('charge_current'))
       } else {
-        const current = override_store.get(override_store) ?? {}
-        const ok = await serialQueue.add(() => override_store.upload({ ...current, charge_current: val }))
+        const current = $override_store ?? {}
+        // auto_release: false to keep the override sticky — see setMode.
+        const ok = await serialQueue.add(() =>
+          override_store.upload({ ...current, charge_current: val, auto_release: false }),
+        )
         if (!ok) {
           showWriteError()
           rateNonce++ // remount ChargeRate so the slider reverts to the confirmed value
