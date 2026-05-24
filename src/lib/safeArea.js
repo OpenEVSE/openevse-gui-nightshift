@@ -25,11 +25,26 @@ function syncOnce() {
   document.documentElement.style.setProperty('--safe-top', `${top}px`)
 }
 
+// Kick iOS's compositor into resolving env(safe-area-inset-*). On standalone
+// PWA launch env() reports 0 to CSS and stays there until a *real*
+// composited paint cycle — a non-zero transform change is the smallest such
+// trigger. Static transform: translateY(0) is a no-op the browser optimizes
+// out, which is why it doesn't help that PullToRefresh already has one;
+// only when the user pulls (non-zero translate) does iOS recompute env().
+// We do that programmatically here so the user doesn't have to.
+function kickCompositor() {
+  document.body.style.transform = 'translateZ(0.01px)'
+  requestAnimationFrame(() => {
+    document.body.style.transform = ''
+  })
+}
+
 export function initSafeArea() {
   syncOnce()
-  // Several rAF passes catch the iOS PWA late-resolve cycle (first paint
-  // returns 0, the right value lands a frame or two later).
-  let rafs = 5
+  kickCompositor()
+  // Several rAF passes catch the iOS PWA late-resolve cycle (the right
+  // value typically lands a frame or two after the compositor kick).
+  let rafs = 8
   function tick() {
     syncOnce()
     if (--rafs > 0) requestAnimationFrame(tick)
@@ -40,6 +55,9 @@ export function initSafeArea() {
   window.addEventListener('resize', syncOnce)
   window.addEventListener('orientationchange', syncOnce)
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') syncOnce()
+    if (document.visibilityState === 'visible') {
+      kickCompositor()
+      syncOnce()
+    }
   })
 }
