@@ -488,7 +488,9 @@
       "body": "Force la charge pendant la durée choisie. La charge s'arrête automatiquement à la fin.",
       "minutes": "{n} min",
       "hour": "1 h",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "active": "Boost · {time}",
+      "cancel_active": "Annuler le boost"
     }
   },
   "monitoring": {

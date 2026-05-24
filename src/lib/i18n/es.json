@@ -488,7 +488,9 @@
       "body": "Carga forzada durante el tiempo elegido. Se detiene automáticamente cuando termina.",
       "minutes": "{n} min",
       "hour": "1 h",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "active": "Impulso · {time}",
+      "cancel_active": "Cancelar impulso"
     }
   },
   "monitoring": {

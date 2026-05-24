@@ -203,6 +203,23 @@
   // flip mode manually — v1 tradeoff documented on the button.
   let boostTimerId = null
   let prevOverride = null
+  // ms-epoch when the active boost ends, or null. Drives the inline
+  // "Boosting · MM:SS" indicator on BoostButton; cleared by the timer or
+  // by cancelBoost().
+  let boostEndsAt = $state(null)
+
+  async function restoreFromBoost() {
+    if (!prevOverride || !prevOverride.state) {
+      await serialQueue.add(() => override_store.clear())
+    } else {
+      // Force auto_release: false here too — re-uploading the snapshot
+      // as-is would inherit the device's auto_release: true default and
+      // hit the same release path.
+      await serialQueue.add(() =>
+        override_store.upload({ ...prevOverride, auto_release: false }),
+      )
+    }
+  }
 
   async function boost(minutes) {
     if (busy) return
@@ -236,22 +253,24 @@
         return
       }
       if (boostTimerId) clearTimeout(boostTimerId)
+      boostEndsAt = Date.now() + minutes * 60 * 1000
       boostTimerId = setTimeout(async () => {
         boostTimerId = null
-        if (!prevOverride || !prevOverride.state) {
-          await serialQueue.add(() => override_store.clear())
-        } else {
-          // Force auto_release: false here too — re-uploading the snapshot
-          // as-is would inherit the device's auto_release: true default and
-          // hit the same release path.
-          await serialQueue.add(() =>
-            override_store.upload({ ...prevOverride, auto_release: false }),
-          )
-        }
+        boostEndsAt = null
+        await restoreFromBoost()
       }, minutes * 60 * 1000)
     } finally {
       busy = false
     }
+  }
+
+  async function cancelBoost() {
+    if (boostTimerId) {
+      clearTimeout(boostTimerId)
+      boostTimerId = null
+    }
+    boostEndsAt = null
+    await restoreFromBoost()
   }
 </script>
 
@@ -306,7 +325,9 @@
 
     <BoostButton
       disabled={busy}
+      endsAt={boostEndsAt}
       onboost={boost}
+      oncancel={cancelBoost}
     />
   {/if}
 </section>

@@ -488,7 +488,9 @@
       "body": "Erőltetett töltés a kiválasztott időtartamra. A töltés automatikusan leáll, amikor lejár az idő.",
       "minutes": "{n} perc",
       "hour": "1 óra",
-      "cancel": "Mégse"
+      "cancel": "Mégse",
+      "active": "Boost · {time}",
+      "cancel_active": "Boost megszakítása"
     }
   },
   "monitoring": {

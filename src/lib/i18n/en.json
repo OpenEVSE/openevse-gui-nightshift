@@ -488,7 +488,9 @@
       "body": "Force charging now for the selected duration. Charging stops automatically when the time is up.",
       "minutes": "{n} min",
       "hour": "1 hr",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "active": "Boosting · {time}",
+      "cancel_active": "Cancel boost"
     }
   },
   "monitoring": {
