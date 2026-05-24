@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
         injectRegister: null,
         selfDestroying: true,
         workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg,gz}'] },
-        includeAssets: ['favicon.ico'],
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'apple-splash-1170x2532.png'],
         manifest: {
           name: 'OpenEVSE UI',
           short_name: 'OpenEVSE',
