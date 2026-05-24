@@ -15,10 +15,12 @@
 </script>
 
 <!-- pt + horizontal pad respect the iOS notch / status bar so brand and
-     connection dot don't disappear behind the clock or the curved edge. -->
+     connection dot don't disappear behind the clock or the curved edge.
+     --safe-top is JS-probed (see lib/safeArea.js) — env() reads 0 on the
+     first paint of an iOS standalone PWA. -->
 <header
   class="flex items-center justify-between py-3
-         pt-[max(env(safe-area-inset-top),0.75rem)]
+         pt-[max(var(--safe-top,0px),0.75rem)]
          pl-[max(env(safe-area-inset-left),1rem)]
          pr-[max(env(safe-area-inset-right),1rem)]"
 >

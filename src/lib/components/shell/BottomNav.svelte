@@ -17,10 +17,15 @@
      padding-bottom reserving exactly the inset so the buttons still
      get their full 56px. Without growing the height first, border-box
      would shrink the button area instead of pushing the bar taller.
-     The sidebar layout on sm+ resets everything. -->
+     The sidebar layout on sm+ resets everything.
+
+     --safe-bottom is written by lib/safeArea.js (JS probe of env()).
+     iOS standalone PWA returns 0 for env(safe-area-inset-bottom) on
+     the first paint and only resolves it after a reflow; the probe
+     keeps the variable in sync. -->
 <nav
-  class="flex h-[calc(3.5rem+env(safe-area-inset-bottom))] items-stretch border-t border-border bg-surface-2
-         pb-[env(safe-area-inset-bottom)]
+  class="flex h-[calc(3.5rem+var(--safe-bottom,0px))] items-stretch border-t border-border bg-surface-2
+         pb-[var(--safe-bottom,0px)]
          pl-[env(safe-area-inset-left)]
          pr-[env(safe-area-inset-right)]
          sm:h-full sm:w-20 sm:flex-col sm:border-r sm:border-t-0
