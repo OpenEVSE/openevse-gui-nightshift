@@ -26,20 +26,9 @@ await icon(512, 0.30, 'pwa-maskable-512x512.png')
 // transparency (iOS adds its own rounded mask).
 await icon(180, 0.16, 'apple-touch-icon.png')
 
-// iOS splash image for iPhone 14 / 15 portrait (1170×2532, 3× DPR). Other
-// iPhones get the default white/black splash — adding the rest is mostly
-// busywork; this covers the user's primary device.
-async function splash(w, h, file) {
-  const gearSize = Math.round(Math.min(w, h) * 0.4)
-  const gear = await sharp(colored, { density: 384 }).resize(gearSize, gearSize).png().toBuffer()
-  const left = Math.round((w - gearSize) / 2)
-  const top = Math.round((h - gearSize) / 2)
-  await sharp({ create: { width: w, height: h, channels: 4, background: bg } })
-    .composite([{ input: gear, top, left }])
-    .png()
-    .toFile(new URL(`../public/${file}`, import.meta.url).pathname)
-}
-await splash(1170, 2532, 'apple-splash-1170x2532.png')
+// (No apple-touch-startup-image splash. A single device-specific PNG was
+// ~78 kB on flash for ~500 ms of visible value before the JS app paints —
+// bad tradeoff for an embedded device. iOS uses its default splash.)
 
 // favicon: a 48px PNG written as favicon.ico (browsers accept PNG data here)
 const fav = await sharp(colored, { density: 384 }).resize(40, 40).extend({

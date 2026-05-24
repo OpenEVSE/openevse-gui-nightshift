@@ -19,15 +19,10 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0c0e13" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="./favicon.ico" />
-    <!-- iOS "Add to Home Screen": 180×180 icon (no transparency — iOS rounds
-         the corners itself) and a splash image for iPhone 14/15 portrait.
-         Other iPhones fall back to the system default splash. -->
+    <!-- iOS "Add to Home Screen" app icon — 180×180, opaque, iOS rounds
+         the corners itself. No splash image: a device-specific PNG was
+         ~78 kB of flash for ~500 ms of value; iOS uses its default. -->
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link
-      rel="apple-touch-startup-image"
-      href="./apple-splash-1170x2532.png"
-      media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
-    />
     <title>OpenEVSE</title>
   </head>
   <body>
