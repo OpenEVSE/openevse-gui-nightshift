@@ -12,6 +12,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="OpenEVSE" />
+    <!-- Initial theme color follows the system scheme so the status bar
+         doesn't flash the wrong shade before JS loads. theme.js replaces
+         these with a single #theme-color tag matching the resolved theme
+         (which may be a user override). -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0e13" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="./favicon.ico" />
     <title>OpenEVSE</title>
   </head>

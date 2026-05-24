@@ -2,6 +2,23 @@ import { writable } from 'svelte/store'
 
 const STORAGE_KEY = 'oevse-theme'
 
+// Kept in sync with --surface in src/app.css. The system chrome (iOS status
+// bar tint, Android task switcher) reads this from <meta name="theme-color">.
+const THEME_COLORS = { light: '#ffffff', dark: '#0c0e13' }
+
+function syncThemeColorMeta(resolved) {
+  if (typeof document === 'undefined') return
+  // Remove the static media-query metas baked into index.html — once we know
+  // the resolved theme (including any user override) we drive a single tag.
+  document
+    .querySelectorAll('meta[name="theme-color"]')
+    .forEach((node) => node.remove())
+  const meta = document.createElement('meta')
+  meta.setAttribute('name', 'theme-color')
+  meta.setAttribute('content', THEME_COLORS[resolved] || THEME_COLORS.dark)
+  document.head.appendChild(meta)
+}
+
 function osPrefersDark() {
   return typeof window !== 'undefined'
     && window.matchMedia
@@ -34,6 +51,7 @@ function createThemeStore() {
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', state.resolved)
     }
+    syncThemeColorMeta(state.resolved)
   }
 
   function setTheme(choice) {
