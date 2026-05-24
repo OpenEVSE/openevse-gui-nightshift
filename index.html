@@ -2,8 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=no" />
+    <!-- viewport-fit=cover lets the app draw under the iOS notch / home
+         indicator; safe-area-inset-* CSS env() vars then carry the
+         offsets we pad against in Header and BottomNav. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="OpenEVSE UI" />
+    <!-- "Add to Home Screen" on iOS: run in standalone mode and let the
+         app draw under the translucent status bar. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="OpenEVSE" />
     <link rel="icon" href="./favicon.ico" />
     <title>OpenEVSE</title>
   </head>

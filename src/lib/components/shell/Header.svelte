@@ -14,7 +14,14 @@
   )
 </script>
 
-<header class="flex items-center justify-between px-4 py-3">
+<!-- pt + horizontal pad respect the iOS notch / status bar so brand and
+     connection dot don't disappear behind the clock or the curved edge. -->
+<header
+  class="flex items-center justify-between py-3
+         pt-[max(env(safe-area-inset-top),0.75rem)]
+         pl-[max(env(safe-area-inset-left),1rem)]
+         pr-[max(env(safe-area-inset-right),1rem)]"
+>
   <div class="flex items-center gap-2">
     <GearMark size={26} class="text-accent" />
     <span class="text-sm font-semibold text-text">{deviceName}</span>
