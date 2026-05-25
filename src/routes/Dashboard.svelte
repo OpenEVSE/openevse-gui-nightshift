@@ -20,6 +20,7 @@
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
   import StatChips from '../lib/components/dashboard/StatChips.svelte'
+  import ThrottleBadge from '../lib/components/dashboard/ThrottleBadge.svelte'
   import ModeSelector from '../lib/components/dashboard/ModeSelector.svelte'
   import ChargeRate from '../lib/components/dashboard/ChargeRate.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
@@ -286,6 +287,8 @@
     reasonValues={reason.values}
     faultText={getStateDesc($status_store?.state) ?? ''}
   />
+
+  <ThrottleBadge />
 
   <StatChips {charging} {live} {summary} {sessionCost} />
 
