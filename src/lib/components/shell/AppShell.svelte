@@ -24,14 +24,7 @@
   })
 </script>
 
-<!-- fixed inset-0 anchors to the actual viewport rather than the
-     html/body height chain. iOS standalone PWAs evaluate
-     env(safe-area-inset-bottom) as 0 on first paint when the layout
-     is sized via height: 100% / 100dvh, then only resolve it after a
-     reflow — visible as a gap below the bottom nav that disappears
-     the moment you scroll or pull. Fixed positioning sidesteps that
-     by anchoring to the real edges on every layout. -->
-<div class="fixed inset-0 flex flex-col sm:flex-row-reverse">
+<div class="flex h-full flex-col sm:flex-row-reverse">
   <div class="flex min-h-0 flex-1 flex-col">
     <Header {deviceName} {wsConnected} {evseConnected} />
     <ConnectionBanners {wsConnected} {evseConnected} {error} />

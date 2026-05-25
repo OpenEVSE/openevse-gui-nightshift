@@ -53,16 +53,7 @@
   color-scheme: dark;
 }
 
-/* In iOS standalone PWAs `height: 100%` chains down from the visual
-   viewport (which excludes the home-indicator inset), so the outer
-   flex column stops short of the screen edge and the bottom-nav's
-   safe-area padding has nothing to land on. 100dvh anchors the root
-   to the actual viewport including the safe area; 100vh is the pre-
-   dvh fallback. */
-html, body, #app {
-  height: 100vh;
-  height: 100dvh;
-}
+html, body, #app { height: 100%; }
 body {
   margin: 0;
   background: var(--surface);

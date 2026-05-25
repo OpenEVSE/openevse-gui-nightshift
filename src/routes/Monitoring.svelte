@@ -10,12 +10,10 @@
     energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
     showVehicle, safetyData, claimRows,
   } from '../lib/monitoring/metrics.js'
-  import { serialQueue } from '../lib/queue.js'
   import Tabs from '../lib/components/ui/Tabs.svelte'
   import MetricsTab from '../lib/components/monitoring/MetricsTab.svelte'
   import SafetyTab from '../lib/components/monitoring/SafetyTab.svelte'
   import ManagerTab from '../lib/components/monitoring/ManagerTab.svelte'
-  import PullToRefresh from '../lib/components/ui/PullToRefresh.svelte'
 
   let activeTab = $state(0)
 
@@ -41,17 +39,8 @@
     { label: $_('monitoring.tab.safety'), alert: hasError },
     { label: $_('monitoring.tab.manager'), alert: false },
   ])
-
-  // status_store updates push via the WS, but config + claims/target are
-  // pull-only — refresh both so the visible metrics catch up after a
-  // network blip.
-  async function refresh() {
-    await serialQueue.add(() => config_store.download())
-    await serialQueue.add(() => claims_target_store.download())
-  }
 </script>
 
-<PullToRefresh onrefresh={refresh}>
 <section class="p-4">
   <h1 class="mb-3 text-lg font-semibold text-text">{$_('screen.monitoring')}</h1>
 
@@ -67,4 +56,3 @@
     {/if}
   </div>
 </section>
-</PullToRefresh>

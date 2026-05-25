@@ -16,7 +16,6 @@
   import Button from '../lib/components/ui/Button.svelte'
   import ProgressBar from '../lib/components/ui/ProgressBar.svelte'
   import LogList from '../lib/components/history/LogList.svelte'
-  import PullToRefresh from '../lib/components/ui/PullToRefresh.svelte'
 
   let phase = $state('loading')
   let progress = $state(0)
@@ -77,7 +76,6 @@
   onMount(load)
 </script>
 
-<PullToRefresh onrefresh={load}>
 <section class="p-4">
   <h1 class="mb-3 text-lg font-semibold text-text">{$_('screen.history')}</h1>
 
@@ -96,4 +94,3 @@
     <LogList {rows} />
   {/if}
 </section>
-</PullToRefresh>
