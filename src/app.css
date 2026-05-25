@@ -53,7 +53,13 @@
   color-scheme: dark;
 }
 
-html, body, #app { height: 100%; }
+/* In iOS standalone PWA the chain html { height: 100% } → body / #app
+   measures the *layout* viewport (innerHeight), which on iPhones is the
+   physical screen minus the status-bar inset — verified on iOS 18.7 to
+   give 894 against a 956 px screen. The bottom-nav then ends 62 px short
+   of the screen edge. 100vh / 100lvh both report the full screen and
+   give us the right anchor; 100dvh was a red herring — same as 100%. */
+html, body, #app { height: 100vh; }
 body {
   margin: 0;
   background: var(--surface);
