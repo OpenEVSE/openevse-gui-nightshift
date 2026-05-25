@@ -61,6 +61,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: (id) => {
+            if (id.includes('/node_modules/uplot/')) return 'charts'
             if (['luxon', 'svelte-i18n', 'iconify-icon'].some((pkg) => id.includes(`/node_modules/${pkg}/`))) {
               return 'vendor'
             }
