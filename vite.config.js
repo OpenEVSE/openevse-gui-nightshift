@@ -4,6 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { compression } from 'vite-plugin-compression2'
 import { mockPlugin } from './dev/mock-plugin.js'
+import { readFileSync } from 'node:fs'
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
@@ -11,6 +14,12 @@ export default defineConfig(({ mode }) => {
   const isMock = mode === 'mock'
   return {
     base: './',
+    // Expose the package.json version as __APP_VERSION__ at build time —
+    // the Firmware settings page reads this to show the GUI version
+    // alongside the EVSE / WiFi gateway firmware numbers.
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+    },
     plugins: [
       svelte(),
       tailwindcss(),

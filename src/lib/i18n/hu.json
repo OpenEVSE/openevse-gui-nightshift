@@ -325,6 +325,7 @@
       "versions": "Telepített verziók",
       "evse": "OpenEVSE firmware",
       "gateway": "WiFi átjáró firmware",
+      "gui": "Webes felület",
       "update": "Firmware frissítés",
       "update_desc": "Töltse fel a .bin vagy .hex firmware fájlt a WiFi átjáró frissítéséhez.",
       "choose_file": "Firmware fájl kiválasztása",

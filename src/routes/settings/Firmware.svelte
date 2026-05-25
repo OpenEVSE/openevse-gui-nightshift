@@ -201,6 +201,7 @@
   <ConfigSection title={$_('config.firmware.versions')}>
     <ReadOnlyRow label={$_('config.firmware.evse')} value={$config_store?.firmware} />
     <ReadOnlyRow label={$_('config.firmware.gateway')} value={$config_store?.version} />
+    <ReadOnlyRow label={$_('config.firmware.gui')} value={__APP_VERSION__} />
   </ConfigSection>
 
   <ConfigSection title={$_('config.firmware.online')}>

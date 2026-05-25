@@ -325,6 +325,7 @@
       "versions": "Versions installées",
       "evse": "Micrologiciel OpenEVSE",
       "gateway": "Micrologiciel passerelle WiFi",
+      "gui": "Interface web",
       "update": "Mise à jour du micrologiciel",
       "update_desc": "Envoyez un fichier .bin ou .hex pour mettre à jour la passerelle WiFi.",
       "choose_file": "Choisir le fichier de micrologiciel",

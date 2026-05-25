@@ -325,6 +325,7 @@
       "versions": "Installed versions",
       "evse": "OpenEVSE firmware",
       "gateway": "WiFi gateway firmware",
+      "gui": "Web UI",
       "update": "Firmware update",
       "update_desc": "Upload a .bin or .hex firmware file to update the WiFi gateway.",
       "choose_file": "Choose firmware file",

@@ -31,3 +31,5 @@ test-results
 dev-dist
 .superpowers/
 OVERNIGHT.md
+openevse-gui-nightshift-*.tar.gz
+openevse-gui-nightshift-*.zip

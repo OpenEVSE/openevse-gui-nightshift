@@ -1,10 +1,17 @@
 import { defineConfig } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { readFileSync } from 'node:fs'
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
 
 export default defineConfig({
   plugins: [svelte({ hot: !process.env.VITEST })],
   resolve: {
     conditions: ['browser'],
+  },
+  // Mirror vite.config.js's define so tests see __APP_VERSION__.
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
   },
   test: {
     environment: 'jsdom',
