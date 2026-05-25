@@ -1,6 +1,7 @@
 <script>
   import uPlot from 'uplot'
   import 'uplot/dist/uPlot.min.css'
+  import { untrack } from 'svelte'
 
   let { opts, data } = $props()
 
@@ -16,11 +17,15 @@
     if (!container) return
     if (chart) { chart.destroy(); chart = null }
     const width = container.clientWidth || 600
-    const o = { ...opts, width, height: opts.height ?? 260 }
-    chart = new uPlot(o, data, container)
+    const currentOpts = untrack(() => opts)
+    const currentData = untrack(() => data)
+    const o = { ...currentOpts, width, height: currentOpts.height ?? 260 }
+    chart = new uPlot(o, currentData, container)
   }
 
+  // Rebuild only when opts changes or on mount/theme change
   $effect(() => {
+    opts  // explicit dependency on opts
     rebuild()
     ro = new ResizeObserver(() => {
       if (chart && container) chart.setSize({ width: container.clientWidth, height: chart.height })
@@ -36,8 +41,8 @@
     }
   })
 
+  // Cheap data swap whenever data changes (no destroy/recreate)
   $effect(() => {
-    // React to data changes after initial mount
     if (chart) chart.setData(data)
   })
 </script>
