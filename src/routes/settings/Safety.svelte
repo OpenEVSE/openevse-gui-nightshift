@@ -9,6 +9,7 @@
   import FormField from '../../lib/components/config/FormField.svelte'
   import ReadOnlyRow from '../../lib/components/config/ReadOnlyRow.svelte'
   import Toggle from '../../lib/components/ui/Toggle.svelte'
+  import Slider from '../../lib/components/ui/Slider.svelte'
 
   const form = createConfigForm()
 
@@ -55,5 +56,31 @@
       value={$status_store?.stuckcount}
       tone={$status_store?.stuckcount ? 'warn' : 'default'}
     />
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.safety.temp_throttle')}>
+    <FormField label={$_('config.safety.temp_throttle_enable')} description={$_('config.safety.temp_throttle_desc')}>
+      <Toggle
+        checked={!!$config_store?.temp_throttle_enabled}
+        label={$_('config.safety.temp_throttle_enable')}
+        onchange={(v) => form.saveField('temp_throttle_enabled', v)}
+      />
+    </FormField>
+    {#if $config_store?.temp_throttle_enabled}
+      <FormField label={$_('config.safety.temp_throttle_setpoint')}>
+        <div class="flex items-center gap-3">
+          <Slider
+            min={40}
+            max={80}
+            step={1}
+            value={$config_store?.temp_throttle_setpoint ?? 65}
+            onchange={(v) => form.saveField('temp_throttle_setpoint', v)}
+          />
+          <span class="w-12 text-right text-sm tabular-nums text-text">
+            {$config_store?.temp_throttle_setpoint ?? 65}°C
+          </span>
+        </div>
+      </FormField>
+    {/if}
   </ConfigSection>
 </ConfigPage>
