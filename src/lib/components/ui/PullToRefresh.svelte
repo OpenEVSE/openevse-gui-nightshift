@@ -64,12 +64,22 @@
   }
 </script>
 
+<!-- IMPORTANT: do NOT emit a `transform: translateY(0px)` when idle.
+     Even zero translateY is a *defined* transform (not `none`), and on iOS
+     standalone PWAs that promotes the element to a permanent stacking
+     context / compositor candidate which gates env(safe-area-inset-*)
+     resolution for the whole page until *some* transform change happens.
+     That manifested as a gap below BottomNav on launch that only closed
+     when the user pulled (the first non-zero transform of the session).
+     Only emit the transform while actively pulling or animating. -->
 <div
   bind:this={wrapperEl}
   class="relative"
   role="region"
   aria-label="Pull to refresh"
-  style={`transform: translateY(${displacement}px); transition: ${displacement === 0 || refreshing ? 'transform 220ms ease' : 'none'};`}
+  style={displacement > 0 || refreshing
+    ? `transform: translateY(${displacement}px); transition: ${refreshing ? 'transform 220ms ease' : 'none'};`
+    : 'transition: transform 220ms ease;'}
   ontouchstart={onTouchStart}
   ontouchmove={onTouchMove}
   ontouchend={onTouchEnd}
