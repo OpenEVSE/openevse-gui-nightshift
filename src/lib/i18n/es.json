@@ -498,8 +498,7 @@
       "cancel_active": "Cancelar impulso"
     },
     "throttle": {
-      "active": "Limitado · {amps} A",
-      "detail": "La reducción por temperatura está bajando la corriente de carga."
+      "active": "Limitado · {amps} A"
     }
   },
   "monitoring": {
@@ -529,7 +528,7 @@
       "loading": "Cargando…",
       "error": "No se pudieron cargar los datos de energía",
       "no_samples": "Aún no hay muestras registradas",
-      "axis": { "current": "Corriente (A)", "temperature": "Temperatura (°C)", "energy": "Energía (Wh)" }
+      "axis": { "current": "Corriente (A)", "temperature": "Temperatura (°C)" }
     },
     "sensor": {
       "pilot": "Piloto",

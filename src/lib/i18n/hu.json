@@ -498,8 +498,7 @@
       "cancel_active": "Boost megszakítása"
     },
     "throttle": {
-      "active": "Korlátozva · {amps} A",
-      "detail": "A hőmérséklet-szabályozás csökkenti a töltőáramot."
+      "active": "Korlátozva · {amps} A"
     }
   },
   "monitoring": {
@@ -529,7 +528,7 @@
       "loading": "Betöltés…",
       "error": "Nem sikerült betölteni az energia adatokat",
       "no_samples": "Még nincs rögzített minta",
-      "axis": { "current": "Áram (A)", "temperature": "Hőmérséklet (°C)", "energy": "Energia (Wh)" }
+      "axis": { "current": "Áram (A)", "temperature": "Hőmérséklet (°C)" }
     },
     "sensor": {
       "pilot": "Pilot",

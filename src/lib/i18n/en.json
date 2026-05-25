@@ -498,8 +498,7 @@
       "cancel_active": "Cancel boost"
     },
     "throttle": {
-      "active": "Throttled · {amps} A",
-      "detail": "Temperature throttle is reducing the charge current."
+      "active": "Throttled · {amps} A"
     }
   },
   "monitoring": {
@@ -529,7 +528,7 @@
       "loading": "Loading…",
       "error": "Failed to load energy data",
       "no_samples": "No samples recorded yet",
-      "axis": { "current": "Current (A)", "temperature": "Temperature (°C)", "energy": "Energy (Wh)" }
+      "axis": { "current": "Current (A)", "temperature": "Temperature (°C)" }
     },
     "sensor": {
       "pilot": "Pilot",

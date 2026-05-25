@@ -498,8 +498,7 @@
       "cancel_active": "Annuler le boost"
     },
     "throttle": {
-      "active": "Bridé · {amps} A",
-      "detail": "La limitation thermique réduit le courant de charge."
+      "active": "Bridé · {amps} A"
     }
   },
   "monitoring": {
@@ -529,7 +528,7 @@
       "loading": "Chargement…",
       "error": "Échec du chargement des données d'énergie",
       "no_samples": "Aucun échantillon enregistré",
-      "axis": { "current": "Courant (A)", "temperature": "Température (°C)", "energy": "Énergie (Wh)" }
+      "axis": { "current": "Courant (A)", "temperature": "Température (°C)" }
     },
     "sensor": {
       "pilot": "Pilote",
