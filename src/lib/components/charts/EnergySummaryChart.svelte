@@ -31,8 +31,19 @@
         {
           stroke: theme.axisText,
           grid: { stroke: theme.grid, width: 1 },
-          splits: () => rows.map((_r, i) => i),
-          values: () => rows.map((r) => r.label),
+          // Thin x-axis labels based on plot area width so narrow screens
+          // (e.g. iPhone) don't collide 40 daily labels into a smear.
+          // Target ~55 px per label; stride the rows by the resulting count.
+          splits: (u) => {
+            const plotW = u?.bbox?.width ? u.bbox.width / devicePixelRatio : 320
+            const maxLabels = Math.max(2, Math.floor(plotW / 55))
+            if (rows.length <= maxLabels) return rows.map((_r, i) => i)
+            const stride = Math.ceil(rows.length / maxLabels)
+            const out = []
+            for (let i = 0; i < rows.length; i += stride) out.push(i)
+            return out
+          },
+          values: (_u, splits) => splits.map((i) => rows[i]?.label ?? ''),
         },
         {
           stroke: theme.axisText,

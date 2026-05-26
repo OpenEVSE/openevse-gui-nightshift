@@ -6,14 +6,14 @@
 </script>
 
 {#if variant === 'subtle'}
-  <div class="flex gap-4 border-b border-border" role="tablist">
+  <div class="flex gap-6 border-b border-border" role="tablist">
     {#each tabs as tab, i}
       <button
         type="button"
         role="tab"
         aria-selected={i === active}
         onclick={() => onchange(i)}
-        class="relative -mb-px border-b-2 py-1.5 text-xs font-semibold transition
+        class="relative -mb-px border-b-2 py-2 text-sm font-semibold transition
                {i === active ? 'border-accent text-text' : 'border-transparent text-text-dim hover:text-text'}"
       >
         {tab.label}
