@@ -23,7 +23,6 @@
     const peak = samples.length ? Math.max(...samples.map((s) => s.a ?? 0)) : 0
     const ampMax = Math.max(40, peak + 5, (hardCap || 0) + 5)
     return {
-      height: 280,
       cursor: { drag: { x: false, y: false } },
       legend: { show: true },
       scales: {
@@ -48,5 +47,5 @@
 {#if samples.length === 0}
   <div class="py-12 text-center text-sm text-text-dim">{$_('monitoring.energy.no_samples')}</div>
 {:else}
-  <UplotChart {opts} {data} />
+  <UplotChart {opts} {data} fill />
 {/if}

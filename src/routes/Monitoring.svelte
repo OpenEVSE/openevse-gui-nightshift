@@ -43,12 +43,12 @@
   ])
 </script>
 
-<section class="p-4">
+<section class="flex h-full min-h-0 flex-col p-4">
   <h1 class="mb-3 text-lg font-semibold text-text">{$_('screen.monitoring')}</h1>
 
   <Tabs {tabs} active={activeTab} onchange={(i) => (activeTab = i)} />
 
-  <div class="mt-3">
+  <div class="mt-3 flex min-h-0 flex-1 flex-col">
     {#if activeTab === 0}
       <MetricsTab {groups} />
     {:else if activeTab === 1}

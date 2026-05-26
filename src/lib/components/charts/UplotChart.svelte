@@ -3,7 +3,9 @@
   import 'uplot/dist/uPlot.min.css'
   import { untrack } from 'svelte'
 
-  let { opts, data } = $props()
+  // `fill` makes the chart size to its parent container's height (use inside
+  // a flex column with min-h-0 flex-1). When false, uPlot uses opts.height.
+  let { opts, data, fill = false } = $props()
 
   let container
   /** @type {uPlot | null} */
@@ -13,13 +15,20 @@
   /** @type {MutationObserver | null} */
   let mo = null
 
+  function computeSize() {
+    const width = container.clientWidth || 600
+    const fallback = (untrack(() => opts).height) ?? 260
+    const height = fill ? (container.clientHeight || fallback) : fallback
+    return { width, height }
+  }
+
   function rebuild() {
     if (!container) return
     if (chart) { chart.destroy(); chart = null }
     const currentOpts = untrack(() => opts)
     const currentData = untrack(() => data)
-    const width = container.clientWidth || 600
-    const o = { ...currentOpts, width, height: currentOpts.height ?? 260 }
+    const { width, height } = computeSize()
+    const o = { ...currentOpts, width, height }
     chart = new uPlot(o, currentData, container)
   }
 
@@ -28,9 +37,12 @@
   $effect(() => {
     rebuild()
     ro = new ResizeObserver(() => {
-      if (chart && container) chart.setSize({ width: container.clientWidth, height: chart.height })
+      if (chart && container) chart.setSize(computeSize())
     })
     ro.observe(container)
+    // In fill mode also observe the parent so the chart picks up height changes
+    // when the surrounding flex layout reflows (e.g. window resize, tab switch).
+    if (fill && container.parentElement) ro.observe(container.parentElement)
     mo = new MutationObserver(() => rebuild())
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
     return () => {
@@ -49,10 +61,9 @@
   // Opts swap path — opts changes usually mean theme/scale rebuild is needed.
   // Full rebuild because uPlot can't live-swap most options.
   $effect(() => {
-    // Touch opts to subscribe; rebuild() does the work.
     void opts
     if (chart) rebuild()
   })
 </script>
 
-<div bind:this={container} class="w-full"></div>
+<div bind:this={container} class={fill ? 'h-full w-full' : 'w-full'}></div>

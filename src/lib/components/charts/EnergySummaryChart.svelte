@@ -22,7 +22,6 @@
   let opts = $derived.by(() => {
     const theme = readChartTheme()
     return {
-      height: 260,
       legend: { show: false },
       cursor: { drag: { x: false, y: false } },
       scales: {
@@ -59,5 +58,5 @@
 {#if rows.length === 0}
   <div class="py-12 text-center text-sm text-text-dim">{$_('monitoring.energy.no_samples')}</div>
 {:else}
-  <UplotChart {opts} {data} />
+  <UplotChart {opts} {data} fill />
 {/if}

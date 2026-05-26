@@ -57,7 +57,7 @@
   function currentClicked() { energy_store.loadRaw() }
 </script>
 
-<div class="space-y-3">
+<div class="flex h-full min-h-0 flex-col gap-3">
   <Tabs {tabs} active={viewIndex} onchange={onTabChange} />
 
   {#if view === 'live'}
@@ -92,15 +92,19 @@
     </div>
 
     {#if $energy_store.error.raw}
-      <div class="py-12 text-center text-sm text-error">{$_('monitoring.energy.error')}</div>
+      <div class="flex min-h-0 flex-1 items-center justify-center text-sm text-error">{$_('monitoring.energy.error')}</div>
     {:else}
-      <EnergyLiveChart samples={$energy_store.raw.samples} />
+      <div class="min-h-0 flex-1">
+        <EnergyLiveChart samples={$energy_store.raw.samples} />
+      </div>
     {/if}
   {:else}
     {#if $energy_store.error[view]}
-      <div class="py-12 text-center text-sm text-error">{$_('monitoring.energy.error')}</div>
+      <div class="flex min-h-0 flex-1 items-center justify-center text-sm text-error">{$_('monitoring.energy.error')}</div>
     {:else}
-      <EnergySummaryChart rows={summaryRows} />
+      <div class="min-h-0 flex-1">
+        <EnergySummaryChart rows={summaryRows} />
+      </div>
     {/if}
   {/if}
 </div>
