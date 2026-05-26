@@ -77,7 +77,7 @@
 </script>
 
 <div class="flex h-full min-h-0 flex-col gap-3">
-  <Tabs {tabs} active={viewIndex} onchange={onTabChange} />
+  <Tabs {tabs} variant="subtle" active={viewIndex} onchange={onTabChange} />
 
   {#if view === 'live'}
     <div class="flex items-center justify-between gap-2 text-xs text-text-dim">
