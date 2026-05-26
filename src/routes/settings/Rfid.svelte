@@ -1,9 +1,12 @@
 <!-- src/routes/settings/Rfid.svelte -->
 <script>
   import { _ } from 'svelte-i18n'
+  import { onMount } from 'svelte'
   import { config_store } from '../../lib/stores/config.js'
   import { status_store } from '../../lib/stores/status.js'
   import { uistates_store } from '../../lib/stores/uistates.js'
+  import { uisettings_store } from '../../lib/stores/uisettings.js'
+  import { rfid_users_store } from '../../lib/stores/rfid_users.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { serialQueue } from '../../lib/queue.js'
   import { showWriteError } from '../../lib/alerts.js'
@@ -15,6 +18,7 @@
   import Toggle from '../../lib/components/ui/Toggle.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
   import IconButton from '../../lib/components/ui/IconButton.svelte'
+  import RfidUserModal from '../../lib/components/config/RfidUserModal.svelte'
 
   const form = createConfigForm()
 
@@ -23,6 +27,17 @@
   let scanned = $derived($status_store?.rfid_input ?? '')
   let scanWaiting = $derived($uistates_store?.rfid_waiting ?? 0)
   let alreadyRegistered = $derived(scanned !== '' && tags.includes(scanned))
+
+  let labsOn = $derived(!!$uisettings_store?.dev_features)
+  let editingUid = $state(null)
+  let editingInitial = $state('')
+  let editBusy = $state(false)
+
+  // Pull the user-name map when Labs is on and RFID is enabled. The endpoint
+  // is firmware-side dev work — the store flips error=true if missing.
+  onMount(() => {
+    if (labsOn && enabled) rfid_users_store.download()
+  })
 
   async function scan() {
     const res = await serialQueue.add(() => httpAPI('GET', '/rfid/add', null, 'txt', 60000))
@@ -39,6 +54,32 @@
   }
   function removeAll() {
     saveTags([])
+  }
+
+  function openNameEditor(uid) {
+    editingUid = uid
+    editingInitial = $rfid_users_store.users[uid] ?? ''
+  }
+  function closeNameEditor() {
+    if (editBusy) return
+    editingUid = null
+    editingInitial = ''
+  }
+  async function saveName(name) {
+    if (!editingUid) return
+    editBusy = true
+    const ok = await rfid_users_store.save(editingUid, name)
+    editBusy = false
+    if (ok) closeNameEditor()
+    else showWriteError()
+  }
+  async function removeName() {
+    if (!editingUid) return
+    editBusy = true
+    const ok = await rfid_users_store.remove(editingUid)
+    editBusy = false
+    if (ok) closeNameEditor()
+    else showWriteError()
   }
 </script>
 
@@ -78,8 +119,31 @@
     {#if tags.length > 0}
       <ConfigSection title={$_('config.rfid.registered')}>
         {#each tags as tag}
-          <div class="flex items-center justify-between py-2 text-sm">
-            <span class="font-mono text-text">{tag}</span>
+          <div class="flex items-center gap-2 py-2 text-sm">
+            <div class="min-w-0 flex-1">
+              <div class="truncate font-mono text-text">{tag}</div>
+              {#if labsOn}
+                {@const userName = $rfid_users_store.users[tag]}
+                {#if userName}
+                  <div class="mt-0.5 truncate text-xs text-accent">{userName}</div>
+                {:else}
+                  <button
+                    type="button"
+                    class="mt-0.5 text-xs text-text-dim hover:text-accent"
+                    onclick={() => openNameEditor(tag)}
+                  >
+                    {$_('config.rfid.add_user_name')}
+                  </button>
+                {/if}
+              {/if}
+            </div>
+            {#if labsOn && $rfid_users_store.users[tag]}
+              <IconButton
+                icon="mdi:pencil-outline"
+                label={$_('config.rfid.edit_user_name')}
+                onclick={() => openNameEditor(tag)}
+              />
+            {/if}
             <IconButton icon="mdi:trash-can-outline" label={$_('config.rfid.remove')} onclick={() => remove(tag)} />
           </div>
         {/each}
@@ -90,3 +154,16 @@
     {/if}
   {/if}
 </ConfigPage>
+
+{#if labsOn}
+  <RfidUserModal
+    open={editingUid !== null}
+    uid={editingUid ?? ''}
+    initialName={editingInitial}
+    canRemove={editingUid !== null && !!$rfid_users_store.users[editingUid]}
+    busy={editBusy}
+    onclose={closeNameEditor}
+    onsave={saveName}
+    onremove={removeName}
+  />
+{/if}

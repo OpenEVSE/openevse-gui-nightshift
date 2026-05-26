@@ -34,6 +34,10 @@ export function mockPlugin() {
     '/api/energy/annual': loadFixture('energy_annual.json'),
   }
 
+  // In-memory state for endpoints that mutate. Seeded once per dev-server
+  // run; reset by restarting the server.
+  const rfidUsers = JSON.parse(loadFixture('rfid_users.json'))
+
   // Base status object for WebSocket messages
   const baseStatus = JSON.parse(fixtures['/api/status'])
 
@@ -69,6 +73,35 @@ export function mockPlugin() {
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end('1')
           return
+        }
+
+        // RFID user-name map (Labs feature — firmware support pending)
+        if (url === '/api/rfid/users') {
+          if (req.method === 'GET') {
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify(rfidUsers))
+            return
+          }
+          if (req.method === 'POST') {
+            let body = ''
+            req.on('data', (chunk) => { body += chunk })
+            req.on('end', () => {
+              try {
+                const { rfid, name } = JSON.parse(body)
+                if (rfid && typeof name === 'string') rfidUsers[rfid] = name
+              } catch { /* ignore malformed body */ }
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'done' }))
+            })
+            return
+          }
+          if (req.method === 'DELETE') {
+            const m = req.url?.match(/[?&]rfid=([^&]*)/)
+            if (m) delete rfidUsers[decodeURIComponent(m[1])]
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ msg: 'done' }))
+            return
+          }
         }
 
         if (url === '/api/scan' && req.method === 'GET') {

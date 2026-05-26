@@ -191,7 +191,15 @@
       "already": "This tag is already registered.",
       "registered": "Registered tags",
       "remove": "Remove",
-      "remove_all": "Remove all"
+      "remove_all": "Remove all",
+      "user_name": "User name",
+      "user_name_for": "User name for tag",
+      "user_name_placeholder": "e.g. Alice",
+      "add_user_name": "Add user name",
+      "edit_user_name": "Edit user name",
+      "save_name": "Save name",
+      "remove_name": "Remove name",
+      "cancel": "Cancel"
     },
     "vehicle": {
       "source": "Vehicle data source",

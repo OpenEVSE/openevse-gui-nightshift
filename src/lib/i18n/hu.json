@@ -191,7 +191,15 @@
       "already": "Ez a címke már regisztrálva van.",
       "registered": "Regisztrált címkék",
       "remove": "Eltávolítás",
-      "remove_all": "Összes eltávolítása"
+      "remove_all": "Összes eltávolítása",
+      "user_name": "Felhasználónév",
+      "user_name_for": "A kártya felhasználóneve",
+      "user_name_placeholder": "pl. Anna",
+      "add_user_name": "Felhasználónév hozzáadása",
+      "edit_user_name": "Felhasználónév szerkesztése",
+      "save_name": "Név mentése",
+      "remove_name": "Név eltávolítása",
+      "cancel": "Mégse"
     },
     "vehicle": {
       "source": "Jármű adatforrás",

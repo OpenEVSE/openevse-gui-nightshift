@@ -14,6 +14,8 @@ import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
 import { status_store } from '../../../lib/stores/status.js'
 import { uistates_store } from '../../../lib/stores/uistates.js'
+import { uisettings_store } from '../../../lib/stores/uisettings.js'
+import { rfid_users_store } from '../../../lib/stores/rfid_users.js'
 import Rfid from '../Rfid.svelte'
 
 beforeEach(() => {
@@ -21,6 +23,8 @@ beforeEach(() => {
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ msg: 'done' })
   status_store.set({ rfid_input: '' })
+  uisettings_store.update((s) => ({ ...s, dev_features: false }))
+  rfid_users_store.reset()
 })
 
 describe('RFID page', () => {
@@ -56,6 +60,28 @@ describe('RFID page', () => {
     const { getByText } = render(Rfid)
     await fireEvent.click(getByText('config.rfid.register'))
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ rfid_storage: 'AA11,CC33' }))
+  })
+
+  it('does not show the name-edit affordance when Labs is off', () => {
+    config_store.set({ rfid_enabled: true, rfid_storage: 'AA11' })
+    const { queryByText } = render(Rfid)
+    expect(queryByText('config.rfid.add_user_name')).not.toBeInTheDocument()
+  })
+
+  it('exposes the add-name affordance when Labs is on and the tag has no name', () => {
+    uisettings_store.update((s) => ({ ...s, dev_features: true }))
+    config_store.set({ rfid_enabled: true, rfid_storage: 'AA11' })
+    const { getByText } = render(Rfid)
+    expect(getByText('config.rfid.add_user_name')).toBeInTheDocument()
+  })
+
+  it('shows the assigned name when Labs is on and the user-name map is loaded', () => {
+    uisettings_store.update((s) => ({ ...s, dev_features: true }))
+    rfid_users_store.set({ users: { AA11: 'Alice' }, loading: false, error: false })
+    config_store.set({ rfid_enabled: true, rfid_storage: 'AA11' })
+    const { getByText, queryByText } = render(Rfid)
+    expect(getByText('Alice')).toBeInTheDocument()
+    expect(queryByText('config.rfid.add_user_name')).not.toBeInTheDocument()
   })
 
   it('shows the alert box when the scan call fails', async () => {

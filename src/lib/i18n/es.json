@@ -191,7 +191,15 @@
       "already": "Esta etiqueta ya está registrada.",
       "registered": "Etiquetas registradas",
       "remove": "Eliminar",
-      "remove_all": "Eliminar todas"
+      "remove_all": "Eliminar todas",
+      "user_name": "Nombre de usuario",
+      "user_name_for": "Nombre de usuario de la etiqueta",
+      "user_name_placeholder": "p. ej. Alicia",
+      "add_user_name": "Añadir nombre de usuario",
+      "edit_user_name": "Editar nombre de usuario",
+      "save_name": "Guardar nombre",
+      "remove_name": "Eliminar nombre",
+      "cancel": "Cancelar"
     },
     "vehicle": {
       "source": "Fuente de datos del vehículo",

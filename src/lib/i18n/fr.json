@@ -191,7 +191,15 @@
       "already": "Ce badge est déjà enregistré.",
       "registered": "Badges enregistrés",
       "remove": "Retirer",
-      "remove_all": "Tout retirer"
+      "remove_all": "Tout retirer",
+      "user_name": "Nom d'utilisateur",
+      "user_name_for": "Nom d'utilisateur du tag",
+      "user_name_placeholder": "ex. Alice",
+      "add_user_name": "Ajouter un nom d'utilisateur",
+      "edit_user_name": "Modifier le nom d'utilisateur",
+      "save_name": "Enregistrer le nom",
+      "remove_name": "Supprimer le nom",
+      "cancel": "Annuler"
     },
     "vehicle": {
       "source": "Source des données véhicule",
