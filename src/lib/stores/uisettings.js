@@ -11,4 +11,5 @@ export const uisettings_store = persisted('settings', {
 	temp_unit: 'c',     // 'c' | 'f' — display unit only; device always reports °C
 	energy_rate: 0,     // local-only tariff in <currency> per kWh; 0 hides cost UI
 	currency_symbol: '$',
+	dev_features: false, // gates power-user pages (Developer Tools) in Settings nav
   })

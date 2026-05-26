@@ -117,7 +117,7 @@
       "ohmconnect": "OhmConnect",
       "firmware": "Firmware",
       "certificates": "Certificados",
-      "terminal": "Terminal",
+      "terminal": "Herramientas de desarrollo",
       "about": "Acerca de"
     },
     "validation": {
@@ -311,6 +311,9 @@
       "cancel": "Cancelar"
     },
     "terminal": {
+      "feature_gates": "Funciones de desarrollo",
+      "energy_charts": "Gráficos de energía",
+      "energy_charts_desc": "Añade la pestaña Energía a Monitoreo. Requiere los endpoints de registro de energía en desarrollo — déjalo desactivado hasta que se instale ese firmware.",
       "rapi": "Consola de comandos RAPI",
       "command": "Comando",
       "send": "Enviar",

@@ -2,12 +2,19 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { httpAPI } from '../../lib/api/httpAPI.js'
+  import { uisettings_store } from '../../lib/stores/uisettings.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
+  import FormField from '../../lib/components/config/FormField.svelte'
   import ConsoleViewer from '../../lib/components/config/ConsoleViewer.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
+  import Toggle from '../../lib/components/ui/Toggle.svelte'
   import Modal from '../../lib/components/ui/Modal.svelte'
   import { downloadDiagnostics } from '../../lib/diagnostics.js'
+
+  function setDevFeatures(on) {
+    uisettings_store.update((s) => ({ ...s, dev_features: !!on }))
+  }
 
   let command = $state('$')
   let results = $state([])
@@ -39,6 +46,19 @@
 </script>
 
 <ConfigPage title={$_('config.pages.terminal')}>
+  <ConfigSection title={$_('config.terminal.feature_gates')}>
+    <FormField
+      label={$_('config.terminal.energy_charts')}
+      description={$_('config.terminal.energy_charts_desc')}
+    >
+      <Toggle
+        checked={!!$uisettings_store?.dev_features}
+        label={$_('config.terminal.energy_charts')}
+        onchange={setDevFeatures}
+      />
+    </FormField>
+  </ConfigSection>
+
   <ConfigSection title={$_('config.terminal.rapi')}>
     {#if results.length > 0}
       <div class="mb-3 max-h-60 overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs">

@@ -16,12 +16,17 @@
   import ManagerTab from '../lib/components/monitoring/ManagerTab.svelte'
   import EnergyTab from '../lib/components/monitoring/EnergyTab.svelte'
 
-  let activeTab = $state(0)
-
   let hasError = $derived(!!$uistates_store?.error)
+  let devOn = $derived(!!$uisettings_store?.dev_features)
+
+  // Track the selected tab by id, not index — the Energy tab appears only
+  // when dev features are on, and index-based tracking would jump tabs
+  // around as the user toggles the gate.
+  let activeId = $state('data')
 
   onMount(() => {
-    if ($uistates_store?.error) activeTab = 2
+    if ($uistates_store?.error) activeId = 'safety'
+    else if (devOn) activeId = 'energy'
   })
 
   let groups = $derived([
@@ -36,24 +41,32 @@
   let claims = $derived(claimRows($claims_target_store))
 
   let tabs = $derived([
-    { label: $_('monitoring.tab.energy'), alert: false },
-    { label: $_('monitoring.tab.data'), alert: false },
-    { label: $_('monitoring.tab.safety'), alert: hasError },
-    { label: $_('monitoring.tab.manager'), alert: false },
+    ...(devOn ? [{ id: 'energy',  label: $_('monitoring.tab.energy'),  alert: false }] : []),
+    { id: 'data',    label: $_('monitoring.tab.data'),    alert: false },
+    { id: 'safety',  label: $_('monitoring.tab.safety'),  alert: hasError },
+    { id: 'manager', label: $_('monitoring.tab.manager'), alert: false },
   ])
+
+  // If the user disables dev features while sitting on the Energy tab,
+  // fall back to Data so we don't render a removed tab.
+  $effect(() => {
+    if (!tabs.some((t) => t.id === activeId)) activeId = tabs[0]?.id ?? 'data'
+  })
+
+  let activeIndex = $derived(Math.max(0, tabs.findIndex((t) => t.id === activeId)))
 </script>
 
 <section class="flex h-full min-h-0 flex-col p-4">
   <h1 class="mb-3 text-lg font-semibold text-text">{$_('screen.monitoring')}</h1>
 
-  <Tabs {tabs} active={activeTab} onchange={(i) => (activeTab = i)} />
+  <Tabs {tabs} active={activeIndex} onchange={(i) => (activeId = tabs[i].id)} />
 
   <div class="mt-3 flex min-h-0 flex-1 flex-col">
-    {#if activeTab === 0}
+    {#if activeId === 'energy'}
       <EnergyTab />
-    {:else if activeTab === 1}
+    {:else if activeId === 'data'}
       <MetricsTab {groups} />
-    {:else if activeTab === 2}
+    {:else if activeId === 'safety'}
       <SafetyTab data={safety} />
     {:else}
       <ManagerTab rows={claims} />

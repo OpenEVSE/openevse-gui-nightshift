@@ -117,7 +117,7 @@
       "ohmconnect": "OhmConnect",
       "firmware": "Micrologiciel",
       "certificates": "Certificats",
-      "terminal": "Terminal",
+      "terminal": "Outils développeur",
       "about": "À propos"
     },
     "validation": {
@@ -311,6 +311,9 @@
       "cancel": "Annuler"
     },
     "terminal": {
+      "feature_gates": "Fonctions de développement",
+      "energy_charts": "Graphiques d'énergie",
+      "energy_charts_desc": "Ajoute l'onglet Énergie à Surveillance. Nécessite les endpoints de journalisation d'énergie en cours de développement — laissez désactivé tant que ce firmware n'est pas flashé.",
       "rapi": "Console de commandes RAPI",
       "command": "Commande",
       "send": "Envoyer",

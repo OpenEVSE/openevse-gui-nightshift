@@ -117,7 +117,7 @@
       "ohmconnect": "OhmConnect",
       "firmware": "Firmware",
       "certificates": "Tanúsítványok",
-      "terminal": "Terminál",
+      "terminal": "Fejlesztői eszközök",
       "about": "Névjegy"
     },
     "validation": {
@@ -311,6 +311,9 @@
       "cancel": "Mégse"
     },
     "terminal": {
+      "feature_gates": "Fejlesztői funkciók",
+      "energy_charts": "Energia diagramok",
+      "energy_charts_desc": "Megjeleníti az Energia fület a Monitorozás képernyőn. A fejlesztés alatt álló firmware energianaplózó végpontokat igényli — hagyd kikapcsolva, amíg a megfelelő firmware nincs feltöltve.",
       "rapi": "RAPI parancskonsol",
       "command": "Parancs",
       "send": "Elküld",

@@ -117,7 +117,7 @@
       "ohmconnect": "OhmConnect",
       "firmware": "Firmware",
       "certificates": "Certificates",
-      "terminal": "Terminal",
+      "terminal": "Developer Tools",
       "about": "About"
     },
     "validation": {
@@ -311,6 +311,9 @@
       "cancel": "Cancel"
     },
     "terminal": {
+      "feature_gates": "Development features",
+      "energy_charts": "Energy charts",
+      "energy_charts_desc": "Adds the Energy tab to Monitoring. Requires the in-development firmware energy logging endpoints — leave off until that firmware is flashed.",
       "rapi": "RAPI command console",
       "command": "Command",
       "send": "Send",
