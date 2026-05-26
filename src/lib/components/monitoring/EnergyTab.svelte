@@ -3,7 +3,6 @@
   import { onMount } from 'svelte'
   import { energy_store } from '../../stores/energy.js'
   import Tabs from '../ui/Tabs.svelte'
-  import Button from '../ui/Button.svelte'
   import EnergyLiveChart from '../charts/EnergyLiveChart.svelte'
   import EnergySummaryChart from '../charts/EnergySummaryChart.svelte'
 
@@ -62,22 +61,34 @@
   <Tabs {tabs} active={viewIndex} onchange={onTabChange} />
 
   {#if view === 'live'}
-    <div class="flex items-center justify-between text-xs text-text-dim">
-      <Button
-        label={$_('monitoring.energy.older')}
+    <div class="flex items-center justify-between gap-2 text-xs text-text-dim">
+      <button
+        type="button"
+        class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-text transition
+               disabled:cursor-not-allowed disabled:opacity-40
+               hover:not-disabled:bg-surface-2"
         disabled={$energy_store.loading.raw || $energy_store.raw.noOlder || !$energy_store.raw.samples.length}
         onclick={olderClicked}
-      />
-      <span>
+      >
+        {$_('monitoring.energy.older')}
+      </button>
+
+      <span class="min-w-0 flex-1 text-center">
         {#if $energy_store.raw.noOlder}{$_('monitoring.energy.no_older')}
         {:else if $energy_store.raw.historical}{$_('monitoring.energy.historical')}
         {:else}{$_('monitoring.energy.latest_samples', { values: { n: $energy_store.raw.samples.length } })}{/if}
       </span>
-      {#if $energy_store.raw.historical}
-        <Button label={$_('monitoring.energy.current')} onclick={currentClicked} />
-      {:else}
-        <span class="w-16"></span>
-      {/if}
+
+      <button
+        type="button"
+        class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-text transition
+               disabled:opacity-0 disabled:cursor-default
+               hover:not-disabled:bg-surface-2"
+        disabled={!$energy_store.raw.historical}
+        onclick={currentClicked}
+      >
+        {$_('monitoring.energy.current')}
+      </button>
     </div>
 
     {#if $energy_store.error.raw}

@@ -16,7 +16,12 @@
 
   let opts = $derived.by(() => {
     const theme = readChartTheme()
-    const ampMax = ($config_store?.max_current_hard ?? 50) + 5
+    // Headroom that survives broken config: never below 40 A, always above the
+    // highest observed sample. max_current_hard reports 0 on some firmware
+    // builds (and the mock fixture), which would otherwise crush the trace.
+    const hardCap = $config_store?.max_current_hard
+    const peak = samples.length ? Math.max(...samples.map((s) => s.a ?? 0)) : 0
+    const ampMax = Math.max(40, peak + 5, (hardCap || 0) + 5)
     return {
       height: 280,
       cursor: { drag: { x: false, y: false } },
