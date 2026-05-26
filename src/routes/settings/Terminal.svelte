@@ -46,19 +46,6 @@
 </script>
 
 <ConfigPage title={$_('config.pages.terminal')}>
-  <ConfigSection title={$_('config.terminal.labs')}>
-    <FormField
-      label={$_('config.terminal.labs_enable')}
-      description={$_('config.terminal.labs_desc')}
-    >
-      <Toggle
-        checked={!!$uisettings_store?.dev_features}
-        label={$_('config.terminal.labs_enable')}
-        onchange={setDevFeatures}
-      />
-    </FormField>
-  </ConfigSection>
-
   <ConfigSection title={$_('config.terminal.rapi')}>
     {#if results.length > 0}
       <div class="mb-3 max-h-60 overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs">
@@ -106,6 +93,19 @@
         {$_('config.terminal.diagnostics_done', { values: { file: exportedFile } })}
       </p>
     {/if}
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.terminal.labs')}>
+    <FormField
+      label={$_('config.terminal.labs_enable')}
+      description={$_('config.terminal.labs_desc')}
+    >
+      <Toggle
+        checked={!!$uisettings_store?.dev_features}
+        label={$_('config.terminal.labs_enable')}
+        onchange={setDevFeatures}
+      />
+    </FormField>
   </ConfigSection>
 </ConfigPage>
 
