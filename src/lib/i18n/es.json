@@ -615,6 +615,7 @@
     "error_title": "No se pudo cargar el historial",
     "error_body": "El cargador no devolvió el registro. Inténtalo de nuevo.",
     "retry": "Reintentar",
+    "export_csv": "Exportar CSV",
     "types": {
       "information": "Información",
       "notification": "Notificación",

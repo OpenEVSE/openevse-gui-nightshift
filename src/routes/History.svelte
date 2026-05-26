@@ -4,6 +4,7 @@
   import { history_store } from '../lib/stores/history.js'
   import { config_store } from '../lib/stores/config.js'
   import { uisettings_store } from '../lib/stores/uisettings.js'
+  import { rfid_users_store } from '../lib/stores/rfid_users.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { formatDate, getStateDesc } from '../lib/utils.js'
@@ -19,6 +20,17 @@
 
   let phase = $state('loading')
   let progress = $state(0)
+
+  let labsOn = $derived(!!$uisettings_store?.dev_features)
+
+  // Resolve the "User" cell for one log entry. Labs-only: returns null when
+  // the feature is off so LogRow can hide the line entirely.
+  function userTextFor(entry) {
+    if (!labsOn) return null
+    const uid = entry?.rfidTag
+    if (!uid) return '—'
+    return $rfid_users_store.users[uid] ?? uid
+  }
 
   let rows = $derived(
     (Array.isArray($history_store) ? $history_store : []).map((e) => {
@@ -41,9 +53,23 @@
         ),
         temp: t.value,
         tempUnit: t.unitKey,
+        userText: userTextFor(e),
       }
     }),
   )
+
+  function exportCsv() {
+    // Hit the dev proxy when running under vite (/api/* → /*) and the bare
+    // device path in production. Same pattern as the v2 PR. Letting the
+    // browser drive the download keeps the streamed CSV out of memory.
+    const url = (import.meta.env?.DEV ? '/api' : '') + '/logs/export'
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'session-history.csv'
+    document.body.appendChild(link)
+    link.click()
+    setTimeout(() => link.remove(), 100)
+  }
 
   async function load() {
     phase = 'loading'
@@ -73,11 +99,21 @@
     }
   }
 
-  onMount(load)
+  onMount(() => {
+    if (labsOn) rfid_users_store.download()
+    load()
+  })
 </script>
 
 <section class="p-4">
-  <h1 class="mb-3 text-lg font-semibold text-text">{$_('screen.history')}</h1>
+  <div class="mb-3 flex items-center gap-2">
+    <h1 class="flex-1 text-lg font-semibold text-text">{$_('screen.history')}</h1>
+    {#if labsOn && phase === 'ready' && rows.length > 0}
+      <div class="w-32 shrink-0">
+        <Button label={$_('history.export_csv')} variant="ghost" onclick={exportCsv} />
+      </div>
+    {/if}
+  </div>
 
   {#if phase === 'loading'}
     <Card class="flex flex-col items-center gap-3 px-6 py-12">

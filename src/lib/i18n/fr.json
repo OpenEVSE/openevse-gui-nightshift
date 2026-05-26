@@ -615,6 +615,7 @@
     "error_title": "Impossible de charger l'historique",
     "error_body": "Le chargeur n'a pas renvoyé le journal. Veuillez réessayer.",
     "retry": "Réessayer",
+    "export_csv": "Exporter en CSV",
     "types": {
       "information": "Information",
       "notification": "Notification",

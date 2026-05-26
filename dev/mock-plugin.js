@@ -161,6 +161,18 @@ export function mockPlugin() {
           return
         }
 
+        // Session history CSV export (Labs feature — firmware support pending)
+        if (url === '/api/logs/export') {
+          res.writeHead(200, {
+            'Content-Type': 'text/csv',
+            'Content-Disposition': 'attachment; filename="session-history.csv"',
+          })
+          res.end('time,type,evseState,energy,temperature,rfidTag\n' +
+            '2026-05-21T18:30:00Z,information,3,7400,28.5,AA11BB22\n' +
+            '2026-05-20T08:00:00Z,information,3,11200,30.0,CC33DD44\n')
+          return
+        }
+
         // History log endpoints (dynamic — not in the exact-match table)
         if (url === '/api/logs') {
           res.writeHead(200, { 'Content-Type': 'application/json' })

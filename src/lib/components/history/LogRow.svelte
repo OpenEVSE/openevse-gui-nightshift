@@ -9,6 +9,7 @@
     timeText = '', energyKwh = 0,
     temp = 0, tempUnit = 'units.celsius',
     costText = null,
+    userText = null,
   } = $props()
 
   const toneClass = {
@@ -24,11 +25,15 @@
   <Icon icon={stateIcon} size={24} class={toneClass[stateTone]} />
   <div class="min-w-0 flex-1">
     <div class="truncate text-sm font-semibold text-text">{stateDesc}</div>
-    <div class="mt-0.5 flex items-center gap-1.5 text-xs text-text-dim">
+    <div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-text-dim">
       <Icon icon={typeIcon} size={13} class={toneClass[typeTone]} />
       <span>{typeLabel}</span>
       <span aria-hidden="true">·</span>
       <span>{timeText}</span>
+      {#if userText}
+        <span aria-hidden="true">·</span>
+        <span class="truncate">{userText}</span>
+      {/if}
     </div>
   </div>
   <div class="shrink-0 text-right">

@@ -35,4 +35,13 @@ describe('LogRow', () => {
     expect(getByText(/83\.3/)).toBeInTheDocument()
     expect(getByText(/units\.fahrenheit/)).toBeInTheDocument()
   })
+  it('omits the user line when userText is null', () => {
+    const { queryByText } = render(LogRow, { props: { ...props, userText: null } })
+    // — em-dash is the "no rfid" fallback when userText is passed; null hides line entirely
+    expect(queryByText('—')).not.toBeInTheDocument()
+  })
+  it('shows the user line when userText is passed', () => {
+    const { getByText } = render(LogRow, { props: { ...props, userText: 'Alice' } })
+    expect(getByText('Alice')).toBeInTheDocument()
+  })
 })

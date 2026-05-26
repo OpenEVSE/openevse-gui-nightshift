@@ -615,6 +615,7 @@
     "error_title": "A történet nem tölthető be",
     "error_body": "A töltő nem küldte vissza a naplót. Kérjük, próbálja újra.",
     "retry": "Újra",
+    "export_csv": "CSV-export",
     "types": {
       "information": "Információ",
       "notification": "Értesítés",
