@@ -29,9 +29,9 @@ export function mockPlugin() {
     '/api/claims/target': loadFixture('claims_target.json'),
     '/api/certificates':  loadFixture('certificates.json'),
     '/api/energy/raw':    loadFixture('energy_raw.json'),
-    '/api/energy/daily':  '{"daily":[]}',
-    '/api/energy/monthly':'{"monthly":[]}',
-    '/api/energy/annual': '{"annual":[]}',
+    '/api/energy/daily':  loadFixture('energy_daily.json'),
+    '/api/energy/monthly':loadFixture('energy_monthly.json'),
+    '/api/energy/annual': loadFixture('energy_annual.json'),
   }
 
   // Base status object for WebSocket messages

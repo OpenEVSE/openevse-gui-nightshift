@@ -11,10 +11,29 @@
   let viewIndex = $state(0)
   let view = $derived(VIEWS[viewIndex])
 
+  // Firmware shape from EnergyLogger:
+  //   daily   = [{ dt: 'YYYY-MM-DD', pk, mn, en (Wh)  }, ...]
+  //   monthly = [{ mo: 'YYYY-MM',    pk, mn, en (kWh) }, ...]
+  //   annual  = [{ yr: 2025,         pk, mn, en (kWh) }, ...]
+  // Shorten the daily label (drop the year) so 40 day-ticks fit; monthly
+  // gets the short month name; annual stays as the year integer.
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  function dailyLabel(dt) {
+    if (typeof dt !== 'string' || dt.length < 10) return dt ?? ''
+    const m = parseInt(dt.slice(5, 7), 10)
+    const d = parseInt(dt.slice(8, 10), 10)
+    return `${m}/${d}`
+  }
+  function monthlyLabel(mo) {
+    if (typeof mo !== 'string' || mo.length < 7) return mo ?? ''
+    const m = parseInt(mo.slice(5, 7), 10)
+    const y = mo.slice(2, 4)
+    return `${MONTHS[m - 1] ?? mo} '${y}`
+  }
   let summaryRows = $derived.by(() => {
-    if (view === 'daily')   return $energy_store.daily  .map((r) => ({ label: r.d ?? r.label ?? '', kwh: r.kwh ?? 0 }))
-    if (view === 'monthly') return $energy_store.monthly.map((r) => ({ label: r.m ?? r.label ?? '', kwh: r.kwh ?? 0 }))
-    if (view === 'annual')  return $energy_store.annual .map((r) => ({ label: String(r.y ?? r.label ?? ''), kwh: r.kwh ?? 0 }))
+    if (view === 'daily')   return $energy_store.daily  .map((r) => ({ label: dailyLabel(r.dt), kwh: (r.en ?? 0) / 1000 }))
+    if (view === 'monthly') return $energy_store.monthly.map((r) => ({ label: monthlyLabel(r.mo), kwh: r.en ?? 0 }))
+    if (view === 'annual')  return $energy_store.annual .map((r) => ({ label: String(r.yr ?? ''), kwh: r.en ?? 0 }))
     return []
   })
 
