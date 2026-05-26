@@ -142,6 +142,8 @@
       "service_l1": "Niveau 1",
       "service_l2": "Niveau 2",
       "pause_mode": "Désactiver le chargeur en pause",
+      "front_button": "Bouton avant",
+      "front_button_desc": "Désactivez-le pour empêcher toute manipulation sur les installations extérieures ou accessibles au public.",
       "start_window": "Fenêtre de départ aléatoire",
       "start_window_desc": "Étale les départs de charge sur ce nombre de secondes pour limiter les pics réseau.",
       "led_brightness": "Luminosité des LEDs",

@@ -142,6 +142,8 @@
       "service_l1": "Level 1",
       "service_l2": "Level 2",
       "pause_mode": "Disable charger when paused",
+      "front_button": "Front button",
+      "front_button_desc": "Disable to prevent tampering on outdoor or publicly accessible installations.",
       "start_window": "Randomised start window",
       "start_window_desc": "Spreads charge starts over this many seconds to ease grid load.",
       "led_brightness": "LED brightness",

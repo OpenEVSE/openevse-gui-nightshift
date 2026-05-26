@@ -85,6 +85,19 @@
         onchange={(v) => form.saveField('pause_uses_disabled', v)}
       />
     </FormField>
+    {#if $config_store?.button_enabled !== undefined}
+      <FormField
+        label={$_('config.evse.front_button')}
+        description={$_('config.evse.front_button_desc')}
+        status={$ss.button_enabled ?? 'idle'}
+      >
+        <Toggle
+          checked={!!$config_store?.button_enabled}
+          label={$_('config.evse.front_button')}
+          onchange={(v) => form.saveField('button_enabled', v)}
+        />
+      </FormField>
+    {/if}
     <FormField
       label={$_('config.evse.start_window')}
       description={$_('config.evse.start_window_desc')}

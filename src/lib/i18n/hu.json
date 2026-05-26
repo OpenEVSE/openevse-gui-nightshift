@@ -142,6 +142,8 @@
       "service_l1": "1. szint",
       "service_l2": "2. szint",
       "pause_mode": "Töltő letiltása szünet alatt",
+      "front_button": "Előlapi gomb",
+      "front_button_desc": "Tiltsd le a piszkálás megelőzéséhez kültéri vagy nyilvánosan hozzáférhető telepítéseknél.",
       "start_window": "Véletlenszerű indítási ablak",
       "start_window_desc": "A töltési indítások ennyi másodpercre oszlanak el a hálózati terhelés csökkentéséhez.",
       "led_brightness": "LED fényerő",

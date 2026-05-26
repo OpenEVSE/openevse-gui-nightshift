@@ -142,6 +142,8 @@
       "service_l1": "Nivel 1",
       "service_l2": "Nivel 2",
       "pause_mode": "Desactivar cargador al pausar",
+      "front_button": "Botón frontal",
+      "front_button_desc": "Desactívalo para evitar manipulaciones en instalaciones al aire libre o de acceso público.",
       "start_window": "Ventana de inicio aleatorio",
       "start_window_desc": "Distribuye los inicios de carga durante este número de segundos para reducir la carga de la red.",
       "led_brightness": "Brillo del LED",
