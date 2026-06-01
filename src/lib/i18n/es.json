@@ -92,6 +92,14 @@
       "suspend_evse": "Permitir que OCPP suspenda el cargador",
       "energize_plug": "Activar conector al autorizar"
     },
+    "homeassistant": {
+      "title": "Home Assistant",
+      "url": "URL de Home Assistant",
+      "connect": "Conectar",
+      "disconnect": "Desconectar",
+      "connected": "Conectado",
+      "disconnected": "No conectado"
+    },
     "title": "Ajustes",
     "back": "Ajustes",
     "coming_soon": "Esta página estará disponible próximamente.",
@@ -118,7 +126,8 @@
       "firmware": "Firmware",
       "certificates": "Certificados",
       "terminal": "Herramientas de desarrollo",
-      "about": "Acerca de"
+      "about": "Acerca de",
+      "home_assistant": "Home Assistant"
     },
     "validation": {
       "required": "Obligatorio",

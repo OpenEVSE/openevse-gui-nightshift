@@ -92,6 +92,14 @@
       "suspend_evse": "Az OCPP felfüggesztheti a töltőt",
       "energize_plug": "Csatlakozó aktiválása engedélyezéskor"
     },
+    "homeassistant": {
+      "title": "Home Assistant",
+      "url": "Home Assistant URL",
+      "connect": "Csatlakozás",
+      "disconnect": "Lecsatlakozás",
+      "connected": "Csatlakozva",
+      "disconnected": "Nincs csatlakozva"
+    },
     "title": "Beállítások",
     "back": "Beállítások",
     "coming_soon": "Ez az oldal hamarosan elérhető.",
@@ -118,7 +126,8 @@
       "firmware": "Firmware",
       "certificates": "Tanúsítványok",
       "terminal": "Fejlesztői eszközök",
-      "about": "Névjegy"
+      "about": "Névjegy",
+      "home_assistant": "Home Assistant"
     },
     "validation": {
       "required": "Kötelező",

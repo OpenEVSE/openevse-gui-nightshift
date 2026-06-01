@@ -23,6 +23,7 @@ import Firmware from '../routes/settings/Firmware.svelte'
 import Certificates from '../routes/settings/Certificates.svelte'
 import Terminal from '../routes/settings/Terminal.svelte'
 import About from '../routes/settings/About.svelte'
+import HomeAssistant from '../routes/settings/HomeAssistant.svelte'
 
 export const routes = {
   '/': Dashboard,
@@ -43,6 +44,7 @@ routes['/settings/network'] = Network
 routes['/settings/http'] = Http
 routes['/settings/mqtt'] = Mqtt
 routes['/settings/ocpp'] = Ocpp
+routes['/settings/home-assistant'] = HomeAssistant
 
 // Charger pages — override the placeholders set above.
 routes['/settings/evse'] = Evse

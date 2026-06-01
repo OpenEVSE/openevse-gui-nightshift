@@ -92,6 +92,14 @@
       "suspend_evse": "OCPP peut suspendre le chargeur",
       "energize_plug": "Alimenter la prise à l'autorisation"
     },
+    "homeassistant": {
+      "title": "Home Assistant",
+      "url": "URL de Home Assistant",
+      "connect": "Connecter",
+      "disconnect": "Déconnecter",
+      "connected": "Connecté",
+      "disconnected": "Non connecté"
+    },
     "title": "Paramètres",
     "back": "Paramètres",
     "coming_soon": "Cette page arrive bientôt.",
@@ -118,7 +126,8 @@
       "firmware": "Micrologiciel",
       "certificates": "Certificats",
       "terminal": "Outils développeur",
-      "about": "À propos"
+      "about": "À propos",
+      "home_assistant": "Home Assistant"
     },
     "validation": {
       "required": "Requis",

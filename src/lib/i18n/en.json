@@ -92,6 +92,14 @@
       "suspend_evse": "Let OCPP suspend the charger",
       "energize_plug": "Energize plug on authorization"
     },
+    "homeassistant": {
+      "title": "Home Assistant",
+      "url": "Home Assistant URL",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "connected": "Connected",
+      "disconnected": "Not connected"
+    },
     "title": "Settings",
     "back": "Settings",
     "coming_soon": "This page is coming soon.",
@@ -118,7 +126,8 @@
       "firmware": "Firmware",
       "certificates": "Certificates",
       "terminal": "Developer Tools",
-      "about": "About"
+      "about": "About",
+      "home_assistant": "Home Assistant"
     },
     "validation": {
       "required": "Required",
