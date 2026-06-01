@@ -228,6 +228,7 @@
       "entity_soc": "SoC entitás",
       "entity_range": "Hatótáv entitás",
       "entity_eta": "Töltési idő entitás",
+      "entity_charge_limit": "Töltési limit entitás",
       "http_info": "Járműadatokat küldhet a töltőre HTTP POST kéréssel:",
       "via_openevse": "A bejelentkezés az OpenEVSE szerverén keresztül történik, amely elvégzi a Tesla azonosítást. Az Irányítópult megnyitásával közvetlenül is beilleszthet API tokeneket.",
       "username": "Tesla fiók e-mail cím",

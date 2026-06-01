@@ -228,6 +228,7 @@
       "entity_soc": "Entidad de SoC",
       "entity_range": "Entidad de autonomía",
       "entity_eta": "Entidad de tiempo de carga",
+      "entity_charge_limit": "Entidad de límite de carga",
       "http_info": "Envía datos del vehículo al cargador mediante HTTP POST:",
       "via_openevse": "El inicio de sesión se realiza a través del servidor de OpenEVSE, que gestiona el acceso a Tesla. También puedes abrir Avanzado para pegar los tokens de API directamente.",
       "username": "Correo electrónico de la cuenta Tesla",

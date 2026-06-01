@@ -228,6 +228,7 @@
       "entity_soc": "SoC entity",
       "entity_range": "Range entity",
       "entity_eta": "Time-to-full entity",
+      "entity_charge_limit": "Charge-limit entity",
       "http_info": "Push vehicle data to the charger with an HTTP POST:",
       "via_openevse": "Login goes through OpenEVSE's server, which performs the Tesla sign-in. Or open Advanced to paste API tokens directly.",
       "username": "Tesla account email",

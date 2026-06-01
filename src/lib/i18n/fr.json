@@ -228,6 +228,7 @@
       "entity_soc": "Entité de SoC",
       "entity_range": "Entité d'autonomie",
       "entity_eta": "Entité de temps de charge",
+      "entity_charge_limit": "Entité de limite de charge",
       "http_info": "Envoyez les données véhicule au chargeur via HTTP POST :",
       "via_openevse": "La connexion passe par le serveur OpenEVSE, qui effectue l'authentification Tesla. Vous pouvez aussi ouvrir Avancé pour coller directement vos tokens API.",
       "username": "Adresse e-mail du compte Tesla",

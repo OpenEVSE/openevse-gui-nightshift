@@ -277,6 +277,14 @@
           onchange={(v) => form.saveField('ha_vehicle_eta', v)}
         />
       </FormField>
+      <FormField label={$_('config.vehicle.entity_charge_limit')} status={$ss.ha_vehicle_charge_limit ?? 'idle'}>
+        <TextInput
+          value={$config_store?.ha_vehicle_charge_limit ?? ''}
+          placeholder="sensor.car_charge_limit"
+          revert={form.revert}
+          onchange={(v) => form.saveField('ha_vehicle_charge_limit', v)}
+        />
+      </FormField>
     </ConfigSection>
   {/if}
 </ConfigPage>
