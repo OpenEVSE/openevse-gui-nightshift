@@ -10,7 +10,7 @@ export const SETTINGS_PAGES = [
   { key: 'http', route: '/settings/http', icon: 'mdi:web', labelKey: 'config.pages.http', section: 'connectivity' },
   { key: 'mqtt', route: '/settings/mqtt', icon: 'mdi:transit-connection-variant', labelKey: 'config.pages.mqtt', section: 'connectivity' },
   { key: 'ocpp', route: '/settings/ocpp', icon: 'mdi:ev-station', labelKey: 'config.pages.ocpp', section: 'connectivity' },
-  { key: 'home-assistant', route: '/settings/home-assistant', icon: 'mdi:home-assistant', labelKey: 'config.pages.home_assistant', section: 'connectivity' },
+  { key: 'home-assistant', route: '/settings/home-assistant', icon: 'mdi:home-assistant', labelKey: 'config.pages.home_assistant', section: 'connectivity', requires: 'ha_supported' },
   // Charger
   { key: 'evse', route: '/settings/evse', icon: 'mdi:car-electric', labelKey: 'config.pages.evse', section: 'charger' },
   { key: 'safety', route: '/settings/safety', icon: 'mdi:shield-check-outline', labelKey: 'config.pages.safety', section: 'charger' },
@@ -29,9 +29,11 @@ export const SETTINGS_PAGES = [
   { key: 'about', route: '/settings/about', icon: 'mdi:information-outline', labelKey: 'config.pages.about', section: 'system' },
 ]
 
-export function pagesBySection() {
+export function pagesBySection(config) {
   return SECTIONS.map((section) => ({
     section,
-    pages: SETTINGS_PAGES.filter((p) => p.section === section),
+    pages: SETTINGS_PAGES.filter(
+      (p) => p.section === section && (!p.requires || (config && config[p.requires])),
+    ),
   }))
 }

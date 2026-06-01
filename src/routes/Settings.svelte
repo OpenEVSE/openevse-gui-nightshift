@@ -4,8 +4,9 @@
   import Card from '../lib/components/ui/Card.svelte'
   import Icon from '../lib/icons/Icon.svelte'
   import { pagesBySection } from '../lib/config/pages.js'
+  import { config_store } from '../lib/stores/config.js'
 
-  const groups = pagesBySection()
+  let groups = $derived(pagesBySection($config_store))
 </script>
 
 <section class="p-4">

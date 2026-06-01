@@ -25,7 +25,9 @@
     { value: '1', label: $_('config.vehicle.src_tesla') },
     { value: '2', label: $_('config.vehicle.src_mqtt') },
     { value: '3', label: $_('config.vehicle.src_http') },
-    { value: '4', label: $_('config.vehicle.src_homeassistant') },
+    ...($config_store?.ha_supported
+      ? [{ value: '4', label: $_('config.vehicle.src_homeassistant') }]
+      : []),
   ])
   let unitOptions = $derived([
     { value: 'false', label: $_('config.vehicle.km') },

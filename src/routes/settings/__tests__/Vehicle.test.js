@@ -115,6 +115,17 @@ describe('Vehicle page', () => {
     expect(queryByText('config.vehicle.topic_soc')).not.toBeInTheDocument() // not the MQTT block
   })
 
+  it('offers the Home Assistant source only when ha is supported', () => {
+    config_store.set({ vehicle_data_src: 0, ha_supported: true })
+    const { getByText } = render(Vehicle)
+    expect(getByText('config.vehicle.src_homeassistant')).toBeInTheDocument()
+  })
+  it('hides the Home Assistant source when ha is unsupported', () => {
+    config_store.set({ vehicle_data_src: 0 })
+    const { queryByText } = render(Vehicle)
+    expect(queryByText('config.vehicle.src_homeassistant')).not.toBeInTheDocument()
+  })
+
   it('shows login_failed when the login endpoint returns ok: false', async () => {
     httpAPI.mockImplementation((m, url) => {
       if (url === 'https://auth.openevse.com/login')
