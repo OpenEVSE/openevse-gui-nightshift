@@ -108,6 +108,13 @@ describe('Vehicle page', () => {
     })
   })
 
+  it('reveals HA entity fields when the source is Home Assistant', () => {
+    config_store.set({ vehicle_data_src: 4 })
+    const { getByText, queryByText } = render(Vehicle)
+    expect(getByText('config.vehicle.entity_soc')).toBeInTheDocument()
+    expect(queryByText('config.vehicle.topic_soc')).not.toBeInTheDocument() // not the MQTT block
+  })
+
   it('shows login_failed when the login endpoint returns ok: false', async () => {
     httpAPI.mockImplementation((m, url) => {
       if (url === 'https://auth.openevse.com/login')
