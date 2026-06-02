@@ -342,11 +342,22 @@
   // While charging, refresh the raw energy log every 10 s so the session chart
   // tracks live. The raw log isn't version-bumped like the pull stores, so we
   // poll it ourselves. The effect re-runs when `charging` flips; its cleanup
-  // clears the interval, so polling starts/stops with the charging state.
+  // clears the interval, so polling starts/stops with the charging state. The
+  // in-flight guard prevents ticks piling up if the device is slow to respond.
   $effect(() => {
     if (!charging) return
-    energy_store.loadRaw()
-    const id = setInterval(() => energy_store.loadRaw(), 10000)
+    let inflight = false
+    const tick = async () => {
+      if (inflight) return
+      inflight = true
+      try {
+        await energy_store.loadRaw()
+      } finally {
+        inflight = false
+      }
+    }
+    tick()
+    const id = setInterval(tick, 10000)
     return () => clearInterval(id)
   })
 </script>
@@ -408,7 +419,7 @@
           {display}
           {fill}
           {kw}
-          maxKw={charging ? maxKw : ''}
+          maxKw=""
           reasonKey={reason.key}
           reasonValues={reason.values}
           faultText={getStateDesc($status_store?.state) ?? ''}
