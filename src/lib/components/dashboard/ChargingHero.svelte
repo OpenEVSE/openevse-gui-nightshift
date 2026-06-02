@@ -47,9 +47,11 @@
     {#if hasSoc && soc != null}
       <div class="w-px self-stretch bg-border"></div>
       <div class="text-center">
-        <div class="text-4xl font-extrabold leading-none text-text">{soc}<span class="text-xl">%</span></div>
+        <div class="text-4xl font-extrabold leading-none text-text">{Math.round(soc)}<span class="text-xl">%</span></div>
         <div class="mt-0.5 text-[10px] font-bold tracking-wide text-text-dim">
-          {$_('dashboard.session.soc_target', { values: { target } })}
+          {#if target != null}
+            {$_('dashboard.session.soc_target', { values: { target } })}
+          {/if}
         </div>
       </div>
     {/if}

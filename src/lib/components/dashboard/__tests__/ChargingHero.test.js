@@ -47,4 +47,14 @@ describe('ChargingHero', () => {
     // readout still present
     expect(queryByText('3.2')).toBeInTheDocument()
   })
+
+  it('omits the target sublabel when target is null', () => {
+    const { queryByText } = render(ChargingHero, { props: { ...base, target: null } })
+    expect(queryByText(/null/)).not.toBeInTheDocument()
+  })
+
+  it('rounds a fractional SOC for display', () => {
+    const { getByText } = render(ChargingHero, { props: { ...base, soc: 74.6 } })
+    expect(getByText('75')).toBeInTheDocument()
+  })
 })
