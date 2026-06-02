@@ -51,3 +51,9 @@ export function hmsShort(sec) {
   }
   return h ? `${h}h ${m}m` : `${m}m`
 }
+
+/** Estimated pack max range from a current range reading and SOC %. null if not derivable. */
+export function estMaxRange(batteryRange, soc) {
+  if (!Number.isFinite(batteryRange) || !Number.isFinite(soc) || soc <= 0) return null
+  return batteryRange / (soc / 100)
+}
