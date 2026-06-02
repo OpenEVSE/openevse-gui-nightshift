@@ -7,6 +7,7 @@
     disabled = false,
     onchange = () => {},
     format = (v) => v,
+    ariaLabel = '',
   } = $props()
 
   let current = $state(value)
@@ -27,7 +28,7 @@
 <div class="relative pt-7">
   <input
     type="range"
-    role="slider"
+    aria-label={ariaLabel || undefined}
     {min}
     {max}
     {step}

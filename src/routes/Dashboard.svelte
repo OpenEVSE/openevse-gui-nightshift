@@ -22,8 +22,8 @@
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
   import StatChips from '../lib/components/dashboard/StatChips.svelte'
   import ThrottleBadge from '../lib/components/dashboard/ThrottleBadge.svelte'
-  import ModeSelector from '../lib/components/dashboard/ModeSelector.svelte'
-  import ChargeRate from '../lib/components/dashboard/ChargeRate.svelte'
+  import ModePill from '../lib/components/dashboard/ModePill.svelte'
+  import RatePill from '../lib/components/dashboard/RatePill.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
   import ChargeLimitModal from '../lib/components/dashboard/ChargeLimitModal.svelte'
   import VehicleSocBar from '../lib/components/dashboard/VehicleSocBar.svelte'
@@ -86,6 +86,15 @@
     claimOwner === EvseClients.ocpp.id ||
     claimOwner === EvseClients.limit.id ||
     claimOwner === EvseClients.rfid.id,
+  )
+  let modeLockLabel = $derived(
+    claimOwner === EvseClients.ocpp.id
+      ? 'OCPP'
+      : claimOwner === EvseClients.rfid.id
+        ? 'RFID'
+        : claimOwner === EvseClients.limit.id
+          ? 'LIMIT'
+          : '',
   )
 
   let showEco = $derived(!!$config_store?.divert_enabled)
@@ -158,7 +167,7 @@
         )
         if (!ok) {
           showWriteError()
-          rateNonce++ // remount ChargeRate so the slider reverts to the confirmed value
+          rateNonce++ // remount RatePill so the slider reverts to the confirmed value
         }
       }
     } finally {
@@ -318,15 +327,38 @@
 <section class="px-4 pb-4">
   <StatusLine {display} />
 
-  <PowerRing
-    {display}
-    {fill}
-    {kw}
-    maxKw={charging ? maxKw : ''}
-    reasonKey={reason.key}
-    reasonValues={reason.values}
-    faultText={getStateDesc($status_store?.state) ?? ''}
-  />
+  <div class="relative">
+    <div class="absolute left-0 top-1 z-10">
+      <ModePill
+        {mode}
+        locked={modeLocked}
+        lockLabel={modeLockLabel}
+        disabled={busy || display === 'error'}
+        onmode={setMode}
+      />
+    </div>
+    <div class="absolute right-0 top-1 z-10">
+      {#key rateNonce}
+        <RatePill
+          amps={chargeAmps}
+          min={6}
+          max={maxAmps}
+          claimedBy={rateClaimedBy}
+          disabled={busy || ecoOn || display === 'error'}
+          onchange={setChargeAmps}
+        />
+      {/key}
+    </div>
+    <PowerRing
+      {display}
+      {fill}
+      {kw}
+      maxKw={charging ? maxKw : ''}
+      reasonKey={reason.key}
+      reasonValues={reason.values}
+      faultText={getStateDesc($status_store?.state) ?? ''}
+    />
+  </div>
 
   <ThrottleBadge />
 
@@ -340,24 +372,7 @@
     disabled={busy || display === 'error'}
   />
 
-  <ModeSelector
-    {mode}
-    disabled={busy || modeLocked || display === 'error'}
-    onmode={setMode}
-  />
-
   {#if display !== 'error'}
-    {#key rateNonce}
-      <ChargeRate
-        amps={chargeAmps}
-        min={6}
-        max={maxAmps}
-        disabled={busy || ecoOn}
-        claimedBy={rateClaimedBy}
-        onchange={setChargeAmps}
-      />
-    {/key}
-
     {#if hasSoc}
       {#key socNonce}
         <VehicleSocBar

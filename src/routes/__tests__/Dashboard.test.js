@@ -42,22 +42,20 @@ describe('Dashboard', () => {
     expect(getByText('dashboard.ring.ready')).toBeInTheDocument()
   })
 
-  it('disables mode segments when RFID client owns the state claim', () => {
+  it('locks the mode pill to the claim owner (RFID)', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     claims_target_store.set({ properties: {}, claims: { state: EvseClients.rfid.id } })
-    const { getAllByRole } = render(Dashboard)
-    const buttons = getAllByRole('button')
-    const modeButtons = buttons.filter((btn) => btn.hasAttribute('aria-pressed'))
-    expect(modeButtons.length).toBeGreaterThan(0)
-    modeButtons.forEach((btn) => {
-      expect(btn).toBeDisabled()
-    })
+    const { getByText, queryByText } = render(Dashboard)
+    expect(getByText('RFID')).toBeInTheDocument()
+    // locked pill renders no popover options
+    expect(queryByText('dashboard.mode.off')).not.toBeInTheDocument()
   })
 
   it('surfaces the global alert when a mode write fails', async () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     httpAPI.mockResolvedValue('error')
-    const { getByText } = render(Dashboard)
+    const { getByText, getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.mode.aria' }))
     await fireEvent.click(getByText('dashboard.mode.on'))
     await vi.waitFor(() => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
@@ -107,6 +105,25 @@ describe('Dashboard', () => {
     await fireEvent.change(slider)
     await vi.waitFor(() => {
       expect(httpAPI).toHaveBeenCalledWith('DELETE', '/limit')
+    })
+  })
+
+  it('renders the mode and rate pills instead of the old rows', () => {
+    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 32000, session_energy: 0, session_elapsed: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    expect(getByRole('button', { name: 'dashboard.mode.aria' })).toBeInTheDocument()
+    expect(getByRole('button', { name: 'dashboard.rate.aria' })).toBeInTheDocument()
+  })
+
+  it('writes the charge rate from the rate pill', async () => {
+    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 32000, session_energy: 0, session_elapsed: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    const slider = getByRole('slider', { name: 'dashboard.rate.aria' })
+    slider.value = '20'
+    await fireEvent.change(slider)
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/override', expect.stringContaining('"charge_current":20'))
     })
   })
 })
