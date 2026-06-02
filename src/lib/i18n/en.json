@@ -531,6 +531,10 @@
     },
     "throttle": {
       "active": "Throttled · {amps} A"
+    },
+    "session": {
+      "collecting": "Collecting session data…",
+      "soc_target": "SOC → {target}%"
     }
   },
   "monitoring": {
