@@ -487,14 +487,12 @@
     },
     "summary": { "today": "Hoy", "total": "Total" },
     "mode": {
-      "label": "Modo de carga",
       "auto": "Auto",
       "on": "Activado",
       "off": "Desactivado",
-      "locked": "Controlado por {client}",
       "aria": "Modo de carga"
     },
-    "rate": { "label": "Tasa de carga", "claimed": "Establecido por {client}", "aria": "Velocidad de carga" },
+    "rate": { "claimed": "Establecido por {client}", "aria": "Velocidad de carga" },
     "vehicle": {
       "label": "Vehículo",
       "charging_to": "cargando hasta {pct}%",

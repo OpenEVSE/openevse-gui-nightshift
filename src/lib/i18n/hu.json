@@ -487,14 +487,12 @@
     },
     "summary": { "today": "Ma", "total": "Összes" },
     "mode": {
-      "label": "Töltési mód",
       "auto": "Auto",
       "on": "Be",
       "off": "Ki",
-      "locked": "{client} irányítja",
       "aria": "Töltési mód"
     },
-    "rate": { "label": "Töltési sebesség", "claimed": "{client} állítja", "aria": "Töltési sebesség" },
+    "rate": { "claimed": "{client} állítja", "aria": "Töltési sebesség" },
     "vehicle": {
       "label": "Jármű",
       "charging_to": "töltés eddig: {pct}%",

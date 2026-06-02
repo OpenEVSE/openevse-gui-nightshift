@@ -8,7 +8,7 @@
 <!-- Fixed-height band: the charging layout (chips + sensor row) is taller
      than the resting summary, so reserve its height and centre the content.
      This keeps the controls below from shifting as the state changes. -->
-<div class="flex min-h-[96px] flex-col justify-center">
+<div class="flex flex-col justify-center {charging ? 'min-h-[96px]' : ''}">
   {#if charging}
     <div class="grid grid-cols-3 gap-2 py-2">
       <StatChip value={live.sessionKwh} label={$_('dashboard.chips.session')} sub={sessionCost} />

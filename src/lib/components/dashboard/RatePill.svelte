@@ -14,7 +14,6 @@
 </script>
 
 <div class="relative inline-block text-center">
-  <div class="text-[8px] tracking-wide text-text-dim uppercase">{$_('dashboard.rate.label')}</div>
   <button
     type="button"
     aria-label={$_('dashboard.rate.aria')}

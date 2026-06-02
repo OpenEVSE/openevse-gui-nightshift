@@ -487,14 +487,12 @@
     },
     "summary": { "today": "Today", "total": "Total" },
     "mode": {
-      "label": "Charge mode",
       "auto": "Auto",
       "on": "On",
       "off": "Off",
-      "locked": "Controlled by {client}",
       "aria": "Charge mode"
     },
-    "rate": { "label": "Charge rate", "claimed": "Set by {client}", "aria": "Charge rate" },
+    "rate": { "claimed": "Set by {client}", "aria": "Charge rate" },
     "vehicle": {
       "label": "Vehicle",
       "charging_to": "charging to {pct}%",
