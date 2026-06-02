@@ -97,4 +97,16 @@ describe('Dashboard', () => {
       expect(httpAPI).toHaveBeenCalledWith('POST', '/limit', JSON.stringify({ type: 'soc', value: 85, auto_release: true }))
     })
   })
+
+  it('clears the soc limit when the knob is dragged up to the vehicle limit', async () => {
+    limit_store.set({ type: 'soc', value: 60, auto_release: true })
+    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 80, battery_range: 206, time_to_full_charge: 0 })
+    const { getByRole } = render(Dashboard)
+    const slider = getByRole('slider', { name: 'dashboard.vehicle.target_aria' })
+    slider.value = '80' // at the vehicle limit → no limit
+    await fireEvent.change(slider)
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('DELETE', '/limit')
+    })
+  })
 })

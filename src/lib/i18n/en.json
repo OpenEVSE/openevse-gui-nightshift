@@ -499,10 +499,8 @@
       "charging_to": "charging to {pct}%",
       "to_full": "{time} to full",
       "vehicle_limit": "vehicle limit {pct}%",
-      "target": "target {pct}%",
-      "target_aria": "Charge target",
-      "clear": "Clear charge target",
-      "cap_note": "Vehicle stops at its own {pct}% limit — target above it won't charge further."
+      "evse_limit": "EVSE limit {pct}%",
+      "target_aria": "EVSE charge limit"
     },
     "limit": {
       "label": "Charge limit",

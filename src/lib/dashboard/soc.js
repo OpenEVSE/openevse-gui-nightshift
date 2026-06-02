@@ -6,12 +6,16 @@ function clampPct(n) {
   return Math.max(0, Math.min(100, n))
 }
 
-/** Resting knob position when no soc limit is set: the vehicle limit, or 80 if unknown. */
-export function restingTarget(vehicleLimit) {
-  return Number.isFinite(vehicleLimit) ? clampPct(vehicleLimit) : 80
+/**
+ * The "no limit" knob position: the vehicle limit when known, else 100.
+ * The knob resting here (or being dragged at/above it) means OpenEVSE imposes
+ * no soc limit of its own — the car governs.
+ */
+export function socCeiling(vehicleLimit) {
+  return Number.isFinite(vehicleLimit) ? clampPct(vehicleLimit) : 100
 }
 
-/** True when the target sits above the vehicle's own limit (a hard ceiling). */
+/** True when the target sits above the vehicle's own limit (shown red while dragging). */
 export function isCapped(target, vehicleLimit) {
   return Number.isFinite(vehicleLimit) && target > vehicleLimit
 }
@@ -23,10 +27,8 @@ export function effectiveStop(target, vehicleLimit) {
 
 /**
  * Bar geometry as 0..100 percentages.
- *  fillPct       solid SOC fill
- *  zoneEndPct    end of the lighter "will charge to" zone (= effective stop, never below SOC)
- *  hatchStartPct unreachable-region start (vehicle limit) — only meaningful when capped
- *  hatchEndPct   unreachable-region end (target) — only meaningful when capped
+ *  fillPct     solid SOC fill
+ *  zoneEndPct  end of the lighter "will charge to" zone (= effective stop, never below SOC)
  */
 export function socBarSegments({ soc, target, vehicleLimit }) {
   const s = clampPct(soc)
@@ -35,8 +37,6 @@ export function socBarSegments({ soc, target, vehicleLimit }) {
   return {
     fillPct: s,
     zoneEndPct: Math.max(s, eff),
-    hatchStartPct: clampPct(vehicleLimit),
-    hatchEndPct: t,
   }
 }
 

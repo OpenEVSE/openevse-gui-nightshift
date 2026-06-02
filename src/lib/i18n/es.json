@@ -499,10 +499,8 @@
       "charging_to": "cargando hasta {pct}%",
       "to_full": "{time} para completar",
       "vehicle_limit": "límite del vehículo {pct}%",
-      "target": "objetivo {pct}%",
-      "target_aria": "Objetivo de carga",
-      "clear": "Quitar objetivo de carga",
-      "cap_note": "El vehículo se detiene en su propio límite del {pct}%; un objetivo superior no cargará más."
+      "evse_limit": "límite EVSE {pct}%",
+      "target_aria": "Límite de carga EVSE"
     },
     "limit": {
       "label": "Límite de carga",

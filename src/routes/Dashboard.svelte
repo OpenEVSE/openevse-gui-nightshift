@@ -16,7 +16,7 @@
   import { formatCost } from '../lib/cost.js'
   import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
-  import { restingTarget } from '../lib/dashboard/soc.js'
+  import { socCeiling } from '../lib/dashboard/soc.js'
 
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
@@ -111,7 +111,8 @@
     Number.isFinite($status_store?.vehicle_charge_limit) ? $status_store.vehicle_charge_limit : null,
   )
   let socLimitActive = $derived($limit_store?.type === 'soc')
-  let socTarget = $derived(socLimitActive ? $limit_store.value : restingTarget(vehicleLimit))
+  // Knob rests at the ceiling (vehicle limit, or 100) when no soc limit is set.
+  let socTarget = $derived(socLimitActive ? $limit_store.value : socCeiling(vehicleLimit))
   // Bumped on a failed soc write to remount the bar back to the confirmed value.
   let socNonce = $state(0)
 
@@ -206,30 +207,26 @@
     if (!ok) showWriteError()
   }
 
+  // Snap-to-clear: a target at or above the vehicle limit (the ceiling) means
+  // "no OpenEVSE limit" — the car governs. Below it sets a real soc limit.
   async function setSocTarget(val) {
     if (busy) return
     busy = true
     try {
-      const ok = await serialQueue.add(() =>
-        limit_store.upload({ type: 'soc', value: val, auto_release: true }),
-      )
-      if (ok) {
-        await serialQueue.add(() => limit_store.download())
+      let ok
+      if (val >= socCeiling(vehicleLimit)) {
+        // No effective limit. Remove any existing soc limit; otherwise a no-op.
+        ok = socLimitActive ? await serialQueue.add(() => limit_store.remove()) : true
       } else {
-        showWriteError()
-        socNonce++ // remount VehicleSocBar so the target reverts to the confirmed value
+        ok = await serialQueue.add(() =>
+          limit_store.upload({ type: 'soc', value: val, auto_release: true }),
+        )
+        if (ok) await serialQueue.add(() => limit_store.download())
       }
-    } finally {
-      busy = false
-    }
-  }
-
-  async function clearSocLimit() {
-    if (busy) return
-    busy = true
-    try {
-      const ok = await serialQueue.add(() => limit_store.remove())
-      if (!ok) showWriteError()
+      if (!ok) {
+        showWriteError()
+        socNonce++ // remount VehicleSocBar so the knob reverts to the confirmed value
+      }
     } finally {
       busy = false
     }
@@ -371,10 +368,8 @@
           rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
           timeToFull={$status_store?.time_to_full_charge ?? 0}
           {charging}
-          limitActive={socLimitActive}
           disabled={busy}
           onchange={setSocTarget}
-          onclear={clearSocLimit}
         />
       {/key}
     {/if}

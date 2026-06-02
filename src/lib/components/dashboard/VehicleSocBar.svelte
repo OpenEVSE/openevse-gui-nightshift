@@ -1,7 +1,6 @@
 <script>
   import { _ } from 'svelte-i18n'
-  import Icon from '../../icons/Icon.svelte'
-  import { socBarSegments, isCapped, hmsShort } from '../../dashboard/soc.js'
+  import { socBarSegments, isCapped, socCeiling, hmsShort } from '../../dashboard/soc.js'
 
   let {
     soc = 0,
@@ -11,15 +10,13 @@
     rangeMiles = false,
     timeToFull = 0,
     charging = false,
-    limitActive = false,
     disabled = false,
     onchange = () => {},
-    onclear = () => {},
   } = $props()
 
-  // Live position during a drag; resyncs whenever the committed target changes.
-  // Initialise from the prop so the first paint is correct (matches Slider.svelte);
-  // the $effect re-syncs on later prop changes. The warning is a false positive here.
+  // Live knob position during a drag. Initialise from the prop so the first paint
+  // is correct (matches Slider.svelte); the $effect re-syncs on later prop changes
+  // — including the snap back to the ceiling after the limit is cleared.
   // svelte-ignore state_referenced_locally
   let current = $state(target)
   $effect(() => {
@@ -34,103 +31,89 @@
   }
 
   let seg = $derived(socBarSegments({ soc, target: current, vehicleLimit }))
-  let capped = $derived(isCapped(current, vehicleLimit))
+  let ceiling = $derived(socCeiling(vehicleLimit))
+  // Above the vehicle limit (shown red, only ever transient — release snaps back).
+  let above = $derived(isCapped(current, vehicleLimit))
+  // Knob resting at/above the ceiling means no OpenEVSE limit.
+  let atRest = $derived(current >= ceiling)
+
   let toFull = $derived(charging ? hmsShort(timeToFull) : '')
   let rangeUnit = $derived(rangeMiles ? $_('units.miles') : $_('units.km'))
-  // The target line is dimmed when it's not an active limit, or when capped.
-  let dim = $derived(!limitActive || capped)
+
+  let lineClass = $derived(above ? 'bg-error' : 'bg-text')
+  let labelClass = $derived(above ? 'border-error text-error' : 'border-border text-text')
+  // Dimmed when resting (no limit); solid when an active limit is set, or red above.
+  let knobOpacity = $derived(atRest && !above ? 0.55 : 1)
 </script>
 
 <div class="mt-3 rounded-xl bg-surface-2 px-3 py-3">
   <!-- header -->
-  <div class="mb-7 flex items-baseline justify-between">
-    <span class="text-[8px] tracking-wide text-text-dim uppercase">{$_('dashboard.vehicle.label')}</span>
-    <span class="text-xs text-text">
+  <div class="mb-3 flex items-center justify-between gap-2">
+    <span class="shrink-0 text-[8px] tracking-wide text-text-dim uppercase">{$_('dashboard.vehicle.label')}</span>
+    <span class="min-w-0 truncate text-xs text-text">
       {#if range != null}{range}&nbsp;{rangeUnit} · {/if}{$_('dashboard.vehicle.charging_to', {
         values: { pct: Math.round(seg.zoneEndPct) },
       })}{#if toFull} · {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}{/if}
     </span>
   </div>
 
-  <!-- bar -->
-  <div class="relative h-[34px]">
-    <!-- track -->
-    <div class="absolute inset-0 rounded-full bg-surface-3"></div>
-    <!-- SOC fill: rounded left, flat right -->
-    <div
-      class="absolute inset-y-0 left-0 rounded-l-full bg-gradient-to-r from-accent to-cyan-400"
-      style="width: {seg.fillPct}%"
-    ></div>
-    <!-- "will charge to" zone -->
-    {#if seg.zoneEndPct > seg.fillPct}
+  <!-- bar block — reserves room above (EVSE-limit bubble) and below (vehicle-limit
+       label) so neither overflows the card or collides with the header -->
+  <div class="relative h-[84px]">
+    <!-- track row, centred in the reserved space -->
+    <div class="absolute inset-x-0 top-[28px] h-[34px]">
+      <!-- track -->
+      <div class="absolute inset-0 rounded-full bg-surface-3"></div>
+      <!-- SOC fill: rounded left, flat right -->
       <div
-        class="absolute inset-y-0 bg-accent/30"
-        style="left: {seg.fillPct}%; width: {seg.zoneEndPct - seg.fillPct}%"
+        class="absolute inset-y-0 left-0 rounded-l-full bg-gradient-to-r from-accent to-cyan-400"
+        style="width: {seg.fillPct}%"
       ></div>
-    {/if}
-    <!-- unreachable region when capped -->
-    {#if capped}
-      <div
-        class="absolute inset-y-0"
-        style="left: {seg.hatchStartPct}%; width: {seg.hatchEndPct - seg.hatchStartPct}%;
-               background: repeating-linear-gradient(45deg, rgba(251,191,36,.10) 0 4px, transparent 4px 8px)"
-      ></div>
-    {/if}
-    <!-- SOC % label inside the fill -->
-    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-[15px] font-bold text-[#04121d]">
-      {Math.round(soc)}%
+      <!-- "will charge to" zone -->
+      {#if seg.zoneEndPct > seg.fillPct}
+        <div
+          class="absolute inset-y-0 bg-accent/30"
+          style="left: {seg.fillPct}%; width: {seg.zoneEndPct - seg.fillPct}%"
+        ></div>
+      {/if}
+      <!-- SOC % label inside the fill -->
+      <div class="absolute left-3 top-1/2 -translate-y-1/2 text-[15px] font-bold text-[#04121d]">
+        {Math.round(soc)}%
+      </div>
+      <!-- invisible, accessible drag control over the track -->
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value={current}
+        {disabled}
+        aria-label={$_('dashboard.vehicle.target_aria')}
+        oninput={handleInput}
+        onchange={handleChange}
+        class="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+      />
     </div>
 
-    <!-- vehicle-limit marker: thin amber line, label below -->
+    <!-- vehicle-limit marker: amber line over the track, label below (decorative) -->
     {#if vehicleLimit != null}
-      <div class="absolute -top-1.5 -bottom-6 w-0" style="left: {vehicleLimit}%">
-        <div class="absolute left-1/2 top-0 bottom-[18px] w-0.5 -translate-x-1/2 bg-amber-400"></div>
-        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-amber-400">
+      <div class="pointer-events-none absolute top-[28px] w-0" style="left: {vehicleLimit}%">
+        <div class="absolute top-0 left-1/2 h-[34px] w-0.5 -translate-x-1/2 bg-amber-400"></div>
+        <div class="absolute top-[38px] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-amber-400">
           {$_('dashboard.vehicle.vehicle_limit', { values: { pct: Math.round(vehicleLimit) } })}
         </div>
       </div>
     {/if}
 
-    <!-- target: wide white line, bubble label above -->
-    <div class="absolute -top-[34px] -bottom-2 w-0" style="left: {current}%; opacity: {dim ? 0.55 : 1}">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-surface-3 px-1.5 py-0.5 text-[11px] font-semibold text-text">
-        {$_('dashboard.vehicle.target', { values: { pct: Math.round(current) } })}
-      </div>
-      <div class="absolute top-[26px] bottom-0 left-1/2 w-1.5 -translate-x-1/2 rounded-[3px] bg-text"></div>
-    </div>
-
-    <!-- invisible, accessible drag control over the whole bar -->
-    <input
-      type="range"
-      min="0"
-      max="100"
-      step="1"
-      value={current}
-      {disabled}
-      aria-label={$_('dashboard.vehicle.target_aria')}
-      oninput={handleInput}
-      onchange={handleChange}
-      class="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
-    />
-
-    <!-- clear the soc limit (only when one is active) -->
-    {#if limitActive}
-      <button
-        type="button"
-        aria-label={$_('dashboard.vehicle.clear')}
-        onclick={onclear}
-        class="absolute -right-1 -top-7 rounded-full p-1 text-text-dim hover:text-error"
+    <!-- EVSE-limit knob: bubble above, wide line over the track (decorative; the
+         range input handles interaction). Red while above the vehicle limit. -->
+    <div class="pointer-events-none absolute top-0 w-0" style="left: {current}%; opacity: {knobOpacity}">
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border bg-surface-3 px-1.5 py-0.5 text-[11px] font-semibold {labelClass}"
       >
-        <Icon icon="mdi:close" size={16} />
-      </button>
-    {/if}
-  </div>
-
-  <!-- cap note -->
-  {#if capped}
-    <div class="mt-2 flex items-center gap-1.5 text-[11.5px] text-amber-400">
-      <Icon icon="mdi:alert" size={14} />
-      <span>{$_('dashboard.vehicle.cap_note', { values: { pct: Math.round(vehicleLimit) } })}</span>
+        {$_('dashboard.vehicle.evse_limit', { values: { pct: Math.round(current) } })}
+      </div>
+      <div class="absolute top-[28px] left-1/2 h-[34px] w-1.5 -translate-x-1/2 rounded-[3px] {lineClass}"></div>
     </div>
-  {/if}
+  </div>
 </div>

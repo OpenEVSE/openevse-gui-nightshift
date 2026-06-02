@@ -26,24 +26,23 @@ describe('VehicleSocBar', () => {
     expect(onchange).toHaveBeenCalledWith(65)
   })
 
-  it('shows the cap note only when the target is above the vehicle limit', async () => {
-    const capped = render(VehicleSocBar, { props: { soc: 74, vehicleLimit: 75, target: 80 } })
-    expect(capped.getByText('dashboard.vehicle.cap_note')).toBeInTheDocument()
-    cleanup()
-
-    const normal = render(VehicleSocBar, { props: { soc: 74, vehicleLimit: 90, target: 80 } })
-    expect(normal.queryByText('dashboard.vehicle.cap_note')).not.toBeInTheDocument()
+  it('labels the draggable knob as the EVSE limit', () => {
+    const { getByText } = render(VehicleSocBar, { props: { ...base } })
+    expect(getByText('dashboard.vehicle.evse_limit')).toBeInTheDocument()
   })
 
-  it('shows the clear control and calls onclear only when a limit is active', async () => {
-    const onclear = vi.fn()
-    const active = render(VehicleSocBar, { props: { ...base, limitActive: true, onclear } })
-    await fireEvent.click(active.getByLabelText('dashboard.vehicle.clear'))
-    expect(onclear).toHaveBeenCalledOnce()
+  it('colours the EVSE-limit marker red only when above the vehicle limit', () => {
+    const above = render(VehicleSocBar, { props: { soc: 74, vehicleLimit: 75, target: 80 } })
+    expect(above.getByText('dashboard.vehicle.evse_limit').className).toContain('text-error')
     cleanup()
 
-    const inactive = render(VehicleSocBar, { props: { ...base, limitActive: false } })
-    expect(inactive.queryByLabelText('dashboard.vehicle.clear')).not.toBeInTheDocument()
+    const below = render(VehicleSocBar, { props: { soc: 74, vehicleLimit: 90, target: 80 } })
+    expect(below.getByText('dashboard.vehicle.evse_limit').className).not.toContain('text-error')
+  })
+
+  it('has no clear button — clearing is done by dragging to the vehicle limit', () => {
+    const { queryByLabelText } = render(VehicleSocBar, { props: { ...base } })
+    expect(queryByLabelText('dashboard.vehicle.clear')).not.toBeInTheDocument()
   })
 
   it('omits the vehicle-limit marker when the limit is unknown', () => {

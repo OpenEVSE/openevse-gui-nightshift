@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { restingTarget, isCapped, effectiveStop, socBarSegments, hmsShort } from '../soc.js'
+import { socCeiling, isCapped, effectiveStop, socBarSegments, hmsShort } from '../soc.js'
 
-describe('restingTarget', () => {
+describe('socCeiling', () => {
   it('uses the vehicle limit when known', () => {
-    expect(restingTarget(75)).toBe(75)
+    expect(socCeiling(75)).toBe(75)
   })
-  it('falls back to 80 when the vehicle limit is unknown', () => {
-    expect(restingTarget(null)).toBe(80)
-    expect(restingTarget(undefined)).toBe(80)
-    expect(restingTarget(NaN)).toBe(80)
+  it('falls back to 100 when the vehicle limit is unknown', () => {
+    expect(socCeiling(null)).toBe(100)
+    expect(socCeiling(undefined)).toBe(100)
+    expect(socCeiling(NaN)).toBe(100)
   })
 })
 
@@ -34,11 +34,11 @@ describe('effectiveStop', () => {
 describe('socBarSegments', () => {
   it('fills to SOC and runs the zone up to the effective stop', () => {
     expect(socBarSegments({ soc: 74, target: 80, vehicleLimit: 90 }))
-      .toEqual({ fillPct: 74, zoneEndPct: 80, hatchStartPct: 90, hatchEndPct: 80 })
+      .toEqual({ fillPct: 74, zoneEndPct: 80 })
   })
-  it('clamps the zone to the vehicle limit when capped', () => {
+  it('clamps the zone to the vehicle limit when the target is above it', () => {
     expect(socBarSegments({ soc: 74, target: 80, vehicleLimit: 75 }))
-      .toEqual({ fillPct: 74, zoneEndPct: 75, hatchStartPct: 75, hatchEndPct: 80 })
+      .toEqual({ fillPct: 74, zoneEndPct: 75 })
   })
   it('never runs the zone below the current SOC', () => {
     expect(socBarSegments({ soc: 74, target: 60, vehicleLimit: 90 }).zoneEndPct).toBe(74)
@@ -46,7 +46,7 @@ describe('socBarSegments', () => {
   it('clamps inputs to 0..100', () => {
     const s = socBarSegments({ soc: 120, target: -5, vehicleLimit: 200 })
     expect(s.fillPct).toBe(100)
-    expect(s.hatchEndPct).toBe(0)
+    expect(s.zoneEndPct).toBe(100)
   })
 })
 

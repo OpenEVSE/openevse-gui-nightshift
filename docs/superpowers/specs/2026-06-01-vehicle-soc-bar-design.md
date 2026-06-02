@@ -2,6 +2,26 @@
 
 **Status:** Approved design. Date: 2026-06-01.
 
+> **Revision 2026-06-02 (post-hardware UX pass).** After seeing it on an iPhone,
+> the interaction model and layout changed. This revision supersedes the
+> "draggable target" / cap-note / clear-button sections below where they conflict:
+>
+> - **Marker renamed** from "target" to **"EVSE limit"** (distinguishes it from the
+>   car's "vehicle limit").
+> - **No clear (×) button.** Clearing is **snap-to-clear**: a knob value **at or above
+>   the vehicle limit (the "ceiling" = vehicle limit, or 100% if unknown) means "no
+>   OpenEVSE limit."** Releasing there removes the `/limit`; the knob rests on the
+>   amber vehicle-limit line (dimmed). Below the line = an active soc limit.
+> - **Dragging above the vehicle limit shows the EVSE-limit marker + label in red**
+>   (live feedback that it exceeds the car's cap) — this **replaces the amber cap-note
+>   text and the hatch fill, both removed.** Red is transient: on release above the
+>   line it snaps back and clears.
+> - **Layout:** the bar lives in a fixed-height block (~84px) that reserves space for
+>   the bubble (above) and the vehicle-limit label (below) so nothing overflows the
+>   card or collides on narrow screens; the header info line truncates with `…`.
+> - Helper change: `restingTarget` → `socCeiling(vehicleLimit)` (vehicle limit, or 100);
+>   `socBarSegments` no longer returns hatch fields.
+
 ## Goal
 
 Add an evcc-style vehicle State-of-Charge bar to the Dashboard. It shows the
