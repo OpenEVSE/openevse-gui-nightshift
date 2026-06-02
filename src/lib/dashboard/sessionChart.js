@@ -6,6 +6,7 @@
 export function clipToSession(samples, sessionElapsed) {
   if (!Array.isArray(samples) || samples.length === 0) return []
   if (!Number.isFinite(sessionElapsed) || sessionElapsed <= 0) return samples
+  // /energy/raw returns samples in chronological order, so the last is newest.
   const start = samples[samples.length - 1].ts - sessionElapsed
   return samples.filter((s) => s.ts >= start)
 }
@@ -40,8 +41,9 @@ export function kwAxisMax(kwValues) {
 
 /** Format x-axis tick (relative seconds) as "0", "25m", or "1h05". */
 export function fmtSessionTime(sec) {
-  const m = Math.round(sec / 60)
+  let m = Math.round(sec / 60)
   if (m === 0) return '0'
   if (m < 60) return `${m}m`
-  return `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}`
+  const h = Math.floor(m / 60)
+  return `${h}h${String(m % 60).padStart(2, '0')}`
 }

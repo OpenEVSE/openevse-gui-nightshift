@@ -82,4 +82,7 @@ describe('fmtSessionTime', () => {
   it('rolls into h:mm past an hour', () => {
     expect(fmtSessionTime(3900)).toBe('1h05')
   })
+  it('promotes a value that rounds up to a full hour', () => {
+    expect(fmtSessionTime(3570)).toBe('1h00') // 59.5 min rounds to 60 -> 1h00
+  })
 })
