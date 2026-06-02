@@ -27,7 +27,12 @@
     current = Number(e.currentTarget.value)
   }
   function handleChange(e) {
-    onchange(Number(e.currentTarget.value))
+    const v = Number(e.currentTarget.value)
+    // At/above the vehicle limit there is no limit — snap the knob back to the
+    // line right away. We can't rely on the parent re-syncing `target`, because
+    // when nothing was set the parent's value doesn't change (it's a no-op).
+    if (v >= ceiling) current = ceiling
+    onchange(v)
   }
 
   let seg = $derived(socBarSegments({ soc, target: current, vehicleLimit }))
@@ -95,25 +100,29 @@
       />
     </div>
 
-    <!-- vehicle-limit marker: amber line over the track, label below (decorative) -->
+    <!-- vehicle-limit marker: amber line over the track; label clamped to the bar -->
     {#if vehicleLimit != null}
       <div class="pointer-events-none absolute top-[28px] w-0" style="left: {vehicleLimit}%">
         <div class="absolute top-0 left-1/2 h-[34px] w-0.5 -translate-x-1/2 bg-amber-400"></div>
-        <div class="absolute top-[38px] left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-amber-400">
-          {$_('dashboard.vehicle.vehicle_limit', { values: { pct: Math.round(vehicleLimit) } })}
-        </div>
+      </div>
+      <div
+        class="pointer-events-none absolute top-[66px] whitespace-nowrap text-[10px] font-semibold text-amber-400"
+        style="left: {vehicleLimit}%; transform: translateX(-{vehicleLimit}%)"
+      >
+        {$_('dashboard.vehicle.vehicle_limit', { values: { pct: Math.round(vehicleLimit) } })}
       </div>
     {/if}
 
-    <!-- EVSE-limit knob: bubble above, wide line over the track (decorative; the
-         range input handles interaction). Red while above the vehicle limit. -->
-    <div class="pointer-events-none absolute top-0 w-0" style="left: {current}%; opacity: {knobOpacity}">
-      <div
-        class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border bg-surface-3 px-1.5 py-0.5 text-[11px] font-semibold {labelClass}"
-      >
-        {$_('dashboard.vehicle.evse_limit', { values: { pct: Math.round(current) } })}
-      </div>
-      <div class="absolute top-[28px] left-1/2 h-[34px] w-1.5 -translate-x-1/2 rounded-[3px] {lineClass}"></div>
+    <!-- EVSE-limit knob: bubble above (clamped so it never runs off the edge),
+         wide line over the track. Red while above the vehicle limit. -->
+    <div
+      class="pointer-events-none absolute top-0 whitespace-nowrap rounded-md border bg-surface-3 px-1.5 py-0.5 text-[11px] font-semibold {labelClass}"
+      style="left: {current}%; transform: translateX(-{current}%); opacity: {knobOpacity}"
+    >
+      {$_('dashboard.vehicle.evse_limit', { values: { pct: Math.round(current) } })}
+    </div>
+    <div class="pointer-events-none absolute top-[28px] w-0" style="left: {current}%; opacity: {knobOpacity}">
+      <div class="absolute top-0 left-1/2 h-[34px] w-1.5 -translate-x-1/2 rounded-[3px] {lineClass}"></div>
     </div>
   </div>
 </div>
