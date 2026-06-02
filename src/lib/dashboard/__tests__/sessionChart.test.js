@@ -86,3 +86,47 @@ describe('fmtSessionTime', () => {
     expect(fmtSessionTime(3570)).toBe('1h00') // 59.5 min rounds to 60 -> 1h00
   })
 })
+
+import { buildSessionOpts, limitLinePlugin, liveDotPlugin } from '../sessionChart.js'
+
+const theme = { accent: '#3cc6bd', charging: '#3cc6bd', warning: '#e7a948', axisText: '#6b7585', grid: '#1c2230' }
+
+describe('buildSessionOpts', () => {
+  it('defines soc (0-100) and kw (0-kwMax) scales plus a hidden-x scale', () => {
+    const o = buildSessionOpts({ theme, target: 80, kwMax: 8 })
+    expect(o.scales.soc.range).toEqual([0, 100])
+    expect(o.scales.kw.range).toEqual([0, 8])
+    expect(o.scales.x.time).toBe(false)
+  })
+  it('renders SOC as bars and kW as a line series', () => {
+    const o = buildSessionOpts({ theme, target: 80, kwMax: 8 })
+    // [x, soc, kw]
+    expect(typeof o.series[1].paths).toBe('function') // bars path builder
+    expect(o.series[1].scale).toBe('soc')
+    expect(o.series[2].scale).toBe('kw')
+    expect(o.series[2].paths).toBeUndefined() // default line
+  })
+  it('includes the limit-line and live-dot plugins', () => {
+    const o = buildSessionOpts({ theme, target: 80, kwMax: 8 })
+    expect(o.plugins).toHaveLength(2)
+    expect(typeof o.plugins[0].hooks.draw).toBe('function')
+    expect(typeof o.plugins[1].hooks.draw).toBe('function')
+  })
+})
+
+describe('limitLinePlugin', () => {
+  it('no-ops in draw when target is not finite', () => {
+    const p = limitLinePlugin(null, '#e7a948')
+    // a fake uPlot whose ctx would throw if touched
+    const u = { valToPos: () => { throw new Error('should not be called') }, ctx: {}, bbox: {} }
+    expect(() => p.hooks.draw(u)).not.toThrow()
+  })
+})
+
+describe('liveDotPlugin', () => {
+  it('no-ops in draw when there is no finite kW point', () => {
+    const p = liveDotPlugin('#e7a948')
+    const u = { data: [[], [], []], valToPos: () => { throw new Error('should not be called') }, ctx: {} }
+    expect(() => p.hooks.draw(u)).not.toThrow()
+  })
+})
