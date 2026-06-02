@@ -494,6 +494,16 @@
       "locked": "{client} irányítja"
     },
     "rate": { "label": "Töltési sebesség", "claimed": "{client} állítja" },
+    "vehicle": {
+      "label": "Jármű",
+      "charging_to": "töltés eddig: {pct}%",
+      "to_full": "{time} a teljes töltésig",
+      "vehicle_limit": "jármű korlátja {pct}%",
+      "target": "cél {pct}%",
+      "target_aria": "Töltési cél",
+      "clear": "Töltési cél törlése",
+      "cap_note": "A jármű a saját {pct}%-os korlátjánál megáll – az e fölötti cél nem tölt tovább."
+    },
     "limit": {
       "label": "Töltési korlát",
       "none": "Nincs beállítva",

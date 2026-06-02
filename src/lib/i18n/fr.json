@@ -494,6 +494,16 @@
       "locked": "Contrôlé par {client}"
     },
     "rate": { "label": "Courant de charge", "claimed": "Défini par {client}" },
+    "vehicle": {
+      "label": "Véhicule",
+      "charging_to": "charge jusqu'à {pct}%",
+      "to_full": "{time} avant la charge complète",
+      "vehicle_limit": "limite du véhicule {pct}%",
+      "target": "cible {pct}%",
+      "target_aria": "Cible de charge",
+      "clear": "Effacer la cible de charge",
+      "cap_note": "Le véhicule s'arrête à sa propre limite de {pct}% ; une cible supérieure ne chargera pas davantage."
+    },
     "limit": {
       "label": "Limite de charge",
       "none": "Aucune limite",
