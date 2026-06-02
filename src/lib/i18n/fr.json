@@ -491,9 +491,10 @@
       "auto": "Auto",
       "on": "Marche",
       "off": "Arrêt",
-      "locked": "Contrôlé par {client}"
+      "locked": "Contrôlé par {client}",
+      "aria": "Mode de charge"
     },
-    "rate": { "label": "Courant de charge", "claimed": "Défini par {client}" },
+    "rate": { "label": "Courant de charge", "claimed": "Défini par {client}", "aria": "Vitesse de charge" },
     "vehicle": {
       "label": "Véhicule",
       "charging_to": "charge jusqu'à {pct}%",
