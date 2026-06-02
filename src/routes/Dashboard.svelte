@@ -40,11 +40,18 @@
   let mode = $derived($uistates_store?.mode ?? 0)
   let display = $derived(displayState($status_store, mode))
   let charging = $derived(display === 'charging')
+  // The charging session chart is a Labs feature, gated like the Energy tab —
+  // it polls /energy/raw and isn't hardware-validated yet. When Labs is off,
+  // charging keeps the existing PowerRing.
+  let labsOn = $derived(!!$uisettings_store?.dev_features)
+  let showChart = $derived(charging && labsOn)
   let maxAmps = $derived($config_store?.max_current_soft ?? 48)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
   let reason = $derived(connectedReason(mode, $plan_store))
 
   let kw = $derived((($status_store?.power ?? 0) / 1000).toFixed(1))
+  // Shown on the PowerRing while charging (the non-Labs / chart-off path).
+  let maxKw = $derived((maxAmps * ($status_store?.voltage ?? 0) / 1000).toFixed(1))
 
   let tempDisplay = $derived(
     formatTemp(temp_round($status_store?.temp), $uisettings_store?.temp_unit),
@@ -344,7 +351,7 @@
   // clears the interval, so polling starts/stops with the charging state. The
   // in-flight guard prevents ticks piling up if the device is slow to respond.
   $effect(() => {
-    if (!charging) return
+    if (!showChart) return
     let inflight = false
     const tick = async () => {
       if (inflight) return
@@ -362,12 +369,12 @@
 </script>
 
 <section class="px-4 pb-4">
-  {#if !charging}
+  {#if !showChart}
     <StatusLine {display} />
   {/if}
 
   <div class="relative">
-    {#if charging}
+    {#if showChart}
       <div in:fade={{ duration: 150 }}>
         <ChargingHero
           {kw}
@@ -418,7 +425,7 @@
           {display}
           {fill}
           {kw}
-          maxKw=""
+          maxKw={charging ? maxKw : ''}
           reasonKey={reason.key}
           reasonValues={reason.values}
           faultText={getStateDesc($status_store?.state) ?? ''}

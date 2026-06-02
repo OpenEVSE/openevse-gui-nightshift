@@ -109,11 +109,14 @@ Props: { kw, soc, target, mode, modeLocked, modeLockLabel,
 
 ### `Dashboard.svelte` (modify)
 
-Swap the hero by state:
-- `display === 'charging'` → `ChargingHero` (pills passed in, not floated).
-- otherwise → existing `PowerRing` + floating `ModePill` / `RatePill` (unchanged).
+Swap the hero by state, **gated behind the Labs flag** (`uisettings_store.dev_features`),
+consistent with the `/energy/raw`-based Energy tab in `Monitoring.svelte`:
+- `showChart = charging && labsOn`.
+- `showChart` → `ChargingHero` (pills passed in, not floated); `/energy/raw` polled.
+- otherwise → existing `PowerRing` + floating `ModePill` / `RatePill` (unchanged); no
+  polling. When Labs is off, charging keeps the PowerRing exactly as before this feature.
 
-Idle ↔ charging is a simple crossfade.
+Idle ↔ charging (chart) is a simple crossfade.
 
 ## Pure helpers (`src/lib/dashboard/sessionChart.js`, new)
 
