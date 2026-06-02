@@ -512,7 +512,6 @@
       "type_none": "Ninguno",
       "type_time": "Tiempo",
       "type_energy": "Energía",
-      "type_range": "Rango",
       "hours": "Horas",
       "minutes": "Minutos",
       "energy_value": "Energía (kWh)",

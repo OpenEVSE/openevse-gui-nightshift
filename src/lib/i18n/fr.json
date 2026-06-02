@@ -512,7 +512,6 @@
       "type_none": "Aucune",
       "type_time": "Temps",
       "type_energy": "Énergie",
-      "type_range": "Autonomie",
       "hours": "Heures",
       "minutes": "Minutes",
       "energy_value": "Énergie (kWh)",
