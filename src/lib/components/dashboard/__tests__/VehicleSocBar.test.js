@@ -40,6 +40,15 @@ describe('VehicleSocBar', () => {
     expect(below.getByText('dashboard.vehicle.evse_limit').className).not.toContain('text-error')
   })
 
+  it('snaps the knob back to the vehicle limit when released above it (no prior limit)', async () => {
+    const { getByRole } = render(VehicleSocBar, { props: { soc: 40, vehicleLimit: 75, target: 75 } })
+    const input = getByRole('slider')
+    input.value = '88'
+    await fireEvent.input(input) // drag moves the knob above the limit
+    await fireEvent.change(input) // release → should snap back to the line
+    expect(input.value).toBe('75')
+  })
+
   it('has no clear button — clearing is done by dragging to the vehicle limit', () => {
     const { queryByLabelText } = render(VehicleSocBar, { props: { ...base } })
     expect(queryByLabelText('dashboard.vehicle.clear')).not.toBeInTheDocument()
