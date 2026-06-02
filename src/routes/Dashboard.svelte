@@ -45,7 +45,6 @@
   let reason = $derived(connectedReason(mode, $plan_store))
 
   let kw = $derived((($status_store?.power ?? 0) / 1000).toFixed(1))
-  let maxKw = $derived((maxAmps * ($status_store?.voltage ?? 0) / 1000).toFixed(1))
 
   let tempDisplay = $derived(
     formatTemp(temp_round($status_store?.temp), $uisettings_store?.temp_unit),
@@ -134,7 +133,7 @@
       : $limit_store?.type === 'range' && Number.isFinite(maxRange)
         ? // clamp: a stale range limit above a shrunken max-range estimate must
           // not map past 100% (the knob would then auto-clear on first touch)
-          Math.min(100, ($limit_store.value / maxRange) * 100)
+          Math.round(Math.min(100, ($limit_store.value / maxRange) * 100))
         : socCeiling(vehicleLimit),
   )
   // Bumped on a failed bar write to remount the card back to the confirmed value.
