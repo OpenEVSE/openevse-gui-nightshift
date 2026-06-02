@@ -531,6 +531,10 @@
     },
     "throttle": {
       "active": "Bridé · {amps} A"
+    },
+    "session": {
+      "collecting": "Collecte des données de session…",
+      "soc_target": "SOC → {target}%"
     }
   },
   "monitoring": {

@@ -1,11 +1,13 @@
 <script>
   import { _ } from 'svelte-i18n'
+  import { fade } from 'svelte/transition'
   import { status_store } from '../lib/stores/status.js'
   import { config_store } from '../lib/stores/config.js'
   import { override_store } from '../lib/stores/override.js'
   import { limit_store } from '../lib/stores/limit.js'
   import { claims_target_store } from '../lib/stores/claims_target.js'
   import { plan_store } from '../lib/stores/plan.js'
+  import { energy_store } from '../lib/stores/energy.js'
   import { uistates_store } from '../lib/stores/uistates.js'
   import { uisettings_store } from '../lib/stores/uisettings.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
@@ -20,6 +22,7 @@
 
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
+  import ChargingHero from '../lib/components/dashboard/ChargingHero.svelte'
   import StatChips from '../lib/components/dashboard/StatChips.svelte'
   import ThrottleBadge from '../lib/components/dashboard/ThrottleBadge.svelte'
   import ModePill from '../lib/components/dashboard/ModePill.svelte'
@@ -37,11 +40,17 @@
   let mode = $derived($uistates_store?.mode ?? 0)
   let display = $derived(displayState($status_store, mode))
   let charging = $derived(display === 'charging')
+  // The charging session chart is a Labs feature, gated like the Energy tab —
+  // it polls /energy/raw and isn't hardware-validated yet. When Labs is off,
+  // charging keeps the existing PowerRing.
+  let labsOn = $derived(!!$uisettings_store?.dev_features)
+  let showChart = $derived(charging && labsOn)
   let maxAmps = $derived($config_store?.max_current_soft ?? 48)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
   let reason = $derived(connectedReason(mode, $plan_store))
 
   let kw = $derived((($status_store?.power ?? 0) / 1000).toFixed(1))
+  // Shown on the PowerRing while charging (the non-Labs / chart-off path).
   let maxKw = $derived((maxAmps * ($status_store?.voltage ?? 0) / 1000).toFixed(1))
 
   let tempDisplay = $derived(
@@ -131,7 +140,7 @@
       : $limit_store?.type === 'range' && Number.isFinite(maxRange)
         ? // clamp: a stale range limit above a shrunken max-range estimate must
           // not map past 100% (the knob would then auto-clear on first touch)
-          Math.min(100, ($limit_store.value / maxRange) * 100)
+          Math.round(Math.min(100, ($limit_store.value / maxRange) * 100))
         : socCeiling(vehicleLimit),
   )
   // Bumped on a failed bar write to remount the card back to the confirmed value.
@@ -335,42 +344,94 @@
     boostEndsAt = null
     await restoreFromBoost()
   }
+
+  // While charging, refresh the raw energy log every 10 s so the session chart
+  // tracks live. The raw log isn't version-bumped like the pull stores, so we
+  // poll it ourselves. The effect re-runs when `charging` flips; its cleanup
+  // clears the interval, so polling starts/stops with the charging state. The
+  // in-flight guard prevents ticks piling up if the device is slow to respond.
+  $effect(() => {
+    if (!showChart) return
+    let inflight = false
+    const tick = async () => {
+      if (inflight) return
+      inflight = true
+      try {
+        await energy_store.loadRaw()
+      } finally {
+        inflight = false
+      }
+    }
+    tick()
+    const id = setInterval(tick, 10000)
+    return () => clearInterval(id)
+  })
 </script>
 
 <section class="px-4 pb-4">
-  <StatusLine {display} />
+  {#if !showChart}
+    <StatusLine {display} />
+  {/if}
 
   <div class="relative">
-    <div class="absolute left-3 top-1 z-10">
-      <ModePill
-        {mode}
-        locked={modeLocked}
-        lockLabel={modeLockLabel}
-        disabled={busy || display === 'error'}
-        onmode={setMode}
-      />
-    </div>
-    <div class="absolute right-3 top-1 z-10">
-      {#key rateNonce}
-        <RatePill
+    {#if showChart}
+      <div in:fade={{ duration: 150 }}>
+        <ChargingHero
+          {kw}
+          soc={hasSoc ? ($status_store?.battery_level ?? null) : null}
+          target={socTarget}
+          {hasSoc}
+          {mode}
+          {modeLocked}
+          {modeLockLabel}
           amps={chargeAmps}
-          min={6}
-          max={maxAmps}
-          claimedBy={rateClaimedBy}
-          disabled={busy || ecoOn || display === 'error'}
-          onchange={setChargeAmps}
+          {maxAmps}
+          {rateClaimedBy}
+          {rateNonce}
+          samples={$energy_store.raw.samples}
+          voltage={$status_store?.voltage ?? 0}
+          sessionElapsed={$status_store?.session_elapsed ?? 0}
+          chartError={$energy_store.error.raw}
+          modeDisabled={busy || display === 'error'}
+          rateDisabled={busy || ecoOn || display === 'error'}
+          onmode={setMode}
+          onrate={setChargeAmps}
         />
-      {/key}
-    </div>
-    <PowerRing
-      {display}
-      {fill}
-      {kw}
-      maxKw={charging ? maxKw : ''}
-      reasonKey={reason.key}
-      reasonValues={reason.values}
-      faultText={getStateDesc($status_store?.state) ?? ''}
-    />
+      </div>
+    {:else}
+      <div in:fade={{ duration: 150 }}>
+        <div class="absolute left-3 top-1 z-10">
+          <ModePill
+            {mode}
+            locked={modeLocked}
+            lockLabel={modeLockLabel}
+            disabled={busy || display === 'error'}
+            onmode={setMode}
+          />
+        </div>
+        <div class="absolute right-3 top-1 z-10">
+          {#key rateNonce}
+            <RatePill
+              amps={chargeAmps}
+              min={6}
+              max={maxAmps}
+              claimedBy={rateClaimedBy}
+              disabled={busy || ecoOn || display === 'error'}
+              onchange={setChargeAmps}
+            />
+          {/key}
+        </div>
+        <PowerRing
+          {display}
+          {fill}
+          {kw}
+          maxKw={charging ? maxKw : ''}
+          reasonKey={reason.key}
+          reasonValues={reason.values}
+          faultText={getStateDesc($status_store?.state) ?? ''}
+        />
+      </div>
+    {/if}
   </div>
 
   <ThrottleBadge />
