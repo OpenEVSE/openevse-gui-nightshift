@@ -495,11 +495,12 @@
     "rate": { "claimed": "Set by {client}", "aria": "Charge rate" },
     "vehicle": {
       "label": "Vehicle",
-      "charging_to": "charging to {pct}%",
+      "charging_to": "to {value}",
       "to_full": "{time} to full",
-      "vehicle_limit": "vehicle limit {pct}%",
-      "evse_limit": "EVSE limit {pct}%",
-      "target_aria": "EVSE charge limit"
+      "vehicle_limit": "vehicle limit {value}",
+      "evse_limit": "EVSE limit {value}",
+      "target_aria": "EVSE charge limit",
+      "unit_aria": "Limit units"
     },
     "limit": {
       "label": "Charge limit",
@@ -515,7 +516,8 @@
       "hours": "Hours",
       "minutes": "Minutes",
       "energy_value": "Energy (kWh)",
-      "save": "Set limit"
+      "save": "Set limit",
+      "or_limit_by": "Or limit by"
     },
     "eco": "Eco",
     "shaper": "Shaper",

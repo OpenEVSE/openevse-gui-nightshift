@@ -495,11 +495,12 @@
     "rate": { "claimed": "Establecido por {client}", "aria": "Velocidad de carga" },
     "vehicle": {
       "label": "Vehículo",
-      "charging_to": "cargando hasta {pct}%",
+      "charging_to": "a {value}",
       "to_full": "{time} para completar",
-      "vehicle_limit": "límite del vehículo {pct}%",
-      "evse_limit": "límite EVSE {pct}%",
-      "target_aria": "Límite de carga EVSE"
+      "vehicle_limit": "límite del vehículo {value}",
+      "evse_limit": "límite EVSE {value}",
+      "target_aria": "Límite de carga EVSE",
+      "unit_aria": "Unidades del límite"
     },
     "limit": {
       "label": "Límite de carga",
@@ -515,7 +516,8 @@
       "hours": "Horas",
       "minutes": "Minutos",
       "energy_value": "Energía (kWh)",
-      "save": "Establecer límite"
+      "save": "Establecer límite",
+      "or_limit_by": "O limitar por"
     },
     "eco": "Eco",
     "shaper": "Limitador",

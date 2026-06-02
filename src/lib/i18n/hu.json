@@ -495,11 +495,12 @@
     "rate": { "claimed": "{client} állítja", "aria": "Töltési sebesség" },
     "vehicle": {
       "label": "Jármű",
-      "charging_to": "töltés eddig: {pct}%",
+      "charging_to": "eddig: {value}",
       "to_full": "{time} a teljes töltésig",
-      "vehicle_limit": "jármű korlátja {pct}%",
-      "evse_limit": "EVSE korlát {pct}%",
-      "target_aria": "EVSE töltési korlát"
+      "vehicle_limit": "jármű korlátja {value}",
+      "evse_limit": "EVSE korlát {value}",
+      "target_aria": "EVSE töltési korlát",
+      "unit_aria": "Korlát mértékegysége"
     },
     "limit": {
       "label": "Töltési korlát",
@@ -515,7 +516,8 @@
       "hours": "Óra",
       "minutes": "Perc",
       "energy_value": "Energia (kWh)",
-      "save": "Korlát beállítása"
+      "save": "Korlát beállítása",
+      "or_limit_by": "Vagy korlátozás eszerint"
     },
     "eco": "Eco",
     "shaper": "Terheléscsökkentő",
