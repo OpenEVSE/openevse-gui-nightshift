@@ -9,10 +9,12 @@
     buildSessionOpts,
   } from '../../dashboard/sessionChart.js'
 
+  /** @type {{ samples: Array<{ts:number,a:number,t:number,e:number,s:number}>, voltage:number, target:number|null, sessionElapsed:number }} */
   let { samples = [], voltage = 0, target = null, sessionElapsed = 0 } = $props()
 
   let clipped = $derived(clipToSession(samples, sessionElapsed))
-  let data = $derived(toChartData(clipped, voltage))
+  let data = $derived(toChartData(clipped, voltage)) // [x, soc, kw]
+  // kwAxisMax reads data[2] (the kW array) to size the right axis.
   let opts = $derived.by(() =>
     buildSessionOpts({ theme: readChartTheme(), target, kwMax: kwAxisMax(data[2]) }),
   )
