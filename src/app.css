@@ -83,3 +83,20 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .breathe { animation: none; transform: none; }
 }
+
+/* Charging shimmer: a slow accent gradient that drifts toward the charge edge.
+   Applied to the SOC-bar fill only while charging. Replaces the static fill
+   gradient (bg-gradient-to-r from-accent to-cyan-400) for the charging state. */
+.soc-shimmer {
+  background-image: linear-gradient(90deg, var(--accent), #7dd3fc, #22d3ee, var(--accent));
+  background-size: 200% 100%;
+  animation: soc-shimmer-flow 2.2s linear infinite;
+  will-change: background-position;
+}
+@keyframes soc-shimmer-flow {
+  0%   { background-position: 200% 0; }
+  100% { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .soc-shimmer { animation: none; }
+}

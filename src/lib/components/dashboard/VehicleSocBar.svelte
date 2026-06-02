@@ -90,7 +90,9 @@
     <div class="absolute inset-x-0 top-[28px] h-[34px]">
       <div class="absolute inset-0 rounded-full bg-surface-3"></div>
       <div
-        class="absolute inset-y-0 left-0 rounded-l-full bg-gradient-to-r from-accent to-cyan-400"
+        class="absolute inset-y-0 left-0 rounded-l-full {charging
+          ? 'soc-shimmer'
+          : 'bg-gradient-to-r from-accent to-cyan-400'}"
         style="width: {seg.fillPct}%"
       ></div>
       {#if seg.zoneEndPct > seg.fillPct}

@@ -17,6 +17,14 @@ describe('VehicleSocBar', () => {
     expect(getByText('74%')).toBeInTheDocument()
   })
 
+  it('shimmers the fill only while charging', () => {
+    const charging = render(VehicleSocBar, { props: { ...base, charging: true } })
+    expect(charging.container.querySelector('.soc-shimmer')).toBeTruthy()
+    cleanup()
+    const idle = render(VehicleSocBar, { props: { ...base, charging: false } })
+    expect(idle.container.querySelector('.soc-shimmer')).toBeFalsy()
+  })
+
   it('emits onchange with the committed percent on change', async () => {
     const onchange = vi.fn()
     const { getByRole } = render(VehicleSocBar, { props: { ...base, onchange } })
