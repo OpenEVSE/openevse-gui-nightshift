@@ -78,6 +78,7 @@ export function liveDotPlugin(color) {
     hooks: {
       draw: (u) => {
         const xs = u.data[0]
+        // data[2] = kW series, matching the [x, soc, kw] order in buildSessionOpts
         const kw = u.data[2]
         let i = kw.length - 1
         while (i >= 0 && !Number.isFinite(kw[i])) i--
@@ -122,7 +123,8 @@ export function buildSessionOpts({ theme, target, kwMax, height = 150 }) {
         label: 'SOC',
         scale: 'soc',
         fill: theme.accent + '55',
-        stroke: 'transparent',
+        width: 0,
+        points: { show: false },
         paths: uPlot.paths.bars({ size: [0.6, 100] }),
       },
       { label: 'kW', scale: 'kw', stroke: theme.charging, width: 2, fill: theme.charging + '22' },
