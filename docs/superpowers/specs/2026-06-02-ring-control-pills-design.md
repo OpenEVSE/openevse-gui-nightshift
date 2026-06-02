@@ -83,9 +83,9 @@ A lightweight anchored popover — DRY base for both pills.
   `amps={chargeAmps}`, `min={6}`, `max={maxAmps}`, `claimedBy={rateClaimedBy}`,
   `disabled={busy || ecoOn || display === 'error'}`, `onchange={setChargeAmps}`.
 
-`ModeSelector.svelte` and `ChargeRate.svelte` files are left in the tree (no longer
-imported) — removing them is out of scope; YAGNI says don't delete code other
-things might still reference, but note they're now unused.
+**Delete** `ModeSelector.svelte` and `ChargeRate.svelte` and their test files — the
+pills fully replace them and nothing else imports them. (`SegmentedControl` and
+`Slider`, which they used, stay — both are used by other pages.)
 
 ## Visual / placement
 
@@ -139,7 +139,6 @@ lives in the Dashboard or a small helper.
 
 ## Out of scope
 
-- Deleting the now-unused `ModeSelector.svelte` / `ChargeRate.svelte` files.
 - Any change to the SOC bar, limit card, eco/shaper toggles, or boost button.
 - The deferred SOC charging-pulse animation.
 - Reworking the claims/priority model — only the *display* of the lock owner changes.
