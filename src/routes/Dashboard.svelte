@@ -16,6 +16,7 @@
   import { formatCost } from '../lib/cost.js'
   import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
+  import { restingTarget } from '../lib/dashboard/soc.js'
 
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
@@ -25,6 +26,7 @@
   import ChargeRate from '../lib/components/dashboard/ChargeRate.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
   import ChargeLimitModal from '../lib/components/dashboard/ChargeLimitModal.svelte'
+  import VehicleSocBar from '../lib/components/dashboard/VehicleSocBar.svelte'
   import EcoShaperToggles from '../lib/components/dashboard/EcoShaperToggles.svelte'
   import BoostButton from '../lib/components/dashboard/BoostButton.svelte'
 
@@ -100,6 +102,18 @@
     if (l.type === 'range') return `${l.value} km`
     return ''
   }
+
+  // ── vehicle SOC bar view-model ──────────────────────────────────────────
+  let hasSoc = $derived(
+    $status_store?.battery_level !== undefined && $status_store?.battery_level !== null,
+  )
+  let vehicleLimit = $derived(
+    Number.isFinite($status_store?.vehicle_charge_limit) ? $status_store.vehicle_charge_limit : null,
+  )
+  let socLimitActive = $derived($limit_store?.type === 'soc')
+  let socTarget = $derived(socLimitActive ? $limit_store.value : restingTarget(vehicleLimit))
+  // Bumped on a failed soc write to remount the bar back to the confirmed value.
+  let socNonce = $state(0)
 
   // ── actions (all writes serialized) ─────────────────────────────────────
   async function setMode(m) {
@@ -190,6 +204,35 @@
   async function clearLimit() {
     const ok = await serialQueue.add(() => limit_store.remove())
     if (!ok) showWriteError()
+  }
+
+  async function setSocTarget(val) {
+    if (busy) return
+    busy = true
+    try {
+      const ok = await serialQueue.add(() =>
+        limit_store.upload({ type: 'soc', value: val, auto_release: true }),
+      )
+      if (ok) {
+        await serialQueue.add(() => limit_store.download())
+      } else {
+        showWriteError()
+        socNonce++ // remount VehicleSocBar so the target reverts to the confirmed value
+      }
+    } finally {
+      busy = false
+    }
+  }
+
+  async function clearSocLimit() {
+    if (busy) return
+    busy = true
+    try {
+      const ok = await serialQueue.add(() => limit_store.remove())
+      if (!ok) showWriteError()
+    } finally {
+      busy = false
+    }
   }
 
   // Boost: force-active override for the chosen duration, then restore the
@@ -318,12 +361,32 @@
       />
     {/key}
 
-    <ChargeLimitCard
-      limit={$limit_store}
-      summary={limitSummary}
-      onopen={() => (limitModalOpen = true)}
-      onclear={clearLimit}
-    />
+    {#if hasSoc}
+      {#key socNonce}
+        <VehicleSocBar
+          soc={$status_store.battery_level}
+          {vehicleLimit}
+          target={socTarget}
+          range={$status_store?.battery_range ?? null}
+          rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
+          timeToFull={$status_store?.time_to_full_charge ?? 0}
+          {charging}
+          limitActive={socLimitActive}
+          disabled={busy}
+          onchange={setSocTarget}
+          onclear={clearSocLimit}
+        />
+      {/key}
+    {/if}
+
+    {#if !socLimitActive}
+      <ChargeLimitCard
+        limit={$limit_store}
+        summary={limitSummary}
+        onopen={() => (limitModalOpen = true)}
+        onclear={clearLimit}
+      />
+    {/if}
 
     <BoostButton
       disabled={busy}
@@ -336,7 +399,6 @@
 
 <ChargeLimitModal
   open={limitModalOpen}
-  allowSoc={$status_store?.battery_level !== undefined}
   allowRange={$status_store?.battery_range !== undefined}
   onclose={() => (limitModalOpen = false)}
   onsave={saveLimit}
