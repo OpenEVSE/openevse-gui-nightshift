@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { socCeiling, isCapped, effectiveStop, socBarSegments, hmsShort } from '../soc.js'
+import { socCeiling, isCapped, effectiveStop, socBarSegments, hmsShort, estMaxRange } from '../soc.js'
 
 describe('socCeiling', () => {
   it('uses the vehicle limit when known', () => {
@@ -64,5 +64,17 @@ describe('hmsShort', () => {
     expect(hmsShort(0)).toBe('')
     expect(hmsShort(-1)).toBe('')
     expect(hmsShort(NaN)).toBe('')
+  })
+})
+
+describe('estMaxRange', () => {
+  it('estimates the pack max range from current range and SOC', () => {
+    expect(estMaxRange(206, 74)).toBeCloseTo(278.378, 2)
+  })
+  it('returns null when SOC is zero or range/SOC is missing', () => {
+    expect(estMaxRange(206, 0)).toBe(null)
+    expect(estMaxRange(null, 74)).toBe(null)
+    expect(estMaxRange(206, null)).toBe(null)
+    expect(estMaxRange(NaN, 74)).toBe(null)
   })
 })

@@ -5,35 +5,30 @@
   import Slider from '../ui/Slider.svelte'
   import Button from '../ui/Button.svelte'
 
-  let { open = false, allowRange = false, onclose = () => {}, onsave = () => {} } = $props()
+  let { open = false, onclose = () => {}, onsave = () => {} } = $props()
 
   let type = $state('energy')
   let energyKwh = $state(5)
   let hours = $state(2)
   let minutes = $state(0)
-  let rangeKm = $state(200)
-
   $effect(() => {
     if (open) {
       type = 'energy'
       energyKwh = 5
       hours = 2
       minutes = 0
-      rangeKm = 200
     }
   })
 
   let typeOptions = $derived([
     { value: 'time', label: $_('dashboard.limit.type_time') },
     { value: 'energy', label: $_('dashboard.limit.type_energy') },
-    { value: 'range', label: $_('dashboard.limit.type_range'), disabled: !allowRange },
   ])
 
   function save() {
     let value = 0
     if (type === 'time') value = hours * 60 + minutes
     else if (type === 'energy') value = Math.round(energyKwh * 1000)
-    else if (type === 'range') value = rangeKm
     onsave({ type, value, auto_release: true })
   }
 </script>
@@ -57,9 +52,6 @@
     {:else if type === 'energy'}
       <div class="mb-1 text-sm text-text">{$_('dashboard.limit.energy_value')}: {energyKwh}</div>
       <Slider min={1} max={100} step={1} value={energyKwh} onchange={(v) => (energyKwh = v)} />
-    {:else if type === 'range'}
-      <div class="mb-1 text-sm text-text">{rangeKm} km</div>
-      <Slider min={10} max={600} step={10} value={rangeKm} onchange={(v) => (rangeKm = v)} />
     {/if}
   </div>
 

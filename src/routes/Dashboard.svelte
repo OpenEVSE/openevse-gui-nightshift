@@ -16,7 +16,7 @@
   import { formatCost } from '../lib/cost.js'
   import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
-  import { socCeiling } from '../lib/dashboard/soc.js'
+  import { socCeiling, estMaxRange } from '../lib/dashboard/soc.js'
 
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
@@ -26,7 +26,6 @@
   import RatePill from '../lib/components/dashboard/RatePill.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
   import ChargeLimitModal from '../lib/components/dashboard/ChargeLimitModal.svelte'
-  import VehicleSocBar from '../lib/components/dashboard/VehicleSocBar.svelte'
   import EcoShaperToggles from '../lib/components/dashboard/EcoShaperToggles.svelte'
   import BoostButton from '../lib/components/dashboard/BoostButton.svelte'
 
@@ -112,17 +111,30 @@
     return ''
   }
 
-  // ── vehicle SOC bar view-model ──────────────────────────────────────────
+  // ── charge-limit bar view-model ─────────────────────────────────────────
   let hasSoc = $derived(
     $status_store?.battery_level !== undefined && $status_store?.battery_level !== null,
   )
   let vehicleLimit = $derived(
     Number.isFinite($status_store?.vehicle_charge_limit) ? $status_store.vehicle_charge_limit : null,
   )
-  let socLimitActive = $derived($limit_store?.type === 'soc')
-  // Knob rests at the ceiling (vehicle limit, or 100) when no soc limit is set.
-  let socTarget = $derived(socLimitActive ? $limit_store.value : socCeiling(vehicleLimit))
-  // Bumped on a failed soc write to remount the bar back to the confirmed value.
+  let maxRange = $derived(estMaxRange($status_store?.battery_range, $status_store?.battery_level))
+  // The bar owns soc + range limits; the row owns time + energy.
+  let barLimitActive = $derived($limit_store?.type === 'soc' || $limit_store?.type === 'range')
+  // Display unit: follows the active range limit by default; the toggle overrides.
+  let userUnit = $state(null)
+  let limitUnit = $derived(userUnit ?? ($limit_store?.type === 'range' ? 'range' : 'percent'))
+  // Knob position is always a percent. Map the active limit back to a percent.
+  let socTarget = $derived(
+    $limit_store?.type === 'soc'
+      ? $limit_store.value
+      : $limit_store?.type === 'range' && Number.isFinite(maxRange)
+        ? // clamp: a stale range limit above a shrunken max-range estimate must
+          // not map past 100% (the knob would then auto-clear on first touch)
+          Math.min(100, ($limit_store.value / maxRange) * 100)
+        : socCeiling(vehicleLimit),
+  )
+  // Bumped on a failed bar write to remount the card back to the confirmed value.
   let socNonce = $state(0)
 
   // ── actions (all writes serialized) ─────────────────────────────────────
@@ -216,25 +228,26 @@
     if (!ok) showWriteError()
   }
 
-  // Snap-to-clear: a target at or above the vehicle limit (the ceiling) means
-  // "no OpenEVSE limit" — the car governs. Below it sets a real soc limit.
-  async function setSocTarget(val) {
+  // Snap-to-clear: a knob at/above the vehicle limit means "no limit". Below it,
+  // write a soc or range limit depending on the active display unit.
+  async function setTarget(pct) {
     if (busy) return
     busy = true
     try {
       let ok
-      if (val >= socCeiling(vehicleLimit)) {
-        // No effective limit. Remove any existing soc limit; otherwise a no-op.
-        ok = socLimitActive ? await serialQueue.add(() => limit_store.remove()) : true
+      if (pct >= socCeiling(vehicleLimit)) {
+        ok = barLimitActive ? await serialQueue.add(() => limit_store.remove()) : true
       } else {
-        ok = await serialQueue.add(() =>
-          limit_store.upload({ type: 'soc', value: val, auto_release: true }),
-        )
+        const data =
+          limitUnit === 'range' && Number.isFinite(maxRange)
+            ? { type: 'range', value: Math.round((pct / 100) * maxRange), auto_release: true }
+            : { type: 'soc', value: pct, auto_release: true }
+        ok = await serialQueue.add(() => limit_store.upload(data))
         if (ok) await serialQueue.add(() => limit_store.download())
       }
       if (!ok) {
         showWriteError()
-        socNonce++ // remount VehicleSocBar so the knob reverts to the confirmed value
+        socNonce++ // remount the card so the knob reverts to the confirmed value
       }
     } finally {
       busy = false
@@ -373,30 +386,27 @@
   />
 
   {#if display !== 'error'}
-    {#if hasSoc}
-      {#key socNonce}
-        <VehicleSocBar
-          soc={$status_store.battery_level}
-          {vehicleLimit}
-          target={socTarget}
-          range={$status_store?.battery_range ?? null}
-          rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
-          timeToFull={$status_store?.time_to_full_charge ?? 0}
-          {charging}
-          disabled={busy}
-          onchange={setSocTarget}
-        />
-      {/key}
-    {/if}
-
-    {#if !socLimitActive}
+    {#key socNonce}
       <ChargeLimitCard
+        {hasSoc}
+        soc={$status_store?.battery_level ?? 0}
+        {vehicleLimit}
+        target={socTarget}
+        range={$status_store?.battery_range ?? null}
+        rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
+        timeToFull={$status_store?.time_to_full_charge ?? 0}
+        {charging}
+        unit={limitUnit}
+        estMaxRange={maxRange}
+        disabled={busy}
+        ontarget={setTarget}
+        onunit={(u) => (userUnit = u)}
         limit={$limit_store}
         summary={limitSummary}
         onopen={() => (limitModalOpen = true)}
         onclear={clearLimit}
       />
-    {/if}
+    {/key}
 
     <BoostButton
       disabled={busy}
@@ -409,7 +419,6 @@
 
 <ChargeLimitModal
   open={limitModalOpen}
-  allowRange={$status_store?.battery_range !== undefined}
   onclose={() => (limitModalOpen = false)}
   onsave={saveLimit}
 />

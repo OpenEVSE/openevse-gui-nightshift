@@ -494,12 +494,12 @@
     },
     "rate": { "claimed": "Défini par {client}", "aria": "Vitesse de charge" },
     "vehicle": {
-      "label": "Véhicule",
-      "charging_to": "charge jusqu'à {pct}%",
+      "charging_to": "jusqu'à {value}",
       "to_full": "{time} avant la charge complète",
-      "vehicle_limit": "limite du véhicule {pct}%",
-      "evse_limit": "limite EVSE {pct}%",
-      "target_aria": "Limite de charge EVSE"
+      "vehicle_limit": "limite du véhicule {value}",
+      "evse_limit": "limite EVSE {value}",
+      "target_aria": "Limite de charge EVSE",
+      "unit_aria": "Unités de limite"
     },
     "limit": {
       "label": "Limite de charge",
@@ -511,11 +511,11 @@
       "type_none": "Aucune",
       "type_time": "Temps",
       "type_energy": "Énergie",
-      "type_range": "Autonomie",
       "hours": "Heures",
       "minutes": "Minutes",
       "energy_value": "Énergie (kWh)",
-      "save": "Définir la limite"
+      "save": "Définir la limite",
+      "or_limit_by": "Ou limiter par"
     },
     "eco": "Éco",
     "shaper": "Délestage",

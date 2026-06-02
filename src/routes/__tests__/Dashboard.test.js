@@ -72,10 +72,9 @@ describe('Dashboard', () => {
     })
   })
 
-  it('shows the vehicle SOC bar when battery_level is present', () => {
+  it('shows the charge-limit bar when battery_level is present', () => {
     status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 80, battery_range: 206, time_to_full_charge: 0 })
-    const { getByText, getByRole } = render(Dashboard)
-    expect(getByText('74%')).toBeInTheDocument()
+    const { getByRole } = render(Dashboard)
     expect(getByRole('slider', { name: 'dashboard.vehicle.target_aria' })).toBeInTheDocument()
   })
 
@@ -85,7 +84,7 @@ describe('Dashboard', () => {
     expect(queryByRole('slider', { name: 'dashboard.vehicle.target_aria' })).not.toBeInTheDocument()
   })
 
-  it('uploads an soc limit when the SOC target is committed', async () => {
+  it('uploads a soc limit when the bar is committed in percent mode', async () => {
     status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 90, battery_range: 206, time_to_full_charge: 0 })
     const { getByRole } = render(Dashboard)
     const slider = getByRole('slider', { name: 'dashboard.vehicle.target_aria' })
@@ -93,6 +92,18 @@ describe('Dashboard', () => {
     await fireEvent.change(slider)
     await vi.waitFor(() => {
       expect(httpAPI).toHaveBeenCalledWith('POST', '/limit', JSON.stringify({ type: 'soc', value: 85, auto_release: true }))
+    })
+  })
+
+  it('uploads a range limit when committed in range mode', async () => {
+    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 90, battery_range: 206, time_to_full_charge: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'units.km' })) // range-unit toggle button
+    const slider = getByRole('slider', { name: 'dashboard.vehicle.target_aria' })
+    slider.value = '50' // 50% of estMaxRange(206/0.74≈278.4) ≈ 139 km
+    await fireEvent.change(slider)
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/limit', JSON.stringify({ type: 'range', value: 139, auto_release: true }))
     })
   })
 
