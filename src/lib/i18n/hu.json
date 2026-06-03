@@ -494,7 +494,6 @@
     },
     "rate": { "claimed": "{client} állítja", "aria": "Töltési sebesség" },
     "vehicle": {
-      "charging_to": "eddig: {value}",
       "to_full": "{time} a teljes töltésig",
       "vehicle_limit": "jármű korlátja {value}",
       "evse_limit": "EVSE korlát {value}",

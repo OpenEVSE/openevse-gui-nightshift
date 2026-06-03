@@ -494,7 +494,6 @@
     },
     "rate": { "claimed": "Défini par {client}", "aria": "Vitesse de charge" },
     "vehicle": {
-      "charging_to": "jusqu'à {value}",
       "to_full": "{time} avant la charge complète",
       "vehicle_limit": "limite du véhicule {value}",
       "evse_limit": "limite EVSE {value}",
