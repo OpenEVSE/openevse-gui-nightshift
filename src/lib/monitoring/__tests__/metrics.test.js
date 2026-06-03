@@ -120,6 +120,17 @@ describe('vehicleMetrics extras', () => {
     expect(byLabel(vehicleMetrics({ vehicle_charging_state: '' }, {}))['monitoring.vehicle.charging_state'])
       .toBeUndefined()
   })
+  it('interprets stringy and numeric plugged values', () => {
+    const t = (v) => byLabel(vehicleMetrics({ vehicle_plugged: v }, {}))['monitoring.vehicle.plugged']?.textKey
+    expect(t(true)).toBe('monitoring.vehicle.plugged_yes')
+    expect(t(1)).toBe('monitoring.vehicle.plugged_yes')
+    expect(t('on')).toBe('monitoring.vehicle.plugged_yes')
+    expect(t('true')).toBe('monitoring.vehicle.plugged_yes')
+    expect(t(false)).toBe('monitoring.vehicle.plugged_no')
+    expect(t(0)).toBe('monitoring.vehicle.plugged_no')
+    expect(t('off')).toBe('monitoring.vehicle.plugged_no')
+    expect(t('false')).toBe('monitoring.vehicle.plugged_no')
+  })
 })
 
 describe('homeBatteryMetrics / showHomeBattery', () => {

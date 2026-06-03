@@ -12,6 +12,14 @@ const CHARGING_STATE_KEYS = {
   disconnected: 'monitoring.vehicle.charging_idle',
 }
 
+/** Interpret an HA plugged-in value (bool, 0/1, or "on"/"off"/"true"/"false") as a boolean. */
+function isPlugged(v) {
+  if (typeof v === 'boolean') return v
+  if (typeof v === 'number') return v !== 0
+  if (typeof v === 'string') return ['true', 'on', '1', 'yes'].includes(v.trim().toLowerCase())
+  return false
+}
+
 /** Round `value` to `p` decimals; null for missing / non-numeric input. */
 export function round(value, p = 0) {
   if (value === null || value === undefined || value === '' || typeof value === 'boolean') return null
@@ -96,7 +104,7 @@ export function vehicleMetrics(status, config) {
   if (s.vehicle_plugged !== undefined && s.vehicle_plugged !== null) {
     rows.push({
       labelKey: 'monitoring.vehicle.plugged',
-      textKey: s.vehicle_plugged ? 'monitoring.vehicle.plugged_yes' : 'monitoring.vehicle.plugged_no',
+      textKey: isPlugged(s.vehicle_plugged) ? 'monitoring.vehicle.plugged_yes' : 'monitoring.vehicle.plugged_no',
       unit: '',
     })
   }
