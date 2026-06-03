@@ -21,6 +21,12 @@
   let enabled = $derived(!!$config_store?.divert_enabled)
   let divertType = $derived(Number($config_store?.divert_type ?? 0))
   let activePreset = $derived(matchPreset($config_store))
+  let haSupported = $derived(!!$config_store?.ha_supported)
+  let divertSrc = $derived(Number($config_store?.divert_data_src ?? 0))
+  let divertSrcOptions = $derived([
+    { value: '0', label: $_('config.solar.data_mqtt') },
+    ...(haSupported ? [{ value: '1', label: $_('config.solar.data_ha') }] : []),
+  ])
 
   let typeOptions = $derived([
     { value: '0', label: $_('config.solar.type_production') },
@@ -79,32 +85,63 @@
           onchange={(v) => form.saveField('divert_type', Number(v))}
         />
       </FormField>
+      {#if haSupported}
+        <FormField label={$_('config.solar.data_source')} status={$ss.divert_data_src ?? 'idle'}>
+          <Select
+            options={divertSrcOptions}
+            value={String(divertSrc)}
+            onchange={(v) => form.saveField('divert_data_src', Number(v))}
+          />
+        </FormField>
+      {/if}
       {#if divertType === 0}
-        <FormField
-          label={$_('config.solar.feed_production')}
-          description={$_('config.solar.feed_production_desc')}
-          status={$ss.mqtt_solar ?? 'idle'}
-        >
-          <TextInput
-            value={$config_store?.mqtt_solar ?? ''}
-            placeholder="topic/pv_production"
-            revert={form.revert}
-            onchange={(v) => form.saveField('mqtt_solar', v)}
-          />
-        </FormField>
+        {#if divertSrc === 1}
+          <FormField label={$_('config.solar.feed_solar_entity')} status={$ss.ha_solar ?? 'idle'}>
+            <TextInput
+              value={$config_store?.ha_solar ?? ''}
+              placeholder="sensor.solar_power"
+              revert={form.revert}
+              onchange={(v) => form.saveField('ha_solar', v)}
+            />
+          </FormField>
+        {:else}
+          <FormField
+            label={$_('config.solar.feed_production')}
+            description={$_('config.solar.feed_production_desc')}
+            status={$ss.mqtt_solar ?? 'idle'}
+          >
+            <TextInput
+              value={$config_store?.mqtt_solar ?? ''}
+              placeholder="topic/pv_production"
+              revert={form.revert}
+              onchange={(v) => form.saveField('mqtt_solar', v)}
+            />
+          </FormField>
+        {/if}
       {:else}
-        <FormField
-          label={$_('config.solar.feed_grid')}
-          description={$_('config.solar.feed_grid_desc')}
-          status={$ss.mqtt_grid_ie ?? 'idle'}
-        >
-          <TextInput
-            value={$config_store?.mqtt_grid_ie ?? ''}
-            placeholder="topic/grid_ie"
-            revert={form.revert}
-            onchange={(v) => form.saveField('mqtt_grid_ie', v)}
-          />
-        </FormField>
+        {#if divertSrc === 1}
+          <FormField label={$_('config.solar.feed_grid_entity')} status={$ss.ha_grid_ie ?? 'idle'}>
+            <TextInput
+              value={$config_store?.ha_grid_ie ?? ''}
+              placeholder="sensor.grid_power"
+              revert={form.revert}
+              onchange={(v) => form.saveField('ha_grid_ie', v)}
+            />
+          </FormField>
+        {:else}
+          <FormField
+            label={$_('config.solar.feed_grid')}
+            description={$_('config.solar.feed_grid_desc')}
+            status={$ss.mqtt_grid_ie ?? 'idle'}
+          >
+            <TextInput
+              value={$config_store?.mqtt_grid_ie ?? ''}
+              placeholder="topic/grid_ie"
+              revert={form.revert}
+              onchange={(v) => form.saveField('mqtt_grid_ie', v)}
+            />
+          </FormField>
+        {/if}
       {/if}
     </ConfigSection>
 
@@ -171,6 +208,32 @@
           onchange={(v) => form.saveField('divert_decay_smoothing_time', v)}
         />
       </FormField>
+    </ConfigSection>
+  {/if}
+
+  {#if haSupported}
+    <ConfigSection title={$_('config.solar.home_battery')}>
+      <p class="text-sm text-text-dim">{$_('config.solar.home_battery_info')}</p>
+      <FormField label={$_('config.solar.battery_soc_entity')} status={$ss.ha_battery_soc ?? 'idle'}>
+        <TextInput
+          value={$config_store?.ha_battery_soc ?? ''}
+          placeholder="sensor.home_battery_soc"
+          revert={form.revert}
+          onchange={(v) => form.saveField('ha_battery_soc', v)}
+        />
+      </FormField>
+      <FormField label={$_('config.solar.battery_power_entity')} status={$ss.ha_battery_power ?? 'idle'}>
+        <TextInput
+          value={$config_store?.ha_battery_power ?? ''}
+          placeholder="sensor.home_battery_power"
+          revert={form.revert}
+          onchange={(v) => form.saveField('ha_battery_power', v)}
+        />
+      </FormField>
+      {#if $status_store?.home_battery_soc !== undefined && $status_store?.home_battery_soc !== null}
+        <ReadOnlyRow label={$_('config.solar.battery_soc')} value={`${$status_store?.home_battery_soc ?? 0} %`} />
+        <ReadOnlyRow label={$_('config.solar.battery_power')} value={`${$status_store?.home_battery_power ?? 0} W`} />
+      {/if}
     </ConfigSection>
   {/if}
 </ConfigPage>
