@@ -285,6 +285,22 @@
           onchange={(v) => form.saveField('ha_vehicle_charge_limit', v)}
         />
       </FormField>
+      <FormField label={$_('config.vehicle.entity_plugged')} status={$ss.ha_vehicle_plugged ?? 'idle'}>
+        <TextInput
+          value={$config_store?.ha_vehicle_plugged ?? ''}
+          placeholder="binary_sensor.car_plugged_in"
+          revert={form.revert}
+          onchange={(v) => form.saveField('ha_vehicle_plugged', v)}
+        />
+      </FormField>
+      <FormField label={$_('config.vehicle.entity_charging_state')} status={$ss.ha_vehicle_charging_state ?? 'idle'}>
+        <TextInput
+          value={$config_store?.ha_vehicle_charging_state ?? ''}
+          placeholder="sensor.car_charging_state"
+          revert={form.revert}
+          onchange={(v) => form.saveField('ha_vehicle_charging_state', v)}
+        />
+      </FormField>
     </ConfigSection>
   {/if}
 </ConfigPage>
