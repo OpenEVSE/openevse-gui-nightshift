@@ -229,6 +229,8 @@
       "entity_range": "Range entity",
       "entity_eta": "Time-to-full entity",
       "entity_charge_limit": "Charge-limit entity",
+      "entity_plugged": "Plugged-in entity",
+      "entity_charging_state": "Charging state entity",
       "http_info": "Push vehicle data to the charger with an HTTP POST:",
       "via_openevse": "Login goes through OpenEVSE's server, which performs the Tesla sign-in. Or open Advanced to paste API tokens directly.",
       "username": "Tesla account email",
@@ -275,7 +277,18 @@
       "attack": "Smoothing — attack",
       "attack_desc": "Seconds to react to falling available power.",
       "decay": "Smoothing — decay",
-      "decay_desc": "Seconds to react to rising available power."
+      "decay_desc": "Seconds to react to rising available power.",
+      "data_source": "Data source",
+      "data_mqtt": "MQTT",
+      "data_ha": "Home Assistant",
+      "feed_solar_entity": "Solar production entity",
+      "feed_grid_entity": "Grid import/export entity",
+      "home_battery": "Home Battery",
+      "home_battery_info": "Reads home-battery data from Home Assistant entities.",
+      "battery_soc_entity": "Battery SoC entity",
+      "battery_power_entity": "Battery power entity",
+      "battery_soc": "Battery SoC",
+      "battery_power": "Battery power"
     },
     "shaper": {
       "enable": "Enable load shaper",
@@ -291,7 +304,11 @@
       "max_interval": "Maximum data interval",
       "max_interval_desc": "Failsafe if no live data arrives within this many seconds.",
       "smoothing": "Input smoothing",
-      "smoothing_desc": "Filter time constant for the live power reading."
+      "smoothing_desc": "Filter time constant for the live power reading.",
+      "data_source": "Data source",
+      "data_mqtt": "MQTT",
+      "data_ha": "Home Assistant",
+      "live_entity": "Live power entity"
     },
     "emoncms": {
       "enable": "Enable EmonCMS",
@@ -542,7 +559,8 @@
       "energy": "Energy delivered",
       "sensors": "Sensors",
       "service": "Service",
-      "vehicle": "Vehicle"
+      "vehicle": "Vehicle",
+      "home_battery": "Home Battery"
     },
     "energy": {
       "session": "Session",
@@ -586,7 +604,18 @@
       "updated": "Last updated",
       "battery": "Battery",
       "range": "Range",
-      "timeleft": "Time to full"
+      "timeleft": "Time to full",
+      "plugged": "Plugged in",
+      "plugged_yes": "Yes",
+      "plugged_no": "No",
+      "charging_state": "Charging state",
+      "charging_active": "Charging",
+      "charging_complete": "Complete",
+      "charging_idle": "Idle"
+    },
+    "home_battery": {
+      "soc": "State of charge",
+      "power": "Power"
     },
     "safety": {
       "errors": "Errors",
@@ -611,7 +640,8 @@
     "fahrenheit": "°F",
     "km": "km",
     "miles": "mi",
-    "percent": "%"
+    "percent": "%",
+    "watt": "W"
   },
   "clients": {
     "manual": "Manual",
