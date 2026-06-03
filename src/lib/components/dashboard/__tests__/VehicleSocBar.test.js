@@ -80,4 +80,27 @@ describe('VehicleSocBar', () => {
     const { queryByText } = render(VehicleSocBar, { props: { soc: 74, vehicleLimit: null, target: 80 } })
     expect(queryByText('dashboard.vehicle.vehicle_limit')).not.toBeInTheDocument()
   })
+
+  it('shows current → target progress in percent mode', () => {
+    const { getByText } = render(VehicleSocBar, {
+      props: { soc: 74, vehicleLimit: 90, target: 80, charging: false },
+    })
+    expect(getByText('74% → 80%')).toBeInTheDocument()
+  })
+
+  it('shows current → target progress in range units', () => {
+    const { getByText } = render(VehicleSocBar, {
+      props: { soc: 74, vehicleLimit: 90, target: 80, range: 206, unit: 'range', estMaxRange: 278, charging: false },
+    })
+    // current uses the reported range (206); target ≈ 80% of estMaxRange
+    expect(getByText(/^206 → \d+ units\.km$/)).toBeInTheDocument()
+  })
+
+  it('collapses to a single value (no arrow) when SOC has reached the target', () => {
+    const { queryByText } = render(VehicleSocBar, {
+      props: { soc: 85, vehicleLimit: 90, target: 80, charging: false },
+    })
+    // soc (85) is at/above the effective target -> no "→" anywhere
+    expect(queryByText(/→/)).not.toBeInTheDocument()
+  })
 })

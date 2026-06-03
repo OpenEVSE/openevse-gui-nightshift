@@ -494,7 +494,6 @@
     },
     "rate": { "claimed": "Set by {client}", "aria": "Charge rate" },
     "vehicle": {
-      "charging_to": "to {value}",
       "to_full": "{time} to full",
       "vehicle_limit": "vehicle limit {value}",
       "evse_limit": "EVSE limit {value}",

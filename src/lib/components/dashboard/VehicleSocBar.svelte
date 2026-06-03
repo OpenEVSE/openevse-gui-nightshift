@@ -50,6 +50,22 @@
     return `${Math.round(pct)}%`
   }
 
+  // "74% → 80%" / "206 → 223 km" while charging toward the target; collapses to
+  // just the current value once SOC has reached/passed the effective target.
+  function rangeAt(pct) {
+    return Math.round((pct / 100) * estMaxRange)
+  }
+  let progress = $derived.by(() => {
+    if (rangeMode) {
+      const cur = range ?? rangeAt(soc)
+      const tgt = rangeAt(seg.zoneEndPct)
+      return cur >= tgt ? `${cur} ${rangeUnitLabel}` : `${cur} → ${tgt} ${rangeUnitLabel}`
+    }
+    const cur = Math.round(soc)
+    const tgt = Math.round(seg.zoneEndPct)
+    return cur >= tgt ? `${cur}%` : `${cur}% → ${tgt}%`
+  })
+
   let lineClass = $derived(above ? 'bg-error' : 'bg-text')
   let labelClass = $derived(above ? 'border-error text-error' : 'border-border text-text')
   let knobOpacity = $derived(atRest && !above ? 0.55 : 1)
@@ -59,9 +75,7 @@
   <!-- header: info line + (when range known) the % / unit toggle -->
   <div class="mb-3 flex items-center justify-between gap-2">
     <span class="min-w-0 truncate text-xs text-text">
-      {#if range != null}{range}&nbsp;{rangeUnitLabel} · {/if}{$_('dashboard.vehicle.charging_to', {
-        values: { value: fmt(seg.zoneEndPct) },
-      })}{#if toFull} · {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}{/if}
+      {progress}{#if toFull} · {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}{/if}
     </span>
     {#if showUnitToggle}
       <div
