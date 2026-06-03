@@ -1,6 +1,25 @@
 /** Pure helpers for the Monitoring screen. Self-contained — no store/DOM imports. */
 import { formatTemp } from '../temperature.js'
 
+/** HA vehicle charging-state strings → localized label keys. Unknown values pass through. */
+const CHARGING_STATE_KEYS = {
+  charging: 'monitoring.vehicle.charging_active',
+  complete: 'monitoring.vehicle.charging_complete',
+  charged: 'monitoring.vehicle.charging_complete',
+  full: 'monitoring.vehicle.charging_complete',
+  idle: 'monitoring.vehicle.charging_idle',
+  stopped: 'monitoring.vehicle.charging_idle',
+  disconnected: 'monitoring.vehicle.charging_idle',
+}
+
+/** Interpret an HA plugged-in value (bool, 0/1, or "on"/"off"/"true"/"false") as a boolean. */
+function isPlugged(v) {
+  if (typeof v === 'boolean') return v
+  if (typeof v === 'number') return v !== 0
+  if (typeof v === 'string') return ['true', 'on', '1', 'yes'].includes(v.trim().toLowerCase())
+  return false
+}
+
 /** Round `value` to `p` decimals; null for missing / non-numeric input. */
 export function round(value, p = 0) {
   if (value === null || value === undefined || value === '' || typeof value === 'boolean') return null
@@ -76,15 +95,26 @@ export function serviceMetrics(status, config) {
 export function vehicleMetrics(status, config) {
   const s = status ?? {}
   const c = config ?? {}
-  return {
-    titleKey: 'monitoring.group.vehicle',
-    rows: [
-      { labelKey: 'monitoring.vehicle.updated', value: hms(s.vehicle_state_update), unit: '' },
-      { labelKey: 'monitoring.vehicle.battery', value: s.battery_level ?? null, unit: 'units.percent' },
-      { labelKey: 'monitoring.vehicle.range', value: s.battery_range ?? null, unit: c.mqtt_vehicle_range_miles ? 'units.miles' : 'units.km' },
-      { labelKey: 'monitoring.vehicle.timeleft', value: hms(s.time_to_full_charge), unit: '' },
-    ],
+  const rows = [
+    { labelKey: 'monitoring.vehicle.updated', value: hms(s.vehicle_state_update), unit: '' },
+    { labelKey: 'monitoring.vehicle.battery', value: s.battery_level ?? null, unit: 'units.percent' },
+    { labelKey: 'monitoring.vehicle.range', value: s.battery_range ?? null, unit: c.mqtt_vehicle_range_miles ? 'units.miles' : 'units.km' },
+    { labelKey: 'monitoring.vehicle.timeleft', value: hms(s.time_to_full_charge), unit: '' },
+  ]
+  if (s.vehicle_plugged !== undefined && s.vehicle_plugged !== null) {
+    rows.push({
+      labelKey: 'monitoring.vehicle.plugged',
+      textKey: isPlugged(s.vehicle_plugged) ? 'monitoring.vehicle.plugged_yes' : 'monitoring.vehicle.plugged_no',
+      unit: '',
+    })
   }
+  if (typeof s.vehicle_charging_state === 'string' && s.vehicle_charging_state.trim() !== '') {
+    const key = CHARGING_STATE_KEYS[s.vehicle_charging_state.trim().toLowerCase()]
+    rows.push(key
+      ? { labelKey: 'monitoring.vehicle.charging_state', textKey: key, unit: '' }
+      : { labelKey: 'monitoring.vehicle.charging_state', value: s.vehicle_charging_state, unit: '' })
+  }
+  return { titleKey: 'monitoring.group.vehicle', rows }
 }
 
 /** Whether the Vehicle metric group should render. */
@@ -92,6 +122,22 @@ export function showVehicle(status, config) {
   const s = status ?? {}
   const c = config ?? {}
   return s.battery_level !== undefined || s.battery_range !== undefined || !!c.time_to_full_charge
+}
+
+export function homeBatteryMetrics(status) {
+  const s = status ?? {}
+  return {
+    titleKey: 'monitoring.group.home_battery',
+    rows: [
+      { labelKey: 'monitoring.home_battery.soc', value: round(s.home_battery_soc, 0), unit: 'units.percent' },
+      { labelKey: 'monitoring.home_battery.power', value: round(s.home_battery_power, 0), unit: 'units.watt' },
+    ],
+  }
+}
+
+/** Whether the Home Battery group should render. */
+export function showHomeBattery(status) {
+  return round((status ?? {}).home_battery_soc, 0) !== null
 }
 
 /** 'ok' | 'warning' | 'error' for a count against warning / alert thresholds. */

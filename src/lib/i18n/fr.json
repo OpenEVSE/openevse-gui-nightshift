@@ -229,6 +229,8 @@
       "entity_range": "Entité d'autonomie",
       "entity_eta": "Entité de temps de charge",
       "entity_charge_limit": "Entité de limite de charge",
+      "entity_plugged": "Entité de branchement",
+      "entity_charging_state": "Entité d'état de charge",
       "http_info": "Envoyez les données véhicule au chargeur via HTTP POST :",
       "via_openevse": "La connexion passe par le serveur OpenEVSE, qui effectue l'authentification Tesla. Vous pouvez aussi ouvrir Avancé pour coller directement vos tokens API.",
       "username": "Adresse e-mail du compte Tesla",
@@ -275,7 +277,18 @@
       "attack": "Lissage — montée",
       "attack_desc": "Secondes pour réagir à une baisse de puissance disponible.",
       "decay": "Lissage — descente",
-      "decay_desc": "Secondes pour réagir à une hausse de puissance disponible."
+      "decay_desc": "Secondes pour réagir à une hausse de puissance disponible.",
+      "data_source": "Source de données",
+      "data_mqtt": "MQTT",
+      "data_ha": "Home Assistant",
+      "feed_solar_entity": "Entité de production solaire",
+      "feed_grid_entity": "Entité d'import/export réseau",
+      "home_battery": "Batterie domestique",
+      "home_battery_info": "Lit les données de la batterie domestique depuis des entités Home Assistant.",
+      "battery_soc_entity": "Entité de SoC de la batterie",
+      "battery_power_entity": "Entité de puissance de la batterie",
+      "battery_soc": "SoC de la batterie",
+      "battery_power": "Puissance de la batterie"
     },
     "shaper": {
       "enable": "Activer le délestage",
@@ -291,7 +304,11 @@
       "max_interval": "Intervalle de données maximum",
       "max_interval_desc": "Sécurité si aucune donnée n'arrive dans ce nombre de secondes.",
       "smoothing": "Lissage de l'entrée",
-      "smoothing_desc": "Constante de temps du filtre pour la mesure de puissance instantanée."
+      "smoothing_desc": "Constante de temps du filtre pour la mesure de puissance instantanée.",
+      "data_source": "Source de données",
+      "data_mqtt": "MQTT",
+      "data_ha": "Home Assistant",
+      "live_entity": "Entité de puissance en direct"
     },
     "emoncms": {
       "enable": "Activer EmonCMS",
@@ -542,7 +559,8 @@
       "energy": "Énergie délivrée",
       "sensors": "Capteurs",
       "service": "Service",
-      "vehicle": "Véhicule"
+      "vehicle": "Véhicule",
+      "home_battery": "Batterie domestique"
     },
     "energy": {
       "session": "Session",
@@ -586,7 +604,18 @@
       "updated": "Dernière mise à jour",
       "battery": "Batterie",
       "range": "Autonomie",
-      "timeleft": "Temps avant plein"
+      "timeleft": "Temps avant plein",
+      "plugged": "Branché",
+      "plugged_yes": "Oui",
+      "plugged_no": "Non",
+      "charging_state": "État de charge",
+      "charging_active": "En charge",
+      "charging_complete": "Terminé",
+      "charging_idle": "Inactif"
+    },
+    "home_battery": {
+      "soc": "État de charge",
+      "power": "Puissance"
     },
     "safety": {
       "errors": "Erreurs",
@@ -611,7 +640,8 @@
     "fahrenheit": "°F",
     "km": "km",
     "miles": "mi",
-    "percent": "%"
+    "percent": "%",
+    "watt": "W"
   },
   "clients": {
     "manual": "Manuel",

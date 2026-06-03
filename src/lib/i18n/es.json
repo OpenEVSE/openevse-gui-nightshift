@@ -229,6 +229,8 @@
       "entity_range": "Entidad de autonomía",
       "entity_eta": "Entidad de tiempo de carga",
       "entity_charge_limit": "Entidad de límite de carga",
+      "entity_plugged": "Entidad de conexión",
+      "entity_charging_state": "Entidad de estado de carga",
       "http_info": "Envía datos del vehículo al cargador mediante HTTP POST:",
       "via_openevse": "El inicio de sesión se realiza a través del servidor de OpenEVSE, que gestiona el acceso a Tesla. También puedes abrir Avanzado para pegar los tokens de API directamente.",
       "username": "Correo electrónico de la cuenta Tesla",
@@ -275,7 +277,18 @@
       "attack": "Suavizado — ataque",
       "attack_desc": "Segundos para reaccionar ante una caída de potencia disponible.",
       "decay": "Suavizado — caída",
-      "decay_desc": "Segundos para reaccionar ante un aumento de potencia disponible."
+      "decay_desc": "Segundos para reaccionar ante un aumento de potencia disponible.",
+      "data_source": "Fuente de datos",
+      "data_mqtt": "MQTT",
+      "data_ha": "Home Assistant",
+      "feed_solar_entity": "Entidad de producción solar",
+      "feed_grid_entity": "Entidad de importación/exportación de red",
+      "home_battery": "Batería doméstica",
+      "home_battery_info": "Lee los datos de la batería doméstica desde entidades de Home Assistant.",
+      "battery_soc_entity": "Entidad de SoC de la batería",
+      "battery_power_entity": "Entidad de potencia de la batería",
+      "battery_soc": "SoC de la batería",
+      "battery_power": "Potencia de la batería"
     },
     "shaper": {
       "enable": "Activar limitador de carga",
@@ -291,7 +304,11 @@
       "max_interval": "Intervalo máximo de datos",
       "max_interval_desc": "Tiempo de seguridad si no llegan datos en vivo en este número de segundos.",
       "smoothing": "Suavizado de entrada",
-      "smoothing_desc": "Constante de tiempo del filtro para la lectura de potencia en vivo."
+      "smoothing_desc": "Constante de tiempo del filtro para la lectura de potencia en vivo.",
+      "data_source": "Fuente de datos",
+      "data_mqtt": "MQTT",
+      "data_ha": "Home Assistant",
+      "live_entity": "Entidad de potencia en vivo"
     },
     "emoncms": {
       "enable": "Activar EmonCMS",
@@ -542,7 +559,8 @@
       "energy": "Energía entregada",
       "sensors": "Sensores",
       "service": "Servicio",
-      "vehicle": "Vehículo"
+      "vehicle": "Vehículo",
+      "home_battery": "Batería doméstica"
     },
     "energy": {
       "session": "Sesión",
@@ -586,7 +604,18 @@
       "updated": "Última actualización",
       "battery": "Batería",
       "range": "Rango",
-      "timeleft": "Tiempo hasta carga completa"
+      "timeleft": "Tiempo hasta carga completa",
+      "plugged": "Conectado",
+      "plugged_yes": "Sí",
+      "plugged_no": "No",
+      "charging_state": "Estado de carga",
+      "charging_active": "Cargando",
+      "charging_complete": "Completa",
+      "charging_idle": "Inactivo"
+    },
+    "home_battery": {
+      "soc": "Estado de carga",
+      "power": "Potencia"
     },
     "safety": {
       "errors": "Errores",
@@ -611,7 +640,8 @@
     "fahrenheit": "°F",
     "km": "km",
     "miles": "mi",
-    "percent": "%"
+    "percent": "%",
+    "watt": "W"
   },
   "clients": {
     "manual": "Manual",

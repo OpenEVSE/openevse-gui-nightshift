@@ -1,9 +1,13 @@
 <script>
   import { _ } from 'svelte-i18n'
 
-  let { labelKey, value, unit = '' } = $props()
+  let { labelKey, value, unit = '', textKey = '' } = $props()
 
-  let display = $derived(value === null || value === undefined ? '—' : value)
+  let display = $derived(
+    textKey ? $_(textKey)
+    : value === null || value === undefined ? '—'
+    : value,
+  )
 </script>
 
 <div class="flex items-center justify-between py-2 text-sm">

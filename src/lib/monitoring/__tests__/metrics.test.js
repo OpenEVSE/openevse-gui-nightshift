@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   round, energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
   showVehicle, countSeverity, safetyData, claimRows,
+  homeBatteryMetrics, showHomeBattery,
 } from '../metrics.js'
 
 describe('round', () => {
@@ -90,6 +91,62 @@ describe('safetyData', () => {
   it('prepends a fault row carrying the state code when faulted', () => {
     const d = safetyData({ state: 8, gfcicount: 0, nogndcount: 0, stuckcount: 0 }, true)
     expect(d.errors[0]).toEqual({ key: 'fault', state: 8, severity: 'error' })
+  })
+})
+
+describe('vehicleMetrics extras', () => {
+  const byLabel = (g) => Object.fromEntries(g.rows.map((r) => [r.labelKey, r]))
+
+  it('omits plugged and charging rows when absent', () => {
+    const m = byLabel(vehicleMetrics({ battery_level: 80 }, {}))
+    expect(m['monitoring.vehicle.plugged']).toBeUndefined()
+    expect(m['monitoring.vehicle.charging_state']).toBeUndefined()
+  })
+  it('renders plugged as a yes/no textKey', () => {
+    expect(byLabel(vehicleMetrics({ vehicle_plugged: true }, {}))['monitoring.vehicle.plugged'])
+      .toEqual({ labelKey: 'monitoring.vehicle.plugged', textKey: 'monitoring.vehicle.plugged_yes', unit: '' })
+    expect(byLabel(vehicleMetrics({ vehicle_plugged: false }, {}))['monitoring.vehicle.plugged'].textKey)
+      .toBe('monitoring.vehicle.plugged_no')
+  })
+  it('maps a known charging state to a textKey', () => {
+    expect(byLabel(vehicleMetrics({ vehicle_charging_state: 'Charging' }, {}))['monitoring.vehicle.charging_state'])
+      .toEqual({ labelKey: 'monitoring.vehicle.charging_state', textKey: 'monitoring.vehicle.charging_active', unit: '' })
+  })
+  it('passes an unknown charging state through as a literal value', () => {
+    expect(byLabel(vehicleMetrics({ vehicle_charging_state: 'Preconditioning' }, {}))['monitoring.vehicle.charging_state'])
+      .toEqual({ labelKey: 'monitoring.vehicle.charging_state', value: 'Preconditioning', unit: '' })
+  })
+  it('ignores an empty charging state string', () => {
+    expect(byLabel(vehicleMetrics({ vehicle_charging_state: '' }, {}))['monitoring.vehicle.charging_state'])
+      .toBeUndefined()
+  })
+  it('interprets stringy and numeric plugged values', () => {
+    const t = (v) => byLabel(vehicleMetrics({ vehicle_plugged: v }, {}))['monitoring.vehicle.plugged']?.textKey
+    expect(t(true)).toBe('monitoring.vehicle.plugged_yes')
+    expect(t(1)).toBe('monitoring.vehicle.plugged_yes')
+    expect(t('on')).toBe('monitoring.vehicle.plugged_yes')
+    expect(t('true')).toBe('monitoring.vehicle.plugged_yes')
+    expect(t(false)).toBe('monitoring.vehicle.plugged_no')
+    expect(t(0)).toBe('monitoring.vehicle.plugged_no')
+    expect(t('off')).toBe('monitoring.vehicle.plugged_no')
+    expect(t('false')).toBe('monitoring.vehicle.plugged_no')
+  })
+})
+
+describe('homeBatteryMetrics / showHomeBattery', () => {
+  it('builds soc and power rows', () => {
+    const g = homeBatteryMetrics({ home_battery_soc: 82.4, home_battery_power: -1200 })
+    expect(g.titleKey).toBe('monitoring.group.home_battery')
+    const byLabel = Object.fromEntries(g.rows.map((r) => [r.labelKey, r]))
+    expect(byLabel['monitoring.home_battery.soc']).toEqual({ labelKey: 'monitoring.home_battery.soc', value: 82, unit: 'units.percent' })
+    expect(byLabel['monitoring.home_battery.power']).toEqual({ labelKey: 'monitoring.home_battery.power', value: -1200, unit: 'units.watt' })
+  })
+  it('shows only when home_battery_soc is a real number', () => {
+    expect(showHomeBattery({ home_battery_soc: 0 })).toBe(true)
+    expect(showHomeBattery({ home_battery_soc: 82 })).toBe(true)
+    expect(showHomeBattery({})).toBe(false)
+    expect(showHomeBattery({ home_battery_soc: null })).toBe(false)
+    expect(showHomeBattery({ home_battery_soc: false })).toBe(false)
   })
 })
 

@@ -35,4 +35,11 @@ describe('MetricRow', () => {
     })
     expect(getByText('01:01:01')).toBeInTheDocument()
   })
+  it('renders a translated textKey instead of the value', () => {
+    const { getByText, queryByText } = render(MetricRow, {
+      props: { labelKey: 'monitoring.vehicle.plugged', textKey: 'monitoring.vehicle.plugged_yes', unit: '' },
+    })
+    expect(getByText('monitoring.vehicle.plugged_yes')).toBeInTheDocument()
+    expect(queryByText('—')).toBeNull()
+  })
 })
