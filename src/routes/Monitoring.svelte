@@ -8,7 +8,7 @@
   import { uisettings_store } from '../lib/stores/uisettings.js'
   import {
     energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
-    showVehicle, safetyData, claimRows,
+    showVehicle, homeBatteryMetrics, showHomeBattery, safetyData, claimRows,
   } from '../lib/monitoring/metrics.js'
   import Tabs from '../lib/components/ui/Tabs.svelte'
   import MetricsTab from '../lib/components/monitoring/MetricsTab.svelte'
@@ -34,6 +34,9 @@
     { group: sensorMetrics($status_store, $config_store, { tempUnit: $uisettings_store?.temp_unit }), expanded: false },
     ...(showVehicle($status_store, $config_store)
       ? [{ group: vehicleMetrics($status_store, $config_store), expanded: false }]
+      : []),
+    ...(showHomeBattery($status_store)
+      ? [{ group: homeBatteryMetrics($status_store), expanded: false }]
       : []),
     { group: serviceMetrics($status_store, $config_store), expanded: false },
   ])
