@@ -151,7 +151,7 @@
       {$_('dashboard.vehicle.evse_limit', { values: { value: fmt(current) } })}
     </div>
     <div class="pointer-events-none absolute top-[28px] w-0" style="left: {current}%; opacity: {knobOpacity}">
-      <div class="absolute top-0 left-1/2 h-[34px] w-1.5 -translate-x-1/2 rounded-[3px] {lineClass}"></div>
+      <div class="absolute -top-1.5 left-1/2 h-[40px] w-2.5 -translate-x-1/2 rounded-[3px] {lineClass}"></div>
     </div>
   </div>
 </div>
