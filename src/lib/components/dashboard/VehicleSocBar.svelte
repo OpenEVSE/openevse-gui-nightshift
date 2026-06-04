@@ -67,7 +67,12 @@
   })
 
   let lineClass = $derived(above ? 'bg-error' : 'bg-text')
-  let labelClass = $derived(above ? 'border-error text-error' : 'border-border text-text')
+  // Pill is outlined in the knob colour (not filled) over an opaque surface bg
+  // so the stem tucks behind it; border + text use the knob colour to read as
+  // one marker.
+  let labelClass = $derived(
+    above ? 'border border-error text-error bg-surface' : 'border border-text text-text bg-surface',
+  )
   let knobOpacity = $derived(atRest && !above ? 0.55 : 1)
 </script>
 
@@ -100,7 +105,7 @@
   </div>
 
   <!-- bar block — percent geometry; labels via fmt() -->
-  <div class="relative h-[84px]">
+  <div class="relative h-[96px]">
     <div class="absolute inset-x-0 top-[28px] h-[34px]">
       <div class="absolute inset-0 rounded-full bg-surface-3"></div>
       <div
@@ -133,25 +138,33 @@
     </div>
 
     {#if vehicleLimit != null}
+      <!-- Amber line runs through the bar and down past the floor to meet the
+           label pill; its end tucks behind the opaque pill (rendered after it). -->
       <div class="pointer-events-none absolute top-[28px] w-0" style="left: {vehicleLimit}%">
-        <div class="absolute top-0 left-1/2 h-[34px] w-0.5 -translate-x-1/2 bg-amber-400"></div>
+        <div class="absolute top-0 left-1/2 h-[46px] w-0.5 -translate-x-1/2 bg-amber-400"></div>
       </div>
       <div
-        class="pointer-events-none absolute top-[66px] whitespace-nowrap text-[10px] font-semibold text-amber-400"
+        class="pointer-events-none absolute top-[72px] whitespace-nowrap rounded-md border border-amber-400 bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-amber-400"
         style="left: {vehicleLimit}%; transform: translateX(-{vehicleLimit}%)"
       >
         {$_('dashboard.vehicle.vehicle_limit', { values: { value: fmt(vehicleLimit) } })}
       </div>
     {/if}
 
-    <div
-      class="pointer-events-none absolute top-0 whitespace-nowrap rounded-md border bg-surface-3 px-1.5 py-0.5 text-[11px] font-semibold {labelClass}"
-      style="left: {current}%; transform: translateX(-{current}%); opacity: {knobOpacity}"
-    >
-      {$_('dashboard.vehicle.evse_limit', { values: { value: fmt(current) } })}
-    </div>
-    <div class="pointer-events-none absolute top-[28px] w-0" style="left: {current}%; opacity: {knobOpacity}">
-      <div class="absolute -top-1.5 left-1/2 h-[40px] w-2.5 -translate-x-1/2 rounded-[3px] {lineClass}"></div>
+    <!-- Pill + stem share one opacity layer so the overlap doesn't compound
+         (two dimmed same-colour layers would otherwise read darker). The stem
+         comes first so the opaque pill renders on top, hiding the stem's top
+         edge — the marker reads as one solid pin. -->
+    <div class="pointer-events-none absolute inset-0" style="opacity: {knobOpacity}">
+      <div class="absolute top-[28px] w-0" style="left: {current}%">
+        <div class="absolute -top-2.5 left-1/2 h-[48px] w-2.5 -translate-x-1/2 rounded-b-[3px] {lineClass}"></div>
+      </div>
+      <div
+        class="absolute top-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-semibold {labelClass}"
+        style="left: {current}%; transform: translateX(-{current}%)"
+      >
+        {$_('dashboard.vehicle.evse_limit', { values: { value: fmt(current) } })}
+      </div>
     </div>
   </div>
 </div>

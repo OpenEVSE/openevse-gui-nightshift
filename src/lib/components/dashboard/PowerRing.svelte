@@ -24,19 +24,21 @@
           ? 'var(--sleep)'
           : display === 'off'
             ? 'var(--text-dim)'
-            : 'var(--accent)',
+            : display === 'idle'
+              ? 'var(--success)' // ready: a true green, distinct from the teal accent
+              : 'var(--accent)',
   )
-  // While charging the ring shows charge progress; in the paused / fault /
-  // sleeping / off states it becomes a solid colour-coded indicator ring.
+  // While charging the ring shows charge progress; in the ready / paused /
+  // fault / sleeping / off states it becomes a solid colour-coded indicator ring.
   let ringFill = $derived(
     display === 'charging'
       ? fill
-      : ['connected', 'error', 'sleeping', 'off'].includes(display) ? 1 : 0,
+      : ['idle', 'connected', 'error', 'sleeping', 'off'].includes(display) ? 1 : 0,
   )
-  // Breathe in passive (paused) and fault states. Sleeping gets a light
-  // breath (it's also waiting on something). Off is a deliberate stop —
-  // a static ring reinforces that nothing is happening.
-  let pulse = $derived(['connected', 'error', 'sleeping'].includes(display))
+  // Breathe in ready (armed and waiting), passive (paused) and fault states.
+  // Sleeping gets a light breath (it's also waiting on something). Off is a
+  // deliberate stop — a static ring reinforces that nothing is happening.
+  let pulse = $derived(['idle', 'connected', 'error', 'sleeping'].includes(display))
 </script>
 
 <div class="flex justify-center py-1">
@@ -56,8 +58,18 @@
         </div>
       </div>
     {:else if display === 'idle'}
-      <div class="text-lg font-extrabold text-text-dim">{$_('dashboard.ring.ready')}</div>
-      <div class="px-6 text-[11px] text-text-dim">{$_('dashboard.ring.ready_sub')}</div>
+      <div class="relative h-full w-full">
+        <!-- "Ready": centered both axes within the ring (matches Paused/Sleeping) -->
+        <div class="absolute inset-0 grid place-items-center">
+          <div class="text-[22px] font-extrabold leading-none text-success">{$_('dashboard.ring.ready')}</div>
+        </div>
+        <!-- sub-line: stacked just below the centered word -->
+        <div class="absolute inset-x-0 top-1/2 flex flex-col items-center pt-6">
+          <div class="px-6 text-center text-[11px] leading-tight text-text-dim">
+            {$_('dashboard.ring.ready_sub')}
+          </div>
+        </div>
+      </div>
     {:else if display === 'connected'}
       <div class="relative h-full w-full">
         <!-- "Paused": centered both axes within the ring -->
