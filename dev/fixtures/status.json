@@ -20,7 +20,7 @@
   "voltage": 240,
   "power": 7680,
   "pilot": 32,
-  "max_current": 701,
+  "max_current": 48,
   "temp": 427,
   "temp_max": 427,
   "temp1": 427,

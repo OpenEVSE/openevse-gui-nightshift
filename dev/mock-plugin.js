@@ -41,12 +41,32 @@ export function mockPlugin() {
   // Base status object for WebSocket messages
   const baseStatus = JSON.parse(fixtures['/api/status'])
 
+  // Dev-only runtime state override. Lets the resting/charging layouts be
+  // previewed without a real device: GET /api/_mock/state/<code> flips it
+  // (1 idle, 2 plugged/paused, 3 charging, 4-11 fault, 254 sleeping,
+  // 255 off; "reset" returns to the fixture). null = use the fixture state.
+  let stateOverride = null
+
+  // Dev-only claims/target served to the dashboard. getMode() turns a
+  // manual + "disabled" claim into Off mode, and displayState() then renders
+  // EVSE state 254 as "off" instead of "sleeping". So the switcher keeps the
+  // derived mode coherent with the previewed state: Off only for the dedicated
+  // off code (255), Auto otherwise (so 254 -> sleeping). Bumping claimsVersion
+  // makes DataManager re-download claims/target live over the WebSocket.
+  const claimsOff = JSON.parse(fixtures['/api/claims/target'])
+  const claimsAuto = { properties: {}, claims: { state: null, charge_current: null } }
+  let claimsState = claimsOff
+  let claimsVersion = baseStatus.claims_version ?? 1
+
   function buildStatusMessage(tickCount) {
     // Mirror the device's real status shape; nudge only genuine live fields
     // so the connection looks alive without inventing nonexistent keys.
-    const charging = baseStatus.state === 3
+    const state = stateOverride == null ? baseStatus.state : stateOverride
+    const charging = state === 3
     return JSON.stringify({
       ...baseStatus,
+      state,
+      claims_version: claimsVersion,
       uptime: (baseStatus.uptime ?? 0) + tickCount * 2,
       session_elapsed: charging
         ? (baseStatus.session_elapsed ?? 0) + tickCount * 2
@@ -57,6 +77,11 @@ export function mockPlugin() {
   return {
     name: 'openevse-mock',
     configureServer(server) {
+      // Connected WS clients + tick, shared so the state switcher can push an
+      // updated status frame to every open tab the moment it's flipped.
+      const clients = new Set()
+      let tickCount = 0
+
       // ── HTTP mock middleware ──────────────────────────────────────────────
       server.middlewares.use((req, res, next) => {
         // /api/energy/raw?before=... must return empty before query is stripped
@@ -67,6 +92,39 @@ export function mockPlugin() {
         }
 
         const url = req.url?.split('?')[0] // strip query string
+
+        // Dev-only runtime state switcher: flip the dashboard's EVSE state and
+        // push the new frame to every open tab immediately (no restart).
+        if (url && url.startsWith('/api/_mock/state/')) {
+          const raw = url.slice('/api/_mock/state/'.length)
+          stateOverride = raw === 'reset' ? null : Number(raw)
+          // Keep the derived mode coherent: Off only for the explicit off code.
+          const effectiveState = stateOverride == null ? baseStatus.state : stateOverride
+          const nextClaims = effectiveState === 255 ? claimsOff : claimsAuto
+          if (nextClaims !== claimsState) {
+            claimsState = nextClaims
+            claimsVersion++
+          }
+          const msg = buildStatusMessage(tickCount)
+          for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ state: stateOverride, claims_version: claimsVersion }))
+          return
+        }
+
+        // Status reflects any runtime override so a fresh load matches the WS.
+        if (url === '/api/status') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(buildStatusMessage(tickCount))
+          return
+        }
+
+        // Claims/target reflects the switcher so the derived mode is coherent.
+        if (url === '/api/claims/target') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify(claimsState))
+          return
+        }
 
         // RFID scan acknowledgement
         if (url === '/api/rfid/add') {
@@ -234,9 +292,8 @@ export function mockPlugin() {
         // so Vite's own upgrade handler fires normally.
       })
 
-      let tickCount = 0
-
       wss.on('connection', (ws) => {
+        clients.add(ws)
         // Send an initial status message immediately
         ws.send(buildStatusMessage(tickCount))
 
@@ -260,10 +317,12 @@ export function mockPlugin() {
         })
 
         ws.on('close', () => {
+          clients.delete(ws)
           clearInterval(interval)
         })
 
         ws.on('error', () => {
+          clients.delete(ws)
           clearInterval(interval)
         })
       })
