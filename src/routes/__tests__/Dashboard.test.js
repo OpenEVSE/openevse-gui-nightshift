@@ -45,28 +45,32 @@ describe('Dashboard', () => {
   it('locks the mode pill to the claim owner (RFID)', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     claims_target_store.set({ properties: {}, claims: { state: EvseClients.rfid.id } })
-    const { getByText, queryByText } = render(Dashboard)
-    expect(getByText('RFID')).toBeInTheDocument()
-    // locked pill renders no popover options
-    expect(queryByText('dashboard.mode.off')).not.toBeInTheDocument()
+    const { getByText, queryByRole } = render(Dashboard)
+    // ChargeControls renders a locked-state box with the owner label embedded
+    expect(getByText('dashboard.controls.locked_by')).toBeInTheDocument()
+    // locked state hides the mode radiogroup entirely
+    expect(queryByRole('radiogroup', { name: 'dashboard.mode.aria' })).not.toBeInTheDocument()
   })
 
   it('surfaces the global alert when a mode write fails', async () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     httpAPI.mockResolvedValue('error')
-    const { getByText, getByRole } = render(Dashboard)
-    await fireEvent.click(getByRole('button', { name: 'dashboard.mode.aria' }))
+    const { getByText } = render(Dashboard)
+    // Click the 'On' segment button directly — setSegment calls override_store.upload
+    // which goes through httpAPI; the mock returns 'error' so showWriteError fires.
     await fireEvent.click(getByText('dashboard.mode.on'))
     await vi.waitFor(() => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
   })
 
-  it('drives /divertmode when the Eco toggle is switched on', async () => {
+  it('drives /divertmode when the Eco segment is selected', async () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     config_store.set({ max_current_soft: 48, divert_enabled: true, current_shaper_enabled: false })
-    const { getByLabelText } = render(Dashboard)
-    await fireEvent.click(getByLabelText('dashboard.eco'))
+    const { getByText } = render(Dashboard)
+    // Click the Eco segment button in ChargeControls — setSegment('eco') releases the
+    // override then POSTs divertmode=2.
+    await fireEvent.click(getByText('dashboard.eco'))
     await vi.waitFor(() => {
       expect(httpAPI).toHaveBeenCalledWith('POST', '/divertmode', 'divertmode=2', 'text')
     })
@@ -119,10 +123,12 @@ describe('Dashboard', () => {
     })
   })
 
-  it('renders the mode and rate pills instead of the old rows', () => {
+  it('renders the ChargeControls segment group and the rate pill', () => {
     status_store.set({ state: 3, power: 7000, voltage: 240, amp: 32000, session_energy: 0, session_elapsed: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0 })
     const { getByRole } = render(Dashboard)
-    expect(getByRole('button', { name: 'dashboard.mode.aria' })).toBeInTheDocument()
+    // ChargeControls renders a radiogroup for the mode segment control
+    expect(getByRole('radiogroup', { name: 'dashboard.mode.aria' })).toBeInTheDocument()
+    // RatePill is still present in the non-chart path
     expect(getByRole('button', { name: 'dashboard.rate.aria' })).toBeInTheDocument()
   })
 

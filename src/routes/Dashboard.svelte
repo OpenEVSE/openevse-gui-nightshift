@@ -25,12 +25,11 @@
   import ChargingHero from '../lib/components/dashboard/ChargingHero.svelte'
   import StatChips from '../lib/components/dashboard/StatChips.svelte'
   import ThrottleBadge from '../lib/components/dashboard/ThrottleBadge.svelte'
-  import ModePill from '../lib/components/dashboard/ModePill.svelte'
+  import { selectedSegment } from '../lib/dashboard/controls.js'
+  import ChargeControls from '../lib/components/dashboard/ChargeControls.svelte'
   import RatePill from '../lib/components/dashboard/RatePill.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
   import ChargeLimitModal from '../lib/components/dashboard/ChargeLimitModal.svelte'
-  import EcoShaperToggles from '../lib/components/dashboard/EcoShaperToggles.svelte'
-  import BoostButton from '../lib/components/dashboard/BoostButton.svelte'
 
   let limitModalOpen = $state(false)
   let busy = $state(false)
@@ -109,6 +108,13 @@
   let showShaper = $derived(!!$config_store?.current_shaper_enabled)
   let ecoOn = $derived($status_store?.divertmode === 2 && mode === 0)
   let shaperOn = $derived(!!$uistates_store?.shaper)
+  let chargeSegment = $derived(
+    selectedSegment({
+      mode,
+      divertmode: $status_store?.divertmode,
+      divertEnabled: !!$config_store?.divert_enabled,
+    }),
+  )
 
   let limitSummary = $derived(formatLimit($limit_store))
   function formatLimit(l) {
@@ -147,26 +153,34 @@
   let socNonce = $state(0)
 
   // ── actions (all writes serialized) ─────────────────────────────────────
-  async function setMode(m) {
+  async function setSegment(seg) {
     if (busy) return
     busy = true
     try {
-      let ok
-      if (m === 0) {
-        ok = await serialQueue.add(() => override_store.clear())
-      } else {
-        // auto_release: false — same reason as Boost: when omitted the device
-        // defaults to true, the manual override is released, and a lower-
-        // priority claim (timer/schedule, divert, etc.) takes over with
-        // state=disabled. The user then sees "Sleeping · waiting for
-        // schedule" even though they just picked On.
+      let ok = true
+      if (seg === 'on' || seg === 'off') {
         const cur = $override_store?.charge_current
         const data = {
-          state: m === 1 ? 'active' : 'disabled',
+          state: seg === 'on' ? 'active' : 'disabled',
           charge_current: cur ?? $config_store?.max_current_soft,
           auto_release: false,
         }
         ok = await serialQueue.add(() => override_store.upload(data))
+      } else {
+        // 'auto' or 'eco': release the manual override, then set the divert
+        // state explicitly so we land on the intended segment regardless of
+        // the prior divertmode (On->Auto must turn divert off; On->Eco must turn it on).
+        // Only clear when an override is actually set — clear() returns false
+        // (with no request) on an empty/unset store, which would otherwise be
+        // mistaken for a write failure and fire a spurious error.
+        if ($override_store && Object.keys($override_store).length > 0) {
+          ok = await serialQueue.add(() => override_store.clear())
+        }
+        const dm = seg === 'eco' ? 2 : 1
+        const res = await serialQueue.add(() =>
+          httpAPI('POST', '/divertmode', `divertmode=${dm}`, 'text'),
+        )
+        if (res === 'error') ok = false
       }
       if (!ok) showWriteError()
     } finally {
@@ -182,7 +196,7 @@
         await serialQueue.add(() => override_store.removeProp('charge_current'))
       } else {
         const current = $override_store ?? {}
-        // auto_release: false to keep the override sticky — see setMode.
+        // auto_release: false to keep the override sticky — see setSegment.
         const ok = await serialQueue.add(() =>
           override_store.upload({ ...current, charge_current: val, auto_release: false }),
         )
@@ -191,19 +205,6 @@
           rateNonce++ // remount RatePill so the slider reverts to the confirmed value
         }
       }
-    } finally {
-      busy = false
-    }
-  }
-
-  async function setEco(on) {
-    if (busy) return
-    busy = true
-    try {
-      const res = await serialQueue.add(() =>
-        httpAPI('POST', '/divertmode', `divertmode=${on ? 2 : 1}`, 'text'),
-      )
-      if (res === 'error') showWriteError()
     } finally {
       busy = false
     }
@@ -276,7 +277,7 @@
   let boostTimerId = null
   let prevOverride = null
   // ms-epoch when the active boost ends, or null. Drives the inline
-  // "Boosting · MM:SS" indicator on BoostButton; cleared by the timer or
+  // "Boosting · MM:SS" indicator inside ChargeControls; cleared by the timer or
   // by cancelBoost().
   let boostEndsAt = $state(null)
 
@@ -381,9 +382,6 @@
           soc={hasSoc ? ($status_store?.battery_level ?? null) : null}
           target={socTarget}
           {hasSoc}
-          {mode}
-          {modeLocked}
-          {modeLockLabel}
           amps={chargeAmps}
           {maxAmps}
           {rateClaimedBy}
@@ -392,23 +390,12 @@
           voltage={$status_store?.voltage ?? 0}
           sessionElapsed={$status_store?.session_elapsed ?? 0}
           chartError={$energy_store.error.raw}
-          modeDisabled={busy || display === 'error'}
           rateDisabled={busy || ecoOn || display === 'error'}
-          onmode={setMode}
           onrate={setChargeAmps}
         />
       </div>
     {:else}
       <div in:fade={{ duration: 150 }}>
-        <div class="absolute left-3 top-1 z-10">
-          <ModePill
-            {mode}
-            locked={modeLocked}
-            lockLabel={modeLockLabel}
-            disabled={busy || display === 'error'}
-            onmode={setMode}
-          />
-        </div>
         <div class="absolute right-3 top-1 z-10">
           {#key rateNonce}
             <RatePill
@@ -438,12 +425,21 @@
 
   <StatChips {charging} {live} {summary} {sessionCost} />
 
-  <!-- The eco/shaper and mode controls stay in place during a fault —
-       visible but disabled — so the layout doesn't reflow. -->
-  <EcoShaperToggles
-    {showEco} {ecoOn} onEco={setEco}
-    {showShaper} {shaperOn} onShaper={setShaper}
+  <!-- Unified charge controls: segmented mode + Shaper/Boost modifiers.
+       Stays visible (disabled) during a fault so the layout doesn't reflow. -->
+  <ChargeControls
+    segment={chargeSegment}
+    divertEnabled={showEco}
+    shaperEnabled={showShaper}
+    {shaperOn}
+    locked={modeLocked}
+    lockLabel={modeLockLabel}
     disabled={busy || display === 'error'}
+    {boostEndsAt}
+    onsegment={setSegment}
+    onshaper={setShaper}
+    onboost={boost}
+    oncancelboost={cancelBoost}
   />
 
   {#if display !== 'error'}
@@ -469,12 +465,6 @@
       />
     {/key}
 
-    <BoostButton
-      disabled={busy}
-      endsAt={boostEndsAt}
-      onboost={boost}
-      oncancel={cancelBoost}
-    />
   {/if}
 </section>
 
