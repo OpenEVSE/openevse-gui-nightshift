@@ -107,7 +107,10 @@
   let showEco = $derived(!!$config_store?.divert_enabled)
   let showShaper = $derived(!!$config_store?.current_shaper_enabled)
   let ecoOn = $derived($status_store?.divertmode === 2 && mode === 0)
-  let shaperOn = $derived(!!$uistates_store?.shaper)
+  // Reflect the device's live shaper state (status.shaper, 0/1) — same source
+  // pattern as ecoOn above. uistates_store.shaper is never written by the data
+  // layer, so deriving from it left the toggle permanently off.
+  let shaperOn = $derived(!!$status_store?.shaper)
   let chargeSegment = $derived(
     selectedSegment({
       mode,
@@ -175,6 +178,12 @@
         // mistaken for a write failure and fire a spurious error.
         if ($override_store && Object.keys($override_store).length > 0) {
           ok = await serialQueue.add(() => override_store.clear())
+        }
+        // If releasing the override failed, don't push divertmode on top of a
+        // device we couldn't reach — surface the error and stop.
+        if (!ok) {
+          showWriteError()
+          return
         }
         const dm = seg === 'eco' ? 2 : 1
         const res = await serialQueue.add(() =>

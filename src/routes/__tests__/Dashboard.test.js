@@ -76,6 +76,21 @@ describe('Dashboard', () => {
     })
   })
 
+  it('uploads a disabled override when the Off segment is selected', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByText } = render(Dashboard)
+    // setSegment('off') uploads an override with state 'disabled' and the
+    // soft-max fallback current (no prior override charge_current set).
+    await fireEvent.click(getByText('dashboard.mode.off'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST',
+        '/override',
+        JSON.stringify({ state: 'disabled', charge_current: 48, auto_release: false }),
+      )
+    })
+  })
+
   it('shows the charge-limit bar when battery_level is present', () => {
     status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 80, battery_range: 206, time_to_full_charge: 0 })
     const { getByRole } = render(Dashboard)
