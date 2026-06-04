@@ -49,7 +49,7 @@
   }
 </script>
 
-<div class="mt-3">
+<div>
   {#if active}
     <div class="rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3">
       <div class="flex items-center justify-between gap-3">
