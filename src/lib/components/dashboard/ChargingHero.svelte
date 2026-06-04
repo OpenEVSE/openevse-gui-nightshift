@@ -1,7 +1,6 @@
 <script>
   import { _ } from 'svelte-i18n'
   import StatusLine from './StatusLine.svelte'
-  import ModePill from './ModePill.svelte'
   import RatePill from './RatePill.svelte'
   import SessionChart from './SessionChart.svelte'
 
@@ -10,9 +9,6 @@
     soc = null,
     target = null,
     hasSoc = false,
-    mode = 0,
-    modeLocked = false,
-    modeLockLabel = '',
     amps = 6,
     maxAmps = 48,
     rateClaimedBy = '',
@@ -21,17 +17,14 @@
     voltage = 0,
     sessionElapsed = 0,
     chartError = false,
-    modeDisabled = false,
     rateDisabled = false,
-    onmode = () => {},
     onrate = () => {},
   } = $props()
 </script>
 
 <div>
-  <!-- status row: mode pill · "Charging" · rate pill (placement A) -->
+  <!-- status row: "Charging" · rate pill -->
   <div class="flex items-center justify-between gap-2 px-1">
-    <ModePill {mode} locked={modeLocked} lockLabel={modeLockLabel} disabled={modeDisabled} {onmode} />
     <StatusLine display="charging" />
     {#key rateNonce}
       <RatePill {amps} min={6} max={maxAmps} claimedBy={rateClaimedBy} disabled={rateDisabled} onchange={onrate} />
