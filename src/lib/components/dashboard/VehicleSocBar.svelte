@@ -74,6 +74,11 @@
     above ? 'border border-error text-error bg-surface' : 'border border-text text-text bg-surface',
   )
   let knobOpacity = $derived(atRest && !above ? 0.55 : 1)
+  // The pill shifts to stay in view (translateX of its own width), but the
+  // fixed-width stem sits at the exact value. Clamping the shift keeps the
+  // stem from poking out the pill's edge near 0/100% — the pill instead spills
+  // a few px into the card padding.
+  let pillShift = $derived(Math.min(90, Math.max(10, current)))
 </script>
 
 <div>
@@ -105,7 +110,7 @@
   </div>
 
   <!-- bar block — percent geometry; labels via fmt() -->
-  <div class="relative h-[96px]">
+  <div class="relative h-[72px]">
     <div class="absolute inset-x-0 top-[28px] h-[34px]">
       <div class="absolute inset-0 rounded-full bg-surface-3"></div>
       <div
@@ -138,16 +143,26 @@
     </div>
 
     {#if vehicleLimit != null}
-      <!-- Amber line runs through the bar and down past the floor to meet the
-           label pill; its end tucks behind the opaque pill (rendered after it). -->
+      <!-- Vehicle's own charge limit. The amber line runs through the bar (the
+           slider sits on top there, so dragging still works) and pokes a little
+           below it. The hover target (peer) lives entirely BELOW the bar floor
+           so it never covers the slider; hovering it reveals the tooltip. The
+           tooltip is positioned like a label pill (translateX of its own offset)
+           so a wide multi-line tip can't run off the card edge. -->
       <div class="pointer-events-none absolute top-[28px] w-0" style="left: {vehicleLimit}%">
-        <div class="absolute top-0 left-1/2 h-[46px] w-0.5 -translate-x-1/2 bg-amber-400"></div>
+        <div class="absolute top-0 left-1/2 h-[34px] w-0.5 -translate-x-1/2 bg-amber-400"></div>
       </div>
       <div
-        class="pointer-events-none absolute top-[72px] whitespace-nowrap rounded-md border border-amber-400 bg-surface px-1.5 py-0.5 text-[10px] font-semibold text-amber-400"
+        class="peer absolute top-[62px] z-10 h-[16px] w-5 -translate-x-1/2 cursor-help"
+        style="left: {vehicleLimit}%"
+        aria-label={$_('dashboard.vehicle.vehicle_limit_tip', { values: { value: fmt(vehicleLimit) } })}
+      ></div>
+      <div
+        role="tooltip"
+        class="pointer-events-none absolute top-[74px] z-10 max-w-[300px] whitespace-normal rounded-md border border-amber-400 bg-surface px-2 py-1 text-[10px] font-semibold leading-snug text-amber-400 opacity-0 shadow-lg transition-opacity duration-150 peer-hover:opacity-100"
         style="left: {vehicleLimit}%; transform: translateX(-{vehicleLimit}%)"
       >
-        {$_('dashboard.vehicle.vehicle_limit', { values: { value: fmt(vehicleLimit) } })}
+        {$_('dashboard.vehicle.vehicle_limit_tip', { values: { value: fmt(vehicleLimit) } })}
       </div>
     {/if}
 
@@ -161,7 +176,7 @@
       </div>
       <div
         class="absolute top-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-semibold {labelClass}"
-        style="left: {current}%; transform: translateX(-{current}%)"
+        style="left: {current}%; transform: translateX(-{pillShift}%)"
       >
         {$_('dashboard.vehicle.evse_limit', { values: { value: fmt(current) } })}
       </div>

@@ -491,7 +491,8 @@
     "reason": {
       "off": "Switch to Auto or On",
       "waiting": "Waiting · {time}",
-      "not_charging": "Not charging"
+      "not_charging": "Not charging",
+      "limit_reached": "Charge limit reached · {value}"
     },
     "kw_max": "of {max} kW max",
     "chips": {
@@ -513,6 +514,7 @@
     "vehicle": {
       "to_full": "{time} to full",
       "vehicle_limit": "vehicle limit {value}",
+      "vehicle_limit_tip": "Your vehicle's own charge limit ({value}). The car won't charge past this.",
       "evse_limit": "EVSE limit {value}",
       "target_aria": "EVSE charge limit",
       "unit_aria": "Limit units"

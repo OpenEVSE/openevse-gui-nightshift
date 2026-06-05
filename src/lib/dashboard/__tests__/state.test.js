@@ -21,6 +21,9 @@ describe('displayState', () => {
     expect(displayState({ state: 254 }, 2)).toBe('off')
     expect(displayState({ state: 254 }, 0)).toBe('sleeping')
     expect(displayState({ state: 254 }, 1)).toBe('sleeping')
+    // Same disambiguation for an unplugged-but-disabled device (state 1 + Off).
+    expect(displayState({ state: 1 }, 2)).toBe('off')
+    expect(displayState({ state: 1 }, 0)).toBe('idle')
     expect(displayState({ state: 4 })).toBe('error')
     expect(displayState({ state: 9 })).toBe('error')
     expect(displayState({ state: 11 })).toBe('error')

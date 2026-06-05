@@ -52,6 +52,31 @@ describe('Dashboard', () => {
     expect(queryByRole('radiogroup', { name: 'dashboard.mode.aria' })).not.toBeInTheDocument()
   })
 
+  it('treats a reached charge limit as a ring reason, not a control lock', () => {
+    // Limit tripped: device sleeping (254) with the limit holding the claim.
+    status_store.set({ state: 254, total_day: 0, total_energy: 0 })
+    claims_target_store.set({ properties: {}, claims: { state: EvseClients.limit.id } })
+    limit_store.set({ type: 'soc', value: 80, auto_release: true })
+    const { getByText, getByRole, queryByText } = render(Dashboard)
+    // The reason shows in the ring, and the controls stay live (not locked).
+    expect(getByText('dashboard.reason.limit_reached')).toBeInTheDocument()
+    expect(queryByText('dashboard.controls.locked_by')).not.toBeInTheDocument()
+    expect(getByRole('radiogroup', { name: 'dashboard.mode.aria' })).toBeInTheDocument()
+  })
+
+  it('clears the tripped limit when On is selected so charging resumes', async () => {
+    status_store.set({ state: 254, total_day: 0, total_energy: 0 })
+    claims_target_store.set({ properties: {}, claims: { state: EvseClients.limit.id } })
+    limit_store.set({ type: 'soc', value: 80, auto_release: true })
+    const { getByText } = render(Dashboard)
+    // On forces charge; since the limit claim outranks manual, setSegment also
+    // removes the limit (DELETE /limit) on top of the active override.
+    await fireEvent.click(getByText('dashboard.mode.on'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('DELETE', '/limit')
+    })
+  })
+
   it('surfaces the global alert when a mode write fails', async () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     httpAPI.mockResolvedValue('error')

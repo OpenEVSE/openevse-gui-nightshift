@@ -76,9 +76,14 @@ describe('VehicleSocBar', () => {
     expect(input.value).toBe('75')
   })
 
+  it('renders the vehicle-limit hover tooltip when the limit is known', () => {
+    const { getByText } = render(VehicleSocBar, { props: { soc: 74, vehicleLimit: 90, target: 80 } })
+    expect(getByText('dashboard.vehicle.vehicle_limit_tip')).toBeInTheDocument()
+  })
+
   it('omits the vehicle-limit marker when the limit is unknown', () => {
     const { queryByText } = render(VehicleSocBar, { props: { soc: 74, vehicleLimit: null, target: 80 } })
-    expect(queryByText('dashboard.vehicle.vehicle_limit')).not.toBeInTheDocument()
+    expect(queryByText('dashboard.vehicle.vehicle_limit_tip')).not.toBeInTheDocument()
   })
 
   it('shows current → target progress in percent mode', () => {

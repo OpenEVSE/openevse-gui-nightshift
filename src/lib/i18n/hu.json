@@ -491,7 +491,8 @@
     "reason": {
       "off": "Váltson Auto vagy Be módra",
       "waiting": "Várakozás · {time}",
-      "not_charging": "Nem tölt"
+      "not_charging": "Nem tölt",
+      "limit_reached": "Töltési korlát elérve · {value}"
     },
     "kw_max": "max {max} kW-ból",
     "chips": {
@@ -513,6 +514,7 @@
     "vehicle": {
       "to_full": "{time} a teljes töltésig",
       "vehicle_limit": "jármű korlátja {value}",
+      "vehicle_limit_tip": "A jármű saját töltési korlátja ({value}). Az autó nem tölt ezen túl.",
       "evse_limit": "EVSE korlát {value}",
       "target_aria": "EVSE töltési korlát",
       "unit_aria": "Korlát mértékegysége"

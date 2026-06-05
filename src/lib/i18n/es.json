@@ -491,7 +491,8 @@
     "reason": {
       "off": "Cambia a Auto o Activado",
       "waiting": "Esperando · {time}",
-      "not_charging": "Sin carga"
+      "not_charging": "Sin carga",
+      "limit_reached": "Límite de carga alcanzado · {value}"
     },
     "kw_max": "de {max} kW máx",
     "chips": {
@@ -513,6 +514,7 @@
     "vehicle": {
       "to_full": "{time} para completar",
       "vehicle_limit": "límite del vehículo {value}",
+      "vehicle_limit_tip": "Límite de carga propio del vehículo ({value}). El coche no cargará más allá de esto.",
       "evse_limit": "límite EVSE {value}",
       "target_aria": "Límite de carga EVSE",
       "unit_aria": "Unidades del límite"

@@ -46,7 +46,17 @@
   let showChart = $derived(charging && labsOn)
   let maxAmps = $derived($config_store?.max_current_soft ?? 48)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
-  let reason = $derived(connectedReason(mode, $plan_store))
+
+  let claimOwner = $derived($claims_target_store?.claims?.state)
+  // A reached charge limit grabs the state-claim to stop charging. Unlike OCPP
+  // or RFID it's the user's own setting, not an external authority — so we don't
+  // lock the controls; we surface it as the ring reason and let On clear it.
+  let limitTripped = $derived(claimOwner === EvseClients.limit.id)
+  let reason = $derived(
+    limitTripped
+      ? { key: 'dashboard.reason.limit_reached', values: { value: formatLimit($limit_store) } }
+      : connectedReason(mode, $plan_store),
+  )
 
   let kw = $derived((($status_store?.power ?? 0) / 1000).toFixed(1))
   // Shown on the PowerRing while charging (the non-Labs / chart-off path).
@@ -88,10 +98,10 @@
       : '',
   )
 
-  let claimOwner = $derived($claims_target_store?.claims?.state)
+  // OCPP/RFID are external authorities that genuinely own the charge — lock the
+  // mode controls. A reached limit is handled separately (see limitTripped).
   let modeLocked = $derived(
     claimOwner === EvseClients.ocpp.id ||
-    claimOwner === EvseClients.limit.id ||
     claimOwner === EvseClients.rfid.id,
   )
   let modeLockLabel = $derived(
@@ -99,9 +109,7 @@
       ? 'OCPP'
       : claimOwner === EvseClients.rfid.id
         ? 'RFID'
-        : claimOwner === EvseClients.limit.id
-          ? 'LIMIT'
-          : '',
+        : '',
   )
 
   let showEco = $derived(!!$config_store?.divert_enabled)
@@ -169,6 +177,11 @@
           auto_release: false,
         }
         ok = await serialQueue.add(() => override_store.upload(data))
+        // Forcing On past a reached limit: the limit claim outranks manual, so
+        // the override alone won't resume — clear the tripped limit too.
+        if (ok && seg === 'on' && limitTripped) {
+          ok = await serialQueue.add(() => limit_store.remove())
+        }
       } else {
         // 'auto' or 'eco': release the manual override, then set the divert
         // state explicitly so we land on the intended segment regardless of

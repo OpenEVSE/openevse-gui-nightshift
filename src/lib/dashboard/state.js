@@ -12,7 +12,7 @@
 export function displayState(status, mode = 0) {
   const s = status?.state
   if (s === undefined || s === null || s === 0) return 'starting'
-  if (s === 1) return 'idle'
+  if (s === 1) return mode === 2 ? 'off' : 'idle'
   if (s === 3) return 'charging'
   if (s >= 4 && s <= 11) return 'error'
   if (s === 254) return mode === 2 ? 'off' : 'sleeping'
