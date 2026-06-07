@@ -216,6 +216,9 @@
       "topic_soc": "State-of-charge topic",
       "topic_range": "Range topic",
       "topic_eta": "Time-to-charge topic",
+      "topic_charge_limit": "Charge-limit topic",
+      "topic_plugged": "Plugged-in topic",
+      "topic_charging_state": "Charging-state topic",
       "http_info": "Push vehicle data to the charger with an HTTP POST:",
       "via_openevse": "Login goes through OpenEVSE's server, which performs the Tesla sign-in. Or open Advanced to paste API tokens directly.",
       "username": "Tesla account email",
@@ -262,7 +265,12 @@
       "attack": "Smoothing — attack",
       "attack_desc": "Seconds to react to falling available power.",
       "decay": "Smoothing — decay",
-      "decay_desc": "Seconds to react to rising available power."
+      "decay_desc": "Seconds to react to rising available power.",
+      "home_battery": "Home Battery",
+      "battery_soc_topic": "Battery SoC topic",
+      "battery_power_topic": "Battery power topic",
+      "battery_soc": "Battery SoC",
+      "battery_power": "Battery power"
     },
     "shaper": {
       "enable": "Enable load shaper",

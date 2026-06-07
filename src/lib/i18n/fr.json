@@ -216,6 +216,9 @@
       "topic_soc": "Sujet état de charge (SOC)",
       "topic_range": "Sujet autonomie",
       "topic_eta": "Sujet temps de charge",
+      "topic_charge_limit": "Sujet limite de charge",
+      "topic_plugged": "Sujet branchement",
+      "topic_charging_state": "Sujet état de charge",
       "http_info": "Envoyez les données véhicule au chargeur via HTTP POST :",
       "via_openevse": "La connexion passe par le serveur OpenEVSE, qui effectue l'authentification Tesla. Vous pouvez aussi ouvrir Avancé pour coller directement vos tokens API.",
       "username": "Adresse e-mail du compte Tesla",
@@ -262,7 +265,12 @@
       "attack": "Lissage — montée",
       "attack_desc": "Secondes pour réagir à une baisse de puissance disponible.",
       "decay": "Lissage — descente",
-      "decay_desc": "Secondes pour réagir à une hausse de puissance disponible."
+      "decay_desc": "Secondes pour réagir à une hausse de puissance disponible.",
+      "home_battery": "Batterie domestique",
+      "battery_soc_topic": "Sujet SoC de la batterie",
+      "battery_power_topic": "Sujet puissance de la batterie",
+      "battery_soc": "SoC de la batterie",
+      "battery_power": "Puissance de la batterie"
     },
     "shaper": {
       "enable": "Activer le délestage",

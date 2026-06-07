@@ -216,6 +216,9 @@
       "topic_soc": "Töltöttségi állapot téma",
       "topic_range": "Hatótávolság téma",
       "topic_eta": "Töltési idő téma",
+      "topic_charge_limit": "Töltési limit téma",
+      "topic_plugged": "Csatlakozás téma",
+      "topic_charging_state": "Töltési állapot téma",
       "http_info": "Járműadatokat küldhet a töltőre HTTP POST kéréssel:",
       "via_openevse": "A bejelentkezés az OpenEVSE szerverén keresztül történik, amely elvégzi a Tesla azonosítást. Az Irányítópult megnyitásával közvetlenül is beilleszthet API tokeneket.",
       "username": "Tesla fiók e-mail cím",
@@ -262,7 +265,12 @@
       "attack": "Simítás — attack",
       "attack_desc": "Másodperc az elérhető teljesítmény csökkenésére való reagáláshoz.",
       "decay": "Simítás — decay",
-      "decay_desc": "Másodperc az elérhető teljesítmény növekedésére való reagáláshoz."
+      "decay_desc": "Másodperc az elérhető teljesítmény növekedésére való reagáláshoz.",
+      "home_battery": "Otthoni akkumulátor",
+      "battery_soc_topic": "Akkumulátor töltöttség téma",
+      "battery_power_topic": "Akkumulátor teljesítmény téma",
+      "battery_soc": "Akkumulátor töltöttség",
+      "battery_power": "Akkumulátor teljesítmény"
     },
     "shaper": {
       "enable": "Terheléscsökkentő engedélyezése",

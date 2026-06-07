@@ -43,6 +43,31 @@ describe('Solar page', () => {
     expect(getByText('config.solar.feed_grid')).toBeInTheDocument()
   })
 
+  it('shows the Home Battery MQTT section even when divert is disabled', () => {
+    config_store.set({ divert_enabled: false })
+    const { getByText, getByPlaceholderText } = render(Solar)
+    expect(getByText('config.solar.home_battery')).toBeInTheDocument()
+    expect(getByPlaceholderText('topic/home_battery_soc')).toBeInTheDocument()
+    expect(getByPlaceholderText('topic/home_battery_power')).toBeInTheDocument()
+  })
+
+  it('saves a home-battery MQTT topic on blur', async () => {
+    config_store.set({ divert_enabled: false })
+    const { getByPlaceholderText } = render(Solar)
+    const input = getByPlaceholderText('topic/home_battery_soc')
+    await fireEvent.input(input, { target: { value: 'home/battery/soc' } })
+    await fireEvent.blur(input)
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_home_battery_soc: 'home/battery/soc' }))
+  })
+
+  it('shows live home-battery readings when present', () => {
+    config_store.set({ divert_enabled: false })
+    status_store.set({ solar: 0, grid_ie: 0, charge_rate: 0, home_battery_soc: 82, home_battery_power: -1200 })
+    const { getByText } = render(Solar)
+    expect(getByText('config.solar.battery_soc')).toBeInTheDocument()
+    expect(getByText('config.solar.battery_power')).toBeInTheDocument()
+  })
+
   it('saves all four params when a preset is chosen', async () => {
     config_store.set({ divert_enabled: true, divert_type: 0, divert_PV_ratio: 2 })
     const { getByText } = render(Solar)

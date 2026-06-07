@@ -173,4 +173,27 @@
       </FormField>
     </ConfigSection>
   {/if}
+
+  <ConfigSection title={$_('config.solar.home_battery')}>
+    <FormField label={$_('config.solar.battery_soc_topic')} status={$ss.mqtt_home_battery_soc ?? 'idle'}>
+      <TextInput
+        value={$config_store?.mqtt_home_battery_soc ?? ''}
+        placeholder="topic/home_battery_soc"
+        revert={form.revert}
+        onchange={(v) => form.saveField('mqtt_home_battery_soc', v)}
+      />
+    </FormField>
+    <FormField label={$_('config.solar.battery_power_topic')} status={$ss.mqtt_home_battery_power ?? 'idle'}>
+      <TextInput
+        value={$config_store?.mqtt_home_battery_power ?? ''}
+        placeholder="topic/home_battery_power"
+        revert={form.revert}
+        onchange={(v) => form.saveField('mqtt_home_battery_power', v)}
+      />
+    </FormField>
+    {#if $status_store?.home_battery_soc !== undefined && $status_store?.home_battery_soc !== null}
+      <ReadOnlyRow label={$_('config.solar.battery_soc')} value={`${$status_store?.home_battery_soc ?? 0} %`} />
+      <ReadOnlyRow label={$_('config.solar.battery_power')} value={`${$status_store?.home_battery_power ?? 0} W`} />
+    {/if}
+  </ConfigSection>
 </ConfigPage>

@@ -216,6 +216,9 @@
       "topic_soc": "Topic de estado de carga",
       "topic_range": "Topic de rango",
       "topic_eta": "Topic de tiempo hasta carga completa",
+      "topic_charge_limit": "Topic de límite de carga",
+      "topic_plugged": "Topic de conexión",
+      "topic_charging_state": "Topic de estado de la carga",
       "http_info": "Envía datos del vehículo al cargador mediante HTTP POST:",
       "via_openevse": "El inicio de sesión se realiza a través del servidor de OpenEVSE, que gestiona el acceso a Tesla. También puedes abrir Avanzado para pegar los tokens de API directamente.",
       "username": "Correo electrónico de la cuenta Tesla",
@@ -262,7 +265,12 @@
       "attack": "Suavizado — ataque",
       "attack_desc": "Segundos para reaccionar ante una caída de potencia disponible.",
       "decay": "Suavizado — caída",
-      "decay_desc": "Segundos para reaccionar ante un aumento de potencia disponible."
+      "decay_desc": "Segundos para reaccionar ante un aumento de potencia disponible.",
+      "home_battery": "Batería doméstica",
+      "battery_soc_topic": "Topic de SoC de la batería",
+      "battery_power_topic": "Topic de potencia de la batería",
+      "battery_soc": "SoC de la batería",
+      "battery_power": "Potencia de la batería"
     },
     "shaper": {
       "enable": "Activar limitador de carga",

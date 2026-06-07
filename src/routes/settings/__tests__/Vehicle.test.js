@@ -26,6 +26,18 @@ describe('Vehicle page', () => {
     config_store.set({ vehicle_data_src: 2 })
     const { getByText } = render(Vehicle)
     expect(getByText('config.vehicle.topic_soc')).toBeInTheDocument()
+    expect(getByText('config.vehicle.topic_charge_limit')).toBeInTheDocument()
+    expect(getByText('config.vehicle.topic_plugged')).toBeInTheDocument()
+    expect(getByText('config.vehicle.topic_charging_state')).toBeInTheDocument()
+  })
+
+  it('saves a vehicle MQTT topic on blur', async () => {
+    config_store.set({ vehicle_data_src: 2 })
+    const { getByPlaceholderText } = render(Vehicle)
+    const input = getByPlaceholderText('topic/plugged')
+    await fireEvent.input(input, { target: { value: 'car/plugged' } })
+    await fireEvent.blur(input)
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_vehicle_plugged: 'car/plugged' }))
   })
 
   it('shows the HTTP info block when the source is HTTP', () => {
