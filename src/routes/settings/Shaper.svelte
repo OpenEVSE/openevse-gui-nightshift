@@ -11,18 +11,11 @@
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import NumberInput from '../../lib/components/ui/NumberInput.svelte'
   import Toggle from '../../lib/components/ui/Toggle.svelte'
-  import Select from '../../lib/components/ui/Select.svelte'
 
   const form = createConfigForm()
   const ss = form.saveState
 
   let enabled = $derived(!!$config_store?.current_shaper_enabled)
-  let haSupported = $derived(!!$config_store?.ha_supported)
-  let shaperSrc = $derived(Number($config_store?.shaper_data_src ?? 0))
-  let shaperSrcOptions = $derived([
-    { value: '0', label: $_('config.shaper.data_mqtt') },
-    ...(haSupported ? [{ value: '1', label: $_('config.shaper.data_ha') }] : []),
-  ])
 </script>
 
 <ConfigPage title={$_('config.pages.shaper')}>
@@ -55,34 +48,14 @@
           onchange={(v) => form.saveField('current_shaper_max_pwr', v)}
         />
       </FormField>
-      {#if haSupported}
-        <FormField label={$_('config.shaper.data_source')} status={$ss.shaper_data_src ?? 'idle'}>
-          <Select
-            options={shaperSrcOptions}
-            value={String(shaperSrc)}
-            onchange={(v) => form.saveField('shaper_data_src', Number(v))}
-          />
-        </FormField>
-      {/if}
-      {#if shaperSrc === 1}
-        <FormField label={$_('config.shaper.live_entity')} status={$ss.ha_live_pwr ?? 'idle'}>
-          <TextInput
-            value={$config_store?.ha_live_pwr ?? ''}
-            placeholder="sensor.home_power"
-            revert={form.revert}
-            onchange={(v) => form.saveField('ha_live_pwr', v)}
-          />
-        </FormField>
-      {:else}
-        <FormField label={$_('config.shaper.live_topic')} status={$ss.mqtt_live_pwr ?? 'idle'}>
-          <TextInput
-            value={$config_store?.mqtt_live_pwr ?? ''}
-            placeholder="topic/powerload"
-            revert={form.revert}
-            onchange={(v) => form.saveField('mqtt_live_pwr', v)}
-          />
-        </FormField>
-      {/if}
+      <FormField label={$_('config.shaper.live_topic')} status={$ss.mqtt_live_pwr ?? 'idle'}>
+        <TextInput
+          value={$config_store?.mqtt_live_pwr ?? ''}
+          placeholder="topic/powerload"
+          revert={form.revert}
+          onchange={(v) => form.saveField('mqtt_live_pwr', v)}
+        />
+      </FormField>
       <FormField label={$_('config.shaper.min_pause')} status={$ss.current_shaper_min_pause_time ?? 'idle'}>
         <NumberInput
           value={$config_store?.current_shaper_min_pause_time ?? null}

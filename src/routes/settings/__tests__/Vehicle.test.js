@@ -108,30 +108,6 @@ describe('Vehicle page', () => {
     })
   })
 
-  it('reveals HA entity fields when the source is Home Assistant', () => {
-    config_store.set({ vehicle_data_src: 4, ha_url: 'http://homeassistant.local' })
-    const { getByText, queryByText } = render(Vehicle)
-    expect(getByText('config.vehicle.entity_soc')).toBeInTheDocument()
-    expect(queryByText('config.vehicle.topic_soc')).not.toBeInTheDocument() // not the MQTT block
-  })
-
-  it('does not reveal HA entity fields when src is 4 but ha is unsupported', () => {
-    config_store.set({ vehicle_data_src: 4 }) // no ha_url -> ha_supported false
-    const { queryByText } = render(Vehicle)
-    expect(queryByText('config.vehicle.entity_soc')).not.toBeInTheDocument()
-  })
-
-  it('offers the Home Assistant source only when ha is supported', () => {
-    config_store.set({ vehicle_data_src: 0, ha_url: 'http://homeassistant.local' })
-    const { getByText } = render(Vehicle)
-    expect(getByText('config.vehicle.src_homeassistant')).toBeInTheDocument()
-  })
-  it('hides the Home Assistant source when ha is unsupported', () => {
-    config_store.set({ vehicle_data_src: 0 })
-    const { queryByText } = render(Vehicle)
-    expect(queryByText('config.vehicle.src_homeassistant')).not.toBeInTheDocument()
-  })
-
   it('shows login_failed when the login endpoint returns ok: false', async () => {
     httpAPI.mockImplementation((m, url) => {
       if (url === 'https://auth.openevse.com/login')

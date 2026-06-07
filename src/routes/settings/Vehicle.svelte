@@ -25,9 +25,6 @@
     { value: '1', label: $_('config.vehicle.src_tesla') },
     { value: '2', label: $_('config.vehicle.src_mqtt') },
     { value: '3', label: $_('config.vehicle.src_http') },
-    ...($config_store?.ha_supported
-      ? [{ value: '4', label: $_('config.vehicle.src_homeassistant') }]
-      : []),
   ])
   let unitOptions = $derived([
     { value: 'false', label: $_('config.vehicle.km') },
@@ -242,65 +239,6 @@
       <p class="text-sm text-text-dim">{$_('config.vehicle.http_info')}</p>
       <pre class="mt-2 rounded-xl bg-surface-2 p-3 text-xs text-text-dim">POST http://&lt;charger-ip&gt;/status
 &#123; "battery_level": int, "battery_range": int, "time_to_full_charge": int &#125;</pre>
-    </ConfigSection>
-  {:else if src === 4 && $config_store?.ha_supported}
-    <ConfigSection title={$_('config.vehicle.src_homeassistant')}>
-      <p class="text-sm text-text-dim">{$_('config.vehicle.ha_info')}</p>
-      <FormField label={$_('config.vehicle.range_unit')} status={$ss.mqtt_vehicle_range_miles ?? 'idle'}>
-        <Select
-          options={unitOptions}
-          value={String(!!$config_store?.mqtt_vehicle_range_miles)}
-          onchange={(v) => form.saveField('mqtt_vehicle_range_miles', v === 'true')}
-        />
-      </FormField>
-      <FormField label={$_('config.vehicle.entity_soc')} status={$ss.ha_vehicle_soc ?? 'idle'}>
-        <TextInput
-          value={$config_store?.ha_vehicle_soc ?? ''}
-          placeholder="sensor.car_battery"
-          revert={form.revert}
-          onchange={(v) => form.saveField('ha_vehicle_soc', v)}
-        />
-      </FormField>
-      <FormField label={$_('config.vehicle.entity_range')} status={$ss.ha_vehicle_range ?? 'idle'}>
-        <TextInput
-          value={$config_store?.ha_vehicle_range ?? ''}
-          placeholder="sensor.car_range"
-          revert={form.revert}
-          onchange={(v) => form.saveField('ha_vehicle_range', v)}
-        />
-      </FormField>
-      <FormField label={$_('config.vehicle.entity_eta')} status={$ss.ha_vehicle_eta ?? 'idle'}>
-        <TextInput
-          value={$config_store?.ha_vehicle_eta ?? ''}
-          placeholder="sensor.car_time_to_full"
-          revert={form.revert}
-          onchange={(v) => form.saveField('ha_vehicle_eta', v)}
-        />
-      </FormField>
-      <FormField label={$_('config.vehicle.entity_charge_limit')} status={$ss.ha_vehicle_charge_limit ?? 'idle'}>
-        <TextInput
-          value={$config_store?.ha_vehicle_charge_limit ?? ''}
-          placeholder="sensor.car_charge_limit"
-          revert={form.revert}
-          onchange={(v) => form.saveField('ha_vehicle_charge_limit', v)}
-        />
-      </FormField>
-      <FormField label={$_('config.vehicle.entity_plugged')} status={$ss.ha_vehicle_plugged ?? 'idle'}>
-        <TextInput
-          value={$config_store?.ha_vehicle_plugged ?? ''}
-          placeholder="binary_sensor.car_plugged_in"
-          revert={form.revert}
-          onchange={(v) => form.saveField('ha_vehicle_plugged', v)}
-        />
-      </FormField>
-      <FormField label={$_('config.vehicle.entity_charging_state')} status={$ss.ha_vehicle_charging_state ?? 'idle'}>
-        <TextInput
-          value={$config_store?.ha_vehicle_charging_state ?? ''}
-          placeholder="sensor.car_charging_state"
-          revert={form.revert}
-          onchange={(v) => form.saveField('ha_vehicle_charging_state', v)}
-        />
-      </FormField>
     </ConfigSection>
   {/if}
 </ConfigPage>

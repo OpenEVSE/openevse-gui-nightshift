@@ -162,27 +162,6 @@ export function mockPlugin() {
           }
         }
 
-        // Home Assistant integration (Labs / firmware-pending). Report a
-        // connected instance so the HA settings page and HA-sourced vehicle
-        // data render in mock.
-        if (url === '/api/ha/status' && req.method === 'GET') {
-          res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify({ connected: true, url: 'http://homeassistant.local:8123' }))
-          return
-        }
-        if (url === '/api/ha/disconnect' && req.method === 'POST') {
-          res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify({ msg: 'done' }))
-          return
-        }
-        // OAuth start is a full-page navigation on a real device; bounce back
-        // to the app so the mock doesn't dead-end on a 404.
-        if (url === '/api/ha/auth/start') {
-          res.writeHead(302, { Location: '/#/settings/home-assistant' })
-          res.end()
-          return
-        }
-
         if (url === '/api/scan' && req.method === 'GET') {
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(loadFixture('scan.json'))

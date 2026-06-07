@@ -92,12 +92,6 @@
       "suspend_evse": "OCPP peut suspendre le chargeur",
       "energize_plug": "Alimenter la prise à l'autorisation"
     },
-    "homeassistant": {
-      "title": "Home Assistant",
-      "url": "URL de Home Assistant",
-      "connect": "Connecter",
-      "disconnect": "Déconnecter"
-    },
     "title": "Paramètres",
     "back": "Paramètres",
     "coming_soon": "Cette page arrive bientôt.",
@@ -124,8 +118,7 @@
       "firmware": "Micrologiciel",
       "certificates": "Certificats",
       "terminal": "Outils développeur",
-      "about": "À propos",
-      "home_assistant": "Home Assistant"
+      "about": "À propos"
     },
     "validation": {
       "required": "Requis",
@@ -214,7 +207,6 @@
       "src_tesla": "Tesla",
       "src_mqtt": "MQTT",
       "src_http": "HTTP Push",
-      "src_homeassistant": "Home Assistant",
       "range_unit": "Unité d'autonomie",
       "km": "Kilomètres",
       "miles": "Miles",
@@ -224,13 +216,6 @@
       "topic_soc": "Sujet état de charge (SOC)",
       "topic_range": "Sujet autonomie",
       "topic_eta": "Sujet temps de charge",
-      "ha_info": "Lit les données du véhicule depuis des entités Home Assistant. Nécessite que Home Assistant soit connecté (Réglages → Home Assistant).",
-      "entity_soc": "Entité de SoC",
-      "entity_range": "Entité d'autonomie",
-      "entity_eta": "Entité de temps de charge",
-      "entity_charge_limit": "Entité de limite de charge",
-      "entity_plugged": "Entité de branchement",
-      "entity_charging_state": "Entité d'état de charge",
       "http_info": "Envoyez les données véhicule au chargeur via HTTP POST :",
       "via_openevse": "La connexion passe par le serveur OpenEVSE, qui effectue l'authentification Tesla. Vous pouvez aussi ouvrir Avancé pour coller directement vos tokens API.",
       "username": "Adresse e-mail du compte Tesla",
@@ -277,18 +262,7 @@
       "attack": "Lissage — montée",
       "attack_desc": "Secondes pour réagir à une baisse de puissance disponible.",
       "decay": "Lissage — descente",
-      "decay_desc": "Secondes pour réagir à une hausse de puissance disponible.",
-      "data_source": "Source de données",
-      "data_mqtt": "MQTT",
-      "data_ha": "Home Assistant",
-      "feed_solar_entity": "Entité de production solaire",
-      "feed_grid_entity": "Entité d'import/export réseau",
-      "home_battery": "Batterie domestique",
-      "home_battery_info": "Lit les données de la batterie domestique depuis des entités Home Assistant.",
-      "battery_soc_entity": "Entité de SoC de la batterie",
-      "battery_power_entity": "Entité de puissance de la batterie",
-      "battery_soc": "SoC de la batterie",
-      "battery_power": "Puissance de la batterie"
+      "decay_desc": "Secondes pour réagir à une hausse de puissance disponible."
     },
     "shaper": {
       "enable": "Activer le délestage",
@@ -304,11 +278,7 @@
       "max_interval": "Intervalle de données maximum",
       "max_interval_desc": "Sécurité si aucune donnée n'arrive dans ce nombre de secondes.",
       "smoothing": "Lissage de l'entrée",
-      "smoothing_desc": "Constante de temps du filtre pour la mesure de puissance instantanée.",
-      "data_source": "Source de données",
-      "data_mqtt": "MQTT",
-      "data_ha": "Home Assistant",
-      "live_entity": "Entité de puissance en direct"
+      "smoothing_desc": "Constante de temps du filtre pour la mesure de puissance instantanée."
     },
     "emoncms": {
       "enable": "Activer EmonCMS",

@@ -16,8 +16,7 @@ function createConfigStore() {
             const firmware_is_eu = isEuropeanFirmware(obj.firmware)
             // EU firmware capped at 32A, otherwise 80A
             const max_current_firmware = firmware_is_eu ? 32 : 80
-            const ha_supported = obj.ha_url !== undefined
-            return { ...obj, firmware_is_eu, max_current_firmware, ha_supported }
+            return { ...obj, firmware_is_eu, max_current_firmware }
         }
         return obj
     }

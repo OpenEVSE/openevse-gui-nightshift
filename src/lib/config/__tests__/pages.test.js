@@ -3,8 +3,8 @@ import { describe, it, expect } from 'vitest'
 import { SETTINGS_PAGES, SECTIONS, pagesBySection } from '../pages.js'
 
 describe('SETTINGS_PAGES', () => {
-  it('lists all 18 config pages', () => {
-    expect(SETTINGS_PAGES).toHaveLength(18)
+  it('lists all 17 config pages', () => {
+    expect(SETTINGS_PAGES).toHaveLength(17)
   })
   it('every page has key, route, icon, labelKey, section', () => {
     for (const p of SETTINGS_PAGES) {
@@ -33,7 +33,7 @@ describe('SECTIONS', () => {
 
 describe('pagesBySection', () => {
   it('groups every page under its section, no section empty', () => {
-    const grouped = pagesBySection({ ha_supported: true })
+    const grouped = pagesBySection({})
     expect(grouped).toHaveLength(4)
     let total = 0
     for (const g of grouped) {
@@ -41,20 +41,10 @@ describe('pagesBySection', () => {
       expect(g.pages.length).toBeGreaterThan(0)
       total += g.pages.length
     }
-    expect(total).toBe(18)
+    expect(total).toBe(17)
   })
   it('preserves section order', () => {
-    expect(pagesBySection({ ha_supported: true }).map((g) => g.section)).toEqual(SECTIONS)
-  })
-  it('hides the home-assistant page when ha is unsupported', () => {
-    const groups = pagesBySection({})
-    const keys = groups.flatMap((g) => g.pages.map((p) => p.key))
-    expect(keys).not.toContain('home-assistant')
-  })
-  it('shows the home-assistant page when ha_supported', () => {
-    const groups = pagesBySection({ ha_supported: true })
-    const keys = groups.flatMap((g) => g.pages.map((p) => p.key))
-    expect(keys).toContain('home-assistant')
+    expect(pagesBySection({}).map((g) => g.section)).toEqual(SECTIONS)
   })
   it('still shows non-gated pages with no config', () => {
     const groups = pagesBySection(undefined)

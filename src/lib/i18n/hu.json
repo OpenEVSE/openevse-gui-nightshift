@@ -92,12 +92,6 @@
       "suspend_evse": "Az OCPP felfüggesztheti a töltőt",
       "energize_plug": "Csatlakozó aktiválása engedélyezéskor"
     },
-    "homeassistant": {
-      "title": "Home Assistant",
-      "url": "Home Assistant URL",
-      "connect": "Csatlakozás",
-      "disconnect": "Lecsatlakozás"
-    },
     "title": "Beállítások",
     "back": "Beállítások",
     "coming_soon": "Ez az oldal hamarosan elérhető.",
@@ -124,8 +118,7 @@
       "firmware": "Firmware",
       "certificates": "Tanúsítványok",
       "terminal": "Fejlesztői eszközök",
-      "about": "Névjegy",
-      "home_assistant": "Home Assistant"
+      "about": "Névjegy"
     },
     "validation": {
       "required": "Kötelező",
@@ -214,7 +207,6 @@
       "src_tesla": "Tesla",
       "src_mqtt": "MQTT",
       "src_http": "HTTP push",
-      "src_homeassistant": "Home Assistant",
       "range_unit": "Hatótávolság egysége",
       "km": "Kilométer",
       "miles": "Mérföld",
@@ -224,13 +216,6 @@
       "topic_soc": "Töltöttségi állapot téma",
       "topic_range": "Hatótávolság téma",
       "topic_eta": "Töltési idő téma",
-      "ha_info": "A jármű adatait Home Assistant entitásokból olvassa. Csatlakoztatott Home Assistant szükséges (Beállítások → Home Assistant).",
-      "entity_soc": "SoC entitás",
-      "entity_range": "Hatótáv entitás",
-      "entity_eta": "Töltési idő entitás",
-      "entity_charge_limit": "Töltési limit entitás",
-      "entity_plugged": "Csatlakozás entitás",
-      "entity_charging_state": "Töltési állapot entitás",
       "http_info": "Járműadatokat küldhet a töltőre HTTP POST kéréssel:",
       "via_openevse": "A bejelentkezés az OpenEVSE szerverén keresztül történik, amely elvégzi a Tesla azonosítást. Az Irányítópult megnyitásával közvetlenül is beilleszthet API tokeneket.",
       "username": "Tesla fiók e-mail cím",
@@ -277,18 +262,7 @@
       "attack": "Simítás — attack",
       "attack_desc": "Másodperc az elérhető teljesítmény csökkenésére való reagáláshoz.",
       "decay": "Simítás — decay",
-      "decay_desc": "Másodperc az elérhető teljesítmény növekedésére való reagáláshoz.",
-      "data_source": "Adatforrás",
-      "data_mqtt": "MQTT",
-      "data_ha": "Home Assistant",
-      "feed_solar_entity": "Napelem-termelés entitás",
-      "feed_grid_entity": "Hálózati import/export entitás",
-      "home_battery": "Otthoni akkumulátor",
-      "home_battery_info": "Az otthoni akkumulátor adatait Home Assistant entitásokból olvassa be.",
-      "battery_soc_entity": "Akkumulátor töltöttség entitás",
-      "battery_power_entity": "Akkumulátor teljesítmény entitás",
-      "battery_soc": "Akkumulátor töltöttség",
-      "battery_power": "Akkumulátor teljesítmény"
+      "decay_desc": "Másodperc az elérhető teljesítmény növekedésére való reagáláshoz."
     },
     "shaper": {
       "enable": "Terheléscsökkentő engedélyezése",
@@ -304,11 +278,7 @@
       "max_interval": "Maximális adatintervallum",
       "max_interval_desc": "Biztonsági korlát, ha ennyi másodpercen belül nem érkezik élő adat.",
       "smoothing": "Bemeneti simítás",
-      "smoothing_desc": "Az élő teljesítmény leolvasás szűrőjének időállandója.",
-      "data_source": "Adatforrás",
-      "data_mqtt": "MQTT",
-      "data_ha": "Home Assistant",
-      "live_entity": "Élő teljesítmény entitás"
+      "smoothing_desc": "Az élő teljesítmény leolvasás szűrőjének időállandója."
     },
     "emoncms": {
       "enable": "EmonCMS engedélyezése",
