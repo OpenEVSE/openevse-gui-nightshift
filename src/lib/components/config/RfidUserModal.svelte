@@ -1,5 +1,6 @@
 <!-- src/lib/components/config/RfidUserModal.svelte -->
 <script>
+  import { untrack } from 'svelte'
   import { _ } from 'svelte-i18n'
   import Modal from '../ui/Modal.svelte'
   import Button from '../ui/Button.svelte'
@@ -15,7 +16,7 @@
     onremove = () => {},
   } = $props()
 
-  let name = $state(initialName)
+  let name = $state(untrack(() => initialName))
 
   // Resync the draft when the modal is opened against a different tag.
   $effect(() => {

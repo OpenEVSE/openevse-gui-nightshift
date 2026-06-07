@@ -1,4 +1,5 @@
 <script>
+  import { untrack } from 'svelte'
   import { _ } from 'svelte-i18n'
   import Card from '../ui/Card.svelte'
   import Icon from '../../icons/Icon.svelte'
@@ -6,7 +7,7 @@
 
   let { group, expanded = false } = $props()
 
-  let open = $state(expanded)
+  let open = $state(untrack(() => expanded))
 </script>
 
 <Card class="mb-2">

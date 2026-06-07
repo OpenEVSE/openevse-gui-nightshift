@@ -1,5 +1,7 @@
 <!-- src/lib/components/ui/NumberInput.svelte -->
 <script>
+  import { untrack } from 'svelte'
+
   let {
     value = null,
     min = undefined,
@@ -11,7 +13,7 @@
     onchange = () => {},
   } = $props()
 
-  let draft = $state(value ?? '')
+  let draft = $state(untrack(() => value ?? ''))
   let focused = $state(false)
 
   $effect(() => {

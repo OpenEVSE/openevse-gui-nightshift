@@ -1,4 +1,6 @@
 <script>
+  import { untrack } from 'svelte'
+
   let {
     min = 0,
     max = 100,
@@ -10,7 +12,7 @@
     ariaLabel = '',
   } = $props()
 
-  let current = $state(value)
+  let current = $state(untrack(() => value))
   $effect(() => {
     current = value
   })

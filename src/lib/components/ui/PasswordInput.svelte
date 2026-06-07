@@ -1,5 +1,6 @@
 <!-- src/lib/components/ui/PasswordInput.svelte -->
 <script>
+  import { untrack } from 'svelte'
   import Icon from '../../icons/Icon.svelte'
   import { isDummyPassword } from '../../config/validate.js'
 
@@ -12,7 +13,7 @@
     onchange = () => {},
   } = $props()
 
-  let draft = $state(isDummyPassword(value) ? '' : value)
+  let draft = $state(untrack(() => (isDummyPassword(value) ? '' : value)))
   let focused = $state(false)
   let show = $state(false)
 

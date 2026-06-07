@@ -1,5 +1,7 @@
 <!-- src/lib/components/ui/TextInput.svelte -->
 <script>
+  import { untrack } from 'svelte'
+
   let {
     value = '',
     placeholder = '',
@@ -9,7 +11,7 @@
     onchange = () => {},
   } = $props()
 
-  let draft = $state(value)
+  let draft = $state(untrack(() => value))
   let focused = $state(false)
 
   // Resync from the confirmed store value when not editing, and whenever the
