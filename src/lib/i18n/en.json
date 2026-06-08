@@ -99,7 +99,8 @@
       "connectivity": "Connectivity",
       "charger": "Charger",
       "energy": "Energy",
-      "system": "System"
+      "system": "System",
+      "support": "Support"
     },
     "pages": {
       "network": "Network",
@@ -392,6 +393,11 @@
       "ota_starting": "Starting update — the charger is downloading the build…",
       "ota_retry": "Try again",
       "ota_close": "Close"
+    },
+    "support": {
+      "knowledge_base": "Knowledge base",
+      "guides": "Guides",
+      "discord": "Community support on Discord"
     }
   },
   "nav": {

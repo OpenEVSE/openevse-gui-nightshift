@@ -12,6 +12,12 @@ import Settings from '../Settings.svelte'
 import { SETTINGS_PAGES } from '../../lib/config/pages.js'
 import { config_store } from '../../lib/stores/config.js'
 
+const SUPPORT_LINKS = [
+  { labelKey: 'config.support.knowledge_base', url: 'https://openev.freshdesk.com/support/solutions' },
+  { labelKey: 'config.support.guides', url: 'https://openevse.dozuki.com/' },
+  { labelKey: 'config.support.discord', url: 'https://discord.com/invite/Y3ftbUd4rR' },
+]
+
 describe('Settings hub', () => {
   it('renders the four section headings', () => {
     const { getByText } = render(Settings)
@@ -19,13 +25,24 @@ describe('Settings hub', () => {
       expect(getByText('config.sections.' + s)).toBeInTheDocument()
     }
   })
-  it('renders a link for every config page', () => {
+  it('renders a link for every config page plus the support links', () => {
     config_store.set({})
     const { getAllByRole } = render(Settings)
     const links = getAllByRole('link')
-    expect(links).toHaveLength(SETTINGS_PAGES.length)
+    expect(links).toHaveLength(SETTINGS_PAGES.length + SUPPORT_LINKS.length)
     for (const p of SETTINGS_PAGES) {
       expect(links.some((l) => l.getAttribute('href') === '#' + p.route)).toBe(true)
+    }
+  })
+
+  it('renders a Support section with external links opening in a new tab', () => {
+    const { getByText, getByRole } = render(Settings)
+    expect(getByText('config.sections.support')).toBeInTheDocument()
+    for (const { labelKey, url } of SUPPORT_LINKS) {
+      const link = getByRole('link', { name: labelKey })
+      expect(link).toHaveAttribute('href', url)
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
     }
   })
 })

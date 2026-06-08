@@ -99,7 +99,8 @@
       "connectivity": "Connectivité",
       "charger": "Chargeur",
       "energy": "Énergie",
-      "system": "Système"
+      "system": "Système",
+      "support": "Assistance"
     },
     "pages": {
       "network": "Réseau",
@@ -392,6 +393,11 @@
       "ota_starting": "Démarrage de la mise à jour — le chargeur télécharge la version…",
       "ota_retry": "Réessayer",
       "ota_close": "Fermer"
+    },
+    "support": {
+      "knowledge_base": "Base de connaissances",
+      "guides": "Guides",
+      "discord": "Assistance de la communauté sur Discord"
     }
   },
   "nav": {

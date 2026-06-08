@@ -99,7 +99,8 @@
       "connectivity": "Kapcsolódás",
       "charger": "Töltő",
       "energy": "Energia",
-      "system": "Rendszer"
+      "system": "Rendszer",
+      "support": "Támogatás"
     },
     "pages": {
       "network": "Hálózat",
@@ -392,6 +393,11 @@
       "ota_starting": "Frissítés indítása — a töltő letölti a verziót…",
       "ota_retry": "Újra",
       "ota_close": "Bezárás"
+    },
+    "support": {
+      "knowledge_base": "Tudásbázis",
+      "guides": "Útmutatók",
+      "discord": "Közösségi támogatás a Discordon"
     }
   },
   "nav": {
