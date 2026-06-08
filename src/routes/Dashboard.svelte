@@ -19,7 +19,6 @@
   import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
   import { socCeiling, estMaxRange } from '../lib/dashboard/soc.js'
-  import { plugState } from '../lib/vehicle.js'
 
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
@@ -48,21 +47,13 @@
   let maxAmps = $derived($config_store?.max_current_soft ?? 48)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
 
-  // HA plug state gates the SoC-limit UI and its enforcement. Only an explicit
-  // "unplugged" hides/disarms — when the plugged entity isn't configured
-  // (plugState === null) we keep the prior battery_level-based behavior.
-  let unplugged = $derived(plugState($status_store) === false)
   let socRangeLimit = $derived($limit_store?.type === 'soc' || $limit_store?.type === 'range')
 
   let claimOwner = $derived($claims_target_store?.claims?.state)
   // A reached charge limit grabs the state-claim to stop charging. Unlike OCPP
   // or RFID it's the user's own setting, not an external authority — so we don't
   // lock the controls; we surface it as the ring reason and let On clear it.
-  // A soc/range limit can't be enforcing while the car is unplugged, so don't
-  // surface it as the ring reason (or let On try to clear it) in that state.
-  let limitTripped = $derived(
-    claimOwner === EvseClients.limit.id && !(unplugged && socRangeLimit),
-  )
+  let limitTripped = $derived(claimOwner === EvseClients.limit.id)
   let reason = $derived(
     limitTripped
       ? { key: 'dashboard.reason.limit_reached', values: { value: formatLimit($limit_store) } }
@@ -150,16 +141,14 @@
 
   // ── charge-limit bar view-model ─────────────────────────────────────────
   let hasSoc = $derived(
-    $status_store?.battery_level !== undefined &&
-      $status_store?.battery_level !== null &&
-      !unplugged,
+    $status_store?.battery_level !== undefined && $status_store?.battery_level !== null,
   )
   let vehicleLimit = $derived(
     Number.isFinite($status_store?.vehicle_charge_limit) ? $status_store.vehicle_charge_limit : null,
   )
   let maxRange = $derived(estMaxRange($status_store?.battery_range, $status_store?.battery_level))
   // The bar owns soc + range limits; the row owns time + energy.
-  let barLimitActive = $derived(socRangeLimit && !unplugged)
+  let barLimitActive = $derived(socRangeLimit)
   // Display unit: follows the active range limit by default; the toggle overrides.
   let userUnit = $state(null)
   let limitUnit = $derived(userUnit ?? ($limit_store?.type === 'range' ? 'range' : 'percent'))

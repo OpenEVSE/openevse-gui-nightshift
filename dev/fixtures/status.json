@@ -82,6 +82,5 @@
   "tesla_vehicle_name": false,
   "home_battery_soc": 82,
   "home_battery_power": -1200,
-  "vehicle_plugged": true,
   "vehicle_charging_state": "charging"
 }

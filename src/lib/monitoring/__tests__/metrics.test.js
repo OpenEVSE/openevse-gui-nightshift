@@ -97,16 +97,9 @@ describe('safetyData', () => {
 describe('vehicleMetrics extras', () => {
   const byLabel = (g) => Object.fromEntries(g.rows.map((r) => [r.labelKey, r]))
 
-  it('omits plugged and charging rows when absent', () => {
+  it('omits the charging row when absent', () => {
     const m = byLabel(vehicleMetrics({ battery_level: 80 }, {}))
-    expect(m['monitoring.vehicle.plugged']).toBeUndefined()
     expect(m['monitoring.vehicle.charging_state']).toBeUndefined()
-  })
-  it('renders plugged as a yes/no textKey', () => {
-    expect(byLabel(vehicleMetrics({ vehicle_plugged: true }, {}))['monitoring.vehicle.plugged'])
-      .toEqual({ labelKey: 'monitoring.vehicle.plugged', textKey: 'monitoring.vehicle.plugged_yes', unit: '' })
-    expect(byLabel(vehicleMetrics({ vehicle_plugged: false }, {}))['monitoring.vehicle.plugged'].textKey)
-      .toBe('monitoring.vehicle.plugged_no')
   })
   it('derives "charging" from EVSE state 3', () => {
     expect(byLabel(vehicleMetrics({ state: 3 }, {}))['monitoring.vehicle.charging_state'])
@@ -124,17 +117,6 @@ describe('vehicleMetrics extras', () => {
   it('ignores the legacy vehicle_charging_state push field', () => {
     expect(byLabel(vehicleMetrics({ vehicle_charging_state: 'Charging' }, {}))['monitoring.vehicle.charging_state'])
       .toBeUndefined()
-  })
-  it('interprets stringy and numeric plugged values', () => {
-    const t = (v) => byLabel(vehicleMetrics({ vehicle_plugged: v }, {}))['monitoring.vehicle.plugged']?.textKey
-    expect(t(true)).toBe('monitoring.vehicle.plugged_yes')
-    expect(t(1)).toBe('monitoring.vehicle.plugged_yes')
-    expect(t('on')).toBe('monitoring.vehicle.plugged_yes')
-    expect(t('true')).toBe('monitoring.vehicle.plugged_yes')
-    expect(t(false)).toBe('monitoring.vehicle.plugged_no')
-    expect(t(0)).toBe('monitoring.vehicle.plugged_no')
-    expect(t('off')).toBe('monitoring.vehicle.plugged_no')
-    expect(t('false')).toBe('monitoring.vehicle.plugged_no')
   })
 })
 

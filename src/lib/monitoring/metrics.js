@@ -1,6 +1,5 @@
 /** Pure helpers for the Monitoring screen. Self-contained — no store/DOM imports. */
 import { formatTemp } from '../temperature.js'
-import { isPlugged } from '../vehicle.js'
 
 /**
  * OpenEVSE state code → charging-status label. Derived from the EVSE's own
@@ -97,13 +96,6 @@ export function vehicleMetrics(status, config) {
     { labelKey: 'monitoring.vehicle.range', value: s.battery_range ?? null, unit: c.mqtt_vehicle_range_miles ? 'units.miles' : 'units.km' },
     { labelKey: 'monitoring.vehicle.timeleft', value: hms(s.time_to_full_charge), unit: '' },
   ]
-  if (s.vehicle_plugged !== undefined && s.vehicle_plugged !== null) {
-    rows.push({
-      labelKey: 'monitoring.vehicle.plugged',
-      textKey: isPlugged(s.vehicle_plugged) ? 'monitoring.vehicle.plugged_yes' : 'monitoring.vehicle.plugged_no',
-      unit: '',
-    })
-  }
   const chargingKey = CHARGING_STATE_BY_EVSE[s.state]
   if (chargingKey) {
     rows.push({ labelKey: 'monitoring.vehicle.charging_state', textKey: chargingKey, unit: '' })

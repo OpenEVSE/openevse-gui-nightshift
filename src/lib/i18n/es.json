@@ -218,7 +218,6 @@
       "topic_range": "Topic de rango",
       "topic_eta": "Topic de tiempo hasta carga completa",
       "topic_charge_limit": "Topic de límite de carga",
-      "topic_plugged": "Topic de conexión",
       "http_info": "Envía datos del vehículo al cargador mediante HTTP POST:",
       "via_openevse": "El inicio de sesión se realiza a través del servidor de OpenEVSE, que gestiona el acceso a Tesla. También puedes abrir Avanzado para pegar los tokens de API directamente.",
       "username": "Correo electrónico de la cuenta Tesla",
@@ -593,9 +592,6 @@
       "battery": "Batería",
       "range": "Rango",
       "timeleft": "Tiempo hasta carga completa",
-      "plugged": "Conectado",
-      "plugged_yes": "Sí",
-      "plugged_no": "No",
       "charging_state": "Estado de carga",
       "charging_active": "Cargando",
       "charging_idle": "Inactivo"

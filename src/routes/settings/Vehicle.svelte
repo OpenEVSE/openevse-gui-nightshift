@@ -241,14 +241,6 @@
           onchange={(v) => form.saveField('mqtt_vehicle_charge_limit', v)}
         />
       </FormField>
-      <FormField label={$_('config.vehicle.topic_plugged')} status={$ss.mqtt_vehicle_plugged ?? 'idle'}>
-        <TextInput
-          value={$config_store?.mqtt_vehicle_plugged ?? ''}
-          placeholder="topic/plugged"
-          revert={form.revert}
-          onchange={(v) => form.saveField('mqtt_vehicle_plugged', v)}
-        />
-      </FormField>
     </ConfigSection>
   {:else if src === 3}
     <ConfigSection title={$_('config.vehicle.src_http')}>

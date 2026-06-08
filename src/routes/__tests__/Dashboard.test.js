@@ -128,27 +128,10 @@ describe('Dashboard', () => {
     expect(queryByRole('slider', { name: 'dashboard.vehicle.target_aria' })).not.toBeInTheDocument()
   })
 
-  it('hides the SOC bar when the car is explicitly unplugged, even with battery_level', () => {
-    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 80, battery_range: 206, time_to_full_charge: 0, vehicle_plugged: false })
-    const { queryByRole } = render(Dashboard)
-    expect(queryByRole('slider', { name: 'dashboard.vehicle.target_aria' })).not.toBeInTheDocument()
-  })
-
-  it('still shows the SOC bar when plug state is unknown (HA entity not configured)', () => {
-    // No vehicle_plugged field at all → fall back to battery_level behavior.
+  it('shows the SOC bar whenever battery_level is present', () => {
     status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 80, battery_range: 206, time_to_full_charge: 0 })
     const { getByRole } = render(Dashboard)
     expect(getByRole('slider', { name: 'dashboard.vehicle.target_aria' })).toBeInTheDocument()
-  })
-
-  it('does not surface a soc limit as the ring reason while unplugged', () => {
-    // Device reports the limit claim, but the car is unplugged — the soc limit
-    // can't be enforcing, so it must not show as the ring reason.
-    status_store.set({ state: 254, total_day: 0, total_energy: 0, battery_level: 74, vehicle_plugged: false })
-    claims_target_store.set({ properties: {}, claims: { state: EvseClients.limit.id } })
-    limit_store.set({ type: 'soc', value: 80, auto_release: true })
-    const { queryByText } = render(Dashboard)
-    expect(queryByText('dashboard.reason.limit_reached')).not.toBeInTheDocument()
   })
 
   it('uploads a soc limit when the bar is committed in percent mode', async () => {
