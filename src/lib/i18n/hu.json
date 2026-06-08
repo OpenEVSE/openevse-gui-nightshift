@@ -219,7 +219,6 @@
       "topic_eta": "Töltési idő téma",
       "topic_charge_limit": "Töltési limit téma",
       "topic_plugged": "Csatlakozás téma",
-      "topic_charging_state": "Töltési állapot téma",
       "http_info": "Járműadatokat küldhet a töltőre HTTP POST kéréssel:",
       "via_openevse": "A bejelentkezés az OpenEVSE szerverén keresztül történik, amely elvégzi a Tesla azonosítást. Az Irányítópult megnyitásával közvetlenül is beilleszthet API tokeneket.",
       "username": "Tesla fiók e-mail cím",
@@ -599,7 +598,6 @@
       "plugged_no": "Nem",
       "charging_state": "Töltési állapot",
       "charging_active": "Töltés",
-      "charging_complete": "Kész",
       "charging_idle": "Tétlen"
     },
     "home_battery": {

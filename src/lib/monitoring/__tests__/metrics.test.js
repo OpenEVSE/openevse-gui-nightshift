@@ -108,16 +108,21 @@ describe('vehicleMetrics extras', () => {
     expect(byLabel(vehicleMetrics({ vehicle_plugged: false }, {}))['monitoring.vehicle.plugged'].textKey)
       .toBe('monitoring.vehicle.plugged_no')
   })
-  it('maps a known charging state to a textKey', () => {
-    expect(byLabel(vehicleMetrics({ vehicle_charging_state: 'Charging' }, {}))['monitoring.vehicle.charging_state'])
+  it('derives "charging" from EVSE state 3', () => {
+    expect(byLabel(vehicleMetrics({ state: 3 }, {}))['monitoring.vehicle.charging_state'])
       .toEqual({ labelKey: 'monitoring.vehicle.charging_state', textKey: 'monitoring.vehicle.charging_active', unit: '' })
   })
-  it('passes an unknown charging state through as a literal value', () => {
-    expect(byLabel(vehicleMetrics({ vehicle_charging_state: 'Preconditioning' }, {}))['monitoring.vehicle.charging_state'])
-      .toEqual({ labelKey: 'monitoring.vehicle.charging_state', value: 'Preconditioning', unit: '' })
+  it('derives "idle" from EVSE state 2 (connected, not charging)', () => {
+    expect(byLabel(vehicleMetrics({ state: 2 }, {}))['monitoring.vehicle.charging_state'].textKey)
+      .toBe('monitoring.vehicle.charging_idle')
   })
-  it('ignores an empty charging state string', () => {
-    expect(byLabel(vehicleMetrics({ vehicle_charging_state: '' }, {}))['monitoring.vehicle.charging_state'])
+  it('omits the charging row for non-connected / fault / disabled states', () => {
+    for (const state of [1, 8, 254, 255, undefined]) {
+      expect(byLabel(vehicleMetrics({ state }, {}))['monitoring.vehicle.charging_state']).toBeUndefined()
+    }
+  })
+  it('ignores the legacy vehicle_charging_state push field', () => {
+    expect(byLabel(vehicleMetrics({ vehicle_charging_state: 'Charging' }, {}))['monitoring.vehicle.charging_state'])
       .toBeUndefined()
   })
   it('interprets stringy and numeric plugged values', () => {

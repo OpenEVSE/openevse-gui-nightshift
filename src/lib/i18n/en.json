@@ -219,7 +219,6 @@
       "topic_eta": "Time-to-charge topic",
       "topic_charge_limit": "Charge-limit topic",
       "topic_plugged": "Plugged-in topic",
-      "topic_charging_state": "Charging-state topic",
       "http_info": "Push vehicle data to the charger with an HTTP POST:",
       "via_openevse": "Login goes through OpenEVSE's server, which performs the Tesla sign-in. Or open Advanced to paste API tokens directly.",
       "username": "Tesla account email",
@@ -599,7 +598,6 @@
       "plugged_no": "No",
       "charging_state": "Charging state",
       "charging_active": "Charging",
-      "charging_complete": "Complete",
       "charging_idle": "Idle"
     },
     "home_battery": {

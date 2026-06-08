@@ -28,7 +28,6 @@ describe('Vehicle page', () => {
     expect(getByText('config.vehicle.topic_soc')).toBeInTheDocument()
     expect(getByText('config.vehicle.topic_charge_limit')).toBeInTheDocument()
     expect(getByText('config.vehicle.topic_plugged')).toBeInTheDocument()
-    expect(getByText('config.vehicle.topic_charging_state')).toBeInTheDocument()
   })
 
   it('saves a vehicle MQTT topic on blur', async () => {

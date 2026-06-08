@@ -2,15 +2,17 @@
 import { formatTemp } from '../temperature.js'
 import { isPlugged } from '../vehicle.js'
 
-/** HA vehicle charging-state strings → localized label keys. Unknown values pass through. */
-const CHARGING_STATE_KEYS = {
-  charging: 'monitoring.vehicle.charging_active',
-  complete: 'monitoring.vehicle.charging_complete',
-  charged: 'monitoring.vehicle.charging_complete',
-  full: 'monitoring.vehicle.charging_complete',
-  idle: 'monitoring.vehicle.charging_idle',
-  stopped: 'monitoring.vehicle.charging_idle',
-  disconnected: 'monitoring.vehicle.charging_idle',
+/**
+ * OpenEVSE state code → charging-status label. Derived from the EVSE's own
+ * state machine, so it works without any vehicle integration. Only the
+ * car-connected states carry a meaningful charging status:
+ *   3 = charging (delivering current), 2 = connected but idle.
+ * Other states (no car, fault, sleeping/disabled) have no charging status and
+ * are surfaced elsewhere (Dashboard / Safety tab), so the row is omitted.
+ */
+const CHARGING_STATE_BY_EVSE = {
+  2: 'monitoring.vehicle.charging_idle',
+  3: 'monitoring.vehicle.charging_active',
 }
 
 
@@ -102,11 +104,9 @@ export function vehicleMetrics(status, config) {
       unit: '',
     })
   }
-  if (typeof s.vehicle_charging_state === 'string' && s.vehicle_charging_state.trim() !== '') {
-    const key = CHARGING_STATE_KEYS[s.vehicle_charging_state.trim().toLowerCase()]
-    rows.push(key
-      ? { labelKey: 'monitoring.vehicle.charging_state', textKey: key, unit: '' }
-      : { labelKey: 'monitoring.vehicle.charging_state', value: s.vehicle_charging_state, unit: '' })
+  const chargingKey = CHARGING_STATE_BY_EVSE[s.state]
+  if (chargingKey) {
+    rows.push({ labelKey: 'monitoring.vehicle.charging_state', textKey: chargingKey, unit: '' })
   }
   return { titleKey: 'monitoring.group.vehicle', rows }
 }
