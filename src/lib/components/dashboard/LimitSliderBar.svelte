@@ -40,13 +40,16 @@
   }
   function handleChange(e) {
     const v = Number(e.currentTarget.value)
-    if (v === display) return // no-change: never emit (an idle editor must not clear)
+    // No-change commits never emit (an idle editor must not clear) — except a
+    // 0-commit while a limit is genuinely active: a sub-step limit (e.g.
+    // 400 Wh) displays as 0 but must still be clearable.
+    if (v === display && (v !== 0 || !active)) return
     onchange(kind === 'time' ? v : v * 1000)
   }
 
   // Progress toward the limit (display-unit fraction of the bar, capped).
   let fillPct = $derived.by(() => {
-    if (!active) return 0
+    if (!active || display === 0) return 0
     const prog = kind === 'time' ? progress / 60 : progress / 1000
     return Math.min(100, (prog / display) * 100) * (display / max)
   })

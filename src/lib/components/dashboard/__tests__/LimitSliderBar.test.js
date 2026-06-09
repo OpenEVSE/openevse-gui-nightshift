@@ -74,4 +74,18 @@ describe('LimitSliderBar', () => {
     })
     expect(getByRole('slider', { name: 'dashboard.limit.type_time' })).toBeDisabled()
   })
+
+  it('clears a sub-step limit (displays as 0 but is active)', async () => {
+    const onchange = vi.fn()
+    const { getByRole } = render(LimitSliderBar, { props: { kind: 'energy', value: 400, onchange } })
+    const input = getByRole('slider', { name: 'dashboard.limit.type_energy' })
+    input.value = '0'
+    await fireEvent.change(input)
+    expect(onchange).toHaveBeenCalledWith(0)
+  })
+
+  it('renders no NaN fill for a sub-step limit', () => {
+    const { container } = render(LimitSliderBar, { props: { kind: 'energy', value: 400, progress: 0 } })
+    expect(container.querySelector('[data-fill]').style.width).toBe('0%')
+  })
 })
