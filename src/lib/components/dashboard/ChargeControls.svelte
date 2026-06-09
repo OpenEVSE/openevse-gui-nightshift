@@ -6,14 +6,11 @@
   let {
     segment = 'auto',
     divertEnabled = false,
-    shaperEnabled = false,
-    shaperOn = false,
     locked = false,
     lockLabel = '',
     disabled = false,
     boostEndsAt = null,
     onsegment = () => {},
-    onshaper = () => {},
     onboost = () => {},
     oncancelboost = () => {},
   } = $props()
@@ -26,14 +23,6 @@
   }
 
   let segments = $derived(controlSegments(divertEnabled))
-  // Layout-only: an active boost takes the full row width. Parent clears
-  // boostEndsAt when the boost ends, so a plain truthy check is enough.
-  let boostActive = $derived(!!boostEndsAt)
-
-  // Shared shape so the Shaper toggle and the Boost button line up.
-  const MOD_BTN =
-    'w-full rounded-2xl px-4 py-3 text-sm font-semibold transition ' +
-    'disabled:opacity-40 disabled:cursor-not-allowed border'
 </script>
 
 <div class="mt-3 space-y-2">
@@ -64,43 +53,6 @@
     </div>
   {/if}
 
-  <!-- Modifier row. Idle: two-up grid (Shaper + Boost). Active boost: Shaper on
-       its own full-width row above the boost countdown card. -->
-  {#if boostActive}
-    {#if shaperEnabled}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={shaperOn}
-        aria-label={$_('dashboard.shaper')}
-        disabled={disabled || locked}
-        onclick={() => onshaper(!shaperOn)}
-        class="{MOD_BTN} {shaperOn
-          ? 'border-accent text-accent shadow-[var(--accent-glow)]'
-          : 'border-border text-text'}"
-      >
-        {$_('dashboard.shaper')}
-      </button>
-    {/if}
-    <BoostButton disabled={disabled || locked} endsAt={boostEndsAt} onboost={onboost} oncancel={oncancelboost} />
-  {:else}
-    <div class="grid gap-2 {shaperEnabled ? 'grid-cols-2' : 'grid-cols-1'}">
-      {#if shaperEnabled}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={shaperOn}
-          aria-label={$_('dashboard.shaper')}
-          disabled={disabled || locked}
-          onclick={() => onshaper(!shaperOn)}
-          class="{MOD_BTN} {shaperOn
-            ? 'border-accent text-accent shadow-[var(--accent-glow)]'
-            : 'border-border text-text'}"
-        >
-          {$_('dashboard.shaper')}
-        </button>
-      {/if}
-      <BoostButton disabled={disabled || locked} endsAt={boostEndsAt} onboost={onboost} oncancel={oncancelboost} />
-    </div>
-  {/if}
+  <!-- Modifier row: Boost. (The Shaper toggle lives in Settings, not here.) -->
+  <BoostButton disabled={disabled || locked} endsAt={boostEndsAt} onboost={onboost} oncancel={oncancelboost} />
 </div>

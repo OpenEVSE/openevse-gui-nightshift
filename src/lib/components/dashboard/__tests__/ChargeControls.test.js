@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, fireEvent, cleanup } from '@testing-library/svelte'
+import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
   const t = (k, opts) => (opts?.values ? k + ':' + JSON.stringify(opts.values) : k)
@@ -10,8 +10,8 @@ vi.mock('svelte-i18n', () => {
 import ChargeControls from '../ChargeControls.svelte'
 
 const base = {
-  segment: 'auto', divertEnabled: true, shaperEnabled: true,
-  shaperOn: false, locked: false, lockLabel: '', disabled: false, boostEndsAt: null,
+  segment: 'auto', divertEnabled: true,
+  locked: false, lockLabel: '', disabled: false, boostEndsAt: null,
 }
 
 describe('ChargeControls', () => {
@@ -47,34 +47,13 @@ describe('ChargeControls', () => {
     expect(queryByText('dashboard.mode.auto')).not.toBeInTheDocument()
   })
 
-  it('renders the shaper toggle only when shaper is enabled', () => {
-    const on = render(ChargeControls, { props: { ...base } })
-    expect(on.getByLabelText('dashboard.shaper')).toBeInTheDocument()
-    cleanup()
-    const off = render(ChargeControls, { props: { ...base, shaperEnabled: false } })
-    expect(off.queryByLabelText('dashboard.shaper')).not.toBeInTheDocument()
-  })
-
-  it('emits onshaper with the toggled value', async () => {
-    const onshaper = vi.fn()
-    const { getByLabelText } = render(ChargeControls, { props: { ...base, shaperOn: false, onshaper } })
-    await fireEvent.click(getByLabelText('dashboard.shaper'))
-    expect(onshaper).toHaveBeenCalledWith(true)
+  it('does not render a shaper toggle (it lives in Settings)', () => {
+    const { queryByLabelText } = render(ChargeControls, { props: { ...base } })
+    expect(queryByLabelText('dashboard.shaper')).not.toBeInTheDocument()
   })
 
   it('disables the segment buttons when disabled', () => {
     const { getByText } = render(ChargeControls, { props: { ...base, disabled: true } })
     expect(getByText('dashboard.mode.auto')).toBeDisabled()
-  })
-
-  it('takes the active-boost layout (shaper outside the grid) when a boost is running', () => {
-    const { getByLabelText, container } = render(ChargeControls, {
-      props: { ...base, boostEndsAt: 9_999_999_999_999 },
-    })
-    const shaper = getByLabelText('dashboard.shaper')
-    // In the active-boost branch the shaper toggle is rendered full-width,
-    // not inside the two-up `grid-cols-2` modifier grid.
-    expect(shaper).toBeInTheDocument()
-    expect(shaper.closest('.grid-cols-2')).toBeNull()
   })
 })

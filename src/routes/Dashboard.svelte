@@ -120,12 +120,7 @@
   )
 
   let showEco = $derived(!!$config_store?.divert_enabled)
-  let showShaper = $derived(!!$config_store?.current_shaper_enabled)
   let ecoOn = $derived($status_store?.divertmode === 2 && mode === 0)
-  // Reflect the device's live shaper state (status.shaper, 0/1) — same source
-  // pattern as ecoOn above. uistates_store.shaper is never written by the data
-  // layer, so deriving from it left the toggle permanently off.
-  let shaperOn = $derived(!!$status_store?.shaper)
   let chargeSegment = $derived(
     selectedSegment({
       mode,
@@ -242,18 +237,6 @@
     }
   }
 
-  async function setShaper(on) {
-    if (busy) return
-    busy = true
-    try {
-      const res = await serialQueue.add(() =>
-        httpAPI('POST', '/shaper', `shaper=${on ? 1 : 0}`, 'text'),
-      )
-      if (res === 'error') showWriteError()
-    } finally {
-      busy = false
-    }
-  }
 
   async function saveLimit(limit) {
     limitModalOpen = false
@@ -474,20 +457,17 @@
   <div class="max-lg:contents lg:flex lg:flex-col">
     <div class="max-lg:order-3"><ThrottleBadge /></div>
 
-    <!-- Unified charge controls: segmented mode + Shaper/Boost modifiers.
+    <!-- Unified charge controls: segmented mode + the Boost modifier.
          Stays visible (disabled) during a fault so the layout doesn't reflow. -->
     <div class="max-lg:order-5">
       <ChargeControls
         segment={chargeSegment}
         divertEnabled={showEco}
-        shaperEnabled={showShaper}
-        {shaperOn}
         locked={modeLocked}
         lockLabel={modeLockLabel}
         disabled={busy || display === 'error'}
         {boostEndsAt}
         onsegment={setSegment}
-        onshaper={setShaper}
         onboost={boost}
         oncancelboost={cancelBoost}
       />
