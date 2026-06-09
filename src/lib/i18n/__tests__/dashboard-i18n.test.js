@@ -8,6 +8,6 @@ describe('dashboard i18n keys', () => {
     expect(en.dashboard.reason.off).toBeTypeOf('string')
     expect(en.dashboard.chips.current).toBeTypeOf('string')
     expect(en.dashboard.mode.auto).toBeTypeOf('string')
-    expect(en.dashboard.limit.none).toBeTypeOf('string')
+    expect(en.dashboard.limit.pills_aria).toBeTypeOf('string')
   })
 })

@@ -506,24 +506,17 @@
       "vehicle_limit": "limite du véhicule {value}",
       "vehicle_limit_tip": "Limite de charge propre au véhicule ({value}). La voiture ne charge pas au-delà.",
       "evse_limit": "limite EVSE {value}",
-      "target_aria": "Limite de charge EVSE",
-      "unit_aria": "Unités de limite"
+      "target_aria": "Limite de charge EVSE"
     },
     "limit": {
       "label": "Limite de charge",
-      "none": "Aucune limite",
-      "set": "Définir la limite",
       "left": "restant",
-      "clear": "Effacer la limite",
-      "type": "Type de limite",
-      "type_none": "Aucune",
+      "type_soc": "SOC",
+      "type_range": "Autonomie",
       "type_time": "Temps",
       "type_energy": "Énergie",
-      "hours": "Heures",
-      "minutes": "Minutes",
-      "energy_value": "Énergie (kWh)",
-      "save": "Définir la limite",
-      "or_limit_by": "Ou limiter par"
+      "drag_to_set": "Aucune limite — glisser pour régler",
+      "pills_aria": "Type de limite"
     },
     "eco": "Éco",
     "boost": {

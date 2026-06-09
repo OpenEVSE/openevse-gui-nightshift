@@ -506,24 +506,17 @@
       "vehicle_limit": "vehicle limit {value}",
       "vehicle_limit_tip": "Your vehicle's own charge limit ({value}). The car won't charge past this.",
       "evse_limit": "EVSE limit {value}",
-      "target_aria": "EVSE charge limit",
-      "unit_aria": "Limit units"
+      "target_aria": "EVSE charge limit"
     },
     "limit": {
       "label": "Charge limit",
-      "none": "None set",
-      "set": "Set limit",
       "left": "left",
-      "clear": "Clear limit",
-      "type": "Limit type",
-      "type_none": "None",
+      "type_soc": "SOC",
+      "type_range": "Range",
       "type_time": "Time",
       "type_energy": "Energy",
-      "hours": "Hours",
-      "minutes": "Minutes",
-      "energy_value": "Energy (kWh)",
-      "save": "Set limit",
-      "or_limit_by": "Or limit by"
+      "drag_to_set": "No limit — drag to set",
+      "pills_aria": "Limit type"
     },
     "eco": "Eco",
     "boost": {

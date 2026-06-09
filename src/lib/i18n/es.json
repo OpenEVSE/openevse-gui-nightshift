@@ -506,24 +506,17 @@
       "vehicle_limit": "límite del vehículo {value}",
       "vehicle_limit_tip": "Límite de carga propio del vehículo ({value}). El coche no cargará más allá de esto.",
       "evse_limit": "límite EVSE {value}",
-      "target_aria": "Límite de carga EVSE",
-      "unit_aria": "Unidades del límite"
+      "target_aria": "Límite de carga EVSE"
     },
     "limit": {
       "label": "Límite de carga",
-      "none": "Sin límite",
-      "set": "Establecer límite",
       "left": "restante",
-      "clear": "Borrar límite",
-      "type": "Tipo de límite",
-      "type_none": "Ninguno",
+      "type_soc": "SOC",
+      "type_range": "Autonomía",
       "type_time": "Tiempo",
       "type_energy": "Energía",
-      "hours": "Horas",
-      "minutes": "Minutos",
-      "energy_value": "Energía (kWh)",
-      "save": "Establecer límite",
-      "or_limit_by": "O limitar por"
+      "drag_to_set": "Sin límite — arrastra para fijar",
+      "pills_aria": "Tipo de límite"
     },
     "eco": "Eco",
     "boost": {

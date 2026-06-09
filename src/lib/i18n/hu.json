@@ -506,24 +506,17 @@
       "vehicle_limit": "jármű korlátja {value}",
       "vehicle_limit_tip": "A jármű saját töltési korlátja ({value}). Az autó nem tölt ezen túl.",
       "evse_limit": "EVSE korlát {value}",
-      "target_aria": "EVSE töltési korlát",
-      "unit_aria": "Korlát mértékegysége"
+      "target_aria": "EVSE töltési korlát"
     },
     "limit": {
       "label": "Töltési korlát",
-      "none": "Nincs beállítva",
-      "set": "Korlát beállítása",
       "left": "maradt",
-      "clear": "Korlát törlése",
-      "type": "Korlát típusa",
-      "type_none": "Egyik sem",
+      "type_soc": "SOC",
+      "type_range": "Hatótáv",
       "type_time": "Idő",
       "type_energy": "Energia",
-      "hours": "Óra",
-      "minutes": "Perc",
-      "energy_value": "Energia (kWh)",
-      "save": "Korlát beállítása",
-      "or_limit_by": "Vagy korlátozás eszerint"
+      "drag_to_set": "Nincs korlát — húzza a beállításhoz",
+      "pills_aria": "Korlát típusa"
     },
     "eco": "Eco",
     "boost": {
