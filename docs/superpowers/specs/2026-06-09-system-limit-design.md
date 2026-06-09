@@ -50,7 +50,7 @@ the Behaviour and Sensor sections:
   Value derives from `$config_store?.limit_default_type`, treating `""`,
   `undefined`, and `"none"` as `none`.
 - **Value** — a `NumberInput` rendered only when type ≠ none, unit-adaptive:
-  - time → minutes (min 0, step 5, placeholder e.g. `120`)
+  - time → minutes (min 0, step 5)
   - energy → kWh shown (min 0, step 1); device stores Wh: save `kWh * 1000`,
     display `limit_default_value / 1000`
   - soc → % (min 0, max 100)
@@ -67,7 +67,7 @@ the Behaviour and Sensor sections:
 
 Discriminator derived once: `let systemLimit = $derived($limit_store?.auto_release === false)`.
 
-Three touch points in `src/routes/Dashboard.svelte` (+ `ChargeLimitCard.svelte`):
+Four touch points in `src/routes/Dashboard.svelte` (+ `ChargeLimitCard.svelte`):
 
 1. **Limit row ×** — `ChargeLimitCard` gains a `clearable = true` prop; the
    time/energy row renders the clear button only when `clearable`. Dashboard
@@ -82,6 +82,11 @@ Three touch points in `src/routes/Dashboard.svelte` (+ `ChargeLimitCard.svelte`)
    the firmware only re-applies the config default at boot or on a config
    write, so a DELETE would silently discard the configured limit — the
    guard prevents a destructive action, not just a futile one.
+4. **Boost's defensive limit clear** — `boost()` opens with a defensive
+   `DELETE /limit` (residual-claim workaround); skip it when `systemLimit`
+   for the same destructive-DELETE reason. Boosting past a *tripped* system
+   limit therefore won't resume charging — same accepted behavior as On.
+   (Found in final review; the original spec enumerated only three paths.)
 
 ## i18n
 
