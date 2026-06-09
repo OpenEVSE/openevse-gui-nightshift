@@ -63,7 +63,7 @@
   }
 </script>
 
-<section class="p-4">
+<section class="p-4 lg:mx-auto lg:max-w-3xl">
   <div class="mb-3 flex items-baseline justify-between">
     <h1 class="text-lg font-semibold text-text">{$_('screen.schedule')}</h1>
     <span class="text-xs text-text-dim">

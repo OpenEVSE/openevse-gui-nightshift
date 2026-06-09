@@ -105,7 +105,7 @@
   })
 </script>
 
-<section class="p-4">
+<section class="p-4 lg:mx-auto lg:max-w-3xl">
   <div class="mb-3 flex items-center gap-2">
     <h1 class="flex-1 text-lg font-semibold text-text">{$_('screen.history')}</h1>
     {#if labsOn && phase === 'ready' && rows.length > 0}
