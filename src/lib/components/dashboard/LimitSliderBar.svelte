@@ -10,6 +10,8 @@
     charging = false,
     disabled = false,
     onchange = () => {}, // device units; 0 = clear
+    // optional snippet rendered at the header's right edge (the card's pills)
+    headerEnd = null,
   } = $props()
 
   // Slider geometry is in display units: minutes for time, kWh for energy.
@@ -64,7 +66,8 @@
 </script>
 
 <div>
-  <!-- header: remaining / hint on the left, scale max on the right -->
+  <!-- header: remaining / hint on the left; the card's pills (when provided)
+       take the right edge, otherwise the scale max shows there. -->
   <div class="mb-3 flex items-center justify-between gap-2 text-xs">
     <span class="min-w-0 truncate text-text">
       {#if active && remaining}
@@ -73,7 +76,11 @@
         <span class="text-text-dim">{$_('dashboard.limit.drag_to_set')}</span>
       {/if}
     </span>
-    <span class="shrink-0 text-[10px] text-text-dim">{fmt(max)}</span>
+    {#if headerEnd}
+      {@render headerEnd()}
+    {:else}
+      <span class="shrink-0 text-[10px] text-text-dim">{fmt(max)}</span>
+    {/if}
   </div>
 
   <!-- bar block — same geometry family as VehicleSocBar -->

@@ -55,8 +55,10 @@
   let editorDisabled = $derived((id) => disabled || (systemLimit && activeType === id))
 </script>
 
-<div class="mt-3 rounded-xl bg-surface-2 px-3 py-3">
-  <div role="radiogroup" aria-label={$_('dashboard.limit.pills_aria')} class="mb-1 flex flex-wrap gap-1.5">
+{#snippet pillRow()}
+  <!-- Rendered inside the editors' header line, right-aligned where the old
+       %/km toggle lived — the progress/remaining text keeps the top-left. -->
+  <div role="radiogroup" aria-label={$_('dashboard.limit.pills_aria')} class="flex shrink-0 flex-wrap justify-end gap-1.5">
     {#each pills as pill}
       <button
         type="button"
@@ -75,7 +77,9 @@
       </button>
     {/each}
   </div>
+{/snippet}
 
+<div class="mt-3 rounded-xl bg-surface-2 px-3 py-3">
   {#if selected === 'soc' || selected === 'range'}
     <VehicleSocBar
       {soc}
@@ -89,6 +93,7 @@
       {estMaxRange}
       disabled={editorDisabled(selected)}
       onchange={ontarget}
+      headerEnd={pillRow}
     />
   {:else}
     <LimitSliderBar
@@ -98,6 +103,7 @@
       {charging}
       disabled={editorDisabled(selected)}
       onchange={(v) => onlimit({ type: selected, value: v })}
+      headerEnd={pillRow}
     />
   {/if}
 </div>

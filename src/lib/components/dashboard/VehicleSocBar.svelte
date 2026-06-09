@@ -14,6 +14,8 @@
     unit = 'percent',
     estMaxRange = null,
     onchange = () => {},
+    // optional snippet rendered at the header's right edge (the card's pills)
+    headerEnd = null,
   } = $props()
 
   // Live knob position during a drag (percent). Initialise from the prop so the
@@ -80,11 +82,12 @@
 </script>
 
 <div>
-  <!-- header: info line (unit selection lives in the card's pills) -->
+  <!-- header: info line left, the card's pills (when provided) right -->
   <div class="mb-3 flex items-center justify-between gap-2">
     <span class="min-w-0 truncate text-xs text-text">
       {progress}{#if toFull} · {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}{/if}
     </span>
+    {@render headerEnd?.()}
   </div>
 
   <!-- bar block — percent geometry; labels via fmt() -->
