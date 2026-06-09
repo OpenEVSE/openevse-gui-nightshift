@@ -88,4 +88,11 @@ describe('LimitSliderBar', () => {
     const { container } = render(LimitSliderBar, { props: { kind: 'energy', value: 400, progress: 0 } })
     expect(container.querySelector('[data-fill]').style.width).toBe('0%')
   })
+
+  it('insets the rendered knob ~7% from the rails (commits still span 0..max)', () => {
+    const zero = render(LimitSliderBar, { props: { kind: 'time', value: 0 } })
+    expect(zero.container.querySelector('[data-knob]').style.left).toBe('7%')
+    const full = render(LimitSliderBar, { props: { kind: 'time', value: 480 } })
+    expect(full.container.querySelector('[data-knob]').style.left).toBe('93%')
+  })
 })

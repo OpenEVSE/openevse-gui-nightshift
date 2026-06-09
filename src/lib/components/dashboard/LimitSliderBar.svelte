@@ -56,6 +56,10 @@
     return Math.min(100, (prog / display) * 100) * (display / max)
   })
   let knobPct = $derived((current / max) * 100)
+  // Render the marker inset ~7% from each rail so the pin never hangs off the
+  // rounded track ends (the slider rests at 0, unlike the SOC bar whose values
+  // rarely rail). The committed value still spans the full 0..max.
+  let knobRenderPct = $derived(Math.min(93, Math.max(7, knobPct)))
   let knobOpacity = $derived(current === 0 ? 0.55 : 1)
   let remaining = $derived.by(() => {
     if (!active) return ''
@@ -110,12 +114,12 @@
 
     <!-- knob pin + value pill (one opacity layer, like the SOC bar) -->
     <div class="pointer-events-none absolute inset-0" style="opacity: {knobOpacity}">
-      <div class="absolute top-[28px] w-0" style="left: {knobPct}%">
+      <div data-knob class="absolute top-[28px] w-0" style="left: {knobRenderPct}%">
         <div class="absolute -top-2.5 left-1/2 h-[48px] w-2.5 -translate-x-1/2 rounded-b-[3px] bg-text"></div>
       </div>
       <div
         class="absolute top-0 rounded-md border border-text bg-surface px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap text-text"
-        style="left: {knobPct}%; transform: translateX(-{pillShift}%)"
+        style="left: {knobRenderPct}%; transform: translateX(-{pillShift}%)"
       >
         {fmt(current)}
       </div>
