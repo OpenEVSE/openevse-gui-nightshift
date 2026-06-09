@@ -82,10 +82,13 @@
 </script>
 
 <div>
-  <!-- header: info line left, the card's pills (when provided) right -->
+  <!-- header: info line left, the card's pills (when provided) right. The
+       "to full" note shares the line only where there's room; on phones it
+       moves to a caption under the bar instead of colliding with the pills. -->
   <div class="mb-3 flex items-center justify-between gap-2">
     <span class="min-w-0 truncate text-xs text-text">
-      {progress}{#if toFull} · {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}{/if}
+      {progress}{#if toFull}<span class="max-sm:hidden">
+          · {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}</span>{/if}
     </span>
     {@render headerEnd?.()}
   </div>
@@ -163,4 +166,11 @@
       </div>
     </div>
   </div>
+
+  {#if toFull}
+    <!-- phone slot for the "to full" note (the header shows it from sm: up) -->
+    <div class="mt-1 text-[10px] text-text-dim sm:hidden">
+      {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}
+    </div>
+  {/if}
 </div>
