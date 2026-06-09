@@ -49,24 +49,28 @@
     onchange(kind === 'time' ? v : v * 1000)
   }
 
-  // Progress toward the limit (display-unit fraction of the bar, capped).
-  let fillPct = $derived.by(() => {
+  // The scale is inset ~7% from each rail, so the pin and pill never hang off
+  // the rounded track ends at 0 or max. (The SOC bar gets the same at-rest
+  // look because its knob parks at the vehicle-limit ceiling on release; here
+  // 0 and max are real, committable values, so the whole scale pads instead —
+  // every value stays reachable and the inset input keeps finger↔pin 1:1.)
+  const INSET = 7
+  const ZONE = 100 - 2 * INSET
+  let posPct = $derived(INSET + (current / max) * ZONE)
+  // Progress toward the limit, in track percent within the inset zone —
+  // capped at the limit so the fill meets the pin exactly when it trips.
+  let fillW = $derived.by(() => {
     if (!active || display === 0) return 0
     const prog = kind === 'time' ? progress / 60 : progress / 1000
-    return Math.min(100, (prog / display) * 100) * (display / max)
+    return (Math.min(display, prog) / max) * ZONE
   })
-  let knobPct = $derived((current / max) * 100)
-  // Render the marker inset ~7% from each rail so the pin never hangs off the
-  // rounded track ends (the slider rests at 0, unlike the SOC bar whose values
-  // rarely rail). The committed value still spans the full 0..max.
-  let knobRenderPct = $derived(Math.min(93, Math.max(7, knobPct)))
   let knobOpacity = $derived(current === 0 ? 0.55 : 1)
   let remaining = $derived.by(() => {
     if (!active) return ''
     if (kind === 'time') return hmsShort(Math.max(0, value * 60 - progress))
     return `${(Math.max(0, value - progress) / 1000).toFixed(1)} ${$_('units.kwh')}`
   })
-  let pillShift = $derived(Math.min(90, Math.max(10, knobPct)))
+  let pillShift = $derived(Math.min(90, Math.max(10, posPct)))
 </script>
 
 <div>
@@ -93,11 +97,13 @@
       <div class="absolute inset-0 rounded-full bg-surface-3"></div>
       <div
         data-fill
-        class="absolute inset-y-0 left-0 rounded-l-full {charging && active
+        class="absolute inset-y-0 rounded-full {charging && active
           ? 'soc-shimmer'
           : 'bg-gradient-to-r from-accent to-cyan-400'}"
-        style="width: {fillPct}%"
+        style="left: {INSET}%; width: {fillW}%"
       ></div>
+      <!-- the input spans only the inset zone so the thumb position and the
+           rendered pin agree across the whole drag -->
       <input
         type="range"
         min="0"
@@ -108,18 +114,19 @@
         aria-label={$_(kind === 'time' ? 'dashboard.limit.type_time' : 'dashboard.limit.type_energy')}
         oninput={handleInput}
         onchange={handleChange}
-        class="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+        class="absolute inset-y-0 h-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+        style="left: {INSET}%; width: {ZONE}%"
       />
     </div>
 
     <!-- knob pin + value pill (one opacity layer, like the SOC bar) -->
     <div class="pointer-events-none absolute inset-0" style="opacity: {knobOpacity}">
-      <div data-knob class="absolute top-[28px] w-0" style="left: {knobRenderPct}%">
+      <div data-knob class="absolute top-[28px] w-0" style="left: {posPct}%">
         <div class="absolute -top-2.5 left-1/2 h-[48px] w-2.5 -translate-x-1/2 rounded-b-[3px] bg-text"></div>
       </div>
       <div
         class="absolute top-0 rounded-md border border-text bg-surface px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap text-text"
-        style="left: {knobRenderPct}%; transform: translateX(-{pillShift}%)"
+        style="left: {posPct}%; transform: translateX(-{pillShift}%)"
       >
         {fmt(current)}
       </div>

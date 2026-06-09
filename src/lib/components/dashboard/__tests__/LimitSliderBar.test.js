@@ -61,9 +61,11 @@ describe('LimitSliderBar', () => {
       props: { kind: 'energy', value: 5000, progress: 9000, charging: true },
     })
     const fill = over.container.querySelector('[data-fill]')
-    // 5 kWh limit = knob at 5% of the 100 kWh track; over-delivered progress
-    // caps the fill AT the knob, never past it.
-    expect(fill.style.width).toBe('5%')
+    // The scale is inset 7% from each rail (86% usable zone). A 5 kWh limit on
+    // the 100 kWh scale puts the knob 5% into that zone; over-delivered
+    // progress caps the fill AT the knob, never past it.
+    expect(fill.style.left).toBe('7%')
+    expect(fill.style.width).toBe(`${(5 / 100) * 86}%`)
     const none = render(LimitSliderBar, { props: { kind: 'energy', value: 0, progress: 9000 } })
     expect(none.container.querySelector('[data-fill]').style.width).toBe('0%')
   })
