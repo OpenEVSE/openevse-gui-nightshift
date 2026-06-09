@@ -189,4 +189,13 @@ describe('Dashboard', () => {
       expect(httpAPI).toHaveBeenCalledWith('POST', '/override', expect.stringContaining('"charge_current":20'))
     })
   })
+
+  it('carries the desktop two-column grid classes', () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { container } = render(Dashboard)
+    const section = container.querySelector('section')
+    expect(section.className).toContain('lg:grid-cols-2')
+    // two column wrappers that dissolve on mobile
+    expect(container.querySelectorAll('section > [class*="max-lg:contents"]')).toHaveLength(2)
+  })
 })

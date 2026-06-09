@@ -393,33 +393,39 @@
   })
 </script>
 
-<section class="px-4 pb-4">
-  {#if !showChart}
-    <StatusLine {display} />
+<section
+  class="flex flex-col px-4 pb-4 lg:mx-auto lg:grid lg:w-full lg:max-w-5xl
+         lg:grid-cols-2 lg:items-start lg:gap-x-6"
+>
+  {#if showChart}
+    <!-- Labs chart hero: full content width on desktop, first block on mobile -->
+    <div class="max-lg:order-1 lg:col-span-2" in:fade={{ duration: 150 }}>
+      <ChargingHero
+        {kw}
+        soc={hasSoc ? ($status_store?.battery_level ?? null) : null}
+        target={socTarget}
+        {hasSoc}
+        amps={chargeAmps}
+        {maxAmps}
+        {rateClaimedBy}
+        {rateNonce}
+        samples={$energy_store.raw.samples}
+        voltage={$status_store?.voltage ?? 0}
+        sessionElapsed={$status_store?.session_elapsed ?? 0}
+        chartError={$energy_store.error.raw}
+        rateDisabled={busy || ecoOn || display === 'error'}
+        onrate={setChargeAmps}
+      />
+    </div>
   {/if}
 
-  <div class="relative">
-    {#if showChart}
-      <div in:fade={{ duration: 150 }}>
-        <ChargingHero
-          {kw}
-          soc={hasSoc ? ($status_store?.battery_level ?? null) : null}
-          target={socTarget}
-          {hasSoc}
-          amps={chargeAmps}
-          {maxAmps}
-          {rateClaimedBy}
-          {rateNonce}
-          samples={$energy_store.raw.samples}
-          voltage={$status_store?.voltage ?? 0}
-          sessionElapsed={$status_store?.session_elapsed ?? 0}
-          chartError={$energy_store.error.raw}
-          rateDisabled={busy || ecoOn || display === 'error'}
-          onrate={setChargeAmps}
-        />
-      </div>
-    {:else}
-      <div in:fade={{ duration: 150 }}>
+  <!-- Act column: status, ring + rate, throttle, mode controls.
+       max-lg:contents dissolves the wrapper on mobile; max-lg:order-* on the
+       children preserves today's visual order in the section's flex-col. -->
+  <div class="max-lg:contents lg:flex lg:flex-col">
+    {#if !showChart}
+      <div class="max-lg:order-1"><StatusLine {display} /></div>
+      <div class="relative max-lg:order-2" in:fade={{ duration: 150 }}>
         <div class="absolute right-3 top-1 z-10">
           {#key rateNonce}
             <RatePill
@@ -443,53 +449,59 @@
         />
       </div>
     {/if}
+
+    <div class="max-lg:order-3"><ThrottleBadge /></div>
+
+    <!-- Unified charge controls: segmented mode + Shaper/Boost modifiers.
+         Stays visible (disabled) during a fault so the layout doesn't reflow. -->
+    <div class="max-lg:order-5">
+      <ChargeControls
+        segment={chargeSegment}
+        divertEnabled={showEco}
+        shaperEnabled={showShaper}
+        {shaperOn}
+        locked={modeLocked}
+        lockLabel={modeLockLabel}
+        disabled={busy || display === 'error'}
+        {boostEndsAt}
+        onsegment={setSegment}
+        onshaper={setShaper}
+        onboost={boost}
+        oncancelboost={cancelBoost}
+      />
+    </div>
   </div>
 
-  <ThrottleBadge />
+  <!-- Observe column: stat chips, SOC / charge-limit card -->
+  <div class="max-lg:contents lg:flex lg:flex-col">
+    <div class="max-lg:order-4"><StatChips {charging} {live} {summary} {sessionCost} /></div>
 
-  <StatChips {charging} {live} {summary} {sessionCost} />
-
-  <!-- Unified charge controls: segmented mode + Shaper/Boost modifiers.
-       Stays visible (disabled) during a fault so the layout doesn't reflow. -->
-  <ChargeControls
-    segment={chargeSegment}
-    divertEnabled={showEco}
-    shaperEnabled={showShaper}
-    {shaperOn}
-    locked={modeLocked}
-    lockLabel={modeLockLabel}
-    disabled={busy || display === 'error'}
-    {boostEndsAt}
-    onsegment={setSegment}
-    onshaper={setShaper}
-    onboost={boost}
-    oncancelboost={cancelBoost}
-  />
-
-  {#if display !== 'error'}
-    {#key socNonce}
-      <ChargeLimitCard
-        {hasSoc}
-        soc={$status_store?.battery_level ?? 0}
-        {vehicleLimit}
-        target={socTarget}
-        range={$status_store?.battery_range ?? null}
-        rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
-        timeToFull={$status_store?.time_to_full_charge ?? 0}
-        {charging}
-        unit={limitUnit}
-        estMaxRange={maxRange}
-        disabled={busy}
-        ontarget={setTarget}
-        onunit={(u) => (userUnit = u)}
-        limit={$limit_store}
-        summary={limitSummary}
-        onopen={() => (limitModalOpen = true)}
-        onclear={clearLimit}
-      />
-    {/key}
-
-  {/if}
+    {#if display !== 'error'}
+      <div class="max-lg:order-6">
+        {#key socNonce}
+          <ChargeLimitCard
+            {hasSoc}
+            soc={$status_store?.battery_level ?? 0}
+            {vehicleLimit}
+            target={socTarget}
+            range={$status_store?.battery_range ?? null}
+            rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
+            timeToFull={$status_store?.time_to_full_charge ?? 0}
+            {charging}
+            unit={limitUnit}
+            estMaxRange={maxRange}
+            disabled={busy}
+            ontarget={setTarget}
+            onunit={(u) => (userUnit = u)}
+            limit={$limit_store}
+            summary={limitSummary}
+            onopen={() => (limitModalOpen = true)}
+            onclear={clearLimit}
+          />
+        {/key}
+      </div>
+    {/if}
+  </div>
 </section>
 
 <ChargeLimitModal
