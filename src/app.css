@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Map Tailwind's `dark:` variant onto our data-theme attribute so components
+   can opt into dark-only tweaks (the theme is driven by [data-theme], not the
+   prefers-color-scheme / .dark defaults Tailwind ships with). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* Expose theme colors as Tailwind utilities (bg-surface, text-accent, ...).
    Each maps to a CSS variable that the active theme sets below. */
 @theme {

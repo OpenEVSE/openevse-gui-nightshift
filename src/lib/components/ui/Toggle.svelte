@@ -10,10 +10,10 @@
   {disabled}
   onclick={() => onchange(!checked)}
   class="relative h-6 w-11 rounded-full transition disabled:opacity-40
-         {checked ? 'bg-accent' : 'bg-surface-3'}"
+         {checked ? 'bg-accent' : 'bg-surface-3 dark:bg-white/20'}"
 >
   <span
-    class="absolute top-0.5 h-5 w-5 rounded-full bg-surface transition-all
+    class="absolute top-0.5 h-5 w-5 rounded-full bg-surface transition-all dark:bg-text
            {checked ? 'left-[22px]' : 'left-0.5'}"
   ></span>
 </button>
