@@ -24,4 +24,10 @@ describe('ConfigPage', () => {
     const { getByText } = render(ConfigPage, { title: 'Network', children: body })
     expect(getByText('page body')).toBeInTheDocument()
   })
+  it('constrains the form to a centered column on desktop', () => {
+    const { container } = render(ConfigPage, { title: 'Network', children: body })
+    const cls = container.querySelector('section').className
+    expect(cls).toContain('lg:max-w-2xl')
+    expect(cls).toContain('lg:mx-auto')
+  })
 })

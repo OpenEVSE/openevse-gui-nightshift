@@ -6,7 +6,7 @@
   let { title = '', loading = false, children } = $props()
 </script>
 
-<section class="p-4">
+<section class="p-4 lg:mx-auto lg:max-w-2xl">
   <a
     href="#/settings"
     class="mb-3 inline-flex items-center gap-1 text-sm text-text-dim hover:text-text"
