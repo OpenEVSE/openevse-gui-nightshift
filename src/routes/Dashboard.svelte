@@ -29,9 +29,7 @@
   import ChargeControls from '../lib/components/dashboard/ChargeControls.svelte'
   import RatePill from '../lib/components/dashboard/RatePill.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
-  import ChargeLimitModal from '../lib/components/dashboard/ChargeLimitModal.svelte'
 
-  let limitModalOpen = $state(false)
   let busy = $state(false)
   let rateNonce = $state(0)
 
@@ -129,7 +127,6 @@
     }),
   )
 
-  let limitSummary = $derived(formatLimit($limit_store))
   function formatLimit(l) {
     if (!l || !l.type || l.type === 'none') return ''
     if (l.type === 'time') return sec2time(l.value * 60)
@@ -238,13 +235,28 @@
   }
 
 
-  async function saveLimit(limit) {
-    limitModalOpen = false
-    const ok = await serialQueue.add(() => limit_store.upload(limit))
-    if (ok) {
-      await serialQueue.add(() => limit_store.download())
-    } else {
-      showWriteError()
+  // Inline editors commit device-unit values; 0 means clear. A system limit
+  // is never DELETEd from here — snap the card back instead (shipped rule).
+  async function setInlineLimit({ type, value }) {
+    if (busy) return
+    if (!value) {
+      if (systemLimit) {
+        socNonce++
+        return
+      }
+      return clearLimit()
+    }
+    busy = true
+    try {
+      const ok = await serialQueue.add(() => limit_store.upload({ type, value, auto_release: true }))
+      if (ok) {
+        await serialQueue.add(() => limit_store.download())
+      } else {
+        showWriteError()
+        socNonce++
+      }
+    } finally {
+      busy = false
     }
   }
 
@@ -481,35 +493,28 @@
 
   <!-- SOC / charge-limit card: full content width on desktop, below the columns -->
   {#if display !== 'error'}
-    <div class="max-lg:order-6 lg:col-span-2">
-      {#key socNonce}
-        <ChargeLimitCard
-          {hasSoc}
-          soc={$status_store?.battery_level ?? 0}
-          {vehicleLimit}
-          target={socTarget}
-          range={$status_store?.battery_range ?? null}
-          rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
-          timeToFull={$status_store?.time_to_full_charge ?? 0}
-          {charging}
-          unit={limitUnit}
-          estMaxRange={maxRange}
-          disabled={busy}
-          clearable={!systemLimit}
-          ontarget={setTarget}
-          onunit={(u) => (userUnit = u)}
-          limit={$limit_store}
-          summary={limitSummary}
-          onopen={() => (limitModalOpen = true)}
-          onclear={clearLimit}
-        />
-      {/key}
-    </div>
+      <div class="max-lg:order-6 lg:col-span-2">
+        {#key socNonce}
+          <ChargeLimitCard
+            {hasSoc}
+            soc={$status_store?.battery_level ?? 0}
+            {vehicleLimit}
+            target={socTarget}
+            range={$status_store?.battery_range ?? null}
+            rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
+            timeToFull={$status_store?.time_to_full_charge ?? 0}
+            {charging}
+            estMaxRange={maxRange}
+            disabled={busy}
+            ontarget={setTarget}
+            onunit={(u) => (userUnit = u)}
+            limit={$limit_store}
+            elapsedSec={$status_store?.session_elapsed ?? 0}
+            sessionWh={$status_store?.session_energy ?? 0}
+            {systemLimit}
+            onlimit={setInlineLimit}
+          />
+        {/key}
+      </div>
   {/if}
 </section>
-
-<ChargeLimitModal
-  open={limitModalOpen}
-  onclose={() => (limitModalOpen = false)}
-  onsave={saveLimit}
-/>

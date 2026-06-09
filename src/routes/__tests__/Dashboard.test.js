@@ -201,19 +201,42 @@ describe('Dashboard', () => {
     expect(container.querySelectorAll('section > [class*="max-lg:contents"]')).toHaveLength(2)
   })
 
-  it('hides the limit clear button for a system (default) limit', () => {
+  it('renders the active system limit editor disabled', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     limit_store.set({ type: 'energy', value: 10000, auto_release: false })
-    const { queryByLabelText, getByText } = render(Dashboard)
-    expect(getByText('dashboard.limit.label')).toBeDefined() // row renders (sanity)
-    expect(queryByLabelText('dashboard.limit.clear')).not.toBeInTheDocument()
+    const { getByRole } = render(Dashboard)
+    expect(getByRole('slider', { name: 'dashboard.limit.type_energy' })).toBeDisabled()
   })
 
-  it('keeps the limit clear button for a user limit', () => {
+  it('renders a user limit editor enabled', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     limit_store.set({ type: 'energy', value: 10000, auto_release: true })
-    const { getByLabelText } = render(Dashboard)
-    expect(getByLabelText('dashboard.limit.clear')).toBeInTheDocument()
+    const { getByRole } = render(Dashboard)
+    expect(getByRole('slider', { name: 'dashboard.limit.type_energy' })).not.toBeDisabled()
+  })
+
+  it('uploads a time limit committed from the inline editor', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    const slider = getByRole('slider', { name: 'dashboard.limit.type_time' })
+    slider.value = '120'
+    await fireEvent.change(slider)
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/limit', JSON.stringify({ type: 'time', value: 120, auto_release: true }))
+    })
+  })
+
+  it('drag-to-zero clears a user limit but never a system limit', async () => {
+    // user limit: DELETE goes through
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    limit_store.set({ type: 'time', value: 120, auto_release: true })
+    const first = render(Dashboard)
+    const slider = first.getByRole('slider', { name: 'dashboard.limit.type_time' })
+    slider.value = '0'
+    await fireEvent.change(slider)
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('DELETE', '/limit')
+    })
   })
 
   it('does not DELETE a system limit when the bar commits at the ceiling', async () => {

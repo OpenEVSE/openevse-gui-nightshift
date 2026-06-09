@@ -2,65 +2,86 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
-  const t = (k) => k
+  const t = (k, opts) => (opts?.values ? k + ':' + JSON.stringify(opts.values) : k)
   t.subscribe = (fn) => { fn(t); return () => {} }
   return { _: t }
 })
 
 import ChargeLimitCard from '../ChargeLimitCard.svelte'
 
-describe('ChargeLimitCard', () => {
-  it('shows "none set" and calls onopen when no time/energy limit', async () => {
-    const onopen = vi.fn()
-    const { getByText } = render(ChargeLimitCard, {
-      props: { hasSoc: false, limit: { type: 'none' }, onopen },
-    })
-    expect(getByText('dashboard.limit.none')).toBeInTheDocument()
-    await fireEvent.click(getByText('dashboard.limit.set'))
-    expect(onopen).toHaveBeenCalledOnce()
+const vehicle = { hasSoc: true, soc: 74, vehicleLimit: 90, target: 80, estMaxRange: 278 }
+
+describe('ChargeLimitCard (pills)', () => {
+  it('shows all four pills with vehicle data and a range estimate', () => {
+    const { getByRole } = render(ChargeLimitCard, { props: { ...vehicle } })
+    for (const k of ['type_soc', 'type_range', 'type_time', 'type_energy'])
+      expect(getByRole('radio', { name: `dashboard.limit.${k}` })).toBeInTheDocument()
   })
 
-  it('shows the time/energy summary and calls onclear', async () => {
-    const onclear = vi.fn()
-    const { getByText, getByLabelText } = render(ChargeLimitCard, {
-      props: { hasSoc: false, limit: { type: 'energy', value: 10000 }, summary: '10 kWh', onclear },
-    })
-    expect(getByText('10 kWh')).toBeInTheDocument()
-    await fireEvent.click(getByLabelText('dashboard.limit.clear'))
-    expect(onclear).toHaveBeenCalledOnce()
+  it('collapses to Time and Energy pills without vehicle data', () => {
+    const { queryByRole, getByRole } = render(ChargeLimitCard, { props: { hasSoc: false } })
+    expect(queryByRole('radio', { name: 'dashboard.limit.type_soc' })).not.toBeInTheDocument()
+    expect(queryByRole('radio', { name: 'dashboard.limit.type_range' })).not.toBeInTheDocument()
+    expect(getByRole('radio', { name: 'dashboard.limit.type_time' })).toBeInTheDocument()
+    expect(getByRole('radio', { name: 'dashboard.limit.type_energy' })).toBeInTheDocument()
   })
 
-  it('does not treat a soc/range limit as an active row (bar owns it)', () => {
-    const { getByText } = render(ChargeLimitCard, {
-      props: { hasSoc: true, soc: 74, vehicleLimit: 90, target: 80, limit: { type: 'soc', value: 80 }, summary: '80%' },
-    })
-    expect(getByText('dashboard.limit.none')).toBeInTheDocument()
+  it('defaults to the SOC editor with a vehicle and the Time editor without', () => {
+    const withCar = render(ChargeLimitCard, { props: { ...vehicle } })
+    expect(withCar.getByRole('slider', { name: 'dashboard.vehicle.target_aria' })).toBeInTheDocument()
+    const without = render(ChargeLimitCard, { props: { hasSoc: false } })
+    expect(without.getByRole('slider', { name: 'dashboard.limit.type_time' })).toBeInTheDocument()
   })
 
-  it('renders the bar when hasSoc', () => {
+  it('defaults to the active limit type and marks its pill', () => {
     const { getByRole } = render(ChargeLimitCard, {
-      props: { hasSoc: true, soc: 74, vehicleLimit: 90, target: 80, limit: { type: 'none' } },
+      props: { ...vehicle, limit: { type: 'energy', value: 10000, auto_release: true } },
     })
-    expect(getByRole('slider', { name: 'dashboard.vehicle.target_aria' })).toBeInTheDocument()
+    expect(getByRole('slider', { name: 'dashboard.limit.type_energy' })).toBeInTheDocument()
+    expect(getByRole('radio', { name: 'dashboard.limit.type_energy' }).getAttribute('aria-checked')).toBe('true')
+    expect(getByRole('radio', { name: 'dashboard.limit.type_energy' }).querySelector('[data-active-dot]')).toBeTruthy()
   })
 
-  it('hides the bar when not hasSoc', () => {
-    const { queryByRole } = render(ChargeLimitCard, {
-      props: { hasSoc: false, limit: { type: 'none' } },
+  it('keeps the active dot visible while viewing another pill', async () => {
+    const { getByRole } = render(ChargeLimitCard, {
+      props: { ...vehicle, limit: { type: 'energy', value: 10000, auto_release: true } },
     })
-    expect(queryByRole('slider', { name: 'dashboard.vehicle.target_aria' })).not.toBeInTheDocument()
+    await fireEvent.click(getByRole('radio', { name: 'dashboard.limit.type_time' }))
+    expect(getByRole('slider', { name: 'dashboard.limit.type_time' })).toBeInTheDocument()
+    expect(getByRole('radio', { name: 'dashboard.limit.type_energy' }).querySelector('[data-active-dot]')).toBeTruthy()
   })
 
-  it('hides the clear button (and the set button) when not clearable', () => {
-    const { getByText, queryByLabelText, queryByText } = render(ChargeLimitCard, {
-      props: {
-        hasSoc: false,
-        limit: { type: 'energy', value: 10000 },
-        summary: '10 kWh',
-        clearable: false,
-      },
+  it('forwards SOC/Range pill picks to onunit', async () => {
+    const onunit = vi.fn()
+    const { getByRole } = render(ChargeLimitCard, { props: { ...vehicle, onunit } })
+    await fireEvent.click(getByRole('radio', { name: 'dashboard.limit.type_range' }))
+    expect(onunit).toHaveBeenCalledWith('range')
+    await fireEvent.click(getByRole('radio', { name: 'dashboard.limit.type_soc' }))
+    expect(onunit).toHaveBeenCalledWith('percent')
+  })
+
+  it('emits onlimit with device units from the inline editors', async () => {
+    const onlimit = vi.fn()
+    const { getByRole } = render(ChargeLimitCard, { props: { hasSoc: false, onlimit } })
+    const slider = getByRole('slider', { name: 'dashboard.limit.type_time' })
+    slider.value = '120'
+    await fireEvent.change(slider)
+    expect(onlimit).toHaveBeenCalledWith({ type: 'time', value: 120 })
+  })
+
+  it('disables only the active system limit editor', async () => {
+    const { getByRole } = render(ChargeLimitCard, {
+      props: { hasSoc: false, limit: { type: 'time', value: 120, auto_release: false }, systemLimit: true },
     })
-    expect(getByText('10 kWh')).toBeInTheDocument() // summary still shows
+    expect(getByRole('slider', { name: 'dashboard.limit.type_time' })).toBeDisabled()
+    await fireEvent.click(getByRole('radio', { name: 'dashboard.limit.type_energy' }))
+    expect(getByRole('slider', { name: 'dashboard.limit.type_energy' })).not.toBeDisabled()
+  })
+
+  it('has no clear button, set button, or modal trigger', () => {
+    const { queryByLabelText, queryByText } = render(ChargeLimitCard, {
+      props: { ...vehicle, limit: { type: 'energy', value: 10000, auto_release: true } },
+    })
     expect(queryByLabelText('dashboard.limit.clear')).not.toBeInTheDocument()
     expect(queryByText('dashboard.limit.set')).not.toBeInTheDocument()
   })
