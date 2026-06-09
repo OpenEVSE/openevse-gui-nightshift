@@ -57,7 +57,8 @@ the Behaviour and Sensor sections:
   - range → km or miles label per `mqtt_vehicle_range_miles` (min 0, step 10)
 - **Saving** — both keys in one write via the existing `form.saveFields`:
   - changing type to a concrete kind: `{ limit_default_type: t,
-    limit_default_value: v }` (keep the current value if one exists, else 0)
+    limit_default_value: 0 }` — the value resets on type change because units
+    differ per type (matches gui-v2); the user then enters the value
   - changing the value: `{ limit_default_value: v }` (converted for energy)
   - choosing None: `{ limit_default_type: 'none' }`
 - Follows the page's existing FormField/save-state idiom; no modal.
