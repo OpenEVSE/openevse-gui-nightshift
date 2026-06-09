@@ -49,28 +49,25 @@
     onchange(kind === 'time' ? v : v * 1000)
   }
 
-  // The scale is inset ~7% from each rail, so the pin and pill never hang off
-  // the rounded track ends at 0 or max. (The SOC bar gets the same at-rest
-  // look because its knob parks at the vehicle-limit ceiling on release; here
-  // 0 and max are real, committable values, so the whole scale pads instead —
-  // every value stays reachable and the inset input keeps finger↔pin 1:1.)
-  const INSET = 7
-  const ZONE = 100 - 2 * INSET
-  let posPct = $derived(INSET + (current / max) * ZONE)
-  // Progress toward the limit, in track percent within the inset zone —
-  // capped at the limit so the fill meets the pin exactly when it trips.
-  let fillW = $derived.by(() => {
+  // Progress toward the limit (display-unit fraction of the bar, capped at
+  // the knob so the fill meets the pin exactly when the limit trips).
+  let fillPct = $derived.by(() => {
     if (!active || display === 0) return 0
     const prog = kind === 'time' ? progress / 60 : progress / 1000
-    return (Math.min(display, prog) / max) * ZONE
+    return (Math.min(display, prog) / max) * 100
   })
+  let knobPct = $derived((current / max) * 100)
   let knobOpacity = $derived(current === 0 ? 0.55 : 1)
   let remaining = $derived.by(() => {
     if (!active) return ''
     if (kind === 'time') return hmsShort(Math.max(0, value * 60 - progress))
     return `${(Math.max(0, value - progress) / 1000).toFixed(1)} ${$_('units.kwh')}`
   })
-  let pillShift = $derived(Math.min(90, Math.max(10, posPct)))
+  // Same mechanism as the SOC bar, but clamped tighter (20/80 vs 10/90): the
+  // stem sits pillShift% across the pill's own width, and these pills are
+  // narrow ("0:00"), so 10% of pill width is less than half the stem — the
+  // stem would poke out of the pill's edge at the rails.
+  let pillShift = $derived(Math.min(80, Math.max(20, knobPct)))
 </script>
 
 <div>
@@ -97,13 +94,11 @@
       <div class="absolute inset-0 rounded-full bg-surface-3"></div>
       <div
         data-fill
-        class="absolute inset-y-0 rounded-full {charging && active
+        class="absolute inset-y-0 left-0 rounded-l-full {charging && active
           ? 'soc-shimmer'
           : 'bg-gradient-to-r from-accent to-cyan-400'}"
-        style="left: {INSET}%; width: {fillW}%"
+        style="width: {fillPct}%"
       ></div>
-      <!-- the input spans only the inset zone so the thumb position and the
-           rendered pin agree across the whole drag -->
       <input
         type="range"
         min="0"
@@ -114,19 +109,19 @@
         aria-label={$_(kind === 'time' ? 'dashboard.limit.type_time' : 'dashboard.limit.type_energy')}
         oninput={handleInput}
         onchange={handleChange}
-        class="absolute inset-y-0 h-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
-        style="left: {INSET}%; width: {ZONE}%"
+        class="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
       />
     </div>
 
     <!-- knob pin + value pill (one opacity layer, like the SOC bar) -->
     <div class="pointer-events-none absolute inset-0" style="opacity: {knobOpacity}">
-      <div data-knob class="absolute top-[28px] w-0" style="left: {posPct}%">
+      <div data-knob class="absolute top-[28px] w-0" style="left: {knobPct}%">
         <div class="absolute -top-2.5 left-1/2 h-[48px] w-2.5 -translate-x-1/2 rounded-b-[3px] bg-text"></div>
       </div>
       <div
+        data-pill
         class="absolute top-0 rounded-md border border-text bg-surface px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap text-text"
-        style="left: {posPct}%; transform: translateX(-{pillShift}%)"
+        style="left: {knobPct}%; transform: translateX(-{pillShift}%)"
       >
         {fmt(current)}
       </div>

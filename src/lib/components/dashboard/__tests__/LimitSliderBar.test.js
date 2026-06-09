@@ -61,11 +61,9 @@ describe('LimitSliderBar', () => {
       props: { kind: 'energy', value: 5000, progress: 9000, charging: true },
     })
     const fill = over.container.querySelector('[data-fill]')
-    // The scale is inset 7% from each rail (86% usable zone). A 5 kWh limit on
-    // the 100 kWh scale puts the knob 5% into that zone; over-delivered
-    // progress caps the fill AT the knob, never past it.
-    expect(fill.style.left).toBe('7%')
-    expect(fill.style.width).toBe(`${(5 / 100) * 86}%`)
+    // 5 kWh limit = knob at 5% of the 100 kWh track; over-delivered progress
+    // caps the fill AT the knob, never past it.
+    expect(fill.style.width).toBe('5%')
     const none = render(LimitSliderBar, { props: { kind: 'energy', value: 0, progress: 9000 } })
     expect(none.container.querySelector('[data-fill]').style.width).toBe('0%')
   })
@@ -91,10 +89,12 @@ describe('LimitSliderBar', () => {
     expect(container.querySelector('[data-fill]').style.width).toBe('0%')
   })
 
-  it('insets the rendered knob ~7% from the rails (commits still span 0..max)', () => {
+  it('keeps the stem inside the narrow value pill at the rails (SOC-bar pillShift, clamped tighter)', () => {
     const zero = render(LimitSliderBar, { props: { kind: 'time', value: 0 } })
-    expect(zero.container.querySelector('[data-knob]').style.left).toBe('7%')
+    expect(zero.container.querySelector('[data-knob]').style.left).toBe('0%') // pin spans the full track
+    expect(zero.container.querySelector('[data-pill]').style.transform).toBe('translateX(-20%)')
     const full = render(LimitSliderBar, { props: { kind: 'time', value: 480 } })
-    expect(full.container.querySelector('[data-knob]').style.left).toBe('93%')
+    expect(full.container.querySelector('[data-knob]').style.left).toBe('100%')
+    expect(full.container.querySelector('[data-pill]').style.transform).toBe('translateX(-80%)')
   })
 })
