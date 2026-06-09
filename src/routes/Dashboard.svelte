@@ -49,6 +49,11 @@
 
   let socRangeLimit = $derived($limit_store?.type === 'soc' || $limit_store?.type === 'range')
 
+  // A default limit applied by the firmware (config limit_default_*) reports
+  // auto_release: false on /limit — it's config-driven, so the dashboard
+  // shows it but offers no way to delete it.
+  let systemLimit = $derived($limit_store?.auto_release === false)
+
   let claimOwner = $derived($claims_target_store?.claims?.state)
   // A reached charge limit grabs the state-claim to stop charging. Unlike OCPP
   // or RFID it's the user's own setting, not an external authority — so we don't
@@ -181,7 +186,8 @@
         ok = await serialQueue.add(() => override_store.upload(data))
         // Forcing On past a reached limit: the limit claim outranks manual, so
         // the override alone won't resume — clear the tripped limit too.
-        if (ok && seg === 'on' && limitTripped) {
+        // A system limit can't be cleared (the firmware would reapply it).
+        if (ok && seg === 'on' && limitTripped && !systemLimit) {
           ok = await serialQueue.add(() => limit_store.remove())
         }
       } else {
@@ -270,7 +276,14 @@
     try {
       let ok
       if (pct >= socCeiling(vehicleLimit)) {
-        ok = barLimitActive ? await serialQueue.add(() => limit_store.remove()) : true
+        if (barLimitActive && systemLimit) {
+          // A system (default) limit can't be cleared from the bar — snap the
+          // knob back to the configured limit instead of deleting it.
+          socNonce++
+          ok = true
+        } else {
+          ok = barLimitActive ? await serialQueue.add(() => limit_store.remove()) : true
+        }
       } else {
         const data =
           limitUnit === 'range' && Number.isFinite(maxRange)
@@ -495,6 +508,7 @@
           unit={limitUnit}
           estMaxRange={maxRange}
           disabled={busy}
+          clearable={!systemLimit}
           ontarget={setTarget}
           onunit={(u) => (userUnit = u)}
           limit={$limit_store}

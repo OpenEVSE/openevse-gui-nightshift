@@ -198,4 +198,31 @@ describe('Dashboard', () => {
     // two column wrappers that dissolve on mobile
     expect(container.querySelectorAll('section > [class*="max-lg:contents"]')).toHaveLength(2)
   })
+
+  it('hides the limit clear button for a system (default) limit', () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    limit_store.set({ type: 'energy', value: 10000, auto_release: false })
+    const { queryByLabelText, getByText } = render(Dashboard)
+    expect(getByText('dashboard.limit.label')).toBeDefined() // row renders (sanity)
+    expect(queryByLabelText('dashboard.limit.clear')).not.toBeInTheDocument()
+  })
+
+  it('keeps the limit clear button for a user limit', () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    limit_store.set({ type: 'energy', value: 10000, auto_release: true })
+    const { getByLabelText } = render(Dashboard)
+    expect(getByLabelText('dashboard.limit.clear')).toBeInTheDocument()
+  })
+
+  it('does not DELETE a system limit when forcing On past a trip', async () => {
+    status_store.set({ state: 254, total_day: 0, total_energy: 0 })
+    claims_target_store.set({ properties: {}, claims: { state: EvseClients.limit.id } })
+    limit_store.set({ type: 'energy', value: 10000, auto_release: false })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.mode.on'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalled() // the override write happened
+    })
+    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
+  })
 })
