@@ -41,22 +41,9 @@ describe('VehicleSocBar', () => {
     expect(getByText('206 units.km')).toBeInTheDocument()
   })
 
-  it('shows the unit toggle only when estMaxRange is known', () => {
-    const withRange = render(VehicleSocBar, { props: { ...base, estMaxRange: 278 } })
-    expect(withRange.getByRole('group', { name: 'dashboard.vehicle.unit_aria' })).toBeInTheDocument()
-    cleanup()
-    const noRange = render(VehicleSocBar, { props: { ...base } })
-    expect(noRange.queryByRole('group', { name: 'dashboard.vehicle.unit_aria' })).not.toBeInTheDocument()
-  })
-
-  it('emits onunit when a unit button is clicked', async () => {
-    const onunit = vi.fn()
-    const { getByRole } = render(VehicleSocBar, {
-      props: { ...base, estMaxRange: 278, onunit },
-    })
-    // the range-unit button's accessible name is its visible text (units.km under the i18n mock)
-    await fireEvent.click(getByRole('button', { name: 'units.km' }))
-    expect(onunit).toHaveBeenCalledWith('range')
+  it('renders no unit toggle (pills own the unit)', () => {
+    const { queryByRole } = render(VehicleSocBar, { props: { ...base, estMaxRange: 278 } })
+    expect(queryByRole('group')).not.toBeInTheDocument()
   })
 
   it('colours the EVSE-limit marker red only when above the vehicle limit', () => {

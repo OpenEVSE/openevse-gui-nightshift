@@ -146,9 +146,11 @@ describe('Dashboard', () => {
   })
 
   it('uploads a range limit when committed in range mode', async () => {
+    // Range mode now follows the active limit / Range pill; the toggle is gone.
+    // Seed an active range limit so limitUnit resolves to 'range' without any toggle click.
     status_store.set({ state: 3, power: 7000, voltage: 240, amp: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0, battery_level: 74, vehicle_charge_limit: 90, battery_range: 206, time_to_full_charge: 0 })
+    limit_store.set({ type: 'range', value: 100, auto_release: true })
     const { getByRole } = render(Dashboard)
-    await fireEvent.click(getByRole('button', { name: 'units.km' })) // range-unit toggle button
     const slider = getByRole('slider', { name: 'dashboard.vehicle.target_aria' })
     slider.value = '50' // 50% of estMaxRange(206/0.74≈278.4) ≈ 139 km
     await fireEvent.change(slider)

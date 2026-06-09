@@ -14,7 +14,6 @@
     unit = 'percent',
     estMaxRange = null,
     onchange = () => {},
-    onunit = () => {},
   } = $props()
 
   // Live knob position during a drag (percent). Initialise from the prop so the
@@ -41,7 +40,6 @@
   let atRest = $derived(current >= ceiling)
   let toFull = $derived(charging ? hmsShort(timeToFull) : '')
   let rangeUnitLabel = $derived(rangeMiles ? $_('units.miles') : $_('units.km'))
-  let showUnitToggle = $derived(Number.isFinite(estMaxRange))
   let rangeMode = $derived(unit === 'range' && Number.isFinite(estMaxRange))
 
   // Format a bar percentage in the active unit: "60%" or "167 km".
@@ -82,31 +80,11 @@
 </script>
 
 <div>
-  <!-- header: info line + (when range known) the % / unit toggle -->
+  <!-- header: info line (unit selection lives in the card's pills) -->
   <div class="mb-3 flex items-center justify-between gap-2">
     <span class="min-w-0 truncate text-xs text-text">
       {progress}{#if toFull} · {$_('dashboard.vehicle.to_full', { values: { time: toFull } })}{/if}
     </span>
-    {#if showUnitToggle}
-      <div
-        role="group"
-        aria-label={$_('dashboard.vehicle.unit_aria')}
-        class="flex shrink-0 overflow-hidden rounded-full border border-border text-[10px] font-bold"
-      >
-        <button
-          type="button"
-          aria-pressed={unit === 'percent'}
-          onclick={() => onunit('percent')}
-          class="px-2 py-0.5 {unit === 'percent' ? 'bg-accent text-surface' : 'text-text-dim'}"
-        >%</button>
-        <button
-          type="button"
-          aria-pressed={unit === 'range'}
-          onclick={() => onunit('range')}
-          class="px-2 py-0.5 {unit === 'range' ? 'bg-accent text-surface' : 'text-text-dim'}"
-        >{rangeUnitLabel}</button>
-      </div>
-    {/if}
   </div>
 
   <!-- bar block — percent geometry; labels via fmt() -->

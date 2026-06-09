@@ -347,7 +347,7 @@ git commit -m "feat(dashboard): LimitSliderBar inline time/energy limit editor"
 
 Nothing else changes — `unit`, `rangeMode`, `fmt`, knob, ceiling, pin all stay.
 
-- [ ] **Step 4: Run — expect ALL PASS.** Note: `ChargeLimitCard.test.js` and `Dashboard.test.js` still pass because they never asserted the toggle.
+- [ ] **Step 4: Run — expect ALL PASS.** Note: `ChargeLimitCard.test.js` and `Dashboard.test.js` still pass because they never asserted the toggle. Correction: `Dashboard.test.js`'s "uploads a range limit when committed in range mode" test DID click the toggle; it was re-pointed in this task to seed an active range limit (`limit_store.set({ type: 'range', … })`) so range mode is established via `limitUnit` derivation rather than a button click.
 
 - [ ] **Step 5: Suite + commit**
 
