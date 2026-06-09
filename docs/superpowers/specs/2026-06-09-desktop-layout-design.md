@@ -49,7 +49,9 @@ At `lg:` the section centers at `max-w-5xl` and lays out as a two-column grid
 
 - **Left column (act):** StatusLine, PowerRing + RatePill, ThrottleBadge,
   ChargeControls.
-- **Right column (observe):** StatChips, ChargeLimitCard (SOC bar + limits).
+- **Right column (observe):** StatChips.
+- **ChargeLimitCard (SOC bar + limits):** spans the full content width below
+  the columns (`lg:col-span-2`) — the bar benefits from the horizontal room.
 - **Chart hero:** when the Labs hero is active (`dev_features` on + charging —
   the *same* gating as today, unchanged), it spans the full content width
   above the columns (`lg:col-span-2`). When Labs is off or idle, the columns
