@@ -78,8 +78,10 @@ Three touch points in `src/routes/Dashboard.svelte` (+ `ChargeLimitCard.svelte`)
    existing nonce remount). Dragging to a sub-ceiling value still posts a
    normal *user* limit, which overrides the default for the session.
 3. **Mode "On" after a tripped limit** — `setSegment('on')` currently issues
-   `DELETE /limit` when `limitTripped`; skip that when `systemLimit` (the
-   firmware would reapply a config-driven limit anyway).
+   `DELETE /limit` when `limitTripped`; skip that when `systemLimit`. Note:
+   the firmware only re-applies the config default at boot or on a config
+   write, so a DELETE would silently discard the configured limit — the
+   guard prevents a destructive action, not just a futile one.
 
 ## i18n
 
