@@ -509,7 +509,6 @@
       "target_aria": "EVSE charge limit"
     },
     "limit": {
-      "label": "Charge limit",
       "left": "left",
       "minutes": "Minutes",
       "type_soc": "SOC",

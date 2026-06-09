@@ -262,7 +262,10 @@
 
   async function clearLimit() {
     const ok = await serialQueue.add(() => limit_store.remove())
-    if (!ok) showWriteError()
+    if (!ok) {
+      showWriteError()
+      socNonce++ // remount the card so a dragged-to-zero knob reverts
+    }
   }
 
   // Snap-to-clear: a knob at/above the vehicle limit means "no limit". Below it,

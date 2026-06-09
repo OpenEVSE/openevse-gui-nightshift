@@ -509,7 +509,6 @@
       "target_aria": "EVSE töltési korlát"
     },
     "limit": {
-      "label": "Töltési korlát",
       "left": "maradt",
       "minutes": "Perc",
       "type_soc": "SOC",

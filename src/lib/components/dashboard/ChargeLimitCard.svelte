@@ -56,7 +56,7 @@
 </script>
 
 <div class="mt-3 rounded-xl bg-surface-2 px-3 py-3">
-  <div role="radiogroup" aria-label={$_('dashboard.limit.pills_aria')} class="mb-1 flex gap-1.5">
+  <div role="radiogroup" aria-label={$_('dashboard.limit.pills_aria')} class="mb-1 flex flex-wrap gap-1.5">
     {#each pills as pill}
       <button
         type="button"
