@@ -226,7 +226,7 @@ describe('Dashboard', () => {
     })
   })
 
-  it('drag-to-zero clears a user limit but never a system limit', async () => {
+  it('drag-to-zero clears a user limit', async () => {
     // user limit: DELETE goes through
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     limit_store.set({ type: 'time', value: 120, auto_release: true })
@@ -281,6 +281,22 @@ describe('Dashboard', () => {
     })
     // Flush so a (buggy) defensive DELETE would have landed.
     await new Promise((r) => setTimeout(r, 0))
+    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
+  })
+
+  it('never DELETEs a system limit from the inline editor, even if events reach it', async () => {
+    // Defense-in-depth: the active system editor is disabled and the idle
+    // editors suppress no-change commits, but the setInlineLimit guard must
+    // hold even if a change event reaches the slider (jsdom dispatches to
+    // disabled inputs; live races can too).
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    limit_store.set({ type: 'time', value: 120, auto_release: false })
+    const { getByRole } = render(Dashboard)
+    const slider = getByRole('slider', { name: 'dashboard.limit.type_time' })
+    expect(slider).toBeDisabled()
+    slider.value = '0'
+    await fireEvent.change(slider)
+    await new Promise((r) => setTimeout(r, 0)) // flush would-be DELETE microtasks
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
   })
 })

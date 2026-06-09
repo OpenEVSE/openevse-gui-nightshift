@@ -493,28 +493,28 @@
 
   <!-- SOC / charge-limit card: full content width on desktop, below the columns -->
   {#if display !== 'error'}
-      <div class="max-lg:order-6 lg:col-span-2">
-        {#key socNonce}
-          <ChargeLimitCard
-            {hasSoc}
-            soc={$status_store?.battery_level ?? 0}
-            {vehicleLimit}
-            target={socTarget}
-            range={$status_store?.battery_range ?? null}
-            rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
-            timeToFull={$status_store?.time_to_full_charge ?? 0}
-            {charging}
-            estMaxRange={maxRange}
-            disabled={busy}
-            ontarget={setTarget}
-            onunit={(u) => (userUnit = u)}
-            limit={$limit_store}
-            elapsedSec={$status_store?.session_elapsed ?? 0}
-            sessionWh={$status_store?.session_energy ?? 0}
-            {systemLimit}
-            onlimit={setInlineLimit}
-          />
-        {/key}
-      </div>
+    <div class="max-lg:order-6 lg:col-span-2">
+      {#key socNonce}
+        <ChargeLimitCard
+          {hasSoc}
+          soc={$status_store?.battery_level ?? 0}
+          {vehicleLimit}
+          target={socTarget}
+          range={$status_store?.battery_range ?? null}
+          rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
+          timeToFull={$status_store?.time_to_full_charge ?? 0}
+          {charging}
+          estMaxRange={maxRange}
+          disabled={busy}
+          ontarget={setTarget}
+          onunit={(u) => (userUnit = u)}
+          limit={$limit_store}
+          elapsedSec={$status_store?.session_elapsed ?? 0}
+          sessionWh={$status_store?.session_energy ?? 0}
+          {systemLimit}
+          onlimit={setInlineLimit}
+        />
+      {/key}
+    </div>
   {/if}
 </section>
