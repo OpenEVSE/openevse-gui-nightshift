@@ -23,6 +23,8 @@
     summary = '',
     onopen = () => {},
     onclear = () => {},
+    // false for a system (default) limit — it shows but can't be cleared here.
+    clearable = true,
   } = $props()
 
   // The compact row reflects only the non-bar limit kinds (time/energy).
@@ -58,14 +60,16 @@
       </div>
     </div>
     {#if rowActive}
-      <button
-        type="button"
-        aria-label={$_('dashboard.limit.clear')}
-        onclick={onclear}
-        class="rounded-full p-1 text-text-dim hover:text-error"
-      >
-        <Icon icon="mdi:close" size={18} />
-      </button>
+      {#if clearable}
+        <button
+          type="button"
+          aria-label={$_('dashboard.limit.clear')}
+          onclick={onclear}
+          class="rounded-full p-1 text-text-dim hover:text-error"
+        >
+          <Icon icon="mdi:close" size={18} />
+        </button>
+      {/if}
     {:else}
       <button type="button" onclick={onopen} class="text-xs font-semibold text-accent">
         + <span>{$_('dashboard.limit.set')}</span>

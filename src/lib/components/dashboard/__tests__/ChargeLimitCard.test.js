@@ -50,4 +50,18 @@ describe('ChargeLimitCard', () => {
     })
     expect(queryByRole('slider', { name: 'dashboard.vehicle.target_aria' })).not.toBeInTheDocument()
   })
+
+  it('hides the clear button (and the set button) when not clearable', () => {
+    const { getByText, queryByLabelText, queryByText } = render(ChargeLimitCard, {
+      props: {
+        hasSoc: false,
+        limit: { type: 'energy', value: 10000 },
+        summary: '10 kWh',
+        clearable: false,
+      },
+    })
+    expect(getByText('10 kWh')).toBeInTheDocument() // summary still shows
+    expect(queryByLabelText('dashboard.limit.clear')).not.toBeInTheDocument()
+    expect(queryByText('dashboard.limit.set')).not.toBeInTheDocument()
+  })
 })
