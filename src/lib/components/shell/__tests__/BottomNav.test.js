@@ -19,4 +19,12 @@ describe('BottomNav', () => {
     const { getByLabelText } = render(BottomNav, { props: { path: '/schedule' } })
     expect(getByLabelText('nav.schedule')).toHaveAttribute('aria-current', 'page')
   })
+
+  it('carries the desktop labeled-rail classes', () => {
+    const { container, getAllByRole } = render(BottomNav, { props: { path: '/' } })
+    expect(container.querySelector('nav').className).toContain('lg:w-52')
+    for (const link of getAllByRole('link')) {
+      expect(link.className).toContain('lg:flex-row')
+    }
+  })
 })

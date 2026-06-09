@@ -33,7 +33,8 @@
          pl-[env(safe-area-inset-left)]
          pr-[env(safe-area-inset-right)]
          sm:h-full sm:w-20 sm:flex-col sm:border-r sm:border-t-0
-         sm:pb-0 sm:pl-0 sm:pr-0"
+         sm:pb-0 sm:pl-0 sm:pr-0
+         lg:w-52"
 >
   {#each items as item}
     <a
@@ -42,6 +43,7 @@
       aria-current={isActive(item, path) ? 'page' : undefined}
       class="flex flex-1 flex-col items-center justify-center gap-1 text-[10px]
              sm:flex-none sm:py-4
+             lg:flex-row lg:justify-start lg:gap-3 lg:px-5 lg:py-3 lg:text-sm
              {isActive(item, path) ? 'text-accent' : 'text-text-dim'}"
     >
       <Icon icon={item.icon} size={22} />
