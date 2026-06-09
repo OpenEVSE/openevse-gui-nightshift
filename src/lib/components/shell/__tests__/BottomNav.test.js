@@ -22,7 +22,7 @@ describe('BottomNav', () => {
 
   it('carries the desktop labeled-rail classes', () => {
     const { container, getAllByRole } = render(BottomNav, { props: { path: '/' } })
-    expect(container.querySelector('nav').className).toContain('lg:w-52')
+    expect(container.querySelector('nav').className).toContain('lg:w-44')
     for (const link of getAllByRole('link')) {
       expect(link.className).toContain('lg:flex-row')
     }

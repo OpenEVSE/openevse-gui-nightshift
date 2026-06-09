@@ -35,7 +35,7 @@
          pr-[env(safe-area-inset-right)]
          sm:h-full sm:w-20 sm:flex-col sm:border-r sm:border-t-0
          sm:pb-0 sm:pl-0 sm:pr-0
-         lg:w-52"
+         lg:w-44"
 >
   <!-- Desktop rail brand: lives in the sidebar at lg (the header hides its
        copy there); a rule + breathing room separates it from the nav items. -->
