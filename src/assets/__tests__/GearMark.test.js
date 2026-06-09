@@ -14,4 +14,14 @@ describe('GearMark', () => {
     const { container } = render(GearMark)
     expect(container.querySelector('[fill="currentColor"]')).toBeInTheDocument()
   })
+
+  it('gives concurrent instances distinct mask ids', () => {
+    // Duplicate ids made every gear resolve to the FIRST mask in the document;
+    // with that copy display:none (header at lg) the keyhole rendered filled.
+    const a = render(GearMark).container.querySelector('mask').id
+    const b = render(GearMark).container.querySelector('mask').id
+    expect(a).toBeTruthy()
+    expect(b).toBeTruthy()
+    expect(a).not.toBe(b)
+  })
 })

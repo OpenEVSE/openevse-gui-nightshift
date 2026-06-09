@@ -1,13 +1,16 @@
+<script module>
+  // Module-level so concurrent instances get distinct mask ids. A per-instance
+  // fallback once handed every instance the same id when crypto.randomUUID was
+  // unavailable (non-secure origins, e.g. dev over LAN IP) — the browser then
+  // resolved all gears to the FIRST mask in the document, and if that copy sat
+  // in a display:none subtree the mask broke and the keyhole filled in.
+  let counter = 0
+</script>
+
 <script>
   let { size = 32, class: klass = '' } = $props()
 
-  let _counter = 0
-  function nextId() {
-    return `oevse-keyhole-${++_counter}`
-  }
-  const maskId = (typeof crypto !== 'undefined' && crypto.randomUUID)
-    ? `oevse-keyhole-${crypto.randomUUID()}`
-    : nextId()
+  const maskId = `oevse-keyhole-${++counter}`
 </script>
 
 <svg
