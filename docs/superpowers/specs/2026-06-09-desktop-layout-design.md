@@ -47,15 +47,14 @@ Active state remains `text-accent`; everything below `lg:` is untouched.
 At `lg:` the section centers at `max-w-5xl` and lays out as a two-column grid
 (`lg:grid lg:grid-cols-2 lg:gap-x-6 lg:items-start`):
 
-- **Left column (act):** StatusLine, PowerRing + RatePill, ThrottleBadge,
-  ChargeControls.
+- **Hero (top, spanning):** the StatusLine + PowerRing (+ RatePill) — or,
+  when the Labs hero is active (`dev_features` on + charging, the *same*
+  gating as today), the chart hero — spans the full content width above the
+  columns (`lg:col-span-2`), so the hero slot matches between states.
+- **Left column (act):** ThrottleBadge, ChargeControls.
 - **Right column (observe):** StatChips.
 - **ChargeLimitCard (SOC bar + limits):** spans the full content width below
   the columns (`lg:col-span-2`) — the bar benefits from the horizontal room.
-- **Chart hero:** when the Labs hero is active (`dev_features` on + charging —
-  the *same* gating as today, unchanged), it spans the full content width
-  above the columns (`lg:col-span-2`). When Labs is off or idle, the columns
-  render without it.
 
 Mobile DOM order must be preserved (StatusLine, ring, throttle, chips,
 controls, limit card). Column grouping is CSS-only — wrapper divs with

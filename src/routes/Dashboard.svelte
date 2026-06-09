@@ -419,37 +419,39 @@
     </div>
   {/if}
 
-  <!-- Act column: status, ring + rate, throttle, mode controls.
+  {#if !showChart}
+    <!-- Ring hero: occupies the same top-center spanning slot as the chart,
+         so the hero area matches between the two states. -->
+    <div class="max-lg:order-1 lg:col-span-2"><StatusLine {display} /></div>
+    <div class="relative max-lg:order-2 lg:col-span-2" in:fade={{ duration: 150 }}>
+      <div class="absolute right-3 top-1 z-10">
+        {#key rateNonce}
+          <RatePill
+            amps={chargeAmps}
+            min={6}
+            max={maxAmps}
+            claimedBy={rateClaimedBy}
+            disabled={busy || ecoOn || display === 'error'}
+            onchange={setChargeAmps}
+          />
+        {/key}
+      </div>
+      <PowerRing
+        {display}
+        {fill}
+        {kw}
+        maxKw={charging ? maxKw : ''}
+        reasonKey={reason.key}
+        reasonValues={reason.values}
+        faultText={getStateDesc($status_store?.state) ?? ''}
+      />
+    </div>
+  {/if}
+
+  <!-- Act column: throttle, mode controls.
        max-lg:contents dissolves the wrapper on mobile; max-lg:order-* on the
        children preserves today's visual order in the section's flex-col. -->
   <div class="max-lg:contents lg:flex lg:flex-col">
-    {#if !showChart}
-      <div class="max-lg:order-1"><StatusLine {display} /></div>
-      <div class="relative max-lg:order-2" in:fade={{ duration: 150 }}>
-        <div class="absolute right-3 top-1 z-10">
-          {#key rateNonce}
-            <RatePill
-              amps={chargeAmps}
-              min={6}
-              max={maxAmps}
-              claimedBy={rateClaimedBy}
-              disabled={busy || ecoOn || display === 'error'}
-              onchange={setChargeAmps}
-            />
-          {/key}
-        </div>
-        <PowerRing
-          {display}
-          {fill}
-          {kw}
-          maxKw={charging ? maxKw : ''}
-          reasonKey={reason.key}
-          reasonValues={reason.values}
-          faultText={getStateDesc($status_store?.state) ?? ''}
-        />
-      </div>
-    {/if}
-
     <div class="max-lg:order-3"><ThrottleBadge /></div>
 
     <!-- Unified charge controls: segmented mode + Shaper/Boost modifiers.
