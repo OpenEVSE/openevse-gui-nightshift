@@ -428,7 +428,9 @@
     "schedule": "Planificateur",
     "monitoring": "Supervision",
     "history": "Historique",
-    "notfound": "Page introuvable"
+    "notfound": "Page introuvable",
+    "notfound_body": "Cette page n'existe pas — elle a peut-être été déplacée dans cette version de l'interface.",
+    "notfound_home": "Aller à l'accueil"
   },
   "days": {
     "monday": "Lundi",

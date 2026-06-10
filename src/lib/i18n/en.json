@@ -428,7 +428,9 @@
     "schedule": "Schedule",
     "monitoring": "Monitoring",
     "history": "History",
-    "notfound": "Page not found"
+    "notfound": "Page not found",
+    "notfound_body": "That page does not exist — it may have moved in this version of the UI.",
+    "notfound_home": "Go to Home"
   },
   "days": {
     "monday": "Monday",

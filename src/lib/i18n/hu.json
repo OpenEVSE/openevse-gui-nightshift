@@ -428,7 +428,9 @@
     "schedule": "Ütemező",
     "monitoring": "Megfigyelés",
     "history": "Történet",
-    "notfound": "Az oldal nem található"
+    "notfound": "Az oldal nem található",
+    "notfound_body": "Ez az oldal nem létezik — lehet, hogy átkerült a felület ezen verziójában.",
+    "notfound_home": "Ugrás a kezdőlapra"
   },
   "days": {
     "monday": "Hétfő",

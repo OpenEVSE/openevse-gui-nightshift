@@ -63,4 +63,20 @@ routes['/settings/certificates'] = Certificates
 routes['/settings/terminal'] = Terminal
 routes['/settings/about'] = About
 
+// Hash routes from the previous UI mapped to their new homes, so bookmarks
+// and already-open tabs land on the right page after a firmware update
+// instead of a 404. Two pages were renamed; the rest moved
+// /configuration/* -> /settings/*.
+export const LEGACY_ROUTES = {
+  '/configuration': '/settings',
+  '/configuration/selfproduction': '/settings/solar',
+  '/configuration/dev': '/settings/terminal',
+}
+for (const page of [
+  'safety', 'evse', 'mqtt', 'http', 'ocpp', 'network', 'firmware', 'time',
+  'shaper', 'vehicle', 'emoncms', 'ohmconnect', 'about', 'certificates',
+]) {
+  LEGACY_ROUTES['/configuration/' + page] = '/settings/' + page
+}
+
 export { NotFound }

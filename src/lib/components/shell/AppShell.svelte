@@ -1,6 +1,6 @@
 <script>
   import { currentPath } from '../../router.js'
-  import { routes, NotFound } from '../../routes.js'
+  import { routes, NotFound, LEGACY_ROUTES } from '../../routes.js'
   import { status_store } from '../../stores/status.js'
   import { uistates_store } from '../../stores/uistates.js'
   import Router from '../Router.svelte'
@@ -33,7 +33,7 @@
          of letting `overflow-y-auto` promote overflow-x to a bottom scrollbar.
          min-w-0 lets this column shrink in the sm+ sidebar (row) layout. -->
     <main bind:this={mainEl} class="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-      <Router {routes} fallback={NotFound} />
+      <Router {routes} fallback={NotFound} aliases={LEGACY_ROUTES} />
     </main>
   </div>
   <BottomNav path={$currentPath} {deviceName} />

@@ -428,7 +428,9 @@
     "schedule": "Programación",
     "monitoring": "Monitorización",
     "history": "Historial",
-    "notfound": "Página no encontrada"
+    "notfound": "Página no encontrada",
+    "notfound_body": "Esa página no existe — puede que se haya movido en esta versión de la interfaz.",
+    "notfound_home": "Ir al inicio"
   },
   "days": {
     "monday": "Lunes",
