@@ -20,4 +20,17 @@ describe('PowerRing', () => {
     const { getByText } = render(PowerRing, { props: { display: 'idle', fill: 0 } })
     expect(getByText(/^dashboard\.ring\.ready$/)).toBeInTheDocument()
   })
+  it('stacks an emphasized detail line under the reason when sleeping', () => {
+    const { getByText } = render(PowerRing, {
+      props: {
+        display: 'sleeping',
+        reasonKey: 'dashboard.reason.timer',
+        reasonValues: { since: '14:00' },
+        reasonDetail: { key: 'dashboard.reason.timer_on', values: { at: '08:00' } },
+      },
+    })
+    expect(getByText('dashboard.reason.timer')).toBeInTheDocument()
+    const detail = getByText('dashboard.reason.timer_on')
+    expect(detail.className).toContain('font-semibold')
+  })
 })

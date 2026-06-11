@@ -493,7 +493,8 @@
       "waiting": "En attente · {time}",
       "not_charging": "Pas de charge",
       "limit_reached": "Limite de charge atteinte · {value}",
-      "timer": "Minuterie · arrêt depuis {since} · marche à {at}",
+      "timer": "Minuterie · arrêt depuis {since}",
+      "timer_on": "marche à {at}",
       "eco_waiting": "Éco · en attente de surplus",
       "ocpp": "Contrôlé par OCPP",
       "rfid": "En attente du badge RFID"

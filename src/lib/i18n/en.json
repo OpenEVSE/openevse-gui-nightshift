@@ -493,7 +493,8 @@
       "waiting": "Waiting · {time}",
       "not_charging": "Not charging",
       "limit_reached": "Charge limit reached · {value}",
-      "timer": "Timer · off since {since} · on at {at}",
+      "timer": "Timer · off since {since}",
+      "timer_on": "on at {at}",
       "eco_waiting": "Eco · waiting for surplus power",
       "ocpp": "Controlled by OCPP",
       "rfid": "Waiting for RFID card"

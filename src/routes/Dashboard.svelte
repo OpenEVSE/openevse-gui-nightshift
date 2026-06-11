@@ -464,6 +464,7 @@
         maxKw={charging ? maxKw : ''}
         reasonKey={reason.key}
         reasonValues={reason.values}
+        reasonDetail={reason.detail ?? null}
         faultText={getStateDesc($status_store?.state) ?? ''}
       />
     </div>

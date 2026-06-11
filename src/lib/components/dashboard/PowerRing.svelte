@@ -9,6 +9,8 @@
     maxKw = '',
     reasonKey = '',
     reasonValues = {},
+    // optional emphasized second line under the reason (e.g. the timer's resume time)
+    reasonDetail = null,
     faultText = '',
   } = $props()
 
@@ -84,6 +86,11 @@
             <div class="px-7 text-center text-[11px] leading-tight text-text-dim">
               {$_(reasonKey, { values: reasonValues })}
             </div>
+            {#if reasonDetail}
+              <div class="mt-0.5 text-center text-xs font-semibold leading-tight text-text">
+                {$_(reasonDetail.key, { values: reasonDetail.values })}
+              </div>
+            {/if}
           </div>
         {/if}
       </div>
@@ -101,6 +108,11 @@
             <div class="px-7 text-center text-[11px] leading-tight text-text-dim">
               {$_(reasonKey, { values: reasonValues })}
             </div>
+            {#if reasonDetail}
+              <div class="mt-0.5 text-center text-xs font-semibold leading-tight text-text">
+                {$_(reasonDetail.key, { values: reasonDetail.values })}
+              </div>
+            {/if}
           </div>
         {/if}
       </div>

@@ -65,7 +65,13 @@ export function connectedReason(mode, plan, owner = '') {
     // went off and when it comes back, or just the next flip if the device
     // didn't report a current event.
     if (cur?.time) {
-      return { key: 'dashboard.reason.timer', values: { since: hhmm(cur.time), at: hhmm(next.time) } }
+      // Two lines: dim context ("Timer · off since …") over an emphasized
+      // resume time — the actionable fact when you're standing at the charger.
+      return {
+        key: 'dashboard.reason.timer',
+        values: { since: hhmm(cur.time) },
+        detail: { key: 'dashboard.reason.timer_on', values: { at: hhmm(next.time) } },
+      }
     }
     return { key: 'dashboard.reason.waiting', values: { time: hhmm(next.time) } }
   }

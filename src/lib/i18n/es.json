@@ -493,7 +493,8 @@
       "waiting": "Esperando · {time}",
       "not_charging": "Sin carga",
       "limit_reached": "Límite de carga alcanzado · {value}",
-      "timer": "Temporizador · apagado desde {since} · enciende a las {at}",
+      "timer": "Temporizador · apagado desde {since}",
+      "timer_on": "enciende a las {at}",
       "eco_waiting": "Eco · esperando excedente",
       "ocpp": "Controlado por OCPP",
       "rfid": "Esperando tarjeta RFID"
