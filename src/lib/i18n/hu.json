@@ -481,11 +481,22 @@
       "off": "Kikapcsolva",
       "fault": "HIBA"
     },
+    "flows": {
+      "house_load": "Házi terhelés",
+      "available": "Elérhető",
+      "solar": "Napelem",
+      "grid": "Hálózat",
+      "charge_rate": "Töltési sebesség"
+    },
     "reason": {
       "off": "Váltson Auto vagy Be módra",
       "waiting": "Várakozás · {time}",
       "not_charging": "Nem tölt",
-      "limit_reached": "Töltési korlát elérve · {value}"
+      "limit_reached": "Töltési korlát elérve · {value}",
+      "timer": "Időzítő · ki {since} óta · be {at}-kor",
+      "eco_waiting": "Eco · többlet energiára vár",
+      "ocpp": "OCPP vezérlés alatt",
+      "rfid": "RFID kártyára vár"
     },
     "kw_max": "max {max} kW-ból",
     "chips": {
@@ -526,6 +537,7 @@
       "label": "Boost",
       "title": "Gyors töltés",
       "body": "Erőltetett töltés a kiválasztott időtartamra. A töltés automatikusan leáll, amikor lejár az idő.",
+      "note": "A visszaszámlálás ebben a böngészőlapban fut — ha boost közben bezárja vagy újratölti, a töltés bekapcsolva marad, amíg át nem váltja a módot.",
       "minutes": "{n} perc",
       "hour": "1 óra",
       "cancel": "Mégse",

@@ -73,4 +73,32 @@ describe('connectedReason', () => {
   it('generic not_charging otherwise', () => {
     expect(connectedReason(0, null).key).toBe('dashboard.reason.not_charging')
   })
+  it('names the timer window when the scheduler holds the claim', () => {
+    const plan = {
+      current_event: { state: 'disabled', time: '06:25' },
+      next_event: { state: 'active', time: '22:50' },
+    }
+    const r = connectedReason(0, plan, 'timer')
+    expect(r.key).toBe('dashboard.reason.timer')
+    expect(r.values).toEqual({ since: '06:25', at: '22:50' })
+  })
+  it('falls back to waiting when the timer claim has no current event', () => {
+    const plan = { current_event: false, next_event: { state: 'active', time: '22:50' } }
+    const r = connectedReason(0, plan, 'timer')
+    expect(r.key).toBe('dashboard.reason.waiting')
+    expect(r.values.time).toBe('22:50')
+  })
+  it('does not use the timer window when the next flip is a disable', () => {
+    const plan = {
+      current_event: { state: 'active', time: '22:50' },
+      next_event: { state: 'disabled', time: '06:25' },
+    }
+    const r = connectedReason(0, plan, 'timer')
+    expect(r.key).toBe('dashboard.reason.waiting')
+  })
+  it('names eco, ocpp and rfid claim owners', () => {
+    expect(connectedReason(0, null, 'divert').key).toBe('dashboard.reason.eco_waiting')
+    expect(connectedReason(0, null, 'ocpp').key).toBe('dashboard.reason.ocpp')
+    expect(connectedReason(0, null, 'rfid').key).toBe('dashboard.reason.rfid')
+  })
 })

@@ -50,10 +50,25 @@ export function ringFill(status, config, limit) {
 
 /**
  * Why the EVSE is connected-but-not-charging.
- * mode: 0 Auto, 1 On, 2 Off. Returns an i18n key + interpolation values.
+ * mode: 0 Auto, 1 On, 2 Off. `owner` is the EvseClients name holding the
+ * state claim ('' when none) — it names who switched charging off.
+ * Returns an i18n key + interpolation values.
  */
-export function connectedReason(mode, plan) {
+export function connectedReason(mode, plan, owner = '') {
+  const cur = plan?.current_event
   const next = plan?.next_event
+  if (owner === 'timer' && next?.time && next.state === 'active') {
+    // The scheduler switched charging off. Spell out the window: when it
+    // went off and when it comes back, or just the next flip if the device
+    // didn't report a current event.
+    if (cur?.time) {
+      return { key: 'dashboard.reason.timer', values: { since: cur.time, at: next.time } }
+    }
+    return { key: 'dashboard.reason.waiting', values: { time: next.time } }
+  }
+  if (owner === 'divert') return { key: 'dashboard.reason.eco_waiting', values: {} }
+  if (owner === 'ocpp') return { key: 'dashboard.reason.ocpp', values: {} }
+  if (owner === 'rfid') return { key: 'dashboard.reason.rfid', values: {} }
   if (next && next.time) {
     return { key: 'dashboard.reason.waiting', values: { time: next.time } }
   }

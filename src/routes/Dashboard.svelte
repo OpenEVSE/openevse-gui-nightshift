@@ -18,12 +18,13 @@
   import { formatCost } from '../lib/cost.js'
   import { showWriteError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason } from '../lib/dashboard/state.js'
-  import { socCeiling, estMaxRange } from '../lib/dashboard/soc.js'
+  import { socCeiling, estMaxRange, hmsShort } from '../lib/dashboard/soc.js'
 
   import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
   import ChargingHero from '../lib/components/dashboard/ChargingHero.svelte'
   import StatChips from '../lib/components/dashboard/StatChips.svelte'
+  import ShaperDivertRow from '../lib/components/dashboard/ShaperDivertRow.svelte'
   import ThrottleBadge from '../lib/components/dashboard/ThrottleBadge.svelte'
   import { selectedSegment } from '../lib/dashboard/controls.js'
   import ChargeControls from '../lib/components/dashboard/ChargeControls.svelte'
@@ -60,7 +61,7 @@
   let reason = $derived(
     limitTripped
       ? { key: 'dashboard.reason.limit_reached', values: { value: formatLimit($limit_store) } }
-      : connectedReason(mode, $plan_store),
+      : connectedReason(mode, $plan_store, claimOwner ? clientid2name(claimOwner) : ''),
   )
 
   let kw = $derived((($status_store?.power ?? 0) / 1000).toFixed(1))
@@ -78,6 +79,8 @@
     temp: tempDisplay.value,
     tempUnit: tempDisplay.unitKey,
     pilotA: $status_store?.pilot ?? 0,
+    // Vehicle charge ETA (MQTT topic) — '' when the topic isn't configured.
+    toFull: hmsShort($status_store?.time_to_full_charge ?? 0),
   })
   let summary = $derived({
     todayKwh: round($status_store?.total_day ?? 0, 1),
@@ -491,7 +494,10 @@
 
   <!-- Observe column: stat chips -->
   <div class="max-lg:contents lg:flex lg:flex-col">
-    <div class="max-lg:order-4"><StatChips {charging} {live} {summary} {sessionCost} /></div>
+    <div class="max-lg:order-4">
+      <StatChips {charging} {live} {summary} {sessionCost} />
+      <ShaperDivertRow />
+    </div>
   </div>
 
   <!-- SOC / charge-limit card: full content width on desktop, below the columns -->

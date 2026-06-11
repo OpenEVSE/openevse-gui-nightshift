@@ -481,11 +481,22 @@
       "off": "Off",
       "fault": "FAULT"
     },
+    "flows": {
+      "house_load": "House load",
+      "available": "Available",
+      "solar": "Solar",
+      "grid": "Grid",
+      "charge_rate": "Charge rate"
+    },
     "reason": {
       "off": "Switch to Auto or On",
       "waiting": "Waiting · {time}",
       "not_charging": "Not charging",
-      "limit_reached": "Charge limit reached · {value}"
+      "limit_reached": "Charge limit reached · {value}",
+      "timer": "Timer · off since {since} · on at {at}",
+      "eco_waiting": "Eco · waiting for surplus power",
+      "ocpp": "Controlled by OCPP",
+      "rfid": "Waiting for RFID card"
     },
     "kw_max": "of {max} kW max",
     "chips": {
@@ -526,6 +537,7 @@
       "label": "Boost",
       "title": "Boost charge",
       "body": "Force charging now for the selected duration. Charging stops automatically when the time is up.",
+      "note": "The countdown runs in this browser tab — if you close or reload it mid-boost, charging stays on until you change the mode yourself.",
       "minutes": "{n} min",
       "hour": "1 hr",
       "cancel": "Cancel",

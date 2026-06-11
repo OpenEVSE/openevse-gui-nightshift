@@ -77,7 +77,8 @@
 
 <Modal visible={open} closable={true} onclose={() => (open = false)}>
   <h2 class="mb-2 text-base font-semibold text-text">{$_('dashboard.boost.title')}</h2>
-  <p class="mb-4 text-sm text-text-dim">{$_('dashboard.boost.body')}</p>
+  <p class="mb-2 text-sm text-text-dim">{$_('dashboard.boost.body')}</p>
+  <p class="mb-4 text-xs text-text-dim">{$_('dashboard.boost.note')}</p>
   <div class="grid grid-cols-3 gap-2">
     {#each PRESETS as p}
       <Button

@@ -481,11 +481,22 @@
       "off": "Arrêté",
       "fault": "DÉFAUT"
     },
+    "flows": {
+      "house_load": "Consommation maison",
+      "available": "Disponible",
+      "solar": "Solaire",
+      "grid": "Réseau",
+      "charge_rate": "Courant de charge"
+    },
     "reason": {
       "off": "Passer en Auto ou Marche",
       "waiting": "En attente · {time}",
       "not_charging": "Pas de charge",
-      "limit_reached": "Limite de charge atteinte · {value}"
+      "limit_reached": "Limite de charge atteinte · {value}",
+      "timer": "Minuterie · arrêt depuis {since} · marche à {at}",
+      "eco_waiting": "Éco · en attente de surplus",
+      "ocpp": "Contrôlé par OCPP",
+      "rfid": "En attente du badge RFID"
     },
     "kw_max": "sur {max} kW max",
     "chips": {
@@ -526,6 +537,7 @@
       "label": "Boost",
       "title": "Charge boost",
       "body": "Force la charge pendant la durée choisie. La charge s'arrête automatiquement à la fin.",
+      "note": "Le compte à rebours s'exécute dans cet onglet du navigateur — si vous le fermez ou le rechargez pendant le boost, la charge reste active jusqu'à ce que vous changiez de mode.",
       "minutes": "{n} min",
       "hour": "1 h",
       "cancel": "Annuler",

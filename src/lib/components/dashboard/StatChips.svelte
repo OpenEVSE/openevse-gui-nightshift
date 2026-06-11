@@ -14,7 +14,11 @@
   {#if charging}
     <div class="grid grid-cols-3 gap-2 py-2">
       <StatChip value={live.sessionKwh} label={$_('dashboard.chips.session')} sub={sessionCost} />
-      <StatChip value={live.elapsed} label={$_('dashboard.chips.elapsed')} />
+      <StatChip
+        value={live.elapsed}
+        label={$_('dashboard.chips.elapsed')}
+        sub={live.toFull ? $_('dashboard.vehicle.to_full', { values: { time: live.toFull } }) : null}
+      />
       <StatChip value={`${live.currentA} A`} label={$_('dashboard.chips.current')} />
     </div>
     <!-- Sensor trio: compact underlined row on mobile; at lg it joins the

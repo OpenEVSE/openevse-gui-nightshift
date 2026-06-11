@@ -21,6 +21,18 @@ describe('StatChips', () => {
     expect(getByText('12.30')).toBeInTheDocument()
     expect(getByText('01:42:09')).toBeInTheDocument()
   })
+  it('shows the charge ETA under the elapsed chip when present', () => {
+    const { getByText } = render(StatChips, {
+      props: { charging: true, live: { ...live, toFull: '1h 20m' }, summary },
+    })
+    expect(getByText('dashboard.vehicle.to_full')).toBeInTheDocument()
+  })
+  it('omits the charge ETA when the topic is absent', () => {
+    const { queryByText } = render(StatChips, {
+      props: { charging: true, live: { ...live, toFull: '' }, summary },
+    })
+    expect(queryByText('dashboard.vehicle.to_full')).toBeNull()
+  })
   it('shows the today/total summary when not charging', () => {
     const { getByText } = render(StatChips, { props: { charging: false, live, summary } })
     expect(getByText('3.2')).toBeInTheDocument()
