@@ -8,6 +8,7 @@
     value = 0,
     disabled = false,
     onchange = () => {},
+    oninput = () => {},
     format = (v) => v,
     ariaLabel = '',
   } = $props()
@@ -19,6 +20,7 @@
 
   function handleInput(e) {
     current = Number(e.currentTarget.value)
+    oninput(current)
   }
   function handleChange(e) {
     onchange(Number(e.currentTarget.value))

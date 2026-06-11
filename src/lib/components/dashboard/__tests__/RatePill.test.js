@@ -25,6 +25,17 @@ describe('RatePill', () => {
     expect(onchange).toHaveBeenCalledWith(20)
   })
 
+  it('tracks the drag value live in the header before release', async () => {
+    const { getByRole, getAllByText, queryByText } = render(RatePill, { props: { amps: 25, max: 32 } })
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    const slider = getByRole('slider', { name: 'dashboard.rate.aria' })
+    slider.value = '18'
+    await fireEvent.input(slider) // drag, no release yet
+    // both the popover header and the pill button follow the drag
+    expect(getAllByText('18 A')).toHaveLength(2)
+    expect(queryByText('25 A')).toBeNull()
+  })
+
   it('does not open when disabled', async () => {
     const { getByRole, queryByRole } = render(RatePill, { props: { amps: 24, max: 48, disabled: true } })
     await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))

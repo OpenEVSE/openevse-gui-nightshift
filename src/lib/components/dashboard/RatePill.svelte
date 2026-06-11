@@ -6,6 +6,13 @@
   let { amps = 6, min = 6, max = 48, claimedBy = '', disabled = false, onchange = () => {} } = $props()
 
   let open = $state(false)
+  // Live value while the slider is being dragged (touch gives no hover
+  // tooltip, so the header must track the drag). Survives release too — the
+  // committed value only round-trips through the device after onchange, and
+  // falling back to the stale `amps` prop in the meantime reads as "it
+  // ignored me". A failed write remounts the pill (rateNonce), clearing this.
+  let liveAmps = $state(null)
+  let shown = $derived(liveAmps ?? amps)
 
   function toggle() {
     if (disabled) return
@@ -23,13 +30,21 @@
            disabled:cursor-not-allowed"
     class:opacity-40={disabled}
   >
-    <span>{amps} A</span> <span aria-hidden="true">▾</span>
+    <span>{shown} A</span> <span aria-hidden="true">▾</span>
   </button>
 
   <Popover {open} align="right" onclose={() => (open = false)}>
     <div class="w-56 rounded-xl border border-border bg-surface-2 p-3 shadow-xl">
-      <div class="mb-1 text-sm font-bold text-accent">{amps} A</div>
-      <Slider {min} {max} step={1} value={amps} ariaLabel={$_('dashboard.rate.aria')} {onchange} />
+      <div class="mb-1 text-sm font-bold text-accent">{shown} A</div>
+      <Slider
+        {min}
+        {max}
+        step={1}
+        value={amps}
+        ariaLabel={$_('dashboard.rate.aria')}
+        oninput={(v) => (liveAmps = v)}
+        {onchange}
+      />
       {#if claimedBy}
         <div class="mt-1 text-[9px] text-text-dim">
           {$_('dashboard.rate.claimed', { values: { client: claimedBy } })}
