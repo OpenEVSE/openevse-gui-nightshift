@@ -31,18 +31,21 @@ describe('ShaperDivertRow', () => {
   it('shows house load and available current when the shaper is enabled', () => {
     config.set({ current_shaper_enabled: true })
     status.set({ shaper_live_pwr: 4200, shaper_cur: 24, shaper_updated: true })
-    const { getByText, queryByText } = render(ShaperDivertRow)
+    const { getByText } = render(ShaperDivertRow)
     expect(getByText('dashboard.flows.house_load')).toBeInTheDocument()
     expect(getByText('4200 W')).toBeInTheDocument()
     expect(getByText('24 A')).toBeInTheDocument()
-    expect(queryByText('config.shaper.stale')).toBeNull()
+    expect(getByText('4200 W').parentElement.className).not.toContain('opacity-40')
   })
 
-  it('flags stale shaper data', () => {
+  it('dims the shaper readouts when the feed is stale', () => {
+    // shaper_updated flaps in normal operation — staleness fades the values
+    // in place rather than popping an error line in and out under the panel.
     config.set({ current_shaper_enabled: true })
-    status.set({ shaper_live_pwr: 0, shaper_cur: 0, shaper_updated: false })
+    status.set({ shaper_live_pwr: 260, shaper_cur: 40, shaper_updated: false })
     const { getByText } = render(ShaperDivertRow)
-    expect(getByText('config.shaper.stale')).toBeInTheDocument()
+    expect(getByText('260 W').parentElement.className).toContain('opacity-40')
+    expect(getByText('40 A').parentElement.className).toContain('opacity-40')
   })
 
   it('shows solar production and charge rate for divert type 0', () => {
