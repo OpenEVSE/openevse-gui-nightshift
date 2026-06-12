@@ -83,6 +83,16 @@ describe('connectedReason', () => {
     expect(r.values).toEqual({ since: '06:25' })
     expect(r.detail).toEqual({ key: 'dashboard.reason.timer_on', values: { at: '22:50' } })
   })
+  it('names an eco resume when the next timer event is eco', () => {
+    const plan = {
+      current_event: { state: 'disabled', time: '06:25' },
+      next_event: { state: 'eco', time: '10:00' },
+    }
+    const r = connectedReason(0, plan, 'timer')
+    expect(r.key).toBe('dashboard.reason.timer')
+    expect(r.values).toEqual({ since: '06:25' })
+    expect(r.detail).toEqual({ key: 'dashboard.reason.timer_eco', values: { at: '10:00' } })
+  })
   it('trims seconds off plan event times', () => {
     // the device reports HH:MM:SS but schedules only resolve to the minute
     const plan = {

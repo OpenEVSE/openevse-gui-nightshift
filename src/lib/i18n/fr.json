@@ -451,6 +451,7 @@
     "state": "État",
     "active": "Actif",
     "disabled": "Désactivé",
+    "eco": "Éco",
     "select_all": "Tout sélectionner",
     "clear_all": "Tout effacer",
     "save": "Sauvegarder",
@@ -495,6 +496,7 @@
       "limit_reached": "Limite de charge atteinte · {value}",
       "timer": "Minuterie · arrêt depuis {since}",
       "timer_on": "marche à {at}",
+      "timer_eco": "éco à {at}",
       "eco_waiting": "Éco · en attente de surplus",
       "ocpp": "Contrôlé par OCPP",
       "rfid": "En attente du badge RFID"
