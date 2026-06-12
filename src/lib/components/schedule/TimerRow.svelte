@@ -8,7 +8,7 @@
 
   let { timer, removing = false, disabled = false, onedit = () => {}, ondelete = () => {} } = $props()
 
-  let active = $derived(timer?.state === 'active')
+  let tstate = $derived(timer?.state)
   let chips = $derived(formatDayChips(timer?.days))
 </script>
 
@@ -18,9 +18,9 @@
       <div class="text-2xl font-extrabold text-text">{displayTime(timer?.time)}</div>
       <span
         class="mt-0.5 inline-block rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide
-               {active ? 'bg-accent/15 text-accent' : 'bg-surface-3 text-text-dim'}"
+               {tstate === 'active' ? 'bg-accent/15 text-accent' : tstate === 'eco' ? 'bg-warning/15 text-warning' : 'bg-surface-3 text-text-dim'}"
       >
-        {active ? $_('schedule.active') : $_('schedule.disabled')}
+        {tstate === 'active' ? $_('schedule.active') : tstate === 'eco' ? $_('schedule.eco') : $_('schedule.disabled')}
       </span>
     </div>
     <div class="flex flex-1 flex-wrap gap-1">

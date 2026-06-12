@@ -451,6 +451,7 @@
     "state": "Állapot",
     "active": "Aktív",
     "disabled": "Letiltva",
+    "eco": "Eco",
     "select_all": "Mindent kijelöl",
     "clear_all": "Összes törlése",
     "save": "Mentés",
@@ -495,6 +496,7 @@
       "limit_reached": "Töltési korlát elérve · {value}",
       "timer": "Időzítő · ki {since} óta",
       "timer_on": "be {at}-kor",
+      "timer_eco": "eco {at}-kor",
       "eco_waiting": "Eco · többlet energiára vár",
       "ocpp": "OCPP vezérlés alatt",
       "rfid": "RFID kártyára vár"
