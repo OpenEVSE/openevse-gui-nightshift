@@ -54,6 +54,8 @@ describe('isSecured', () => {
     expect(isSecured({ encryption: 0 })).toBe(false)
     expect(isSecured({ encryption: 'wpa2' })).toBe(true)
     expect(isSecured({ encryption: 3 })).toBe(true)
+    expect(isSecured({ secure: 0 })).toBe(false)
+    expect(isSecured({ secure: 3 })).toBe(true)
   })
   it('assumes secured when encryption is unknown', () => {
     expect(isSecured({})).toBe(true)

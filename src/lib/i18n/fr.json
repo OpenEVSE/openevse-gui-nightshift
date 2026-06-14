@@ -40,6 +40,8 @@
       "scan": "Rechercher des réseaux",
       "scanning": "Recherche en cours…",
       "scan_error": "Impossible de rechercher des réseaux.",
+      "manual": "Saisir le réseau manuellement",
+      "cancel_manual": "Annuler la saisie manuelle",
       "wifi_password": "Mot de passe WiFi",
       "connect": "Connecter",
       "connecting_btn": "Connexion…",

@@ -40,6 +40,8 @@
       "scan": "Buscar redes",
       "scanning": "Buscando…",
       "scan_error": "No se pudieron buscar redes.",
+      "manual": "Introducir la red manualmente",
+      "cancel_manual": "Cancelar la entrada manual",
       "wifi_password": "Contraseña WiFi",
       "connect": "Conectar",
       "connecting_btn": "Conectando…",

@@ -28,6 +28,8 @@
   let scanError = $state(false)
   let selected = $state(null)
   let wifiPass = $state('')
+  let manual = $state(false)
+  let manualSsid = $state('')
   let joining = $state(false)
   let joined = $state(false)
 
@@ -48,23 +50,39 @@
 
   function pickNetwork(n) {
     selected = n
+    manual = false
     wifiPass = ''
   }
 
-  async function joinWifi() {
-    if (joining || !selected) return
+  function toggleManual() {
+    manual = !manual
+    selected = null
+    wifiPass = ''
+  }
+
+  async function joinSsid(ssid) {
+    const normalizedSsid = ssid.trim()
+    if (joining || !normalizedSsid) return
     joining = true
     const ok = await serialQueue.add(() =>
-      config_store.upload({ ssid: selected.ssid, pass: wifiPass }),
+      config_store.upload({ ssid: normalizedSsid, pass: wifiPass }),
     )
     joining = false
     if (ok) {
       joined = true
       networks = []
-      onJoined(selected.ssid)
+      onJoined(normalizedSsid)
     } else {
       showWriteError()
     }
+  }
+
+  function joinWifi() {
+    if (selected) joinSsid(selected.ssid)
+  }
+
+  function joinManualWifi() {
+    joinSsid(manualSsid)
   }
 
   onMount(scanWifi)
@@ -144,5 +162,42 @@
     {:else if !scanning}
       <p class="text-sm text-text-dim">{$_('wizard.wifi.empty')}</p>
     {/if}
+
+    <div class="border-t border-border pt-4">
+      <Button
+        label={manual ? $_('config.network.cancel_manual') : $_('config.network.manual')}
+        variant="ghost"
+        disabled={joining}
+        onclick={toggleManual}
+      />
+
+      {#if manual}
+        <div class="mt-3 space-y-3">
+          <input
+            type="text"
+            placeholder={$_('config.network.ssid')}
+            aria-label={$_('config.network.ssid')}
+            value={manualSsid}
+            oninput={(e) => (manualSsid = e.currentTarget.value)}
+            class="w-full rounded-xl border border-border bg-surface-2 px-3 py-2
+                   text-sm text-text focus:border-accent focus:outline-none"
+          />
+          <input
+            type="password"
+            placeholder={$_('config.network.wifi_password')}
+            aria-label={$_('config.network.wifi_password')}
+            value={wifiPass}
+            oninput={(e) => (wifiPass = e.currentTarget.value)}
+            class="w-full rounded-xl border border-border bg-surface-2 px-3 py-2
+                   text-sm text-text focus:border-accent focus:outline-none"
+          />
+          <Button
+            label={joining ? $_('config.network.connecting_btn') : $_('config.network.connect')}
+            disabled={joining || !manualSsid.trim()}
+            onclick={joinManualWifi}
+          />
+        </div>
+      {/if}
+    </div>
   {/if}
 </div>

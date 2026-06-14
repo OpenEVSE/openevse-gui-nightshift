@@ -35,7 +35,7 @@ export function signalPercent(rssi) {
 
 /** Whether a network needs a password. Unknown encryption → assume secured. */
 export function isSecured(network) {
-  const e = network?.encryption
+  const e = network?.encryption ?? network?.secure
   if (e === undefined || e === null) return true
   if (typeof e === 'string') return !/^(none|open)$/i.test(e)
   if (typeof e === 'number') return e !== 0
