@@ -54,6 +54,17 @@ describe('Wizard route', () => {
     expect(queryByText('wizard.previous')).toBeNull()
   })
 
+  it('shows the max current value while the slider is dragged', async () => {
+    const { getByText, getByRole } = render(Wizard)
+    await fireEvent.click(getByText('wizard.next'))
+
+    const slider = getByRole('slider')
+    slider.value = '20'
+    await fireEvent.input(slider)
+
+    expect(getByText('20 A')).toBeInTheDocument()
+  })
+
   it('saves wizard_passed and stays put when finishing off the device AP', async () => {
     status_store.set({ ipaddress: '10.0.0.5' })
     const { getByText, queryByText } = render(Wizard)

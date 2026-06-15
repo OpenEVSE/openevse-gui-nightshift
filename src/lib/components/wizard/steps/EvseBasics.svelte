@@ -16,6 +16,17 @@
   const form = createConfigForm()
   const ss = form.saveState
 
+  let liveMaxCurrent = $state(null)
+  let shownMaxCurrent = $derived(
+    liveMaxCurrent ?? $config_store?.max_current_soft ?? 6,
+  )
+
+  async function saveMaxCurrent(value) {
+    liveMaxCurrent = value
+    await form.saveField('max_current_soft', value)
+    liveMaxCurrent = null
+  }
+
   let boolOptions = $derived([
     { value: 'false', label: $_('config.evse.disabled') },
     { value: 'true', label: $_('config.evse.active') },
@@ -31,14 +42,15 @@
 
   <FormField
     label={$_('config.evse.maxcurrent')}
-    description={`${$config_store?.max_current_soft ?? ''} A`}
+    description={`${shownMaxCurrent} A`}
     status={$ss.max_current_soft ?? 'idle'}
   >
     <Slider
       min={$config_store?.min_current_hard ?? 6}
       max={$config_store?.max_current_hard ?? 32}
       value={$config_store?.max_current_soft ?? 6}
-      onchange={(v) => form.saveField('max_current_soft', v)}
+      oninput={(v) => (liveMaxCurrent = v)}
+      onchange={saveMaxCurrent}
     />
   </FormField>
 
