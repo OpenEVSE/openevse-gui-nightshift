@@ -17,7 +17,7 @@ describe('BottomNav', () => {
 
   it('marks the active route with aria-current', () => {
     const { getByLabelText } = render(BottomNav, { props: { path: '/schedule' } })
-    expect(getByLabelText('nav.schedule')).toHaveAttribute('aria-current', 'page')
+    expect(getByLabelText('nav.charge_manager')).toHaveAttribute('aria-current', 'page')
   })
 
   it('carries the desktop labeled-rail classes', () => {
