@@ -40,6 +40,8 @@
       "scan": "Hálózatok keresése",
       "scanning": "Keresés…",
       "scan_error": "Nem sikerült hálózatokat keresni.",
+      "manual": "Hálózat kézi megadása",
+      "cancel_manual": "Kézi megadás megszakítása",
       "wifi_password": "WiFi jelszó",
       "connect": "Csatlakozás",
       "connecting_btn": "Csatlakozás…",

@@ -40,6 +40,8 @@
       "scan": "Scan for networks",
       "scanning": "Scanning…",
       "scan_error": "Couldn't scan for networks.",
+      "manual": "Enter network manually",
+      "cancel_manual": "Cancel manual entry",
       "wifi_password": "WiFi password",
       "connect": "Connect",
       "connecting_btn": "Connecting…",

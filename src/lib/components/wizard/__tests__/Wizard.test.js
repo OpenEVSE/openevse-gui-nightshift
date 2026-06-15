@@ -16,14 +16,18 @@ vi.mock('../../../queue.js', () => ({
 // Each step pulls in real stores / form helpers / http — stub them so the
 // route renders without an exploded dependency graph. vi.mock is hoisted,
 // so the spy has to live inside vi.hoisted to be reachable from the factory.
-const { saveParam } = vi.hoisted(() => ({
+const { saveParam, upload } = vi.hoisted(() => ({
   saveParam: vi.fn(() => Promise.resolve(true)),
+  upload: vi.fn(() => Promise.resolve(true)),
 }))
 vi.mock('../../../stores/config.js', async () => {
   const { writable } = await import('svelte/store')
   const config_store = writable({ wizard_passed: false, hostname: 'openevse' })
-  return { config_store: Object.assign(config_store, { saveParam }) }
+  return { config_store: Object.assign(config_store, { saveParam, upload }) }
 })
+vi.mock('../../../api/httpAPI.js', () => ({
+  httpAPI: vi.fn(() => Promise.resolve([])),
+}))
 
 import { writable } from 'svelte/store'
 import { status_store } from '../../../stores/status.js'
@@ -32,6 +36,7 @@ import Wizard from '../../../../routes/Wizard.svelte'
 
 beforeEach(() => {
   saveParam.mockClear()
+  upload.mockClear()
   status_store.set({ ipaddress: '10.0.0.5' })
 })
 
@@ -86,5 +91,23 @@ describe('Wizard route', () => {
 
     expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
     expect(getByText('wizard.reconnect.title')).toBeInTheDocument()
+  })
+
+  it('can join a network entered manually when scanning finds nothing', async () => {
+    const { getByText, getByLabelText } = render(Wizard)
+    await fireEvent.click(getByText('wizard.next'))
+    await fireEvent.click(getByText('wizard.next'))
+    await fireEvent.click(getByText('config.network.manual'))
+    await fireEvent.input(getByLabelText('config.network.ssid'), {
+      target: { value: 'Hidden network' },
+    })
+    await fireEvent.input(getByLabelText('config.network.wifi_password'), {
+      target: { value: 'secret' },
+    })
+    await fireEvent.click(getByText('config.network.connect'))
+
+    await vi.waitFor(() => {
+      expect(upload).toHaveBeenCalledWith({ ssid: 'Hidden network', pass: 'secret' })
+    })
   })
 })

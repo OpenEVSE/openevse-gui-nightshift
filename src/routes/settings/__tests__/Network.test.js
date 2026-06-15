@@ -97,4 +97,22 @@ describe('Network page', () => {
       )
     })
   })
+
+  it('joins a network entered manually without a scan result', async () => {
+    const { getByText, getByLabelText } = render(Network)
+    await fireEvent.click(getByText('config.network.manual'))
+    await fireEvent.input(getByLabelText('config.network.ssid'), {
+      target: { value: 'Hidden network' },
+    })
+    await fireEvent.input(getByLabelText('config.network.wifi_password'), {
+      target: { value: 'secret' },
+    })
+    await fireEvent.click(getByText('config.network.connect'))
+
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST', '/config', JSON.stringify({ ssid: 'Hidden network', pass: 'secret' }),
+      )
+    })
+  })
 })
