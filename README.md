@@ -83,6 +83,28 @@ states (e.g. set `state` in `status.json` to `1` for standby or `3` for charging
 Note: the mock serves reads only — it does not accept config writes, so Settings-page
 saves report a write error in mock mode. They work against a real device.
 
+### Docker (emulator — no hardware needed)
+
+A `docker-compose.yml` is included that spins up a complete development
+environment with no hardware required:
+
+| Service | Container | Host port |
+|---------|-----------|-----------|
+| Vite dev server (UI) | `node:22-alpine` | [http://localhost:5173](http://localhost:5173) |
+| OpenEVSE native firmware | `ghcr.io/openevse/openevse-wifi-native:latest` | [http://localhost:8000](http://localhost:8000) |
+| OpenEVSE emulator HTTP UI | `ghcr.io/jeremypoulter/openevse_emulator:latest` | [http://localhost:8080](http://localhost:8080) |
+
+The services start in dependency order — emulator first (waits until its RAPI TCP
+port 8023 is healthy), then the native firmware, then the UI (waits until the
+firmware HTTP API on port 8000 responds).
+
+```bash
+docker compose up
+```
+
+Open [http://localhost:5173](http://localhost:5173). Source files are bind-mounted
+so edits hot-reload exactly as with the local `npm run dev` workflow.
+
 ## Build
 
 ```bash

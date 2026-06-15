@@ -1,0 +1,46 @@
+services:
+  ui:
+    image: node:22-alpine
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - ui_node_modules:/workspace/node_modules
+    environment:
+      - VITE_OPENEVSEHOST=openevse-native:8000
+    command: >-
+      sh -c "npm install &&
+      node -e \"const http=require('http');const url='http://openevse-native:8000/status';let tries=0;const max=60;const probe=()=>{tries++;http.get(url,res=>{res.resume();if(res.statusCode&&res.statusCode<500){process.exit(0)}if(tries>=max){console.error('Native OpenEVSE not ready');process.exit(1)}setTimeout(probe,1000)}).on('error',()=>{if(tries>=max){console.error('Native OpenEVSE not reachable');process.exit(1)}setTimeout(probe,1000)});};probe();\" &&
+      npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    depends_on:
+      openevse-native:
+        condition: service_started
+
+  openevse-native:
+    image: ghcr.io/openevse/openevse-wifi-native:latest
+    environment:
+      - EMULATOR_HOST=openevse-emulator
+      - EMULATOR_PORT=8023
+    command: [ "--set-config", "www_http_port=8000" ]
+    ports:
+      - "8000:8000"
+    depends_on:
+      openevse-emulator:
+        condition: service_healthy
+
+  openevse-emulator:
+    image: ghcr.io/jeremypoulter/openevse_emulator:latest
+    command: ["python", "src/main.py", "--serial-mode",  "tcp",  "--serial-tcp-port",  "8023"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.create_connection(('127.0.0.1', 8023), 2); s.close()"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+      start_period: 2s
+    ports:
+      - "8080:8080"
+      - "8023:8023"
+
+volumes:
+  ui_node_modules:
