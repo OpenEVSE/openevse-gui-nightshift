@@ -70,6 +70,34 @@ describe('Wizard route', () => {
     expect(getByText('20 A')).toBeInTheDocument()
   })
 
+  it('blocks the EVSE step and shows a comms error when the safety module is unreachable', async () => {
+    // Firmware publishes evse_connected as 0 when the WiFi module can't reach
+    // the EVSE controller over serial (gui-nightshift#17).
+    status_store.set({ ipaddress: '10.0.0.5', evse_connected: 0 })
+    const { getByText, queryByRole } = render(Wizard)
+
+    await fireEvent.click(getByText('wizard.next')) // -> EVSE step
+
+    // The error is surfaced and the (untrustworthy) controls are hidden.
+    expect(getByText('connection.evse_missing')).toBeInTheDocument()
+    expect(queryByRole('slider')).toBeNull()
+
+    // Next is disabled, so clicking it can't blindly continue past setup.
+    await fireEvent.click(getByText('wizard.next'))
+    expect(getByText('wizard.evse.title')).toBeInTheDocument()
+  })
+
+  it('allows advancing past the EVSE step when the controller is reachable', async () => {
+    status_store.set({ ipaddress: '10.0.0.5', evse_connected: 1 })
+    const { getByText, getByRole } = render(Wizard)
+
+    await fireEvent.click(getByText('wizard.next')) // -> EVSE step
+    expect(getByRole('slider')).toBeInTheDocument()
+
+    await fireEvent.click(getByText('wizard.next')) // -> WiFi step
+    expect(getByText('wizard.wifi.title')).toBeInTheDocument()
+  })
+
   it('saves wizard_passed and stays put when finishing off the device AP', async () => {
     status_store.set({ ipaddress: '10.0.0.5' })
     const { getByText, queryByText } = render(Wizard)

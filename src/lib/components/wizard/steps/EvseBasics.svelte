@@ -13,6 +13,11 @@
   import Slider from '../../ui/Slider.svelte'
   import Select from '../../ui/Select.svelte'
 
+  // When the WiFi module can't reach the EVSE controller the config values
+  // here are stale/meaningless, so the wizard hides the controls and shows an
+  // error instead of letting setup continue (gui-nightshift#17).
+  let { evseConnected = true } = $props()
+
   const form = createConfigForm()
   const ss = form.saveState
 
@@ -38,39 +43,46 @@
 </script>
 
 <div class="space-y-4">
-  <p class="text-sm text-text-dim">{$_('wizard.evse.intro')}</p>
+  {#if !evseConnected}
+    <div role="alert" class="rounded-xl bg-warning/15 px-4 py-3 text-sm text-warning">
+      <p class="font-semibold">{$_('connection.evse_missing')}</p>
+      <p class="mt-1">{$_('connection.evse_missing_body')}</p>
+    </div>
+  {:else}
+    <p class="text-sm text-text-dim">{$_('wizard.evse.intro')}</p>
 
-  <FormField
-    label={$_('config.evse.maxcurrent')}
-    description={`${shownMaxCurrent} A`}
-    status={$ss.max_current_soft ?? 'idle'}
-  >
-    <Slider
-      min={$config_store?.min_current_hard ?? 6}
-      max={$config_store?.max_current_hard ?? 32}
-      value={$config_store?.max_current_soft ?? 6}
-      oninput={(v) => (liveMaxCurrent = v)}
-      onchange={saveMaxCurrent}
-    />
-  </FormField>
-
-  {#if $config_store?.is_threephase !== undefined}
-    <FormField label={$_('config.evse.threephase')} status={$ss.is_threephase ?? 'idle'}>
-      <Select
-        options={phaseOptions}
-        value={String(!!$config_store?.is_threephase)}
-        onchange={(v) => form.saveField('is_threephase', v === 'true')}
+    <FormField
+      label={$_('config.evse.maxcurrent')}
+      description={`${shownMaxCurrent} A`}
+      status={$ss.max_current_soft ?? 'idle'}
+    >
+      <Slider
+        min={$config_store?.min_current_hard ?? 6}
+        max={$config_store?.max_current_hard ?? 32}
+        value={$config_store?.max_current_soft ?? 6}
+        oninput={(v) => (liveMaxCurrent = v)}
+        onchange={saveMaxCurrent}
       />
     </FormField>
-  {/if}
 
-  {#if $config_store?.default_state !== undefined}
-    <FormField label={$_('config.evse.defaultstate')} status={$ss.default_state ?? 'idle'}>
-      <Select
-        options={boolOptions}
-        value={String(!!$config_store?.default_state)}
-        onchange={(v) => form.saveField('default_state', v === 'true')}
-      />
-    </FormField>
+    {#if $config_store?.is_threephase !== undefined}
+      <FormField label={$_('config.evse.threephase')} status={$ss.is_threephase ?? 'idle'}>
+        <Select
+          options={phaseOptions}
+          value={String(!!$config_store?.is_threephase)}
+          onchange={(v) => form.saveField('is_threephase', v === 'true')}
+        />
+      </FormField>
+    {/if}
+
+    {#if $config_store?.default_state !== undefined}
+      <FormField label={$_('config.evse.defaultstate')} status={$ss.default_state ?? 'idle'}>
+        <Select
+          options={boolOptions}
+          value={String(!!$config_store?.default_state)}
+          onchange={(v) => form.saveField('default_state', v === 'true')}
+        />
+      </FormField>
+    {/if}
   {/if}
 </div>
