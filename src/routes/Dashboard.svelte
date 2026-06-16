@@ -523,6 +523,7 @@
           elapsedSec={$status_store?.session_elapsed ?? 0}
           sessionWh={$status_store?.session_energy ?? 0}
           {systemLimit}
+          maxEnergyKwh={$uisettings_store?.max_energy_kwh ?? 100}
           onlimit={setInlineLimit}
         />
       {/key}

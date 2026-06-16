@@ -22,6 +22,7 @@
     elapsedSec = 0,
     sessionWh = 0,
     systemLimit = false,
+    maxEnergyKwh = 100,
     onlimit = () => {},
   } = $props()
 
@@ -100,6 +101,7 @@
       kind={selected}
       value={activeType === selected ? (limit?.value ?? 0) : 0}
       progress={selected === 'time' ? elapsedSec : sessionWh}
+      {maxEnergyKwh}
       {charging}
       disabled={editorDisabled(selected)}
       onchange={(v) => onlimit({ type: selected, value: v })}

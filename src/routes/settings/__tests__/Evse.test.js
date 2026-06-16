@@ -13,6 +13,7 @@ vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.res
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
 import { uistates_store } from '../../../lib/stores/uistates.js'
+import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import Evse from '../Evse.svelte'
 
 const BASE = {
@@ -170,5 +171,17 @@ describe('EVSE page', () => {
     config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
     const { queryByText } = render(Evse)
     expect(queryByText('config.evse.limit_value')).not.toBeInTheDocument()
+  })
+
+  it('saves the energy-slider max to local UI settings (kWh, not the device)', async () => {
+    config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
+    uisettings_store.update((s) => ({ ...s, max_energy_kwh: 100 }))
+    const { getByDisplayValue } = render(Evse)
+    const input = getByDisplayValue('100')
+    await fireEvent.input(input, { target: { value: '40' } })
+    await fireEvent.blur(input)
+    expect(get(uisettings_store).max_energy_kwh).toBe(40)
+    // It's a local preference — nothing goes to the device.
+    expect(httpAPI).not.toHaveBeenCalled()
   })
 })

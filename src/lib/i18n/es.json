@@ -158,6 +158,8 @@
       "limit_energy": "Energía",
       "limit_soc": "SOC",
       "limit_range": "Autonomía",
+      "energy_slider_max": "Máximo del control de energía (kWh)",
+      "energy_slider_max_desc": "Extremo superior del deslizador de límite de energía del panel. Redúcelo para un control más fino en baterías pequeñas; auméntalo para baterías de más de 100 kWh. Se guarda solo en este dispositivo.",
       "sensor": "Calibración del sensor",
       "scale": "Escala del sensor de corriente",
       "offset": "Compensación del sensor de corriente"
