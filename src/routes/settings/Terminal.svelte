@@ -29,7 +29,10 @@
   }
 
   async function send() {
-    if (sending || !command.trim()) return
+    // Treat a blank input or the bare "$" prefix (the reset default) as empty —
+    // sending it is meaningless and just logs an error entry.
+    const trimmed = command.trim()
+    if (sending || !trimmed || trimmed === '$') return
     sending = true
     try {
       const res = await httpAPI('GET', '/r?json=1&rapi=' + command)

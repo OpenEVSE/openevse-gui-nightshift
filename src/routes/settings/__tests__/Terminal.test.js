@@ -29,6 +29,28 @@ describe('Terminal page', () => {
     })
   })
 
+  it('sends the command when Enter is pressed in the input', async () => {
+    const { getByLabelText } = render(Terminal)
+    const input = getByLabelText('config.terminal.command')
+    await fireEvent.input(input, { target: { value: '$GE' } })
+    await fireEvent.keyDown(input, { key: 'Enter' })
+    expect(httpAPI).toHaveBeenCalledWith('GET', '/r?json=1&rapi=$GE')
+  })
+
+  it('does not send when the input is empty or only the "$" prefix', async () => {
+    const { getByLabelText, getByText } = render(Terminal)
+    const input = getByLabelText('config.terminal.command')
+
+    // Default "$" only — Enter and Send must both be no-ops.
+    await fireEvent.keyDown(input, { key: 'Enter' })
+    await fireEvent.click(getByText('config.terminal.send'))
+
+    await fireEvent.input(input, { target: { value: '   ' } })
+    await fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(httpAPI).not.toHaveBeenCalled()
+  })
+
   it('clears the RAPI result log', async () => {
     const { getByLabelText, getByText, queryByText } = render(Terminal)
     await fireEvent.input(getByLabelText('config.terminal.command'), { target: { value: '$GE' } })
