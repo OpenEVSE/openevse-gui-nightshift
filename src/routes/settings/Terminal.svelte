@@ -29,7 +29,10 @@
   }
 
   async function send() {
-    if (sending || !command.trim()) return
+    // Treat a blank input or the bare "$" prefix (the reset default) as empty —
+    // sending it is meaningless and just logs an error entry.
+    const trimmed = command.trim()
+    if (sending || !trimmed || trimmed === '$') return
     sending = true
     try {
       const res = await httpAPI('GET', '/r?json=1&rapi=' + command)
@@ -65,6 +68,12 @@
       aria-label={$_('config.terminal.command')}
       value={command}
       oninput={(e) => (command = e.currentTarget.value)}
+      onkeydown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          send()
+        }
+      }}
       class="w-full rounded-xl border border-border bg-surface-2 px-3 py-2 font-mono text-sm
              text-text focus:border-accent focus:outline-none"
     />
