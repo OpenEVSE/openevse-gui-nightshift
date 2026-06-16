@@ -31,10 +31,18 @@
 
   let titleKey = $derived(`wizard.${STEPS[step]}.title`)
 
+  // The EVSE step configures the controller (max current, phase, default
+  // state). If the WiFi module can't reach it over serial the device reports
+  // evse_connected: 0, and those reads/writes are meaningless — so block
+  // advancing past this step until comms are restored (gui-nightshift#17).
+  let evseConnected = $derived($status_store?.evse_connected ?? true)
+  let commsBlocked = $derived(STEPS[step] === 'evse' && !evseConnected)
+
   function goPrev() {
     if (step > 0) step -= 1
   }
   function goNext() {
+    if (commsBlocked) return
     if (step < TOTAL - 1) step += 1
   }
 
@@ -74,7 +82,7 @@
   {step}
   total={TOTAL}
   title={$_(titleKey)}
-  canAdvance={!finishing}
+  canAdvance={!finishing && !commsBlocked}
   onPrev={goPrev}
   onNext={goNext}
   onFinish={finish}
@@ -82,7 +90,7 @@
   {#if step === 0}
     <Welcome />
   {:else if step === 1}
-    <EvseBasics />
+    <EvseBasics {evseConnected} />
   {:else if step === 2}
     <Wifi />
   {:else if step === 3}
