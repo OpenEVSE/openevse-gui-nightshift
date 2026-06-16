@@ -158,6 +158,8 @@
       "limit_energy": "Energia",
       "limit_soc": "SOC",
       "limit_range": "Hatótáv",
+      "energy_slider_max": "Energiacsúszka maximuma (kWh)",
+      "energy_slider_max_desc": "Az irányítópult energiakorlát-csúszkájának felső határa. Csökkentse a finomabb beállításhoz kisebb akkumulátoroknál; növelje a 100 kWh feletti csomagokhoz. Csak ezen az eszközön tárolódik.",
       "sensor": "Érzékelő kalibrálás",
       "scale": "Áramérzékelő skála",
       "offset": "Áramérzékelő eltolás"

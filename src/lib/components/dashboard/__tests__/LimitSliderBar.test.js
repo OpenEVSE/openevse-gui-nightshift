@@ -109,6 +109,40 @@ describe('LimitSliderBar', () => {
     expect(container.querySelector('[data-fill]').style.width).toBe('0%')
   })
 
+  it('honours a configurable energy max (narrower track = finer steps)', async () => {
+    const onchange = vi.fn()
+    const { getByRole } = render(LimitSliderBar, {
+      props: { kind: 'energy', value: 0, maxEnergyKwh: 40, onchange },
+    })
+    const input = getByRole('slider', { name: 'dashboard.limit.type_energy' })
+    // 40 kWh max → ticks 0..40.
+    expect(input.max).toBe('40')
+    // A 10 kWh commit still converts to Wh.
+    input.value = '10'
+    await fireEvent.change(input)
+    expect(onchange).toHaveBeenCalledWith(10000)
+    // Fill for a 10 kWh limit is now a quarter of the track, not a tenth.
+    const active = render(LimitSliderBar, {
+      props: { kind: 'energy', value: 10000, progress: 10000, maxEnergyKwh: 40, charging: true },
+    })
+    expect(active.container.querySelector('[data-fill]').style.width).toBe('25%')
+  })
+
+  it('caps a pathological energy max so the stop array stays bounded', () => {
+    const { getByRole } = render(LimitSliderBar, {
+      props: { kind: 'energy', value: 0, maxEnergyKwh: 100000 },
+    })
+    expect(getByRole('slider', { name: 'dashboard.limit.type_energy' }).max).toBe('500')
+  })
+
+  it('clamps the knob for an energy limit above the configured max', () => {
+    // A 60 kWh system limit on a 40 kWh track pins the knob to the rail.
+    const { container } = render(LimitSliderBar, {
+      props: { kind: 'energy', value: 60000, maxEnergyKwh: 40 },
+    })
+    expect(container.querySelector('[data-knob]').style.left).toBe('100%')
+  })
+
   it('keeps the stem inside the narrow value pill at the rails (SOC-bar pillShift, clamped tighter)', () => {
     const zero = render(LimitSliderBar, { props: { kind: 'time', value: 0 } })
     expect(zero.container.querySelector('[data-knob]').style.left).toBe('0%') // pin spans the full track

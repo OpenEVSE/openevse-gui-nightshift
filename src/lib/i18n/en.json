@@ -158,6 +158,8 @@
       "limit_energy": "Energy",
       "limit_soc": "SOC",
       "limit_range": "Range",
+      "energy_slider_max": "Energy slider max (kWh)",
+      "energy_slider_max_desc": "Upper end of the Dashboard energy-limit slider. Lower it for finer control on smaller batteries; raise it for packs over 100 kWh. Saved on this device only.",
       "sensor": "Sensor calibration",
       "scale": "Current sensor scale",
       "offset": "Current sensor offset"

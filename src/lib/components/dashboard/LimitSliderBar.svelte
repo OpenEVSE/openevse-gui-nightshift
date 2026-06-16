@@ -2,6 +2,7 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { hmsShort } from '../../dashboard/soc.js'
+  import { clampEnergyMax } from '../../dashboard/state.js'
 
   let {
     kind = 'time', // 'time' | 'energy'
@@ -10,6 +11,7 @@
     charging = false,
     disabled = false,
     onchange = () => {}, // device units; 0 = clear
+    maxEnergyKwh = 100, // top of the energy scale, in kWh (user-configurable)
     // optional snippet rendered at the header's right edge (the card's pills)
     headerEnd = null,
   } = $props()
@@ -17,21 +19,24 @@
   // The slider operates in tick space — each notch is an equal drag distance,
   // but the time stops coarsen as they grow (15-min steps to 4 h, 30-min to
   // 8 h, then hourly to 24 h) so the common short limits keep fine control
-  // without making a 24 h track twitchy. Energy stays a 1:1 kWh scale.
+  // without making a 24 h track twitchy. Energy stays a 1:1 kWh scale, but its
+  // ceiling is user-configurable — a narrower max gives finer control for
+  // small packs; a wider one covers >100 kWh batteries.
   const TIME_STOPS = []
   for (let m = 0; m <= 240; m += 15) TIME_STOPS.push(m)
   for (let m = 270; m <= 480; m += 30) TIME_STOPS.push(m)
   for (let m = 540; m <= 1440; m += 60) TIME_STOPS.push(m)
-  const KWH_STOPS = Array.from({ length: 101 }, (_, i) => i)
+  let kwhMax = $derived(clampEnergyMax(maxEnergyKwh))
+  let kwhStops = $derived(Array.from({ length: kwhMax + 1 }, (_, i) => i))
 
-  let stops = $derived(kind === 'time' ? TIME_STOPS : KWH_STOPS)
+  let stops = $derived(kind === 'time' ? TIME_STOPS : kwhStops)
   let maxTick = $derived(stops.length - 1)
   // A limit set elsewhere can exceed the scale: clamp the knob render; the
   // header still shows the true remaining.
   let display = $derived(
     kind === 'time'
       ? Math.min(value, TIME_STOPS[TIME_STOPS.length - 1])
-      : Math.min(Math.round(value / 1000), 100),
+      : Math.min(Math.round(value / 1000), kwhMax),
   )
   let active = $derived(value > 0)
 

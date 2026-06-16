@@ -158,6 +158,8 @@
       "limit_energy": "Énergie",
       "limit_soc": "SOC",
       "limit_range": "Autonomie",
+      "energy_slider_max": "Maximum du curseur d'énergie (kWh)",
+      "energy_slider_max_desc": "Limite supérieure du curseur de limite d'énergie du tableau de bord. Abaissez-la pour un réglage plus fin sur les petites batteries ; augmentez-la pour les packs de plus de 100 kWh. Enregistré uniquement sur cet appareil.",
       "sensor": "Calibration du capteur",
       "scale": "Échelle capteur de courant",
       "offset": "Décalage capteur de courant"

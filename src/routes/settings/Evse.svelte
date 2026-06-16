@@ -2,6 +2,8 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { config_store } from '../../lib/stores/config.js'
+  import { uisettings_store } from '../../lib/stores/uisettings.js'
+  import { clampEnergyMax, ENERGY_LIMIT_MAX_KWH } from '../../lib/dashboard/state.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
@@ -61,6 +63,13 @@
   function saveSystemLimitValue(v) {
     const raw = sysType === 'energy' ? Math.round((v ?? 0) * 1000) : (v ?? 0)
     return form.saveField('limit_default_value', raw)
+  }
+
+  // Local-only: the ceiling of the Dashboard energy-limit slider, in kWh.
+  // Lowering it makes the slider finer for small packs; raising it covers
+  // >100 kWh batteries. Stored per-browser, never sent to the device.
+  function saveMaxEnergy(v) {
+    uisettings_store.update((s) => ({ ...s, max_energy_kwh: clampEnergyMax(v) }))
   }
 </script>
 
@@ -181,6 +190,18 @@
         />
       </FormField>
     {/if}
+    <FormField
+      label={$_('config.evse.energy_slider_max')}
+      description={$_('config.evse.energy_slider_max_desc')}
+    >
+      <NumberInput
+        value={$uisettings_store?.max_energy_kwh ?? 100}
+        min={1}
+        max={ENERGY_LIMIT_MAX_KWH}
+        step={1}
+        onchange={saveMaxEnergy}
+      />
+    </FormField>
   </ConfigSection>
 
   <ConfigSection title={$_('config.evse.sensor')}>

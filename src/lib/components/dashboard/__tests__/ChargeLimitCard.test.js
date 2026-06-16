@@ -42,6 +42,14 @@ describe('ChargeLimitCard (pills)', () => {
     expect(getByRole('radio', { name: 'dashboard.limit.type_energy' }).querySelector('[data-active-dot]')).toBeTruthy()
   })
 
+  it('forwards a configurable energy max to the energy slider', async () => {
+    const { getByRole } = render(ChargeLimitCard, {
+      props: { ...vehicle, maxEnergyKwh: 40 },
+    })
+    await fireEvent.click(getByRole('radio', { name: 'dashboard.limit.type_energy' }))
+    expect(getByRole('slider', { name: 'dashboard.limit.type_energy' }).max).toBe('40')
+  })
+
   it('keeps the active dot visible while viewing another pill', async () => {
     const { getByRole } = render(ChargeLimitCard, {
       props: { ...vehicle, limit: { type: 'energy', value: 10000, auto_release: true } },

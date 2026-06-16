@@ -1,5 +1,24 @@
 import { describe, it, expect } from 'vitest'
-import { displayState, ringFill, limitProgress, connectedReason, maxPowerW } from '../state.js'
+import { displayState, ringFill, limitProgress, connectedReason, maxPowerW, clampEnergyMax, ENERGY_LIMIT_MAX_KWH } from '../state.js'
+
+describe('clampEnergyMax', () => {
+  it('keeps a sensible value untouched', () => {
+    expect(clampEnergyMax(40)).toBe(40)
+    expect(clampEnergyMax(100)).toBe(100)
+  })
+  it('rounds to a whole kWh', () => {
+    expect(clampEnergyMax(42.6)).toBe(43)
+  })
+  it('floors at 1 kWh for zero / blank / negative input', () => {
+    expect(clampEnergyMax(0)).toBe(100) // 0 is "unset" → default
+    expect(clampEnergyMax(null)).toBe(100)
+    expect(clampEnergyMax(undefined)).toBe(100)
+    expect(clampEnergyMax(-5)).toBe(1)
+  })
+  it('caps pathological values at the hard ceiling (no giant stop array)', () => {
+    expect(clampEnergyMax(100000)).toBe(ENERGY_LIMIT_MAX_KWH)
+  })
+})
 
 describe('displayState', () => {
   it('returns starting when status is missing or state 0', () => {
