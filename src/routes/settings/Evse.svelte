@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n'
   import { config_store } from '../../lib/stores/config.js'
   import { uisettings_store } from '../../lib/stores/uisettings.js'
+  import { clampEnergyMax, ENERGY_LIMIT_MAX_KWH } from '../../lib/dashboard/state.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
@@ -68,8 +69,7 @@
   // Lowering it makes the slider finer for small packs; raising it covers
   // >100 kWh batteries. Stored per-browser, never sent to the device.
   function saveMaxEnergy(v) {
-    const next = Math.max(1, Math.round(v ?? 100))
-    uisettings_store.update((s) => ({ ...s, max_energy_kwh: next }))
+    uisettings_store.update((s) => ({ ...s, max_energy_kwh: clampEnergyMax(v) }))
   }
 </script>
 
@@ -197,6 +197,7 @@
       <NumberInput
         value={$uisettings_store?.max_energy_kwh ?? 100}
         min={1}
+        max={ENERGY_LIMIT_MAX_KWH}
         step={1}
         onchange={saveMaxEnergy}
       />

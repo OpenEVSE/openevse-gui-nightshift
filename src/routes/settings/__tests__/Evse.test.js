@@ -1,5 +1,5 @@
 // src/routes/settings/__tests__/Evse.test.js
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { get } from 'svelte/store'
 import { render, fireEvent } from '@testing-library/svelte'
 
@@ -26,6 +26,12 @@ beforeEach(() => {
   uistates_store.resetAlertBox()
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ msg: 'done' })
+})
+
+afterEach(() => {
+  // max_energy_kwh is a persisted (localStorage-backed) store — restore the
+  // default so it can't leak into order-dependent tests in other files.
+  uisettings_store.update((s) => ({ ...s, max_energy_kwh: 100 }))
 })
 
 describe('EVSE page', () => {
@@ -183,5 +189,15 @@ describe('EVSE page', () => {
     expect(get(uisettings_store).max_energy_kwh).toBe(40)
     // It's a local preference — nothing goes to the device.
     expect(httpAPI).not.toHaveBeenCalled()
+  })
+
+  it('caps an over-large energy-slider max at the hard ceiling', async () => {
+    config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
+    uisettings_store.update((s) => ({ ...s, max_energy_kwh: 100 }))
+    const { getByDisplayValue } = render(Evse)
+    const input = getByDisplayValue('100')
+    await fireEvent.input(input, { target: { value: '100000' } })
+    await fireEvent.blur(input)
+    expect(get(uisettings_store).max_energy_kwh).toBe(500)
   })
 })

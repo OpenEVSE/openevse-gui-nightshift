@@ -1,6 +1,24 @@
 /** Pure helpers for the Dashboard. No store or DOM access — fully unit-tested. */
 
 /**
+ * Hard ceiling for the user-configurable energy-limit slider max, in kWh.
+ * The slider builds one stop per kWh, so an unbounded value (it comes from
+ * localStorage) could create a huge array and a slow O(n) tick scan. The
+ * largest EV packs today are ~200 kWh, so 500 is generous headroom while
+ * keeping the slider snappy.
+ */
+export const ENERGY_LIMIT_MAX_KWH = 500
+
+/**
+ * Clamp a user-entered energy-slider max to a whole kWh in
+ * [1, ENERGY_LIMIT_MAX_KWH]. A 0 / blank / nullish value is treated as
+ * "unset" and falls back to the 100 kWh default.
+ */
+export function clampEnergyMax(kwh) {
+  return Math.min(ENERGY_LIMIT_MAX_KWH, Math.max(1, Math.round(kwh || 100)))
+}
+
+/**
  * Map the raw OpenEVSE `state` code to a Dashboard display state.
  *
  * `mode` is the dashboard's derived mode (0 = Auto, 1 = On, 2 = Off).

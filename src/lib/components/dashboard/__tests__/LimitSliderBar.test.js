@@ -128,6 +128,13 @@ describe('LimitSliderBar', () => {
     expect(active.container.querySelector('[data-fill]').style.width).toBe('25%')
   })
 
+  it('caps a pathological energy max so the stop array stays bounded', () => {
+    const { getByRole } = render(LimitSliderBar, {
+      props: { kind: 'energy', value: 0, maxEnergyKwh: 100000 },
+    })
+    expect(getByRole('slider', { name: 'dashboard.limit.type_energy' }).max).toBe('500')
+  })
+
   it('clamps the knob for an energy limit above the configured max', () => {
     // A 60 kWh system limit on a 40 kWh track pins the knob to the rail.
     const { container } = render(LimitSliderBar, {

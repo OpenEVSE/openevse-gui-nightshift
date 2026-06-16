@@ -2,6 +2,7 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { hmsShort } from '../../dashboard/soc.js'
+  import { clampEnergyMax } from '../../dashboard/state.js'
 
   let {
     kind = 'time', // 'time' | 'energy'
@@ -25,7 +26,7 @@
   for (let m = 0; m <= 240; m += 15) TIME_STOPS.push(m)
   for (let m = 270; m <= 480; m += 30) TIME_STOPS.push(m)
   for (let m = 540; m <= 1440; m += 60) TIME_STOPS.push(m)
-  let kwhMax = $derived(Math.max(1, Math.round(maxEnergyKwh || 100)))
+  let kwhMax = $derived(clampEnergyMax(maxEnergyKwh))
   let kwhStops = $derived(Array.from({ length: kwhMax + 1 }, (_, i) => i))
 
   let stops = $derived(kind === 'time' ? TIME_STOPS : kwhStops)
