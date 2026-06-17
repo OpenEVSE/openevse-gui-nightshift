@@ -8,6 +8,7 @@
   import { claims_target_store } from '../stores/claims_target.js'
   import { certificate_store } from '../stores/certificates.js'
   import { uistates_store } from '../stores/uistates.js'
+  import { history_store } from '../stores/history.js'
 
   let { onProgress = () => {}, onStatus = () => {}, onLoaded = () => {}, onError = () => {} } = $props()
 
@@ -33,6 +34,10 @@
       step.after?.()
       onProgress(step.progress)
     }
+    // Non-fatal capability probe: a device without /history (JuiceBox) must
+    // still finish startup — we just hide the History tab.
+    const hist = await history_store.download()
+    $uistates_store.history_available = hist !== false
     onStatus('ok')
     onLoaded()
   }
