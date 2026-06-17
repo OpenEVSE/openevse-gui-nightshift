@@ -10,7 +10,8 @@ describe('Router blocked routes', () => {
   it('redirects a blocked path to / instead of rendering it', async () => {
     window.location.hash = '/settings/ocpp'
     window.dispatchEvent(new Event('hashchange'))
-    render(Router, { props: { routes: { '/settings/ocpp': Dummy }, blocked: ['/settings/ocpp'] } })
+    const { queryByText } = render(Router, { props: { routes: { '/settings/ocpp': Dummy }, blocked: ['/settings/ocpp'] } })
+    expect(queryByText('dummy')).not.toBeInTheDocument()
     await vi.waitFor(() => expect(window.location.hash).toBe('#/'))
   })
   it('renders a non-blocked path normally', () => {

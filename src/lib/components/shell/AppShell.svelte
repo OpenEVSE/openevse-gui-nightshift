@@ -21,7 +21,7 @@
   let historyAvailable = $derived($uistates_store?.history_available ?? true)
   let caps = $derived({ charts: CHARTS_ENABLED, history: historyAvailable })
   let blocked = $derived([
-    ...blockedSettingsRoutes($config_store),
+    ...($config_store == null ? [] : blockedSettingsRoutes($config_store)),
     ...(CHARTS_ENABLED ? [] : ['/monitoring']),
     ...(historyAvailable ? [] : ['/history']),
   ])
