@@ -1,7 +1,6 @@
 // src/lib/data/__tests__/TransportManager.test.js
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from '@testing-library/svelte'
-import { get } from 'svelte/store'
 
 vi.mock('../../api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.resolve('error')) }))
 
@@ -20,12 +19,19 @@ class FakeWS {
   emit(t, data) { (this.listeners[t] || []).forEach((fn) => fn({ data })) }
 }
 
+let originalWebSocket
 beforeEach(() => {
+  originalWebSocket = globalThis.WebSocket
+  globalThis.WebSocket = FakeWS
   httpAPI.mockReset()
   httpAPI.mockResolvedValue('error')
   lastWs = undefined
-  globalThis.WebSocket = FakeWS
   uistates_store.update((u) => ({ ...u, ws_connected: true }))
+})
+
+afterEach(() => {
+  globalThis.WebSocket = originalWebSocket
+  vi.useRealTimers()
 })
 
 describe('TransportManager', () => {
@@ -36,15 +42,16 @@ describe('TransportManager', () => {
   })
 
   it('stops polling once the WebSocket goes live', async () => {
+    vi.useFakeTimers()
     httpAPI.mockResolvedValue({ amp: 5 })
     render(TransportManager)
-    await vi.waitFor(() => expect(lastWs).toBeTruthy())
+    // lastWs is set synchronously when WebSocket mounts; drain the initial poll.
+    await vi.advanceTimersByTimeAsync(0)
     lastWs.readyState = 1
     lastWs.emit('open')
     lastWs.emit('message', '{"amp":6}')
     const callsAfterLive = httpAPI.mock.calls.length
-    await new Promise((r) => setTimeout(r, 60))
-    // No *new* polls fire while the socket is live (allow the in-flight one).
-    expect(httpAPI.mock.calls.length).toBeLessThanOrEqual(callsAfterLive + 1)
+    await vi.advanceTimersByTimeAsync(1500 * 5) // five poll intervals
+    expect(httpAPI.mock.calls.length).toBe(callsAfterLive)
   })
 })

@@ -5,6 +5,7 @@
   import { status_store } from '../stores/status.js'
   import { JSONTryParse } from '../utils.js'
 
+  // `live` mirrors ws_connected for transport selection (TransportManager gates Poller on it); ws_connected stays the UI connection signal.
   let { live = $bindable(false) } = $props()
 
   let socket
