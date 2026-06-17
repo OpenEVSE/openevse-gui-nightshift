@@ -5,7 +5,11 @@
   import { status_store } from '../stores/status.js'
   import { JSONTryParse } from '../utils.js'
 
-  // `live` mirrors ws_connected for transport selection (TransportManager gates Poller on it); ws_connected stays the UI connection signal.
+  // `live` drives transport selection: TransportManager gates the Poller on it
+  // (Poller runs while !live). This component only ever reports ws_connected =
+  // true (on open); it never writes false. The Poller owns the false case so a
+  // failed handshake / dropped socket just hands back to polling without
+  // flashing the "connection lost" banner.
   let { live = $bindable(false) } = $props()
 
   let socket
@@ -75,7 +79,11 @@
     s.addEventListener('error', () => {
       if (s !== socket) return
       lastmsg = DateTime.now().toUnixInteger()
-      $uistates_store.ws_connected = false
+      // Don't flip ws_connected here: a failed/closed socket only means we
+      // dropped to polling (live=false). The Poller is the source of truth for
+      // "device reachable" — it re-activates on live=false and sets
+      // ws_connected on its next tick. Reporting false on every probe failure
+      // would flash the "connection lost" banner during the initial handshake.
       live = false
       cancelKeepAlive()
     })
@@ -83,8 +91,7 @@
       if (s !== socket) return
       lastmsg = DateTime.now().toUnixInteger()
       cancelKeepAlive()
-      $uistates_store.ws_connected = false
-      live = false
+      live = false // hand back to the Poller; it owns ws_connected (see 'error')
       failedConnects += 1
       if (!everOpened && failedConnects >= MAX_PROBE_ATTEMPTS) {
         // Device never spoke WebSocket — stop probing, the Poller drives.
@@ -159,8 +166,7 @@
       }
     } else if (ping_cnt > 3 && timing >= 5) {
       ping_cnt = 0
-      $uistates_store.ws_connected = false
-      live = false
+      live = false // stalled socket: drop to polling, Poller re-evaluates reachability
       s.close()
       lastmsg = DateTime.now().toUnixInteger()
       cancelKeepAlive()
