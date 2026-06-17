@@ -13,11 +13,13 @@ export function clipToSession(samples, sessionElapsed) {
   return samples.filter((s) => s.ts >= start)
 }
 
-/** kW for one sample = amps * volts / 1000. Null when voltage/amps unusable. */
-export function sampleKw(sample, voltage) {
+/** kW for one sample = amps * volts * phases / 1000. Null when voltage/amps
+ *  unusable. `phases` is 3 on a 3-phase charger (firmware reports per-phase
+ *  amps, so total power triples — matches maxPowerW() for the PowerRing). */
+export function sampleKw(sample, voltage, phases = 1) {
   if (!Number.isFinite(voltage) || voltage <= 0) return null
   if (!Number.isFinite(sample?.a)) return null
-  return (sample.a * voltage) / 1000
+  return (sample.a * voltage * phases) / 1000
 }
 
 /** SOC percent, or null for the -1 "no vehicle source" sentinel. */
@@ -26,11 +28,11 @@ export function socOrNull(sample) {
 }
 
 /** [relativeSeconds[], soc[], kw[]] for uPlot, x measured from the first sample. */
-export function toChartData(samples, voltage) {
+export function toChartData(samples, voltage, phases = 1) {
   const x0 = samples.length ? samples[0].ts : 0
   const x = samples.map((s) => s.ts - x0)
   const soc = samples.map(socOrNull)
-  const kw = samples.map((s) => sampleKw(s, voltage))
+  const kw = samples.map((s) => sampleKw(s, voltage, phases))
   return [x, soc, kw]
 }
 
@@ -114,8 +116,8 @@ export function buildSessionOpts({ theme, target, kwMax, height = 150 }) {
         grid: { stroke: theme.grid, width: 1 },
         values: (u, splits) => splits.map(fmtSessionTime),
       },
-      { scale: 'soc', stroke: theme.axisText, grid: { stroke: theme.grid, width: 1 } },
-      { side: 1, scale: 'kw', stroke: theme.charging, grid: { show: false } },
+      { scale: 'soc', label: 'SOC %', stroke: theme.axisText, grid: { stroke: theme.grid, width: 1 } },
+      { side: 1, scale: 'kw', label: 'kW', stroke: theme.charging, grid: { show: false } },
     ],
     series: [
       {},
