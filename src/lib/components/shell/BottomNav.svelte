@@ -3,15 +3,15 @@
   import Icon from '../../icons/Icon.svelte'
   import GearMark from '../../../assets/GearMark.svelte'
 
-  let { path = '/', deviceName = 'OpenEVSE' } = $props()
+  let { path = '/', deviceName = 'OpenEVSE', caps = { charts: true, history: true } } = $props()
 
-  const items = [
+  let items = $derived([
     { href: '/', key: 'nav.home', icon: 'mdi:home-outline' },
     { href: '/schedule', key: 'nav.schedule', icon: 'mdi:calendar-clock-outline' },
-    { href: '/monitoring', key: 'nav.monitoring', icon: 'mdi:chart-line' },
-    { href: '/history', key: 'nav.history', icon: 'mdi:history' },
+    ...(caps.charts ? [{ href: '/monitoring', key: 'nav.monitoring', icon: 'mdi:chart-line' }] : []),
+    ...(caps.history ? [{ href: '/history', key: 'nav.history', icon: 'mdi:history' }] : []),
     { href: '/settings', key: 'nav.settings', icon: 'mdi:cog-outline' },
-  ]
+  ])
 
   // Highlight the parent tab while inside its sub-routes (e.g. /settings
   // *and* /settings/firmware both light up the Settings tab). The Home
