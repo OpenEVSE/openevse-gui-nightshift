@@ -433,6 +433,7 @@
         {rateNonce}
         samples={$energy_store.raw.samples}
         voltage={$status_store?.voltage ?? 0}
+        phases={$config_store?.is_threephase ? 3 : 1}
         sessionElapsed={$status_store?.session_elapsed ?? 0}
         chartError={$energy_store.error.raw}
         rateDisabled={busy || ecoOn || display === 'error'}
