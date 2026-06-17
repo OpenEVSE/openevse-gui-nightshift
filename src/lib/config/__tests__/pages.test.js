@@ -60,6 +60,10 @@ describe('pagesBySection', () => {
     const keys = pagesBySection({ ocpp_enabled: false }).flatMap((g) => g.pages.map((p) => p.key))
     expect(keys).toContain('ocpp')
   })
+  it('hides certificates without ocpp_enabled but shows it once reported', () => {
+    expect(pagesBySection({}).flatMap((g) => g.pages.map((p) => p.key))).not.toContain('certificates')
+    expect(pagesBySection({ ocpp_enabled: false }).flatMap((g) => g.pages.map((p) => p.key))).toContain('certificates')
+  })
   it('drops a section that has no visible pages', () => {
     const sections = pagesBySection({}).map((g) => g.section)
     expect(sections).not.toContain('energy')

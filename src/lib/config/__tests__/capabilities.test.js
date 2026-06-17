@@ -12,4 +12,10 @@ describe('blockedSettingsRoutes', () => {
   it('does not block a route whose field is present but falsy', () => {
     expect(blockedSettingsRoutes({ ocpp_enabled: false })).not.toContain('/settings/ocpp')
   })
+  it('blocks certificates (a TLS/OCPP feature) when ocpp_enabled is absent', () => {
+    expect(blockedSettingsRoutes({})).toContain('/settings/certificates')
+  })
+  it('unblocks certificates when ocpp_enabled is reported', () => {
+    expect(blockedSettingsRoutes({ ocpp_enabled: false })).not.toContain('/settings/certificates')
+  })
 })
