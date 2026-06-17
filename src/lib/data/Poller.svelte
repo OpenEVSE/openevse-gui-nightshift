@@ -20,7 +20,7 @@
     poll()
     timer = setInterval(poll, POLL_MS)
   })
-  onDestroy(() => { if (timer) clearInterval(timer) })
+  onDestroy(() => { clearInterval(timer) })
 
   async function poll() {
     if (!active || inflight) return // never overlap; stay quiet while WS drives
@@ -30,6 +30,7 @@
       const ok = res && res !== 'error' && res.msg !== 'error'
       // Shallow-merge like WebSocket.svelte — frames may be partial.
       if (ok) status_store.update((cur) => ({ ...(cur || {}), ...res }))
+      // reuse ws_connected: same "device reachable" UX as the WebSocket path
       uistates_store.update((u) => ({ ...u, ws_connected: ok }))
     } finally {
       inflight = false
