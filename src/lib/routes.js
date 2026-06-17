@@ -1,6 +1,6 @@
 import Dashboard from '../routes/Dashboard.svelte'
 import Schedule from '../routes/Schedule.svelte'
-import Monitoring from '../routes/Monitoring.svelte'
+import Monitoring from '../routes/MonitoringLazy.svelte'
 import History from '../routes/History.svelte'
 import Settings from '../routes/Settings.svelte'
 import NotFound from '../routes/NotFound.svelte'

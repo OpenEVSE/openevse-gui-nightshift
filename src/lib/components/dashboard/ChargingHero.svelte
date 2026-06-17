@@ -2,7 +2,7 @@
   import { _ } from 'svelte-i18n'
   import StatusLine from './StatusLine.svelte'
   import RatePill from './RatePill.svelte'
-  import SessionChart from './SessionChart.svelte'
+  import SessionChartLazy from './SessionChartLazy.svelte'
 
   let {
     kw = '0.0',
@@ -52,6 +52,6 @@
   </div>
 
   {#if !chartError}
-    <SessionChart {samples} {voltage} {phases} {target} {sessionElapsed} />
+    <SessionChartLazy {samples} {voltage} {phases} {target} {sessionElapsed} />
   {/if}
 </div>
