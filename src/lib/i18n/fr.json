@@ -304,7 +304,7 @@
       "posts": "Publications (ok / envoyées)",
       "account": "Compte",
       "server": "Serveur EmonCMS",
-      "server_desc": "ex. emoncms.org ou data.openevse.com/emoncms",
+      "server_desc": "ex. emoncms.org",
       "node": "Nœud",
       "apikey": "Clef API écriture"
     },

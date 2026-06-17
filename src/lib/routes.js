@@ -20,7 +20,7 @@ import Shaper from '../routes/settings/Shaper.svelte'
 import Emoncms from '../routes/settings/Emoncms.svelte'
 import Ohmconnect from '../routes/settings/Ohmconnect.svelte'
 import Firmware from '../routes/settings/Firmware.svelte'
-import Certificates from '../routes/settings/Certificates.svelte'
+import Security from '../routes/settings/Security.svelte'
 import Terminal from '../routes/settings/Terminal.svelte'
 import About from '../routes/settings/About.svelte'
 
@@ -59,7 +59,7 @@ routes['/settings/ohmconnect'] = Ohmconnect
 
 // System pages — override the placeholders set above.
 routes['/settings/firmware'] = Firmware
-routes['/settings/certificates'] = Certificates
+routes['/settings/security'] = Security
 routes['/settings/terminal'] = Terminal
 routes['/settings/about'] = About
 

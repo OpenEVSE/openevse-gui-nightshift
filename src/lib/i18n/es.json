@@ -304,7 +304,7 @@
       "posts": "Posts (ok / enviados)",
       "account": "Cuenta",
       "server": "Servidor EmonCMS",
-      "server_desc": "p. ej. emoncms.org o data.openevse.com/emoncms",
+      "server_desc": "p. ej. emoncms.org",
       "node": "Nodo",
       "apikey": "Clave API de escritura"
     },

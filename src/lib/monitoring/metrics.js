@@ -57,10 +57,14 @@ export function sensorMetrics(status, config, { tempUnit = 'c' } = {}) {
   const s = status ?? {}
   const c = config ?? {}
   const evseT = formatTemp(tempC(s.temp), tempUnit)
+  const freqRaw = s.frequency != null && s.frequency > 0
+    ? round(s.frequency / 100, 2)
+    : null
   const rows = [
     { labelKey: 'monitoring.sensor.pilot', value: round(s.pilot, 0), unit: 'units.amp' },
     { labelKey: 'monitoring.sensor.current', value: round((s.amp ?? 0) / 1000, 1), unit: 'units.amp' },
     { labelKey: 'monitoring.sensor.voltage', value: round(s.voltage, 0), unit: 'units.volt' },
+    { labelKey: 'monitoring.sensor.frequency', value: freqRaw, unit: 'units.hz' },
     { labelKey: 'monitoring.sensor.evsetemp', value: evseT.value, unit: evseT.unitKey },
   ]
   ;[s.temp1, s.temp2, s.temp3, s.temp4].forEach((raw, i) => {

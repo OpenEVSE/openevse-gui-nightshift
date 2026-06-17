@@ -304,7 +304,7 @@
       "posts": "Bejegyzések (ok / küldve)",
       "account": "Fiók",
       "server": "EmonCMS szerver",
-      "server_desc": "pl. emoncms.org vagy data.openevse.com/emoncms",
+      "server_desc": "pl. emoncms.org",
       "node": "Node",
       "apikey": "Írási API kulcs"
     },
