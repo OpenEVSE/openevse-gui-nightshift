@@ -2,6 +2,17 @@
   "app": "OpenEVSE",
   "loading": "Chargement…",
   "notification": "Notification",
+  "jb-fault": {
+    "001": "Échec de l'autotest du firmware",
+    "003": "Pas de terre",
+    "004": "Court-circuit pilote",
+    "005": "Échec de génération du signal pilote",
+    "006": "Échec de l'autotest GFI",
+    "007": "Relais bloqué fermé",
+    "008": "Verrouillage défaut à la terre",
+    "101": "Défaut à la terre",
+    "102": "Relais bloqué ouvert"
+  },
   "logs-states": {
     "loading": "Démarrage",
     "active-nocar": "Actif - VE non connecté",

@@ -2,6 +2,17 @@
   "app": "OpenEVSE",
   "loading": "Betöltés…",
   "notification": "Értesítés",
+  "jb-fault": {
+    "001": "Firmware önteszt sikertelen",
+    "003": "Nincs földelés",
+    "004": "Pilot rövidzárlat",
+    "005": "Pilot jel generálás hiba",
+    "006": "GFI önteszt sikertelen",
+    "007": "Relé beragadt zárva",
+    "008": "Földzárlat lezárás",
+    "101": "Földzárlat",
+    "102": "Relé beragadt nyitva"
+  },
   "logs-states": {
     "loading": "Indulás",
     "active-nocar": "Aktív - Autó nincs csatlakoztatva",

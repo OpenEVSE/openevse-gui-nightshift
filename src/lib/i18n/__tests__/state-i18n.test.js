@@ -14,4 +14,12 @@ describe('logs-states i18n keys', () => {
       expect(states[key]).toBeTypeOf('string')
     }
   })
+
+  it('has a jb-fault label for every code faultDesc resolves', () => {
+    const faults = en['jb-fault']
+    expect(faults).toBeTypeOf('object')
+    for (const code of ['001', '003', '004', '005', '006', '007', '008', '101', '102']) {
+      expect(faults[code]).toBeTypeOf('string')
+    }
+  })
 })

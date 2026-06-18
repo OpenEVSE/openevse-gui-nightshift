@@ -37,4 +37,15 @@ describe('SafetyTab', () => {
     const { getByText } = render(SafetyTab, { props: { data } })
     expect(getByText('monitoring.safety.fault')).toBeInTheDocument()
   })
+  it('shows the exact JuiceBox fault label from wr when comms are live', () => {
+    const data = {
+      errors: [
+        { key: 'fault', state: 8, wr: '005:Pilot Signal Gen Fail:', comms_online: true, severity: 'error' },
+      ],
+      infos: [],
+    }
+    const { getByText } = render(SafetyTab, { props: { data } })
+    // state 8 alone would be the generic "Stuck Relay"; wr 005 overrides it.
+    expect(getByText('jb-fault.005')).toBeInTheDocument()
+  })
 })
