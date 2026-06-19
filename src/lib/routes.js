@@ -20,7 +20,7 @@ import Shaper from '../routes/settings/Shaper.svelte'
 import Emoncms from '../routes/settings/Emoncms.svelte'
 import Ohmconnect from '../routes/settings/Ohmconnect.svelte'
 import Firmware from '../routes/settings/Firmware.svelte'
-import Security from '../routes/settings/Security.svelte'
+import Certificates from '../routes/settings/Certificates.svelte'
 import Terminal from '../routes/settings/Terminal.svelte'
 import About from '../routes/settings/About.svelte'
 
@@ -59,7 +59,7 @@ routes['/settings/ohmconnect'] = Ohmconnect
 
 // System pages — override the placeholders set above.
 routes['/settings/firmware'] = Firmware
-routes['/settings/security'] = Security
+routes['/settings/certificates'] = Certificates
 routes['/settings/terminal'] = Terminal
 routes['/settings/about'] = About
 
@@ -71,8 +71,10 @@ export const LEGACY_ROUTES = {
   '/configuration': '/settings',
   '/configuration/selfproduction': '/settings/solar',
   '/configuration/dev': '/settings/terminal',
-  // Certificates was folded into the new Security page.
-  '/configuration/certificates': '/settings/security',
+  '/configuration/certificates': '/settings/certificates',
+  // The short-lived combined "Security" page was reverted to Certificates;
+  // boot lock + heartbeat moved to the Safety page.
+  '/settings/security': '/settings/certificates',
 }
 for (const page of [
   'safety', 'evse', 'mqtt', 'http', 'ocpp', 'network', 'firmware', 'time',

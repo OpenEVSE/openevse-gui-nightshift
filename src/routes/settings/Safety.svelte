@@ -14,8 +14,25 @@
   import Toggle from '../../lib/components/ui/Toggle.svelte'
   import Slider from '../../lib/components/ui/Slider.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
+  import NumberInput from '../../lib/components/ui/NumberInput.svelte'
 
   const form = createConfigForm()
+
+  let heartbeatEnabled = $derived(($config_store?.heartbeat_interval ?? 0) > 0)
+
+  function setHeartbeat(enabled) {
+    if (enabled) {
+      // Restore sensible defaults; keep any previously saved current > 0
+      const interval = 5
+      const current = ($config_store?.heartbeat_current ?? 0) > 0
+        ? $config_store.heartbeat_current
+        : 6
+      form.saveFields({ heartbeat_interval: interval, heartbeat_current: current })
+    } else {
+      // Set interval=0 to stop $SY pulses; current=0 for fail-safe
+      form.saveFields({ heartbeat_interval: 0, heartbeat_current: 0 })
+    }
+  }
 
   const CHECKS = [
     'gfci_check', 'ground_check', 'relay_check',
@@ -161,6 +178,62 @@
           </span>
         </div>
       </FormField>
+    {/if}
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.security.firmware_security')}>
+    {#if $config_store?.boot_lock !== undefined}
+      <FormField
+        label={$_('config.security.boot_lock')}
+        description={$_('config.security.boot_lock_desc')}
+      >
+        <Toggle
+          checked={!!$config_store?.boot_lock}
+          label={$_('config.security.boot_lock')}
+          onchange={(v) => form.saveField('boot_lock', v)}
+        />
+      </FormField>
+    {/if}
+
+    {#if $config_store?.heartbeat_interval !== undefined}
+      <FormField
+        label={$_('config.security.heartbeat')}
+        description={$_('config.security.heartbeat_desc')}
+      >
+        <Toggle
+          checked={heartbeatEnabled}
+          label={$_('config.security.heartbeat')}
+          onchange={setHeartbeat}
+        />
+      </FormField>
+      {#if heartbeatEnabled}
+        <FormField label={$_('config.security.heartbeat_interval')}>
+          <NumberInput
+            value={$config_store?.heartbeat_interval ?? 5}
+            min={1}
+            max={60}
+            revert={form.revert}
+            onchange={(v) => form.saveField('heartbeat_interval', v)}
+          />
+        </FormField>
+        <FormField
+          label={$_('config.security.heartbeat_current')}
+          description={`${$config_store?.heartbeat_current ?? 6} A`}
+        >
+          <div class="flex items-center gap-3">
+            <Slider
+              min={6}
+              max={24}
+              step={1}
+              value={$config_store?.heartbeat_current ?? 6}
+              onchange={(v) => form.saveField('heartbeat_current', v)}
+            />
+            <span class="w-12 text-right text-sm tabular-nums text-text">
+              {$config_store?.heartbeat_current ?? 6} A
+            </span>
+          </div>
+        </FormField>
+      {/if}
     {/if}
   </ConfigSection>
 </ConfigPage>
