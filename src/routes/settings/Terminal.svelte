@@ -1,8 +1,10 @@
 <!-- src/routes/settings/Terminal.svelte -->
 <script>
+  import { get } from 'svelte/store'
   import { _ } from 'svelte-i18n'
   import { httpAPI } from '../../lib/api/httpAPI.js'
   import { uisettings_store } from '../../lib/stores/uisettings.js'
+  import { uistates_store } from '../../lib/stores/uistates.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
   import FormField from '../../lib/components/config/FormField.svelte'
@@ -18,11 +20,11 @@
 
   // JuiceBox hardware has no OpenEVSE EVSE module and does not speak RAPI, so the
   // command console drops the RAPI branding and the bare "$" RAPI prefix there.
-  // Read import.meta.env inline (like the chart lazy guards) so esbuild can
-  // constant-fold it and the standard build is unaffected. VITE_JUICEBOX=true is
-  // set by the build:juicebox script in package.json.
-  const isJuicebox = import.meta.env.VITE_JUICEBOX === 'true'
-  const cmdDefault = isJuicebox ? '' : '$'
+  // RAPI support is a runtime capability, probed once at startup into
+  // uistates.rapi_available (see FetchData) — so a single build adapts to either
+  // hardware. It's constant for the session, so read it once at init.
+  const speaksRapi = get(uistates_store)?.rapi_available !== false
+  const cmdDefault = speaksRapi ? '$' : ''
 
   let command = $state(cmdDefault)
   let results = $state([])
@@ -57,7 +59,7 @@
 </script>
 
 <ConfigPage title={$_('config.pages.terminal')}>
-  <ConfigSection title={isJuicebox ? $_('config.terminal.console') : $_('config.terminal.rapi')}>
+  <ConfigSection title={speaksRapi ? $_('config.terminal.rapi') : $_('config.terminal.console')}>
     {#if results.length > 0}
       <div class="mb-3 max-h-60 overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs">
         {#each results as r}

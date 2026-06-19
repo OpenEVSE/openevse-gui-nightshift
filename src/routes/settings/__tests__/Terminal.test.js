@@ -1,5 +1,5 @@
 // src/routes/settings/__tests__/Terminal.test.js
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -8,17 +8,21 @@ vi.mock('svelte-i18n', () => {
   return { _: t }
 })
 vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn() }))
+// Real writable so the component's get(uistates_store) reads what we set.
+vi.mock('../../../lib/stores/uistates.js', async () => {
+  const { writable } = await vi.importActual('svelte/store')
+  return { uistates_store: writable({ rapi_available: true }) }
+})
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
+import { uistates_store } from '../../../lib/stores/uistates.js'
 import Terminal from '../Terminal.svelte'
 
 beforeEach(() => {
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ cmd: '$GE', ret: '$OK 0 0^20' })
-})
-
-afterEach(() => {
-  vi.unstubAllEnvs()
+  // Default: a RAPI-capable device (the startup probe sets this; see FetchData).
+  uistates_store.set({ rapi_available: true })
 })
 
 describe('Terminal page', () => {
@@ -60,8 +64,8 @@ describe('Terminal page', () => {
     expect(getByLabelText('config.terminal.command').value).toBe('$')
   })
 
-  it('on JuiceBox the console drops RAPI branding and the "$" default', () => {
-    vi.stubEnv('VITE_JUICEBOX', 'true')
+  it('on a non-RAPI device the console drops RAPI branding and the "$" default', () => {
+    uistates_store.set({ rapi_available: false })
     const { getByLabelText, getByText, queryByText } = render(Terminal)
     // Generic title, not the RAPI one.
     expect(getByText('config.terminal.console')).toBeInTheDocument()
@@ -70,8 +74,8 @@ describe('Terminal page', () => {
     expect(getByLabelText('config.terminal.command').value).toBe('')
   })
 
-  it('on JuiceBox an empty command (no "$" default) does not send', async () => {
-    vi.stubEnv('VITE_JUICEBOX', 'true')
+  it('on a non-RAPI device an empty command (no "$" default) does not send', async () => {
+    uistates_store.set({ rapi_available: false })
     const { getByLabelText, getByText } = render(Terminal)
     await fireEvent.keyDown(getByLabelText('config.terminal.command'), { key: 'Enter' })
     await fireEvent.click(getByText('config.terminal.send'))

@@ -44,6 +44,11 @@
     // Either way startup proceeds — we just hide the History tab when absent.
     const logs = await serialQueue.add(() => httpAPI('GET', '/logs'))
     $uistates_store.history_available = !!logs && logs !== 'error' && logs.msg !== 'error'
+    // Non-fatal capability probe: $GV (get version) is a read-only RAPI command.
+    // OpenEVSE answers it; a device with no EVSE module / no RAPI passthrough
+    // (JuiceBox) errors. Drives the dev console's RAPI branding + "$" default.
+    const rapi = await serialQueue.add(() => httpAPI('GET', '/r?json=1&rapi=$GV'))
+    $uistates_store.rapi_available = !!rapi && rapi !== 'error' && rapi.ret !== undefined
     onStatus('ok')
     onLoaded()
   }
