@@ -24,7 +24,6 @@
 
   let stateOptions = $derived([
     { value: 'active', label: $_('schedule.active') },
-    { value: 'eco', label: $_('schedule.eco') },
     { value: 'disabled', label: $_('schedule.disabled') },
   ])
 

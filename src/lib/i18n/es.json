@@ -455,7 +455,6 @@
     "state": "Estado",
     "active": "Activo",
     "disabled": "Desactivado",
-    "eco": "Eco",
     "select_all": "Seleccionar todos",
     "clear_all": "Limpiar todos",
     "save": "Guardar",
@@ -500,7 +499,6 @@
       "limit_reached": "Límite de carga alcanzado · {value}",
       "timer": "Temporizador · apagado desde {since}",
       "timer_on": "enciende a las {at}",
-      "timer_eco": "eco a las {at}",
       "eco_waiting": "Eco · esperando excedente",
       "ocpp": "Controlado por OCPP",
       "rfid": "Esperando tarjeta RFID"

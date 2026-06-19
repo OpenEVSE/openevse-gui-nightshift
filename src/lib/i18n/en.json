@@ -455,7 +455,6 @@
     "state": "State",
     "active": "Active",
     "disabled": "Disabled",
-    "eco": "Eco",
     "select_all": "Select all",
     "clear_all": "Clear all",
     "save": "Save",
@@ -500,7 +499,6 @@
       "limit_reached": "Charge limit reached · {value}",
       "timer": "Timer · off since {since}",
       "timer_on": "on at {at}",
-      "timer_eco": "eco at {at}",
       "eco_waiting": "Eco · waiting for surplus power",
       "ocpp": "Controlled by OCPP",
       "rfid": "Waiting for RFID card"

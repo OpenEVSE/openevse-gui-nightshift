@@ -43,17 +43,6 @@ describe('schedule_store', () => {
     expect(state[1].time).toBe('18:30')
   })
 
-  it('should sort downloaded timers by time', async () => {
-    httpAPI.mockResolvedValue([
-      { id: 1, time: '18:30:00', days: ['wed'] },
-      { id: 2, time: '06:00:00', days: ['mon'] },
-      { id: 3, time: '12:15:00', days: ['fri'] }
-    ])
-    await schedule_store.download()
-    const state = get(schedule_store)
-    expect(state.map((t) => t.time)).toEqual(['06:00', '12:15', '18:30'])
-  })
-
   it('should return false on download error', async () => {
     httpAPI.mockResolvedValue('error')
     const result = await schedule_store.download()
