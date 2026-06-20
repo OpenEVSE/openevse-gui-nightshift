@@ -22,6 +22,7 @@ import Ohmconnect from '../routes/settings/Ohmconnect.svelte'
 import Firmware from '../routes/settings/Firmware.svelte'
 import Certificates from '../routes/settings/Certificates.svelte'
 import Terminal from '../routes/settings/Terminal.svelte'
+import Display from '../routes/settings/Display.svelte'
 import About from '../routes/settings/About.svelte'
 
 export const routes = {
@@ -61,6 +62,7 @@ routes['/settings/ohmconnect'] = Ohmconnect
 routes['/settings/firmware'] = Firmware
 routes['/settings/certificates'] = Certificates
 routes['/settings/terminal'] = Terminal
+routes['/settings/display'] = Display
 routes['/settings/about'] = About
 
 // Hash routes from the previous UI mapped to their new homes, so bookmarks

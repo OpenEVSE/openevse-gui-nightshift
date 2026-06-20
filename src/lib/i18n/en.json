@@ -143,7 +143,15 @@
       "security": "Security",
       "certificates": "Certificates",
       "terminal": "Developer Tools",
+      "display": "Display",
       "about": "About"
+    },
+    "display": {
+      "panel": "On-device display",
+      "theme": "Display theme",
+      "theme_desc": "Theme for the charger's built-in screen.",
+      "dark": "Dark",
+      "light": "Light"
     },
     "validation": {
       "required": "Required",

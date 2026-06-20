@@ -143,7 +143,15 @@
       "security": "Biztonság",
       "certificates": "Tanúsítványok",
       "terminal": "Fejlesztői eszközök",
+      "display": "Kijelző",
       "about": "Névjegy"
+    },
+    "display": {
+      "panel": "Eszköz kijelzője",
+      "theme": "Kijelző téma",
+      "theme_desc": "A töltő beépített kijelzőjének témája.",
+      "dark": "Sötét",
+      "light": "Világos"
     },
     "validation": {
       "required": "Kötelező",

@@ -25,6 +25,9 @@ export const SETTINGS_PAGES = [
   { key: 'firmware', route: '/settings/firmware', icon: 'mdi:chip', labelKey: 'config.pages.firmware', section: 'system' },
   { key: 'certificates', route: '/settings/certificates', icon: 'mdi:certificate', labelKey: 'config.pages.certificates', section: 'system' },
   { key: 'terminal', route: '/settings/terminal', icon: 'mdi:console', labelKey: 'config.pages.terminal', section: 'system' },
+  // Only present on firmware with the on-device LVGL TFT panel — `tft_theme`
+  // appears in /config there, so it doubles as the "has a panel" capability gate.
+  { key: 'display', route: '/settings/display', icon: 'mdi:monitor', labelKey: 'config.pages.display', section: 'system', requires: 'tft_theme' },
   { key: 'about', route: '/settings/about', icon: 'mdi:information-outline', labelKey: 'config.pages.about', section: 'system' },
 ]
 

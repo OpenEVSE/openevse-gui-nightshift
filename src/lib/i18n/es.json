@@ -143,7 +143,15 @@
       "security": "Seguridad",
       "certificates": "Certificados",
       "terminal": "Herramientas de desarrollo",
+      "display": "Pantalla",
       "about": "Acerca de"
+    },
+    "display": {
+      "panel": "Pantalla del dispositivo",
+      "theme": "Tema de la pantalla",
+      "theme_desc": "Tema de la pantalla integrada del cargador.",
+      "dark": "Oscuro",
+      "light": "Claro"
     },
     "validation": {
       "required": "Obligatorio",

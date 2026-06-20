@@ -26,7 +26,8 @@ describe('Settings hub', () => {
     }
   })
   it('renders a link for every config page plus the support links', () => {
-    config_store.set({})
+    // tft_theme present so the capability-gated Display page renders too.
+    config_store.set({ tft_theme: 'dark' })
     const { getAllByRole } = render(Settings)
     const links = getAllByRole('link')
     expect(links).toHaveLength(SETTINGS_PAGES.length + SUPPORT_LINKS.length)
