@@ -42,6 +42,20 @@ describe('sensorMetrics', () => {
     expect(byLabel['monitoring.sensor.temp4']).toBeUndefined() // missing → omitted
     expect(byLabel['monitoring.sensor.scale']).toBe(454)
   })
+
+  it('scales frequency by 100 when reported (D9 controllers)', () => {
+    const g = sensorMetrics({ pilot: 32, frequency: 5000 }, {})
+    const byLabel = Object.fromEntries(g.rows.map((r) => [r.labelKey, r.value]))
+    expect(byLabel['monitoring.sensor.frequency']).toBe(50) // 5000 / 100 = 50.00 Hz
+  })
+
+  it('omits the frequency row when unsupported (pre-D9) or zero', () => {
+    const absent = sensorMetrics({ pilot: 32 }, {})
+    const zero = sensorMetrics({ pilot: 32, frequency: 0 }, {})
+    const labels = (g) => g.rows.map((r) => r.labelKey)
+    expect(labels(absent)).not.toContain('monitoring.sensor.frequency')
+    expect(labels(zero)).not.toContain('monitoring.sensor.frequency')
+  })
 })
 
 describe('serviceMetrics', () => {

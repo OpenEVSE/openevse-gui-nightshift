@@ -68,3 +68,33 @@ describe('Safety page', () => {
     })
   })
 })
+
+describe('Safety page — firmware security', () => {
+  it('hides the heartbeat controls when the device does not report them', () => {
+    config_store.set({ ...ALL_ON })
+    const { queryByText } = render(Safety)
+    expect(queryByText('config.security.heartbeat')).not.toBeInTheDocument()
+  })
+
+  it('shows interval + fail-current controls when heartbeat is enabled', () => {
+    config_store.set({ ...ALL_ON, heartbeat_interval: 5, heartbeat_current: 6 })
+    const { getByText } = render(Safety)
+    expect(getByText('config.security.heartbeat_interval')).toBeInTheDocument()
+    expect(getByText('config.security.heartbeat_current')).toBeInTheDocument()
+  })
+
+  it('disabling heartbeat zeroes both interval and fail-current ($SY off)', async () => {
+    httpAPI.mockResolvedValue({ msg: 'done' })
+    config_store.set({ ...ALL_ON, heartbeat_interval: 5, heartbeat_current: 6 })
+    const { getAllByLabelText } = render(Safety)
+    // The heartbeat enable toggle is the one labelled config.security.heartbeat.
+    await fireEvent.click(getAllByLabelText('config.security.heartbeat')[0])
+    await vi.waitFor(() => {
+      const post = httpAPI.mock.calls.find(([m, u]) => m === 'POST' && u === '/config')
+      expect(post).toBeTruthy()
+      const body = JSON.parse(post[2])
+      expect(body.heartbeat_interval).toBe(0)
+      expect(body.heartbeat_current).toBe(0)
+    })
+  })
+})

@@ -71,10 +71,14 @@ export const LEGACY_ROUTES = {
   '/configuration': '/settings',
   '/configuration/selfproduction': '/settings/solar',
   '/configuration/dev': '/settings/terminal',
+  '/configuration/certificates': '/settings/certificates',
+  // The short-lived combined "Security" page was reverted to Certificates;
+  // boot lock + heartbeat moved to the Safety page.
+  '/settings/security': '/settings/certificates',
 }
 for (const page of [
   'safety', 'evse', 'mqtt', 'http', 'ocpp', 'network', 'firmware', 'time',
-  'shaper', 'vehicle', 'emoncms', 'ohmconnect', 'about', 'certificates',
+  'shaper', 'vehicle', 'emoncms', 'ohmconnect', 'about',
 ]) {
   LEGACY_ROUTES['/configuration/' + page] = '/settings/' + page
 }
