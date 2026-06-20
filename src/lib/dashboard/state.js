@@ -89,19 +89,17 @@ const hhmm = (t) => (typeof t === 'string' ? t.slice(0, 5) : t)
 export function connectedReason(mode, plan, owner = '') {
   const cur = plan?.current_event
   const next = plan?.next_event
-  if (owner === 'timer' && next?.time && (next.state === 'active' || next.state === 'eco')) {
+  if (owner === 'timer' && next?.time && next.state === 'active') {
     // The scheduler switched charging off. Spell out the window: when it
     // went off and when it comes back, or just the next flip if the device
-    // didn't report a current event. An eco event resumes into solar divert
-    // rather than a fixed timer charge, so name the resume accordingly.
+    // didn't report a current event.
     if (cur?.time) {
       // Two lines: dim context ("Timer · off since …") over an emphasized
-      // resume time, the actionable fact when you're standing at the charger.
-      const resumeKey = next.state === 'eco' ? 'dashboard.reason.timer_eco' : 'dashboard.reason.timer_on'
+      // resume time — the actionable fact when you're standing at the charger.
       return {
         key: 'dashboard.reason.timer',
         values: { since: hhmm(cur.time) },
-        detail: { key: resumeKey, values: { at: hhmm(next.time) } },
+        detail: { key: 'dashboard.reason.timer_on', values: { at: hhmm(next.time) } },
       }
     }
     return { key: 'dashboard.reason.waiting', values: { time: hhmm(next.time) } }

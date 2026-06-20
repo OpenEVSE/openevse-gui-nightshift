@@ -22,7 +22,10 @@ describe('legacy route aliases', () => {
     expect(LEGACY_ROUTES['/configuration/dev']).toBe('/settings/terminal')
     expect(LEGACY_ROUTES['/configuration/evse']).toBe('/settings/evse')
     expect(LEGACY_ROUTES['/configuration']).toBe('/settings')
-    // 14 straight moves + 2 renames + the index
-    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(17)
+    // The short-lived combined Security page reverted to Certificates
+    expect(LEGACY_ROUTES['/settings/security']).toBe('/settings/certificates')
+    expect(LEGACY_ROUTES['/configuration/certificates']).toBe('/settings/certificates')
+    // 14 straight moves + 2 renames + the index + the security->certificates revert
+    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(18)
   })
 })

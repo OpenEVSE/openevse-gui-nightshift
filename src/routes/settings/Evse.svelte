@@ -93,7 +93,58 @@
         ? `${$config_store.max_current_hard} A`
         : ''}
     />
+    {#if $config_store?.voltage !== undefined}
+      <FormField
+        label={$_('config.evse.voltage')}
+        description={$_('config.evse.voltage_desc')}
+        status={$ss.voltage ?? 'idle'}
+      >
+        <div class="flex items-center gap-2">
+          <NumberInput
+            value={$config_store?.voltage ? $config_store.voltage / 100 : 0}
+            min={60}
+            max={300}
+            step={0.01}
+            revert={form.revert}
+            onchange={(v) => form.saveField('voltage', v ? Math.round(v * 100) : 0)}
+          />
+          <span class="text-sm text-text-dim">V</span>
+        </div>
+      </FormField>
+    {/if}
   </ConfigSection>
+
+  {#if $config_store?.relay_dc1 !== undefined || $config_store?.relay_dc2 !== undefined || $config_store?.relay_ac !== undefined}
+    <ConfigSection title={$_('config.evse.relays')}>
+      {#if $config_store?.relay_dc1 !== undefined}
+        <FormField label={$_('config.evse.relay_dc1')} status={$ss.relay_dc1 ?? 'idle'}>
+          <Toggle
+            checked={!!$config_store?.relay_dc1}
+            label={$_('config.evse.relay_dc1')}
+            onchange={(v) => form.saveField('relay_dc1', v)}
+          />
+        </FormField>
+      {/if}
+      {#if $config_store?.relay_dc2 !== undefined}
+        <FormField label={$_('config.evse.relay_dc2')} status={$ss.relay_dc2 ?? 'idle'}>
+          <Toggle
+            checked={!!$config_store?.relay_dc2}
+            label={$_('config.evse.relay_dc2')}
+            onchange={(v) => form.saveField('relay_dc2', v)}
+          />
+        </FormField>
+      {/if}
+      {#if $config_store?.relay_ac !== undefined}
+        <FormField label={$_('config.evse.relay_ac')} status={$ss.relay_ac ?? 'idle'}>
+          <Toggle
+            checked={!!$config_store?.relay_ac}
+            label={$_('config.evse.relay_ac')}
+            onchange={(v) => form.saveField('relay_ac', v)}
+          />
+        </FormField>
+      {/if}
+    </ConfigSection>
+  {/if}
 
   <ConfigSection title={$_('config.evse.behaviour')}>
     {#if $config_store?.default_state !== undefined}
@@ -128,6 +179,19 @@
         onchange={(v) => form.saveField('pause_uses_disabled', v)}
       />
     </FormField>
+    {#if $config_store?.pp_auto !== undefined}
+      <FormField
+        label={$_('config.evse.pp_auto')}
+        description={$_('config.evse.pp_auto_desc')}
+        status={$ss.pp_auto ?? 'idle'}
+      >
+        <Toggle
+          checked={!!$config_store?.pp_auto}
+          label={$_('config.evse.pp_auto')}
+          onchange={(v) => form.saveField('pp_auto', v)}
+        />
+      </FormField>
+    {/if}
     {#if $config_store?.button_enabled !== undefined}
       <FormField
         label={$_('config.evse.front_button')}

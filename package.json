@@ -1,7 +1,7 @@
 {
   "name": "openevse-gui-nightshift",
   "private": true,
-  "version": "2026.24.0",
+  "version": "2026.25.0",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {
@@ -19,15 +19,15 @@
     "@tailwindcss/vite": "^4.3.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/svelte": "^5.3.1",
-    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/coverage-v8": "^4.1.9",
     "jsdom": "^29.1.1",
-    "sharp": "^0.35.1",
+    "sharp": "^0.35.2",
     "svelte": "^5.56.3",
     "tailwindcss": "^4.3.1",
     "vite": "^8.0.16",
     "vite-plugin-compression2": "^2.5.3",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.8",
+    "vitest": "^4.1.9",
     "ws": "^8.21.0"
   },
   "dependencies": {

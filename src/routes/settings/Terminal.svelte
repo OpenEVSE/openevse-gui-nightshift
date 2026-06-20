@@ -22,6 +22,16 @@
   let consoleMode = $state(null) // 'debug' | 'evse' | null
   let exportedFile = $state('')
 
+  // Keep the newest reply in view: the results log is a fixed-height scroll box,
+  // so without this a command sent from the bottom would append below the fold
+  // and look like nothing happened (issue #31). Re-pin to the bottom whenever an
+  // entry is appended.
+  let logEl = $state(null)
+  $effect(() => {
+    results.length
+    if (logEl) logEl.scrollTop = logEl.scrollHeight
+  })
+
   function exportDiagnostics() {
     exportedFile = downloadDiagnostics()
     // Clear the "downloaded X" hint after a few seconds.
@@ -51,7 +61,7 @@
 <ConfigPage title={$_('config.pages.terminal')}>
   <ConfigSection title={$_('config.terminal.rapi')}>
     {#if results.length > 0}
-      <div class="mb-3 max-h-60 overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs">
+      <div bind:this={logEl} class="mb-3 max-h-60 overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs">
         {#each results as r}
           <div class="text-text-dim">&gt; {r.cmd}</div>
           {#if r.error}

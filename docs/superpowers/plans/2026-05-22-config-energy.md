@@ -915,7 +915,7 @@ describe('OhmConnect page', () => {
   "posts": "Posts (ok / sent)",
   "account": "Account",
   "server": "EmonCMS server",
-  "server_desc": "e.g. emoncms.org or data.openevse.com/emoncms",
+  "server_desc": "e.g. emoncms.org",
   "node": "Node",
   "apikey": "Write API key"
 },

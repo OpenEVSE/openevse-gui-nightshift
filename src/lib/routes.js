@@ -23,6 +23,7 @@ import Ohmconnect from '../routes/settings/Ohmconnect.svelte'
 import Firmware from '../routes/settings/Firmware.svelte'
 import Certificates from '../routes/settings/Certificates.svelte'
 import Terminal from '../routes/settings/Terminal.svelte'
+import Display from '../routes/settings/Display.svelte'
 import About from '../routes/settings/About.svelte'
 
 export const routes = {
@@ -63,6 +64,7 @@ routes['/settings/ohmconnect'] = Ohmconnect
 routes['/settings/firmware'] = Firmware
 routes['/settings/certificates'] = Certificates
 routes['/settings/terminal'] = Terminal
+routes['/settings/display'] = Display
 routes['/settings/about'] = About
 
 // Hash routes from the previous UI mapped to their new homes, so bookmarks
@@ -73,10 +75,14 @@ export const LEGACY_ROUTES = {
   '/configuration': '/settings',
   '/configuration/selfproduction': '/settings/solar',
   '/configuration/dev': '/settings/terminal',
+  '/configuration/certificates': '/settings/certificates',
+  // The short-lived combined "Security" page was reverted to Certificates;
+  // boot lock + heartbeat moved to the Safety page.
+  '/settings/security': '/settings/certificates',
 }
 for (const page of [
   'safety', 'evse', 'mqtt', 'http', 'ocpp', 'network', 'firmware', 'time',
-  'shaper', 'vehicle', 'emoncms', 'ohmconnect', 'about', 'certificates',
+  'shaper', 'vehicle', 'emoncms', 'ohmconnect', 'about',
 ]) {
   LEGACY_ROUTES['/configuration/' + page] = '/settings/' + page
 }

@@ -112,6 +112,32 @@ export function mockPlugin() {
           return
         }
 
+        // /time: GET returns NTP status; POST with sync_now=true triggers sync
+        if (url === '/api/time') {
+          if (req.method === 'POST') {
+            let body = ''
+            req.on('data', (c) => { body += c })
+            req.on('end', () => {
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end('{"msg":"done"}')
+            })
+            return
+          }
+          // GET: return a plausible NTP status snapshot
+          const nowSec = Math.floor(Date.now() / 1000)
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({
+            sntp_enabled: true,
+            time: new Date().toISOString(),
+            time_zone: 'Europe/London|GMT0BST,M3.5.0/1,M10.5.0',
+            ntp_status: 'synchronized',
+            ntp_last_sync: nowSec - 312,        // 5m 12s ago
+            ntp_next_sync_ms: 28440000,          // ~7h 54m
+            ntp_server_ip: '185.96.2.100',
+          }))
+          return
+        }
+
         // Status reflects any runtime override so a fresh load matches the WS.
         if (url === '/api/status') {
           res.writeHead(200, { 'Content-Type': 'application/json' })

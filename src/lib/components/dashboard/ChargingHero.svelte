@@ -15,6 +15,7 @@
     rateNonce = 0,
     samples = [],
     voltage = 0,
+    phases = 1,
     sessionElapsed = 0,
     chartError = false,
     rateDisabled = false,
@@ -51,6 +52,6 @@
   </div>
 
   {#if !chartError}
-    <SessionChart {samples} {voltage} {target} {sessionElapsed} />
+    <SessionChart {samples} {voltage} {phases} {target} {sessionElapsed} />
   {/if}
 </div>

@@ -9,8 +9,8 @@
     buildSessionOpts,
   } from '../../dashboard/sessionChart.js'
 
-  /** @type {{ samples: Array<{ts:number,a:number,t:number,e:number,s:number}>, voltage:number, target:number|null, sessionElapsed:number }} */
-  let { samples = [], voltage = 0, target = null, sessionElapsed = 0 } = $props()
+  /** @type {{ samples: Array<{ts:number,a:number,t:number,e:number,s:number}>, voltage:number, target:number|null, sessionElapsed:number, phases:number }} */
+  let { samples = [], voltage = 0, target = null, sessionElapsed = 0, phases = 1 } = $props()
 
   // Size the chart to the viewport so it grows on taller windows: ~42% of the
   // window height, clamped to 150–520px. Passed straight to uPlot as a pixel
@@ -20,7 +20,7 @@
   let height = $derived(Math.round(Math.min(420, Math.max(130, winH * 0.33))))
 
   let clipped = $derived(clipToSession(samples, sessionElapsed))
-  let data = $derived(toChartData(clipped, voltage)) // [x, soc, kw]
+  let data = $derived(toChartData(clipped, voltage, phases)) // [x, soc, kw]
   // Keep kwMax (the right-axis ceiling) as its own number-valued derived so it
   // only changes when the rounded peak changes. opts then keeps a stable
   // reference across the 10s data poll, so UplotChart takes the cheap setData

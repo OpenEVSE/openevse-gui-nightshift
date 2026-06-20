@@ -28,8 +28,13 @@ describe('clipToSession', () => {
 })
 
 describe('sampleKw', () => {
-  it('returns kW = amps * volts / 1000', () => {
+  it('returns kW = amps * volts / 1000 (single phase by default)', () => {
     expect(sampleKw({ a: 32 }, 240)).toBeCloseTo(7.68)
+    expect(sampleKw({ a: 32 }, 240, 1)).toBeCloseTo(7.68)
+  })
+  it('multiplies by the phase count on a 3-phase device', () => {
+    // The firmware reports per-phase amps; total power is amps * volts * phases.
+    expect(sampleKw({ a: 32 }, 240, 3)).toBeCloseTo(23.04)
   })
   it('returns null when voltage is missing or zero', () => {
     expect(sampleKw({ a: 32 }, 0)).toBeNull()
@@ -59,6 +64,12 @@ describe('toChartData', () => {
     expect(soc).toEqual([50, null, 60]) // -1 -> null gap
     expect(kw[0]).toBeCloseTo(7.68)
     expect(kw[1]).toBeCloseTo(3.84)
+  })
+  it('triples the kW values when given 3 phases', () => {
+    const samples = [S(1000, 32, 50), S(1300, 16, -1)]
+    const [, , kw] = toChartData(samples, 240, 3)
+    expect(kw[0]).toBeCloseTo(23.04)
+    expect(kw[1]).toBeCloseTo(11.52)
   })
 })
 
@@ -111,6 +122,12 @@ describe('buildSessionOpts', () => {
     expect(o.plugins).toHaveLength(2)
     expect(typeof o.plugins[0].hooks.draw).toBe('function')
     expect(typeof o.plugins[1].hooks.draw).toBe('function')
+  })
+  it('labels the soc (left) and kW (right) value axes', () => {
+    const o = buildSessionOpts({ theme, target: 80, kwMax: 8 })
+    // axes: [x, soc, kw]
+    expect(o.axes[1].label).toBe('SOC %')
+    expect(o.axes[2].label).toBe('kW')
   })
 })
 
