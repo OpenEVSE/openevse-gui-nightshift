@@ -70,7 +70,7 @@ describe('Display page', () => {
   })
 
   it('shows the timeout slider enabled with Never off when timeout is non-zero', () => {
-    config_store.set({ tft_theme: 'dark', tft_timeout: 600 })
+    config_store.set({ tft_theme: 'dark', lcd_backlight_timeout: 600 })
     const { getByLabelText } = render(Display)
     const slider = getByLabelText('config.display.timeout')
     expect(slider).toHaveValue('600')
@@ -79,28 +79,28 @@ describe('Display page', () => {
   })
 
   it('writes 0 when Never is toggled on, and disables the slider', async () => {
-    config_store.set({ tft_theme: 'dark', tft_timeout: 600 })
+    config_store.set({ tft_theme: 'dark', lcd_backlight_timeout: 600 })
     const { getByLabelText } = render(Display)
     await fireEvent.click(getByLabelText('config.display.never'))
-    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ tft_timeout: 0 }))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_backlight_timeout: 0 }))
   })
 
   it('shows Never on and the slider disabled when timeout is 0', () => {
-    config_store.set({ tft_theme: 'dark', tft_timeout: 0 })
+    config_store.set({ tft_theme: 'dark', lcd_backlight_timeout: 0 })
     const { getByLabelText } = render(Display)
     expect(getByLabelText('config.display.never')).toHaveAttribute('aria-checked', 'true')
     expect(getByLabelText('config.display.timeout')).toBeDisabled()
   })
 
   it('restores the last non-zero value when Never is toggled back off', async () => {
-    config_store.set({ tft_theme: 'dark', tft_timeout: 900 })
+    config_store.set({ tft_theme: 'dark', lcd_backlight_timeout: 900 })
     const { getByLabelText } = render(Display)
     // Never on -> writes 0
     await fireEvent.click(getByLabelText('config.display.never'))
-    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ tft_timeout: 0 }))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_backlight_timeout: 0 }))
     // store now reflects 0; toggling Never off should restore the remembered 900
-    config_store.update((c) => ({ ...c, tft_timeout: 0 }))
+    config_store.update((c) => ({ ...c, lcd_backlight_timeout: 0 }))
     await fireEvent.click(getByLabelText('config.display.never'))
-    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ tft_timeout: 900 }))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_backlight_timeout: 900 }))
   })
 })

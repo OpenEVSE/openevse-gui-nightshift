@@ -16,12 +16,12 @@
   // Every control here maps to an LVGL-TFT firmware config key. The firmware
   // only emits a key in GET /config when it supports it, so each control is
   // gated on the key being *present* (`in`), not truthy — `tft_standby_brightness`
-  // and `tft_timeout` are validly 0 (backlight off / never sleep) and a
+  // and `lcd_backlight_timeout` are validly 0 (backlight off / never sleep) and a
   // truthiness gate would wrongly hide those configurations.
   let cfg = $derived($config_store ?? {})
   let hasBrightness = $derived('tft_brightness' in cfg)
   let hasStandby = $derived('tft_standby_brightness' in cfg)
-  let hasTimeout = $derived('tft_timeout' in cfg)
+  let hasTimeout = $derived('lcd_backlight_timeout' in cfg)
 
   // On-device LVGL panel theme (config key `tft_theme`) — distinct from the web
   // UI's own site theme. Values mirror the GUI's [data-theme] tokens so the
@@ -43,7 +43,7 @@
   // Idle timeout, seconds. 0 = never sleep (Never toggle). The slider works in
   // 5–3600s; we remember the last non-zero value so toggling Never off restores
   // a sensible position rather than snapping to the floor.
-  let timeout = $derived(cfg.tft_timeout ?? 600)
+  let timeout = $derived(cfg.lcd_backlight_timeout ?? 600)
   let never = $derived(timeout === 0)
   let lastSecs = $state(600)
   $effect(() => {
@@ -59,7 +59,7 @@
   }
 
   function setNever(on) {
-    form.saveField('tft_timeout', on ? 0 : lastSecs)
+    form.saveField('lcd_backlight_timeout', on ? 0 : lastSecs)
   }
 </script>
 
@@ -117,7 +117,7 @@
       <FormField
         label={$_('config.display.timeout')}
         description={$_('config.display.timeout_desc')}
-        status={$ss.tft_timeout ?? 'idle'}
+        status={$ss.lcd_backlight_timeout ?? 'idle'}
       >
         <div class="flex items-center justify-between gap-3">
           <span class="text-xs text-text-dim">{fmtTimeout(sliderSecs)}</span>
@@ -138,7 +138,7 @@
           disabled={never}
           format={fmtTimeout}
           ariaLabel={$_('config.display.timeout')}
-          onchange={(v) => form.saveField('tft_timeout', v)}
+          onchange={(v) => form.saveField('lcd_backlight_timeout', v)}
         />
       </FormField>
     {/if}
