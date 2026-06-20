@@ -108,9 +108,25 @@ so edits hot-reload exactly as with the local `npm run dev` workflow.
 ## Build
 
 ```bash
-npm run build         # static, gzipped output in dist/ — ready to flash
+npm run build         # static, gzipped output in dist-full/ — ready to flash
 npm run preview       # serve the production build locally
 ```
+
+## Build targets
+
+- `npm run build` → `dist-full/` — ESP32 image (WebSocket transport + charts).
+- `npm run build:juicebox` → `dist-juicebox/` — JuiceBox/LibreTiny image; the
+  uplot chart chunk is stripped (`VITE_CHARTS=false`), Monitoring and the
+  dashboard session chart are gated off.
+- `npm run build:all` → both, then verifies the JuiceBox build shipped no chart chunk.
+
+Both builds are one source tree. Transport (WebSocket vs polling) is chosen at
+runtime; feature visibility is data-driven from the device's `/config` and
+endpoint responses. The only build-time difference is the chart chunk.
+
+This UI supersedes `openevse-gui-lite`, which is retired. Firmware dependencies
+(separate slice): the JuiceBox firmware must accept `POST /config` JSON and embed
+`dist-juicebox/`.
 
 ## Test
 

@@ -8,13 +8,21 @@ vi.mock('svelte-i18n', () => {
   return { _: t }
 })
 vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn() }))
+// Real writable so the component's get(uistates_store) reads what we set.
+vi.mock('../../../lib/stores/uistates.js', async () => {
+  const { writable } = await vi.importActual('svelte/store')
+  return { uistates_store: writable({ rapi_available: true }) }
+})
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
+import { uistates_store } from '../../../lib/stores/uistates.js'
 import Terminal from '../Terminal.svelte'
 
 beforeEach(() => {
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ cmd: '$GE', ret: '$OK 0 0^20' })
+  // Default: a RAPI-capable device (the startup probe sets this; see FetchData).
+  uistates_store.set({ rapi_available: true })
 })
 
 describe('Terminal page', () => {
@@ -48,6 +56,29 @@ describe('Terminal page', () => {
     await fireEvent.input(input, { target: { value: '   ' } })
     await fireEvent.keyDown(input, { key: 'Enter' })
 
+    expect(httpAPI).not.toHaveBeenCalled()
+  })
+
+  it('on a RAPI device the input defaults to the "$" prefix', () => {
+    const { getByLabelText } = render(Terminal)
+    expect(getByLabelText('config.terminal.command').value).toBe('$')
+  })
+
+  it('on a non-RAPI device the console drops RAPI branding and the "$" default', () => {
+    uistates_store.set({ rapi_available: false })
+    const { getByLabelText, getByText, queryByText } = render(Terminal)
+    // Generic title, not the RAPI one.
+    expect(getByText('config.terminal.console')).toBeInTheDocument()
+    expect(queryByText('config.terminal.rapi')).not.toBeInTheDocument()
+    // Command box starts empty — no "$" prefix.
+    expect(getByLabelText('config.terminal.command').value).toBe('')
+  })
+
+  it('on a non-RAPI device an empty command (no "$" default) does not send', async () => {
+    uistates_store.set({ rapi_available: false })
+    const { getByLabelText, getByText } = render(Terminal)
+    await fireEvent.keyDown(getByLabelText('config.terminal.command'), { key: 'Enter' })
+    await fireEvent.click(getByText('config.terminal.send'))
     expect(httpAPI).not.toHaveBeenCalled()
   })
 

@@ -106,6 +106,12 @@ describe('safetyData', () => {
     const d = safetyData({ state: 8, gfcicount: 0, nogndcount: 0, stuckcount: 0 }, true)
     expect(d.errors[0]).toEqual({ key: 'fault', state: 8, severity: 'error' })
   })
+  it('carries the JuiceBox wr + comms_online on the fault row', () => {
+    const d = safetyData({ state: 8, wr: '005:Pilot Signal Gen Fail:', comms_online: true }, true)
+    expect(d.errors[0]).toEqual({
+      key: 'fault', state: 8, wr: '005:Pilot Signal Gen Fail:', comms_online: true, severity: 'error',
+    })
+  })
 })
 
 describe('vehicleMetrics extras', () => {

@@ -7,8 +7,10 @@
   "scripts": {
     "dev": "vite",
     "dev:mock": "vite --mode mock",
-    "build": "vite build",
-    "preview": "vite preview",
+    "build": "vite build --outDir dist-full --emptyOutDir",
+    "build:juicebox": "VITE_CHARTS=false vite build --outDir dist-juicebox --emptyOutDir",
+    "build:all": "npm run build && npm run build:juicebox && node scripts/verify-juicebox-build.mjs",
+    "preview": "vite preview --outDir dist-full",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

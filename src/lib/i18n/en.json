@@ -2,6 +2,17 @@
   "app": "OpenEVSE",
   "loading": "Loading…",
   "notification": "Notification",
+  "jb-fault": {
+    "001": "FW Self Tests Failed",
+    "003": "No GND",
+    "004": "Short Circuit Pilot",
+    "005": "Pilot Signal Gen Fail",
+    "006": "GFI Auto Test Fail",
+    "007": "Relay Stuck Closed",
+    "008": "Ground Fault Int Lockout",
+    "101": "Ground Fault Int",
+    "102": "Relay Stuck Open"
+  },
   "logs-states": {
     "loading": "Starting",
     "active-nocar": "Active - Car not connected",
@@ -410,6 +421,7 @@
       "labs_enable": "Enable Labs features",
       "labs_desc": "Reveals in-development features that depend on matching firmware support. Leave off until the corresponding firmware is flashed.",
       "rapi": "RAPI command console",
+      "console": "Command console",
       "command": "Command",
       "send": "Send",
       "clear": "Clear",

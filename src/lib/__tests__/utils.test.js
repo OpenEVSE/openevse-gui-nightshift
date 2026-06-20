@@ -99,6 +99,8 @@ import {
   compareVersion,
   removeDuplicateObjects,
   validateFormData,
+  parseJbFault,
+  faultDesc,
 } from '../utils.js'
 
 describe('sec2time', () => {
@@ -558,5 +560,56 @@ describe('validateFormData', () => {
     }
     const result = validateFormData({ data, i18n_path: 'config.errors.', req: true })
     expect(result.ok).toBe(false)
+  })
+})
+
+describe('parseJbFault', () => {
+  it('parses a "NNN:Human text:" fault string', () => {
+    expect(parseJbFault('005:Pilot Signal Gen Fail:')).toEqual({ code: '005', text: 'Pilot Signal Gen Fail' })
+  })
+
+  it('keeps leading zeros in the code', () => {
+    expect(parseJbFault('007:Relay Stuck Closed:').code).toBe('007')
+  })
+
+  it('tolerates a missing trailing colon', () => {
+    expect(parseJbFault('101:Ground Fault Int')).toEqual({ code: '101', text: 'Ground Fault Int' })
+  })
+
+  it('returns null for non-strings and unparseable input', () => {
+    expect(parseJbFault(undefined)).toBeNull()
+    expect(parseJbFault(null)).toBeNull()
+    expect(parseJbFault('')).toBeNull()
+    expect(parseJbFault('not a fault')).toBeNull()
+  })
+})
+
+describe('faultDesc', () => {
+  it('resolves a known JuiceBox code to its localized jb-fault key on an error state', () => {
+    expect(faultDesc({ state: 8, comms_online: true, wr: '005:Pilot Signal Gen Fail:' }))
+      .toBe('jb-fault.005')
+  })
+
+  it('falls back to the raw wr text for an unknown code', () => {
+    expect(faultDesc({ state: 8, comms_online: true, wr: '999:Some New Fault:' }))
+      .toBe('Some New Fault')
+  })
+
+  it('ignores wr when comms are offline (stale) and uses the state label', () => {
+    expect(faultDesc({ state: 8, comms_online: false, wr: '005:Pilot Signal Gen Fail:' }))
+      .toBe('logs-states.error-relay')
+  })
+
+  it('ignores wr outside the error range (4–11)', () => {
+    expect(faultDesc({ state: 3, comms_online: true, wr: '005:Pilot Signal Gen Fail:' }))
+      .toBe('logs-states.active-charge')
+  })
+
+  it('falls back to the state label when wr is absent (OpenEVSE hardware)', () => {
+    expect(faultDesc({ state: 8 })).toBe('logs-states.error-relay')
+  })
+
+  it('tolerates null/undefined status', () => {
+    expect(faultDesc(undefined)).toBeUndefined()
   })
 })

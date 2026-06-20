@@ -13,7 +13,7 @@
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { EvseClients } from '../lib/vars.js'
-  import { sec2time, temp_round, round, clientid2name, getStateDesc } from '../lib/utils.js'
+  import { sec2time, temp_round, round, clientid2name, faultDesc } from '../lib/utils.js'
   import { formatTemp } from '../lib/temperature.js'
   import { formatCost } from '../lib/cost.js'
   import { showWriteError } from '../lib/alerts.js'
@@ -467,7 +467,7 @@
         reasonKey={reason.key}
         reasonValues={reason.values}
         reasonDetail={reason.detail ?? null}
-        faultText={getStateDesc($status_store?.state) ?? ''}
+        faultText={faultDesc($status_store) ?? ''}
       />
     </div>
   {/if}

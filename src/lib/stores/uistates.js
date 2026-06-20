@@ -25,6 +25,8 @@ const model = {
 		// local states
 		data_loaded: false,
 		ws_connected: true,
+		history_available: true,
+		rapi_available: true,
 		status_expanded: false,
 		breakpoint: undefined,
 		has_fetched: false,

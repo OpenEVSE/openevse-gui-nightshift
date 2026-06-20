@@ -7,7 +7,7 @@
   import Wizard from './routes/Wizard.svelte'
   import AlertBox from './lib/components/ui/AlertBox.svelte'
   import FetchData from './lib/data/FetchData.svelte'
-  import WebSocket from './lib/data/WebSocket.svelte'
+  import TransportManager from './lib/data/TransportManager.svelte'
   import DataManager from './lib/data/DataManager.svelte'
   import { config_store } from './lib/stores/config.js'
   import { uistates_store } from './lib/stores/uistates.js'
@@ -44,11 +44,11 @@
 {:else if !$config_store?.wizard_passed}
   <!-- First-run / unprovisioned device: gate the rest of the UI behind setup. -->
   <Wizard />
-  <WebSocket />
+  <TransportManager />
   <DataManager />
 {:else}
   <AppShell />
-  <WebSocket />
+  <TransportManager />
   <DataManager />
   <AlertBox
     visible={$uistates_store.alertbox.visible}

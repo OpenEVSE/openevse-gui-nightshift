@@ -1,7 +1,7 @@
 <script>
   import { _ } from 'svelte-i18n'
   import Card from '../ui/Card.svelte'
-  import { getStateDesc } from '../../utils.js'
+  import { faultDesc } from '../../utils.js'
 
   let { data = { errors: [], infos: [] } } = $props()
 
@@ -15,7 +15,9 @@
     return $_('monitoring.safety.' + row.key)
   }
   function rowValue(row) {
-    return row.key === 'fault' ? $_(getStateDesc(row.state)) : row.count
+    return row.key === 'fault'
+      ? $_(faultDesc({ state: row.state, wr: row.wr, comms_online: row.comms_online }))
+      : row.count
   }
 </script>
 

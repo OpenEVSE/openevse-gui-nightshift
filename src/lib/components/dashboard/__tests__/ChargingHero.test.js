@@ -36,8 +36,11 @@ describe('ChargingHero', () => {
     expect(queryByText('dashboard.session.soc_target:{"target":80}')).not.toBeInTheDocument()
   })
 
-  it('renders the chart (collecting placeholder) when there is no error', () => {
+  it('renders the chart (collecting placeholder) when there is no error', async () => {
     const { getByText } = render(ChargingHero, { props: { ...base } })
+    // SessionChart is now lazy (SessionChartLazy); wait for the dynamic import
+    // to resolve before asserting chart content.
+    await vi.dynamicImportSettled()
     expect(getByText('dashboard.session.collecting')).toBeInTheDocument()
   })
 

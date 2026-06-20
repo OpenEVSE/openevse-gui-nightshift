@@ -11,7 +11,7 @@ import BottomNav from '../BottomNav.svelte'
 
 describe('BottomNav', () => {
   it('renders a link for each of the five primary routes', () => {
-    const { getAllByRole } = render(BottomNav, { props: { path: '/' } })
+    const { getAllByRole } = render(BottomNav, { props: { path: '/', caps: { charts: true, history: true } } })
     expect(getAllByRole('link')).toHaveLength(5)
   })
 
@@ -34,5 +34,19 @@ describe('BottomNav', () => {
     expect(brand.className).toContain('hidden')   // mobile: not shown
     expect(brand.className).toContain('lg:flex')  // desktop rail: shown
     expect(brand.className).toContain('border-b') // rule below the brand
+  })
+})
+
+describe('BottomNav capability gating', () => {
+  it('shows monitoring and history when capable', () => {
+    const { queryByLabelText } = render(BottomNav, { props: { caps: { charts: true, history: true } } })
+    expect(queryByLabelText('nav.monitoring')).toBeInTheDocument()
+    expect(queryByLabelText('nav.history')).toBeInTheDocument()
+  })
+  it('hides monitoring when charts are stripped and history when unavailable', () => {
+    const { queryByLabelText } = render(BottomNav, { props: { caps: { charts: false, history: false } } })
+    expect(queryByLabelText('nav.monitoring')).not.toBeInTheDocument()
+    expect(queryByLabelText('nav.history')).not.toBeInTheDocument()
+    expect(queryByLabelText('nav.home')).toBeInTheDocument()
   })
 })

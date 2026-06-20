@@ -18,21 +18,40 @@ const SUPPORT_LINKS = [
   { labelKey: 'config.support.discord', url: 'https://discord.com/invite/Y3ftbUd4rR' },
 ]
 
+// Full-capability config: all 8 capability fields present so every gated page
+// and every section (including the all-gated `energy` section) is visible.
+const FULL = {
+  mqtt_enabled: true,
+  ocpp_enabled: true,
+  rfid_enabled: true,
+  mqtt_vehicle_soc: true,
+  divert_enabled: true,
+  current_shaper_enabled: true,
+  emoncms_enabled: true,
+  ohm_enabled: true,
+}
+
 describe('Settings hub', () => {
   it('renders the four section headings', () => {
+    config_store.set(FULL)
     const { getByText } = render(Settings)
     for (const s of ['connectivity', 'charger', 'energy', 'system']) {
       expect(getByText('config.sections.' + s)).toBeInTheDocument()
     }
   })
   it('renders a link for every config page plus the support links', () => {
-    config_store.set({})
+    config_store.set(FULL)
     const { getAllByRole } = render(Settings)
     const links = getAllByRole('link')
     expect(links).toHaveLength(SETTINGS_PAGES.length + SUPPORT_LINKS.length)
     for (const p of SETTINGS_PAGES) {
       expect(links.some((l) => l.getAttribute('href') === '#' + p.route)).toBe(true)
     }
+  })
+  it('hides gated sections when capability fields are absent', () => {
+    config_store.set({})
+    const { queryByText } = render(Settings)
+    expect(queryByText('config.sections.energy')).toBeNull()
   })
 
   it('renders a Support section with external links opening in a new tab', () => {

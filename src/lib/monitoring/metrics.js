@@ -141,7 +141,7 @@ export function countSeverity(count, warning, alert) {
   return 'ok'
 }
 
-/** Build the Safety-tab rows. The fault row carries `state` for getStateDesc. */
+/** Build the Safety-tab rows. The fault row carries `state` (+ JuiceBox `wr`/`comms_online`) for faultDesc. */
 export function safetyData(status, hasError) {
   const s = status ?? {}
   const countRow = (key, count) => ({
@@ -150,7 +150,9 @@ export function safetyData(status, hasError) {
     severity: (count ?? 0) === 0 ? 'ok' : 'error',
   })
   const errors = []
-  if (hasError) errors.push({ key: 'fault', state: s.state, severity: 'error' })
+  // Carry wr + comms_online so the fault row can show the exact JuiceBox fault
+  // (see faultDesc in utils.js); OpenEVSE devices omit both and fall back to state.
+  if (hasError) errors.push({ key: 'fault', state: s.state, wr: s.wr, comms_online: s.comms_online, severity: 'error' })
   errors.push(countRow('gfci', s.gfcicount))
   errors.push(countRow('noground', s.nogndcount))
   errors.push(countRow('stuck', s.stuckcount))

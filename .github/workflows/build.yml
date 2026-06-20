@@ -22,10 +22,16 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build:all
 
-      - name: Upload dist/
+      - name: Upload dist-full/
         uses: actions/upload-artifact@v7
         with:
-          name: dist
-          path: dist/
+          name: dist-full
+          path: dist-full/
+
+      - name: Upload dist-juicebox/
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-juicebox
+          path: dist-juicebox/

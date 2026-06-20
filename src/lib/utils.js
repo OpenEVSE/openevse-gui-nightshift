@@ -158,6 +158,47 @@ export function getStateDesc(state) {
 	}
 }
 
+// JuiceBox fault codes with localized labels (keyed jb-fault.<code> in i18n).
+// Codes outside this set fall back to the raw English text carried in `wr`.
+const JB_FAULT_CODES = new Set([
+	"001", "003", "004", "005", "006", "007", "008", "101", "102",
+])
+
+// JuiceBox `/status` reports the exact latched fault as "NNN:Human text:".
+const JB_FAULT_RE = /^(\d+):(.*?):?$/
+
+/** Parse a JuiceBox `wr` fault string "NNN:Human text:" → { code, text } | null. */
+export function parseJbFault(wr) {
+	if (typeof wr !== "string") return null
+	const m = JB_FAULT_RE.exec(wr.trim())
+	if (!m) return null
+	return { code: m[1], text: m[2] }
+}
+
+/**
+ * Fault label for the EVSE's current state. JuiceBox hardware reports the exact
+ * latched fault in `status.wr` ("NNN:Human text:"), which is more precise than
+ * the generic OpenEVSE state label for several JuiceBox faults that have no
+ * exact OpenEVSE equivalent. For the error states (4–11), when `wr` is present
+ * and comms are live, prefer it: known codes resolve to a localized
+ * jb-fault.<code> string, unknown codes use the raw English text. Everything
+ * else (non-error states, missing/stale `wr`) falls back to getStateDesc, so
+ * OpenEVSE hardware is unaffected. The state code stays 1–11 either way — `wr`
+ * is only a precision layer for display.
+ */
+export function faultDesc(status) {
+	const s = status ?? {}
+	if (s.state >= 4 && s.state <= 11 && s.comms_online) {
+		const fault = parseJbFault(s.wr)
+		if (fault) {
+			return JB_FAULT_CODES.has(fault.code)
+				? get(_)("jb-fault." + fault.code)
+				: fault.text
+		}
+	}
+	return getStateDesc(s.state)
+}
+
 export function state2icon(state) {
 	let icon = { 
 		type: undefined,
