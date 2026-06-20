@@ -23,7 +23,7 @@ export const SETTINGS_PAGES = [
   { key: 'ohmconnect', route: '/settings/ohmconnect', icon: 'mdi:flash-outline', labelKey: 'config.pages.ohmconnect', section: 'energy' },
   // System
   { key: 'firmware', route: '/settings/firmware', icon: 'mdi:chip', labelKey: 'config.pages.firmware', section: 'system' },
-  { key: 'certificates', route: '/settings/certificates', icon: 'mdi:certificate-outline', labelKey: 'config.pages.certificates', section: 'system' },
+  { key: 'certificates', route: '/settings/certificates', icon: 'mdi:certificate', labelKey: 'config.pages.certificates', section: 'system' },
   { key: 'terminal', route: '/settings/terminal', icon: 'mdi:console', labelKey: 'config.pages.terminal', section: 'system' },
   { key: 'about', route: '/settings/about', icon: 'mdi:information-outline', labelKey: 'config.pages.about', section: 'system' },
 ]
