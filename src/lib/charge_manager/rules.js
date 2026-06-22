@@ -38,6 +38,23 @@ export function actionToTimerFeature(action) {
 }
 
 /**
+ * Maps a Rule action to the global "Always Active" feature key it corresponds
+ * to, or null for actions (charge / disable) that have no on/off global feature.
+ * Used to keep a feature mutually exclusive between Always-On and Scheduled.
+ * @param {string} action
+ * @returns {string|null}
+ */
+export function actionToFeatureKey(action) {
+  switch (action) {
+    case 'eco_divert': return 'eco_divert'
+    case 'shaper':     return 'shaping'
+    case 'rfid':       return 'rfid'
+    case 'ocpp':       return 'ocpp'
+    default:           return null
+  }
+}
+
+/**
  * Maps a timer `state` + optional `feature` back to a Rule action.
  * `state === 'eco'` handles old-format timers stored before this format change.
  * @param {string} state

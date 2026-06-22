@@ -12,13 +12,11 @@
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import NumberInput from '../../lib/components/ui/NumberInput.svelte'
   import Select from '../../lib/components/ui/Select.svelte'
-  import Toggle from '../../lib/components/ui/Toggle.svelte'
   import SegmentedControl from '../../lib/components/ui/SegmentedControl.svelte'
 
   const form = createConfigForm()
   const ss = form.saveState
 
-  let enabled = $derived(!!$config_store?.divert_enabled)
   let divertType = $derived(Number($config_store?.divert_type ?? 0))
   let activePreset = $derived(matchPreset($config_store))
 
@@ -40,139 +38,130 @@
 </script>
 
 <ConfigPage title={$_('config.pages.solar')}>
+  <!-- Enabling/scheduling Self-production is done from the Charge Manager. -->
+  <a
+    href="#/schedule"
+    class="mb-4 inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5
+           text-sm font-semibold text-white transition hover:opacity-90"
+  >
+    + {$_('config.add_in_charge_manager')}
+  </a>
+
   <ConfigSection>
-    <FormField label={$_('config.solar.enable')}>
-      <Toggle
-        checked={enabled}
-        label={$_('config.solar.enable')}
-        onchange={(v) => form.saveField('divert_enabled', v)}
-      />
-    </FormField>
-    {#if enabled}
+    <ReadOnlyRow
+      label={divertType === 1 ? $_('config.solar.grid') : $_('config.solar.production')}
+      value={`${divertType === 1 ? ($status_store?.grid_ie ?? 0) : ($status_store?.solar ?? 0)} W`}
+    />
+    <ReadOnlyRow label={$_('config.solar.charge_rate')} value={`${$status_store?.charge_rate ?? 0} A`} />
+    {#if $status_store?.divert_active}
       <ReadOnlyRow
-        label={divertType === 1 ? $_('config.solar.grid') : $_('config.solar.production')}
-        value={`${divertType === 1 ? ($status_store?.grid_ie ?? 0) : ($status_store?.solar ?? 0)} W`}
+        label={$_('config.solar.smoothed')}
+        value={`${$status_store?.smoothed_available_current ?? 0} A`}
       />
-      <ReadOnlyRow label={$_('config.solar.charge_rate')} value={`${$status_store?.charge_rate ?? 0} A`} />
-      {#if $status_store?.divert_active}
-        <ReadOnlyRow
-          label={$_('config.solar.smoothed')}
-          value={`${$status_store?.smoothed_available_current ?? 0} A`}
-        />
-      {/if}
     {/if}
   </ConfigSection>
 
-  {#if enabled}
-    <ConfigSection title={$_('config.solar.mode')}>
-      <FormField label={$_('config.solar.default_mode')} description={$_('config.solar.default_mode_desc')}>
-        <Toggle
-          checked={$config_store?.charge_mode === 'eco'}
-          label={$_('config.solar.default_mode')}
-          onchange={(v) => form.saveField('charge_mode', v ? 'eco' : 'fast')}
+  <ConfigSection title={$_('config.solar.mode')}>
+    <FormField label={$_('config.solar.source')} status={$ss.divert_type ?? 'idle'}>
+      <Select
+        options={typeOptions}
+        value={String(divertType)}
+        onchange={(v) => form.saveField('divert_type', Number(v))}
+      />
+    </FormField>
+    {#if divertType === 0}
+      <FormField
+        label={$_('config.solar.feed_production')}
+        description={$_('config.solar.feed_production_desc')}
+        status={$ss.mqtt_solar ?? 'idle'}
+      >
+        <TextInput
+          value={$config_store?.mqtt_solar ?? ''}
+          placeholder="topic/pv_production"
+          revert={form.revert}
+          onchange={(v) => form.saveField('mqtt_solar', v)}
         />
       </FormField>
-      <FormField label={$_('config.solar.source')} status={$ss.divert_type ?? 'idle'}>
-        <Select
-          options={typeOptions}
-          value={String(divertType)}
-          onchange={(v) => form.saveField('divert_type', Number(v))}
+    {:else}
+      <FormField
+        label={$_('config.solar.feed_grid')}
+        description={$_('config.solar.feed_grid_desc')}
+        status={$ss.mqtt_grid_ie ?? 'idle'}
+      >
+        <TextInput
+          value={$config_store?.mqtt_grid_ie ?? ''}
+          placeholder="topic/grid_ie"
+          revert={form.revert}
+          onchange={(v) => form.saveField('mqtt_grid_ie', v)}
         />
       </FormField>
-      {#if divertType === 0}
-        <FormField
-          label={$_('config.solar.feed_production')}
-          description={$_('config.solar.feed_production_desc')}
-          status={$ss.mqtt_solar ?? 'idle'}
-        >
-          <TextInput
-            value={$config_store?.mqtt_solar ?? ''}
-            placeholder="topic/pv_production"
-            revert={form.revert}
-            onchange={(v) => form.saveField('mqtt_solar', v)}
-          />
-        </FormField>
-      {:else}
-        <FormField
-          label={$_('config.solar.feed_grid')}
-          description={$_('config.solar.feed_grid_desc')}
-          status={$ss.mqtt_grid_ie ?? 'idle'}
-        >
-          <TextInput
-            value={$config_store?.mqtt_grid_ie ?? ''}
-            placeholder="topic/grid_ie"
-            revert={form.revert}
-            onchange={(v) => form.saveField('mqtt_grid_ie', v)}
-          />
-        </FormField>
-      {/if}
-    </ConfigSection>
+    {/if}
+  </ConfigSection>
 
-    <ConfigSection title={$_('config.solar.tuning')}>
-      <FormField
-        label={$_('config.solar.preset')}
-        description={$_('config.solar.preset_' + activePreset + '_desc')}
-      >
-        <SegmentedControl
-          options={presetOptions}
-          value={activePreset}
-          onchange={applyPreset}
-        />
-      </FormField>
-      <FormField
-        label={$_('config.solar.ratio')}
-        description={$_('config.solar.ratio_desc')}
-        status={$ss.divert_PV_ratio ?? 'idle'}
-      >
-        <NumberInput
-          value={$config_store?.divert_PV_ratio ?? null}
-          step={0.01}
-          placeholder="1.1"
-          revert={form.revert}
-          onchange={(v) => form.saveField('divert_PV_ratio', v)}
-        />
-      </FormField>
-      <FormField
-        label={$_('config.solar.min_charge')}
-        description={$_('config.solar.min_charge_desc')}
-        status={$ss.divert_min_charge_time ?? 'idle'}
-      >
-        <NumberInput
-          value={$config_store?.divert_min_charge_time ?? null}
-          min={0}
-          placeholder="600"
-          revert={form.revert}
-          onchange={(v) => form.saveField('divert_min_charge_time', v)}
-        />
-      </FormField>
-      <FormField
-        label={$_('config.solar.attack')}
-        description={$_('config.solar.attack_desc')}
-        status={$ss.divert_attack_smoothing_time ?? 'idle'}
-      >
-        <NumberInput
-          value={$config_store?.divert_attack_smoothing_time ?? null}
-          min={0}
-          max={600}
-          revert={form.revert}
-          onchange={(v) => form.saveField('divert_attack_smoothing_time', v)}
-        />
-      </FormField>
-      <FormField
-        label={$_('config.solar.decay')}
-        description={$_('config.solar.decay_desc')}
-        status={$ss.divert_decay_smoothing_time ?? 'idle'}
-      >
-        <NumberInput
-          value={$config_store?.divert_decay_smoothing_time ?? null}
-          min={0}
-          max={600}
-          revert={form.revert}
-          onchange={(v) => form.saveField('divert_decay_smoothing_time', v)}
-        />
-      </FormField>
-    </ConfigSection>
-  {/if}
+  <ConfigSection title={$_('config.solar.tuning')}>
+    <FormField
+      label={$_('config.solar.preset')}
+      description={$_('config.solar.preset_' + activePreset + '_desc')}
+    >
+      <SegmentedControl
+        options={presetOptions}
+        value={activePreset}
+        onchange={applyPreset}
+      />
+    </FormField>
+    <FormField
+      label={$_('config.solar.ratio')}
+      description={$_('config.solar.ratio_desc')}
+      status={$ss.divert_PV_ratio ?? 'idle'}
+    >
+      <NumberInput
+        value={$config_store?.divert_PV_ratio ?? null}
+        step={0.01}
+        placeholder="1.1"
+        revert={form.revert}
+        onchange={(v) => form.saveField('divert_PV_ratio', v)}
+      />
+    </FormField>
+    <FormField
+      label={$_('config.solar.min_charge')}
+      description={$_('config.solar.min_charge_desc')}
+      status={$ss.divert_min_charge_time ?? 'idle'}
+    >
+      <NumberInput
+        value={$config_store?.divert_min_charge_time ?? null}
+        min={0}
+        placeholder="600"
+        revert={form.revert}
+        onchange={(v) => form.saveField('divert_min_charge_time', v)}
+      />
+    </FormField>
+    <FormField
+      label={$_('config.solar.attack')}
+      description={$_('config.solar.attack_desc')}
+      status={$ss.divert_attack_smoothing_time ?? 'idle'}
+    >
+      <NumberInput
+        value={$config_store?.divert_attack_smoothing_time ?? null}
+        min={0}
+        max={600}
+        revert={form.revert}
+        onchange={(v) => form.saveField('divert_attack_smoothing_time', v)}
+      />
+    </FormField>
+    <FormField
+      label={$_('config.solar.decay')}
+      description={$_('config.solar.decay_desc')}
+      status={$ss.divert_decay_smoothing_time ?? 'idle'}
+    >
+      <NumberInput
+        value={$config_store?.divert_decay_smoothing_time ?? null}
+        min={0}
+        max={600}
+        revert={form.revert}
+        onchange={(v) => form.saveField('divert_decay_smoothing_time', v)}
+      />
+    </FormField>
+  </ConfigSection>
 
   <ConfigSection title={$_('config.solar.home_battery')}>
     <FormField label={$_('config.solar.battery_soc_topic')} status={$ss.mqtt_home_battery_soc ?? 'idle'}>

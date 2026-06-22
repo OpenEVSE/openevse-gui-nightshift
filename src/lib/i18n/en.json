@@ -117,6 +117,7 @@
     },
     "title": "Settings",
     "back": "Settings",
+    "add_in_charge_manager": "Add in Charge Manager",
     "coming_soon": "This page is coming soon.",
     "sections": {
       "connectivity": "Connectivity",
@@ -203,7 +204,8 @@
       "offset": "Current sensor offset"
     },
     "safety": {
-      "warning": "Not every safety check is enabled.",
+      "warning": "Not every required safety check is enabled.",
+      "all_on": "All Required Safety Checks On",
       "checks": "Safety checks",
       "gfci_check": "GFCI self-test",
       "ground_check": "Ground monitoring",
@@ -259,6 +261,8 @@
     },
     "rfid": {
       "enable": "Enable RFID",
+      "reader_found": "RFID Reader",
+      "no_reader": "No Reader Found",
       "manage": "Scan a tag",
       "scan": "Scan",
       "place_tag": "Hold a tag against the reader…",
@@ -524,9 +528,15 @@
   "charge_manager": {
     "title": "Charge Manager",
     "default_state": "Default State",
+    "station": "Station",
+    "current": "Current",
     "default_state_active": "Active on power up",
     "default_state_disabled": "Disabled on power up",
+    "default_state_settings": "Default State Settings",
+    "active": "Active",
     "global_section": "Always Active",
+    "temp_protection": "Temperature Protection",
+    "safety": "Safety",
     "global_add": "Add",
     "global_empty": "No global features enabled",
     "feature_picker_title": "Add feature",
@@ -543,6 +553,8 @@
     "feature_rfid_desc": "Require a card tap before charging",
     "feature_ocpp": "OCPP Control",
     "feature_ocpp_desc": "Hand control to your OCPP backend",
+    "feature_ocpp_unavailable": "No OCPP server configured",
+    "feature_rfid_unavailable": "No RFID reader found",
     "feature_charge_current": "Charge Current",
     "feature_charge_current_desc": "Set a fixed current for every session",
     "rule_always_on": "Always On",
@@ -557,6 +569,10 @@
     "rule_condition": "Condition",
     "rule_start_time": "Start time",
     "rule_stop_time": "Stop time",
+    "rule_set_stop_time": "Set a Stop Time",
+    "claims_manager": "Claims Manager",
+    "boot_lock_note": "Boot Lock can be enabled to prevent the station from charging prior to full booting. Note if the WiFi hardware fails or software corrupted, Charging will be blocked.",
+    "heartbeat_note": "This is a dynamic feature, if communication is lost to the controller Heartbeat will fail to the current specified after the time interval has elapsed.",
     "rule_stop_time_enable": "Add stop time",
     "rule_stop_time_remove": "Remove stop time",
     "rule_stop_next_day": "(next day)",
@@ -767,7 +783,8 @@
     "manager": {
       "empty": "No active claims",
       "active": "Active",
-      "disabled": "Disabled"
+      "disabled": "Disabled",
+      "priority": "Priority"
     }
   },
   "units": {

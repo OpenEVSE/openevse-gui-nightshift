@@ -2,41 +2,63 @@
   import { _ } from 'svelte-i18n'
   import Card from '../ui/Card.svelte'
   import Slider from '../ui/Slider.svelte'
-  import Toggle from '../ui/Toggle.svelte'
+  import IconButton from '../ui/IconButton.svelte'
+  import Icon from '../../icons/Icon.svelte'
+
+  import { untrack } from 'svelte'
 
   let {
-    active      = true,
     current     = 32,
     minCurrent  = 6,
     maxCurrent  = 32,
     busy        = false,
-    onchange        = () => {},   // (active: boolean) => void
+    // Status indicators (the switches themselves live in the settings page).
+    heartbeatSupported = false,
+    heartbeatActive    = false,   // red heart when heartbeat supervision is on
+    bootLock           = false,   // lock icon shown only when boot lock is on
     onCurrentChange = () => {},   // (amps: number) => void
+    onEdit          = () => {},   // open the settings page
   } = $props()
+
+  // Live value shown large above the slider — tracks the thumb while dragging.
+  let liveCurrent = $state(untrack(() => current))
+  $effect(() => { liveCurrent = current })
 </script>
 
 <Card class="mb-3 p-4">
-  <!-- Active / Disabled row -->
+  <!-- Header: title · status icons (heart / lock) · edit pencil -->
   <div class="flex items-center justify-between gap-3">
-    <div class="min-w-0 flex-1">
-      <div class="text-sm font-semibold text-text">{$_('charge_manager.default_state')}</div>
-      <div class="mt-0.5 text-xs text-text-dim">
-        {active ? $_('charge_manager.default_state_active') : $_('charge_manager.default_state_disabled')}
-      </div>
+    <div class="text-sm font-semibold text-text">{$_('charge_manager.station')}</div>
+    <div class="flex items-center gap-2">
+      {#if heartbeatSupported}
+        <span
+          role="img"
+          aria-label={$_('config.security.heartbeat')}
+          class={heartbeatActive ? 'text-error' : 'text-text-dim'}
+        >
+          <Icon icon={heartbeatActive ? 'mdi:heart' : 'mdi:heart-outline'} size={18} />
+        </span>
+      {/if}
+      {#if bootLock}
+        <span role="img" aria-label={$_('config.security.boot_lock')} class="text-text-dim">
+          <Icon icon="mdi:lock" size={18} />
+        </span>
+      {/if}
+      <IconButton
+        icon="mdi:pencil-outline"
+        size={18}
+        label={$_('charge_manager.default_state_settings')}
+        disabled={busy}
+        onclick={onEdit}
+      />
     </div>
-    <Toggle
-      checked={active}
-      label={$_('charge_manager.default_state')}
-      disabled={busy}
-      {onchange}
-    />
   </div>
 
-  <!-- Current slider -->
-  <div class="mt-4">
-    <div class="mb-1 flex items-baseline justify-between text-[10px] uppercase tracking-wide text-text-dim">
-      <span>{$_('charge_manager.feature_charge_current')}</span>
-      <span class="font-semibold normal-case text-text">{current} A</span>
+  <!-- Current — large live set point, no popup, tight to the slider -->
+  <div class="mt-3">
+    <div class="text-[10px] uppercase tracking-wide text-text-dim">{$_('charge_manager.current')}</div>
+    <div class="text-3xl font-bold leading-tight tabular-nums text-text">
+      {liveCurrent}<span class="ml-1 text-xl font-semibold text-text-dim">A</span>
     </div>
     <Slider
       min={minCurrent}
@@ -44,8 +66,9 @@
       step={1}
       value={current}
       disabled={busy}
-      format={(v) => `${v} A`}
-      ariaLabel={$_('charge_manager.feature_charge_current')}
+      showBubble={false}
+      ariaLabel={$_('charge_manager.current')}
+      oninput={(v) => (liveCurrent = v)}
       onchange={onCurrentChange}
     />
     <div class="mt-1 flex justify-between text-[10px] text-text-dim">

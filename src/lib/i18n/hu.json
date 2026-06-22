@@ -117,6 +117,7 @@
     },
     "title": "Beállítások",
     "back": "Beállítások",
+    "add_in_charge_manager": "Hozzáadás a töltéskezelőben",
     "coming_soon": "Ez az oldal hamarosan elérhető.",
     "sections": {
       "connectivity": "Kapcsolódás",
@@ -203,7 +204,8 @@
       "offset": "Áramérzékelő eltolás"
     },
     "safety": {
-      "warning": "Nincs minden biztonsági ellenőrzés engedélyezve.",
+      "warning": "Nincs minden szükséges biztonsági ellenőrzés engedélyezve.",
+      "all_on": "Minden szükséges biztonsági ellenőrzés bekapcsolva",
       "checks": "Biztonsági ellenőrzések",
       "gfci_check": "GFCI önteszt",
       "ground_check": "Földelés figyelés",
@@ -259,6 +261,8 @@
     },
     "rfid": {
       "enable": "RFID engedélyezése",
+      "reader_found": "RFID-olvasó",
+      "no_reader": "Nem található olvasó",
       "manage": "Címke beolvasása",
       "scan": "Beolvasás",
       "place_tag": "Tartsa a címkét az olvasó elé…",
@@ -524,9 +528,15 @@
   "charge_manager": {
     "title": "Charge Manager",
     "default_state": "Default State",
+    "station": "Állomás",
+    "current": "Áram",
     "default_state_active": "Active on power up",
     "default_state_disabled": "Disabled on power up",
+    "default_state_settings": "Alapértelmezett állapot beállításai",
+    "active": "Aktív",
     "global_section": "Always Active",
+    "temp_protection": "Hőmérséklet-védelem",
+    "safety": "Biztonság",
     "global_add": "Add",
     "global_empty": "No global features enabled",
     "feature_picker_title": "Add feature",
@@ -543,6 +553,8 @@
     "feature_rfid_desc": "Require a card tap before charging",
     "feature_ocpp": "OCPP Control",
     "feature_ocpp_desc": "Hand control to your OCPP backend",
+    "feature_ocpp_unavailable": "Nincs OCPP-kiszolgáló beállítva",
+    "feature_rfid_unavailable": "Nem található RFID-olvasó",
     "feature_charge_current": "Charge Current",
     "feature_charge_current_desc": "Set a fixed current for every session",
     "rule_always_on": "Always On",
@@ -557,6 +569,10 @@
     "rule_condition": "Condition",
     "rule_start_time": "Start time",
     "rule_stop_time": "Stop time",
+    "rule_set_stop_time": "Leállási idő beállítása",
+    "claims_manager": "Igénykezelő",
+    "boot_lock_note": "A rendszerindítási zár bekapcsolható, hogy megakadályozza a töltést a teljes indulás előtt. Ne feledje: ha a WiFi hardver meghibásodik vagy a szoftver megsérül, a töltés letiltásra kerül.",
+    "heartbeat_note": "Ez egy dinamikus funkció: ha megszakad a kommunikáció a vezérlővel, a szívverés a megadott áramra esik vissza a megadott időintervallum letelte után.",
     "rule_stop_time_enable": "Add stop time",
     "rule_stop_time_remove": "Remove stop time",
     "rule_stop_next_day": "(next day)",
@@ -767,7 +783,8 @@
     "manager": {
       "empty": "Nincs aktív igény",
       "active": "Aktív",
-      "disabled": "Letiltva"
+      "disabled": "Letiltva",
+      "priority": "Prioritás"
     }
   },
   "units": {

@@ -4,6 +4,7 @@ import {
   rulesToTimers,
   ruleDeleteIds,
   actionToTimerState,
+  actionToFeatureKey,
   timerStateToAction,
   formatWindow,
 } from '../rules.js'
@@ -26,6 +27,15 @@ describe('actionToTimerState', () => {
   it('maps eco_divert → active', () => expect(actionToTimerState('eco_divert')).toBe('active'))
   it('maps disable → disabled', () => expect(actionToTimerState('disable')).toBe('disabled'))
   it('maps unknown → active', () => expect(actionToTimerState('whatever')).toBe('active'))
+})
+
+describe('actionToFeatureKey', () => {
+  it('maps eco_divert → eco_divert', () => expect(actionToFeatureKey('eco_divert')).toBe('eco_divert'))
+  it('maps shaper → shaping', () => expect(actionToFeatureKey('shaper')).toBe('shaping'))
+  it('maps rfid → rfid', () => expect(actionToFeatureKey('rfid')).toBe('rfid'))
+  it('maps ocpp → ocpp', () => expect(actionToFeatureKey('ocpp')).toBe('ocpp'))
+  it('returns null for charge (no on/off global feature)', () => expect(actionToFeatureKey('charge')).toBeNull())
+  it('returns null for disable', () => expect(actionToFeatureKey('disable')).toBeNull())
 })
 
 describe('timerStateToAction', () => {

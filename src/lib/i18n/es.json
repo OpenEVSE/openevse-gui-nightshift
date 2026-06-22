@@ -117,6 +117,7 @@
     },
     "title": "Ajustes",
     "back": "Ajustes",
+    "add_in_charge_manager": "Añadir en el Gestor de carga",
     "coming_soon": "Esta página estará disponible próximamente.",
     "sections": {
       "connectivity": "Conectividad",
@@ -203,7 +204,8 @@
       "offset": "Compensación del sensor de corriente"
     },
     "safety": {
-      "warning": "No todas las comprobaciones de seguridad están activadas.",
+      "warning": "No todas las comprobaciones de seguridad requeridas están activadas.",
+      "all_on": "Todas las comprobaciones de seguridad requeridas activadas",
       "checks": "Comprobaciones de seguridad",
       "gfci_check": "Autodiagnóstico GFCI",
       "ground_check": "Monitoreo de tierra",
@@ -259,6 +261,8 @@
     },
     "rfid": {
       "enable": "Activar RFID",
+      "reader_found": "Lector RFID",
+      "no_reader": "No se encontró lector",
       "manage": "Escanear una etiqueta",
       "scan": "Escanear",
       "place_tag": "Acerque una etiqueta al lector…",
@@ -524,9 +528,15 @@
   "charge_manager": {
     "title": "Charge Manager",
     "default_state": "Default State",
+    "station": "Estación",
+    "current": "Corriente",
     "default_state_active": "Active on power up",
     "default_state_disabled": "Disabled on power up",
+    "default_state_settings": "Ajustes del estado predeterminado",
+    "active": "Activo",
     "global_section": "Always Active",
+    "temp_protection": "Protección de temperatura",
+    "safety": "Seguridad",
     "global_add": "Add",
     "global_empty": "No global features enabled",
     "feature_picker_title": "Add feature",
@@ -543,6 +553,8 @@
     "feature_rfid_desc": "Require a card tap before charging",
     "feature_ocpp": "OCPP Control",
     "feature_ocpp_desc": "Hand control to your OCPP backend",
+    "feature_ocpp_unavailable": "No hay servidor OCPP configurado",
+    "feature_rfid_unavailable": "No se encontró lector RFID",
     "feature_charge_current": "Charge Current",
     "feature_charge_current_desc": "Set a fixed current for every session",
     "rule_always_on": "Always On",
@@ -557,6 +569,10 @@
     "rule_condition": "Condition",
     "rule_start_time": "Start time",
     "rule_stop_time": "Stop time",
+    "rule_set_stop_time": "Establecer hora de fin",
+    "claims_manager": "Gestor de reclamaciones",
+    "boot_lock_note": "El bloqueo de arranque puede activarse para impedir que la estación cargue antes de arrancar por completo. Tenga en cuenta que si el hardware WiFi falla o el software se corrompe, la carga quedará bloqueada.",
+    "heartbeat_note": "Esta es una función dinámica: si se pierde la comunicación con el controlador, el latido fallará a la corriente especificada una vez transcurrido el intervalo de tiempo.",
     "rule_stop_time_enable": "Add stop time",
     "rule_stop_time_remove": "Remove stop time",
     "rule_stop_next_day": "(next day)",
@@ -767,7 +783,8 @@
     "manager": {
       "empty": "Sin reclamaciones activas",
       "active": "Activo",
-      "disabled": "Desactivado"
+      "disabled": "Desactivado",
+      "priority": "Prioridad"
     }
   },
   "units": {

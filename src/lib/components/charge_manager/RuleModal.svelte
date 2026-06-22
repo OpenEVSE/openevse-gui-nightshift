@@ -3,6 +3,7 @@
   import Modal from '../ui/Modal.svelte'
   import Button from '../ui/Button.svelte'
   import Slider from '../ui/Slider.svelte'
+  import Toggle from '../ui/Toggle.svelte'
   import LimitSliderBar from '../dashboard/LimitSliderBar.svelte'
   import DayPicker from '../schedule/DayPicker.svelte'
   import { daysToFlags, flagsToDays, DAYS } from '../../schedule/timers.js'
@@ -14,8 +15,18 @@
     busy = false,
     socAvailable = false,
     rangeAvailable = false,
+    // Feature availability — greys out the matching action option when false.
+    ocppAvailable = true,
+    rfidAvailable = true,
     minCurrent = 6,
     maxCurrent = 80,
+    // Global safety config surfaced contextually on certain action cards.
+    bootLockSupported  = false,
+    bootLock           = false,
+    heartbeatSupported = false,
+    heartbeatEnabled   = false,
+    onBootLockChange   = () => {},   // (enabled: boolean) => void
+    onHeartbeatChange  = () => {},   // (enabled: boolean) => void
     onclose = () => {},
     onsave = () => {},
   } = $props()
@@ -25,6 +36,7 @@
   let flags       = $state(DAYS.map(() => true))
   let startTime   = $state('08:00')
   let stopTime    = $state('18:00')
+  let hasStopTime = $state(false)
   let action      = $state('charge')
   let limitType   = $state('none')
   let limitValue  = $state(0)
@@ -37,6 +49,7 @@
       flags         = rule ? daysToFlags(rule.days) : DAYS.map(() => true)
       startTime     = rule?.startTime ?? '08:00'
       stopTime      = rule?.stopTime ?? '18:00'
+      hasStopTime   = (rule?.stopTime ?? null) != null
       action        = rule?.action ?? 'charge'
       limitType     = rule?.limit?.type ?? 'none'
       limitValue    = rule?.limit?.value ?? 0
@@ -46,11 +59,14 @@
   })
 
   // ── Derived ───────────────────────────────────────────────────────────────
-  let nextDay        = $derived(isNextDay(startTime, stopTime))
+  let nextDay        = $derived(hasStopTime && isNextDay(startTime, stopTime))
   let isLimitFeature = $derived(alwaysOn && action === 'charge')
   let showAction     = $derived(!isLimitFeature)
   let showLimit      = $derived(isLimitFeature || (!alwaysOn && !['disable', 'ocpp'].includes(action)))
   let showChargeCurrent = $derived(!alwaysOn && action === 'charge')
+  // Boot Lock surfaces on RFID/OCPP cards; Heartbeat on Eco/Grid-shaping cards.
+  let showBootLock   = $derived(bootLockSupported && ['rfid', 'ocpp'].includes(action))
+  let showHeartbeat  = $derived(heartbeatSupported && ['eco_divert', 'shaper'].includes(action))
 
   function validate() {
     if (!alwaysOn && !flags.some((f) => f)) { showDayError = true; return false }
@@ -68,7 +84,7 @@
       alwaysOn,
       days,
       startTime: alwaysOn ? '00:00' : startTime,
-      stopTime:  alwaysOn ? null : stopTime,
+      stopTime:  (alwaysOn || !hasStopTime) ? null : stopTime,
       action,
       chargeCurrent: (showChargeCurrent && chargeCurrent > 0) ? chargeCurrent : null,
       limit,
@@ -118,20 +134,31 @@
       />
     </label>
 
-    <!-- Stop time -->
-    <label class="mt-3 block">
-      <span class="mb-1 block text-[10px] uppercase tracking-wide text-text-dim">
-        {$_('charge_manager.rule_stop_time')}
-        {#if nextDay}
-          <span class="ml-1 text-warning">{$_('charge_manager.rule_stop_next_day')}</span>
-        {/if}
-      </span>
+    <!-- Stop time (optional) -->
+    <label class="mt-4 flex cursor-pointer items-center gap-2">
       <input
-        type="time"
-        bind:value={stopTime}
-        class={SELECT_CLASS}
+        type="checkbox"
+        bind:checked={hasStopTime}
+        class="h-4 w-4 shrink-0 accent-[var(--color-accent)]"
       />
+      <span class="text-sm text-text">{$_('charge_manager.rule_set_stop_time')}</span>
     </label>
+
+    {#if hasStopTime}
+      <label class="mt-2 block">
+        <span class="mb-1 block text-[10px] uppercase tracking-wide text-text-dim">
+          {$_('charge_manager.rule_stop_time')}
+          {#if nextDay}
+            <span class="ml-1 text-warning">{$_('charge_manager.rule_stop_next_day')}</span>
+          {/if}
+        </span>
+        <input
+          type="time"
+          bind:value={stopTime}
+          class={SELECT_CLASS}
+        />
+      </label>
+    {/if}
   </div>
 
   <!-- Action dropdown (hidden when Always On — limit is the only relevant setting) -->
@@ -144,10 +171,46 @@
         <option value="charge">{$_('charge_manager.rule_action_charge')}</option>
         <option value="eco_divert">{$_('charge_manager.rule_action_eco_divert')}</option>
         <option value="shaper">{$_('charge_manager.rule_action_shaper')}</option>
-        <option value="rfid">{$_('charge_manager.rule_action_rfid')}</option>
-        <option value="ocpp">{$_('charge_manager.rule_action_ocpp')}</option>
+        <option value="rfid" disabled={!rfidAvailable}>
+          {$_('charge_manager.rule_action_rfid')}{!rfidAvailable ? ' — ' + $_('charge_manager.feature_rfid_unavailable') : ''}
+        </option>
+        <option value="ocpp" disabled={!ocppAvailable}>
+          {$_('charge_manager.rule_action_ocpp')}{!ocppAvailable ? ' — ' + $_('charge_manager.feature_ocpp_unavailable') : ''}
+        </option>
         <option value="disable">{$_('charge_manager.rule_action_disable')}</option>
       </select>
+    </div>
+  {/if}
+
+  <!-- Boot Lock (RFID / OCPP) — global safety config, saved immediately -->
+  {#if showBootLock}
+    <div class="mt-5 rounded-xl border border-border bg-surface-2 p-3">
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-sm font-semibold text-text">{$_('config.security.boot_lock')}</span>
+        <Toggle
+          checked={bootLock}
+          label={$_('config.security.boot_lock')}
+          disabled={busy}
+          onchange={onBootLockChange}
+        />
+      </div>
+      <p class="mt-1.5 text-xs text-text-dim">{$_('charge_manager.boot_lock_note')}</p>
+    </div>
+  {/if}
+
+  <!-- Heartbeat supervision (Eco / Grid shaping) — global safety config -->
+  {#if showHeartbeat}
+    <div class="mt-5 rounded-xl border border-border bg-surface-2 p-3">
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-sm font-semibold text-text">{$_('config.security.heartbeat')}</span>
+        <Toggle
+          checked={heartbeatEnabled}
+          label={$_('config.security.heartbeat')}
+          disabled={busy}
+          onchange={onHeartbeatChange}
+        />
+      </div>
+      <p class="mt-1.5 text-xs text-text-dim">{$_('charge_manager.heartbeat_note')}</p>
     </div>
   {/if}
 

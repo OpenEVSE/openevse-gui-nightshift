@@ -5,6 +5,7 @@
   let {
     rules = [],
     removingId = null,
+    activeEventId = null,  // firmware's currently-active schedule event id
     busy = false,
     onedit = () => {},    // called with rule object
     ondelete = () => {},  // called with rule object
@@ -24,6 +25,7 @@
     {#each rules as rule (rule.id)}
       <RuleCard
         {rule}
+        active={activeEventId != null && rule._startEventId === activeEventId}
         removing={removingId === rule.id}
         disabled={busy}
         onedit={() => onedit(rule)}

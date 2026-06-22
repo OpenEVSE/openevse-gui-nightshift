@@ -6,7 +6,7 @@
   import { formatDayChips } from '../../schedule/timers.js'
   import { formatWindow } from '../../charge_manager/rules.js'
 
-  let { rule, removing = false, disabled = false, onedit = () => {}, ondelete = () => {} } = $props()
+  let { rule, active = false, removing = false, disabled = false, onedit = () => {}, ondelete = () => {} } = $props()
 
   let chips  = $derived(formatDayChips(rule?.days))
   let window = $derived(formatWindow(rule?.startTime, rule?.stopTime))
@@ -34,8 +34,16 @@
   <div class="flex items-start justify-between gap-2">
     <!-- Left: action title + schedule details -->
     <button type="button" onclick={onedit} class="min-w-0 flex-1 text-left">
-      <div class="text-sm font-semibold text-text">
-        {actionLabel(rule?.action)}
+      <div class="flex items-center gap-2">
+        <div class="text-sm font-semibold text-text">
+          {actionLabel(rule?.action)}
+        </div>
+        {#if active}
+          <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
+            <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+            {$_('charge_manager.active')}
+          </span>
+        {/if}
       </div>
 
       <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">

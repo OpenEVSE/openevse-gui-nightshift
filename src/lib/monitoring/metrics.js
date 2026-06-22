@@ -1,5 +1,14 @@
 /** Pure helpers for the Monitoring screen. Self-contained — no store/DOM imports. */
 import { formatTemp } from '../temperature.js'
+import { EvseClients } from '../vars.js'
+
+/** Claim priority for an EVSE client id (higher wins); 0 if unknown. */
+function clientPriority(id) {
+  for (const key of Object.keys(EvseClients)) {
+    if (EvseClients[key].id === id) return EvseClients[key].priority
+  }
+  return 0
+}
 
 /**
  * OpenEVSE state code → charging-status label. Derived from the EVSE's own
@@ -159,14 +168,22 @@ export function safetyData(status, hasError) {
   return { errors, infos }
 }
 
-/** One row per entry in `claims_target.claims`. */
-export function claimRows(claimsTarget) {
+/**
+ * One row per entry in `claims_target.claims`, sorted highest priority first.
+ * `priorityByClient` (client id → actual runtime priority, from /claims) is
+ * preferred when available; otherwise the client's default priority is used.
+ */
+export function claimRows(claimsTarget, priorityByClient = null) {
   const ct = claimsTarget ?? {}
   const claims = ct.claims ?? {}
   const properties = ct.properties ?? {}
-  return Object.keys(claims).map((property) => ({
-    property,
-    clientId: claims[property],
-    value: properties[property],
-  }))
+  return Object.keys(claims)
+    .map((property) => {
+      const clientId = claims[property]
+      const priority = (priorityByClient && priorityByClient[clientId] != null)
+        ? priorityByClient[clientId]
+        : clientPriority(clientId)
+      return { property, clientId, value: properties[property], priority }
+    })
+    .sort((a, b) => b.priority - a.priority)
 }
