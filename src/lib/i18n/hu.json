@@ -401,6 +401,7 @@
       "heartbeat_desc": "Életjel a WiFi és a biztonsági modul között; ha az intervallumon belül nincs nyugtázva, a töltő az életjel-hibaáramra vált.",
       "heartbeat_interval": "Életjel intervallum (s)",
       "heartbeat_current": "Életjel-hibaáram",
+      "heartbeat_tooltip": "Életjel {interval} másodpercenként, {current} A-re esik vissza.",
       "tls_certificates": "TLS tanúsítványok"
     },
     "certificates": {

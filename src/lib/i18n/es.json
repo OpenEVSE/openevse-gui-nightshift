@@ -401,6 +401,7 @@
       "heartbeat_desc": "Latido entre el WiFi y el módulo de seguridad; si no se reconoce dentro del intervalo, conmuta a la corriente de seguridad del latido.",
       "heartbeat_interval": "Intervalo de latido (s)",
       "heartbeat_current": "Corriente de seguridad del latido",
+      "heartbeat_tooltip": "Latido cada {interval}s, cae a {current} A.",
       "tls_certificates": "Certificados TLS"
     },
     "certificates": {

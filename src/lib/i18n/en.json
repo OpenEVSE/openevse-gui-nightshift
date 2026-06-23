@@ -401,6 +401,7 @@
       "heartbeat_desc": "Heartbeat between WiFi and safety module, if heartbeat not acknowledged by the interval then fail to the Heartbeat Fail Current.",
       "heartbeat_interval": "Heartbeat interval (s)",
       "heartbeat_current": "Heartbeat Fail Current",
+      "heartbeat_tooltip": "Heartbeat every {interval}s, fails to {current} A.",
       "tls_certificates": "TLS certificates"
     },
     "certificates": {

@@ -54,7 +54,10 @@
   {#if heartbeatSupported}
     <div class="mt-3 rounded-xl border border-border bg-surface p-3">
       <div class="flex items-center justify-between gap-3">
-        <span class="text-sm font-semibold text-text">{$_('config.security.heartbeat')}</span>
+        <div class="min-w-0">
+          <span class="text-sm font-semibold text-text">{$_('config.security.heartbeat')}</span>
+          <div class="mt-0.5 text-xs text-text-dim">{$_('config.security.heartbeat_desc')}</div>
+        </div>
         <Toggle
           checked={heartbeatEnabled}
           label={$_('config.security.heartbeat')}
@@ -97,7 +100,10 @@
 
   {#if bootLockSupported}
     <div class="mt-3 flex items-center justify-between gap-3 rounded-xl border border-border bg-surface p-3">
-      <span class="text-sm font-semibold text-text">{$_('config.security.boot_lock')}</span>
+      <div class="min-w-0">
+        <span class="text-sm font-semibold text-text">{$_('config.security.boot_lock')}</span>
+        <div class="mt-0.5 text-xs text-text-dim">{$_('config.security.boot_lock_desc')}</div>
+      </div>
       <Toggle
         checked={bootLock}
         label={$_('config.security.boot_lock')}

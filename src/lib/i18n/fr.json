@@ -401,6 +401,7 @@
       "heartbeat_desc": "Signal de vie entre le WiFi et le module de sécurité ; s’il n’est pas acquitté dans l’intervalle, bascule sur le courant de repli du signal de vie.",
       "heartbeat_interval": "Intervalle du signal de vie (s)",
       "heartbeat_current": "Courant de repli du signal de vie",
+      "heartbeat_tooltip": "Signal de vie toutes les {interval}s, retombe à {current} A.",
       "tls_certificates": "Certificats TLS"
     },
     "certificates": {

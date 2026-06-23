@@ -23,4 +23,16 @@ describe('RuleCard', () => {
     const { queryByText } = render(RuleCard, { props: { rule, active: false } })
     expect(queryByText('charge_manager.active')).not.toBeInTheDocument()
   })
+  it('shows a current chip when the timer sets a charge current', () => {
+    const { getByText } = render(RuleCard, {
+      props: { rule: { ...rule, action: 'charge', chargeCurrent: 16 } },
+    })
+    expect(getByText('16 A')).toBeInTheDocument()
+  })
+  it('omits the current chip when no charge current is set', () => {
+    const { queryByText } = render(RuleCard, {
+      props: { rule: { ...rule, action: 'charge', chargeCurrent: null } },
+    })
+    expect(queryByText('16 A')).not.toBeInTheDocument()
+  })
 })

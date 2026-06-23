@@ -28,6 +28,8 @@
   }
 
   let limitChip = $derived(limitLabel(rule?.limit))
+  // Fixed charge current set on the timer (scheduled "charge" rules).
+  let currentChip = $derived(rule?.chargeCurrent > 0 ? `${rule.chargeCurrent} A` : null)
 </script>
 
 <Card class="mb-3 p-4">
@@ -60,6 +62,12 @@
         </div>
         <!-- Time window -->
         <span class="text-xs text-text-dim">{window}</span>
+        <!-- Charge current chip -->
+        {#if currentChip}
+          <span class="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold text-accent">
+            {currentChip}
+          </span>
+        {/if}
         <!-- Limit chip -->
         {#if limitChip}
           <span class="rounded-full bg-surface-3 px-2 py-0.5 text-[10px] font-semibold text-text-dim">
