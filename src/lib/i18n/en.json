@@ -151,7 +151,15 @@
       "theme": "Display theme",
       "theme_desc": "Theme for the charger's built-in screen.",
       "dark": "Dark",
-      "light": "Light"
+      "light": "Light",
+      "brightness": "Active brightness",
+      "brightness_desc": "Screen brightness while the display is in use. A 10% minimum keeps it readable.",
+      "standby": "Standby brightness",
+      "standby_desc": "Screen brightness when idle. 0% turns the backlight off.",
+      "standby_off": "Off",
+      "timeout": "Idle timeout",
+      "timeout_desc": "How long the screen stays bright before dimming to standby. It stays full-bright while charging or in a fault.",
+      "never": "Never"
     },
     "validation": {
       "required": "Required",

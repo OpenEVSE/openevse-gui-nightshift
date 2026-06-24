@@ -151,7 +151,15 @@
       "theme": "Kijelző téma",
       "theme_desc": "A töltő beépített kijelzőjének témája.",
       "dark": "Sötét",
-      "light": "Világos"
+      "light": "Világos",
+      "brightness": "Aktív fényerő",
+      "brightness_desc": "A kijelző fényereje használat közben. A 10%-os minimum olvashatóan tartja.",
+      "standby": "Készenléti fényerő",
+      "standby_desc": "A kijelző fényereje tétlen állapotban. A 0% kikapcsolja a háttérvilágítást.",
+      "standby_off": "Ki",
+      "timeout": "Tétlenségi időkorlát",
+      "timeout_desc": "Mennyi ideig marad világos a kijelző, mielőtt készenléti állapotba halványul. Töltés közben vagy hiba esetén teljes fényerőn marad.",
+      "never": "Soha"
     },
     "validation": {
       "required": "Kötelező",

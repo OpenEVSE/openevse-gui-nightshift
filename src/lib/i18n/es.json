@@ -151,7 +151,15 @@
       "theme": "Tema de la pantalla",
       "theme_desc": "Tema de la pantalla integrada del cargador.",
       "dark": "Oscuro",
-      "light": "Claro"
+      "light": "Claro",
+      "brightness": "Brillo activo",
+      "brightness_desc": "Brillo de la pantalla mientras está en uso. El mínimo del 10 % la mantiene legible.",
+      "standby": "Brillo en reposo",
+      "standby_desc": "Brillo de la pantalla cuando está inactiva. El 0 % apaga la retroiluminación.",
+      "standby_off": "Apagado",
+      "timeout": "Tiempo de inactividad",
+      "timeout_desc": "Cuánto tiempo permanece encendida la pantalla antes de atenuarse al modo de reposo. Permanece a pleno brillo mientras carga o en caso de fallo.",
+      "never": "Nunca"
     },
     "validation": {
       "required": "Obligatorio",

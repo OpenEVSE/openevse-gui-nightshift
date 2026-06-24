@@ -151,7 +151,15 @@
       "theme": "Thème de l'écran",
       "theme_desc": "Thème de l'écran intégré du chargeur.",
       "dark": "Sombre",
-      "light": "Clair"
+      "light": "Clair",
+      "brightness": "Luminosité active",
+      "brightness_desc": "Luminosité de l'écran pendant son utilisation. Un minimum de 10 % le garde lisible.",
+      "standby": "Luminosité en veille",
+      "standby_desc": "Luminosité de l'écran au repos. 0 % éteint le rétroéclairage.",
+      "standby_off": "Éteint",
+      "timeout": "Délai d'inactivité",
+      "timeout_desc": "Durée pendant laquelle l'écran reste allumé avant de passer en veille. Il reste à pleine luminosité pendant la charge ou en cas de défaut.",
+      "never": "Jamais"
     },
     "validation": {
       "required": "Requis",
