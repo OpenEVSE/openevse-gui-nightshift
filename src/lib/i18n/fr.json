@@ -449,6 +449,7 @@
       "expand16mb_starting": "Démarrage…",
       "expand16mb_phase_staging": "Préparation et téléchargement…",
       "expand16mb_phase_downloading_app": "Téléchargement du firmware…",
+      "expand16mb_phase_downloading_migrator": "Préparation du migrateur…",
       "expand16mb_phase_verifying": "Vérification…",
       "expand16mb_phase_committing": "Écriture du nouveau schéma…",
       "expand16mb_reload": "Terminé. Redémarrage et rechargement dans {sec}s…",

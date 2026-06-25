@@ -449,6 +449,7 @@
       "expand16mb_starting": "Starting…",
       "expand16mb_phase_staging": "Preparing and downloading…",
       "expand16mb_phase_downloading_app": "Downloading firmware…",
+      "expand16mb_phase_downloading_migrator": "Preparing migrator…",
       "expand16mb_phase_verifying": "Verifying…",
       "expand16mb_phase_committing": "Writing new layout…",
       "expand16mb_reload": "Done. Rebooting and reloading in {sec}s…",

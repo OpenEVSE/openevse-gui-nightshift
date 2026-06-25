@@ -449,6 +449,7 @@
       "expand16mb_starting": "Indítás…",
       "expand16mb_phase_staging": "Előkészítés és letöltés…",
       "expand16mb_phase_downloading_app": "Firmware letöltése…",
+      "expand16mb_phase_downloading_migrator": "Migrátor előkészítése…",
       "expand16mb_phase_verifying": "Ellenőrzés…",
       "expand16mb_phase_committing": "Új kiosztás írása…",
       "expand16mb_reload": "Kész. Újraindítás és újratöltés {sec} mp múlva…",
