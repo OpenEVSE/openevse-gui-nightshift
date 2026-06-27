@@ -81,6 +81,19 @@ export function createTzObj(tz) {
 	return tzobj
 }
 
+// Human-readable byte size. ESP flash/partition sizes are powers of two, so a
+// 16 MB chip (16777216 bytes) renders as "16 MB" without rounding artefacts.
+export function formatBytes(bytes, decimals = 1) {
+	if (bytes === undefined || bytes === null || isNaN(bytes)) return '—'
+	if (bytes === 0) return '0 B'
+	const k = 1024
+	const sizes = ['B', 'KB', 'MB', 'GB']
+	const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1)
+	const value = bytes / Math.pow(k, i)
+	// Whole bytes have no fraction; larger units trim trailing zeros.
+	return (i === 0 ? value : parseFloat(value.toFixed(decimals))) + ' ' + sizes[i]
+}
+
 export function round(value, precision = null) {
 	var multiplier = Math.pow(10, precision || 0);
 	return Math.round(value * multiplier) / multiplier;
