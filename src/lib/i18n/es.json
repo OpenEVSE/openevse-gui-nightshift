@@ -48,9 +48,17 @@
       "connecting": "Conectando — el cargador se unirá de nuevo a tu red. Es posible que tengas que recargar esta página en su nueva dirección."
     },
     "http": {
+      "portal": "Portal web",
+      "enable": "Activar HTTP",
       "auth": "Contraseña de la interfaz web",
       "username": "Usuario",
       "password": "Contraseña",
+      "ssh": "Línea de comandos SSH",
+      "ssh_enable": "Activar SSH",
+      "ssh_username": "Usuario",
+      "ssh_password": "Contraseña",
+      "ssh_note": "Los cambios surten efecto tras reiniciar",
+      "ssh_note_desc": "Activar SSH o cambiar sus credenciales solo tiene efecto la próxima vez que el dispositivo se reinicie.",
       "lang": "Idioma",
       "temp_unit": "Unidad de temperatura",
       "temp_celsius": "Celsius",
@@ -65,7 +73,6 @@
       "protocol": "Protocolo",
       "server": "Servidor",
       "port": "Puerto",
-      "user": "Usuario",
       "password": "Contraseña",
       "tls": "TLS",
       "reject_unauthorized": "Rechazar certificados autofirmados",
@@ -127,7 +134,7 @@
     },
     "pages": {
       "network": "Red",
-      "http": "HTTP",
+      "http": "HTTP/SSH",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
       "evse": "Cargador",
@@ -408,6 +415,13 @@
       "tls_certificates": "Certificados TLS"
     },
     "certificates": {
+      "https": "HTTPS (administración web)",
+      "https_enable": "Activar HTTPS",
+      "https_cert": "Certificado activo",
+      "https_cert_desc": "El certificado usado para servir la interfaz web por HTTPS. Déjelo sin definir para servir solo HTTP.",
+      "https_none": "Ninguno (solo HTTP)",
+      "https_port": "Puerto HTTPS",
+      "generate_self_signed": "Generar certificado autofirmado",
       "installed": "Certificados instalados",
       "empty": "No hay certificados instalados.",
       "add": "Añadir certificado",

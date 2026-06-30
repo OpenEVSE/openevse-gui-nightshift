@@ -48,9 +48,17 @@
       "connecting": "Connecting — the charger will rejoin your network. You may need to reload this page at its new address."
     },
     "http": {
+      "portal": "Web portal",
+      "enable": "Enable HTTP",
       "auth": "Web interface password",
       "username": "Username",
       "password": "Password",
+      "ssh": "SSH command line",
+      "ssh_enable": "Enable SSH",
+      "ssh_username": "Username",
+      "ssh_password": "Password",
+      "ssh_note": "Changes take effect after a reboot",
+      "ssh_note_desc": "Enabling SSH or changing its credentials only takes effect after the device next reboots.",
       "lang": "Language",
       "temp_unit": "Temperature unit",
       "temp_celsius": "Celsius",
@@ -65,7 +73,6 @@
       "protocol": "Protocol",
       "server": "Server",
       "port": "Port",
-      "user": "Username",
       "password": "Password",
       "tls": "TLS",
       "reject_unauthorized": "Reject self-signed certificates",
@@ -127,7 +134,7 @@
     },
     "pages": {
       "network": "Network",
-      "http": "HTTP",
+      "http": "HTTP/SSH",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
       "evse": "Charger",
@@ -408,6 +415,13 @@
       "tls_certificates": "TLS certificates"
     },
     "certificates": {
+      "https": "HTTPS (web admin)",
+      "https_enable": "Enable HTTPS",
+      "https_cert": "Active certificate",
+      "https_cert_desc": "The certificate used to serve the web admin UI over HTTPS. Leave unset to serve HTTP only.",
+      "https_none": "None (HTTP only)",
+      "https_port": "HTTPS port",
+      "generate_self_signed": "Generate self-signed certificate",
       "installed": "Installed certificates",
       "empty": "No certificates installed.",
       "add": "Add certificate",

@@ -37,7 +37,7 @@ describe('HTTP page', () => {
   it('turning the auth toggle off clears both credentials', async () => {
     config_store.set({ www_username: 'admin', www_password: '••••••••••', lang: 'en' })
     const { getByRole } = render(Http)
-    await fireEvent.click(getByRole('switch'))
+    await fireEvent.click(getByRole('switch', { name: 'config.http.auth' }))
     expect(httpAPI).toHaveBeenCalledWith(
       'POST', '/config', JSON.stringify({ www_username: '', www_password: '' }),
     )
@@ -47,7 +47,7 @@ describe('HTTP page', () => {
     httpAPI.mockResolvedValue('error')
     config_store.set({ www_username: 'admin', www_password: '••••••••••', lang: 'en' })
     const { getByRole } = render(Http)
-    await fireEvent.click(getByRole('switch'))
+    await fireEvent.click(getByRole('switch', { name: 'config.http.auth' }))
     await vi.waitFor(() => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })

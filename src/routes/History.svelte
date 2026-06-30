@@ -4,6 +4,7 @@
   import { history_store } from '../lib/stores/history.js'
   import { config_store } from '../lib/stores/config.js'
   import { uisettings_store } from '../lib/stores/uisettings.js'
+  import { uistates_store } from '../lib/stores/uistates.js'
   import { rfid_users_store } from '../lib/stores/rfid_users.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
@@ -74,6 +75,14 @@
   async function load() {
     phase = 'loading'
     progress = 0
+    // History paging fires many sequential device requests in a row; over
+    // HTTPS each one needs its own fresh TLS handshake (the device's
+    // listener can't keep-alive), and the live status WebSocket holds the
+    // device's single concurrent TLS session for as long as it's open —
+    // starving every one of these handshakes. Drop it for the duration;
+    // WebSocket.svelte reconnects automatically once this clears. No-op
+    // over plain HTTP, where there's no such limit.
+    $uistates_store.ws_paused = true
     try {
       const index = await serialQueue.add(() => httpAPI('GET', '/logs'))
       if (
@@ -96,6 +105,8 @@
       phase = 'ready'
     } catch {
       phase = 'error'
+    } finally {
+      $uistates_store.ws_paused = false
     }
   }
 

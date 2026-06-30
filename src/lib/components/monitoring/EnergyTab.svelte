@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n'
   import { onMount } from 'svelte'
   import { energy_store } from '../../stores/energy.js'
+  import { uistates_store } from '../../stores/uistates.js'
   import Tabs from '../ui/Tabs.svelte'
   import EnergyLiveChart from '../charts/EnergyLiveChart.svelte'
   import EnergySummaryChart from '../charts/EnergySummaryChart.svelte'
@@ -37,11 +38,24 @@
     return []
   })
 
+  // The live status WebSocket holds the device's single concurrent HTTPS/TLS
+  // session for as long as it's open, starving any other HTTPS request of a
+  // handshake — see WebSocket.svelte. Drop it for the duration of a chart
+  // fetch and let it reconnect afterward. No-op over plain HTTP.
+  async function withWsPause(fn) {
+    $uistates_store.ws_paused = true
+    try {
+      return await fn()
+    } finally {
+      $uistates_store.ws_paused = false
+    }
+  }
+
   function loadFor(v) {
-    if (v === 'live')    return energy_store.loadRaw()
-    if (v === 'daily')   return energy_store.loadDaily()
-    if (v === 'monthly') return energy_store.loadMonthly()
-    if (v === 'annual')  return energy_store.loadAnnual()
+    if (v === 'live')    return withWsPause(() => energy_store.loadRaw())
+    if (v === 'daily')   return withWsPause(() => energy_store.loadDaily())
+    if (v === 'monthly') return withWsPause(() => energy_store.loadMonthly())
+    if (v === 'annual')  return withWsPause(() => energy_store.loadAnnual())
   }
 
   function onTabChange(i) { viewIndex = i; loadFor(VIEWS[i]) }
@@ -54,7 +68,7 @@
     clearInterval(timer)
     if (view === 'live') {
       timer = setInterval(() => {
-        if (!$energy_store.raw.historical) energy_store.loadRaw()
+        if (!$energy_store.raw.historical) withWsPause(() => energy_store.loadRaw())
       }, 60000)
     }
     return () => clearInterval(timer)
@@ -71,9 +85,9 @@
     const samples = $energy_store.raw.samples
     if (!samples.length) return
     const oldest = Math.min(...samples.map((s) => s.ts))
-    energy_store.loadRaw(oldest)
+    withWsPause(() => energy_store.loadRaw(oldest))
   }
-  function currentClicked() { energy_store.loadRaw() }
+  function currentClicked() { withWsPause(() => energy_store.loadRaw()) }
 </script>
 
 <div class="flex h-full min-h-0 flex-col gap-3">

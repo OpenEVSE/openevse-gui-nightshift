@@ -6,6 +6,7 @@
     from '../../lib/config/firmware.js'
   import { config_store } from '../../lib/stores/config.js'
   import { status_store } from '../../lib/stores/status.js'
+  import { uistates_store } from '../../lib/stores/uistates.js'
   import { serialQueue } from '../../lib/queue.js'
   import { httpAPI } from '../../lib/api/httpAPI.js'
   import { showWriteError } from '../../lib/alerts.js'
@@ -166,6 +167,11 @@
     if (!firmwareFile || uploading) return
     uploading = true
     serialQueue.pause()
+    // The device's HTTPS listener only sustains one concurrent TLS session —
+    // the live status WebSocket holds it indefinitely, which starves the
+    // upload's handshake entirely. Drop it for the duration; WebSocket.svelte
+    // reconnects automatically once this clears.
+    $uistates_store.ws_paused = true
     try {
       const fd = new FormData()
       fd.append('update', firmwareFile)
@@ -174,6 +180,7 @@
     } catch {
       showWriteError()
     } finally {
+      $uistates_store.ws_paused = false
       serialQueue.resume()
       uploading = false
     }

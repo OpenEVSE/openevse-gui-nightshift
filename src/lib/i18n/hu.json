@@ -48,9 +48,17 @@
       "connecting": "Csatlakozás folyamatban — a töltő újra csatlakozik a hálózathoz. Előfordulhat, hogy új címen kell újratöltenie ezt az oldalt."
     },
     "http": {
+      "portal": "Webes portál",
+      "enable": "HTTP engedélyezése",
       "auth": "Webes felület jelszava",
       "username": "Felhasználónév",
       "password": "Jelszó",
+      "ssh": "SSH parancssor",
+      "ssh_enable": "SSH engedélyezése",
+      "ssh_username": "Felhasználónév",
+      "ssh_password": "Jelszó",
+      "ssh_note": "A módosítások újraindítás után lépnek érvénybe",
+      "ssh_note_desc": "Az SSH engedélyezése vagy hitelesítő adatainak módosítása csak az eszköz következő újraindításakor lép érvénybe.",
       "lang": "Nyelv",
       "temp_unit": "Hőmérséklet mértékegysége",
       "temp_celsius": "Celsius",
@@ -65,7 +73,6 @@
       "protocol": "Protokoll",
       "server": "Szerver",
       "port": "Port",
-      "user": "Felhasználónév",
       "password": "Jelszó",
       "tls": "TLS",
       "reject_unauthorized": "Saját aláírású tanúsítványok elutasítása",
@@ -127,7 +134,7 @@
     },
     "pages": {
       "network": "Hálózat",
-      "http": "HTTP",
+      "http": "HTTP/SSH",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
       "evse": "Töltő",
@@ -408,6 +415,13 @@
       "tls_certificates": "TLS tanúsítványok"
     },
     "certificates": {
+      "https": "HTTPS (webes felület)",
+      "https_enable": "HTTPS engedélyezése",
+      "https_cert": "Aktív tanúsítvány",
+      "https_cert_desc": "A webes felület HTTPS-en történő kiszolgálásához használt tanúsítvány. Hagyja üresen, ha csak HTTP-t szeretne használni.",
+      "https_none": "Nincs (csak HTTP)",
+      "https_port": "HTTPS port",
+      "generate_self_signed": "Önaláírt tanúsítvány létrehozása",
       "installed": "Telepített tanúsítványok",
       "empty": "Nincsenek telepített tanúsítványok.",
       "add": "Tanúsítvány hozzáadása",

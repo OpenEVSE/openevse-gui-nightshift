@@ -25,6 +25,9 @@ const model = {
 		// local states
 		data_loaded: false,
 		ws_connected: true,
+		// Set true while an operation needs the device's single concurrent
+		// HTTPS/TLS session for itself (e.g. firmware upload) — see WebSocket.svelte.
+		ws_paused: false,
 		status_expanded: false,
 		breakpoint: undefined,
 		has_fetched: false,

@@ -251,13 +251,6 @@
           onchange={(v) => form.saveField('mqtt_port', v)}
         />
       </FormField>
-      <FormField label={$_('config.mqtt.user')} status={$ss.mqtt_user ?? 'idle'}>
-        <TextInput
-          value={$config_store?.mqtt_user ?? ''}
-          revert={form.revert}
-          onchange={(v) => form.saveField('mqtt_user', v)}
-        />
-      </FormField>
       <FormField label={$_('config.mqtt.password')} status={$ss.mqtt_pass ?? 'idle'}>
         <PasswordInput
           value={$config_store?.mqtt_pass ?? ''}

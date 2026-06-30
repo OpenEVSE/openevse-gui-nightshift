@@ -48,9 +48,17 @@
       "connecting": "Connexion en cours — le chargeur va rejoindre votre réseau. Vous devrez peut-être recharger cette page à sa nouvelle adresse."
     },
     "http": {
+      "portal": "Portail web",
+      "enable": "Activer HTTP",
       "auth": "Mot de passe de l'interface web",
       "username": "Identifiant",
       "password": "Mot de passe",
+      "ssh": "Ligne de commande SSH",
+      "ssh_enable": "Activer SSH",
+      "ssh_username": "Identifiant",
+      "ssh_password": "Mot de passe",
+      "ssh_note": "Les modifications prennent effet après un redémarrage",
+      "ssh_note_desc": "L'activation de SSH ou la modification de ses identifiants ne prend effet qu'au prochain redémarrage de l'appareil.",
       "lang": "Langue",
       "temp_unit": "Unité de température",
       "temp_celsius": "Celsius",
@@ -65,7 +73,6 @@
       "protocol": "Protocole",
       "server": "Serveur",
       "port": "Port",
-      "user": "Identifiant",
       "password": "Mot de passe",
       "tls": "TLS",
       "reject_unauthorized": "Rejeter les certificats auto-signés",
@@ -127,7 +134,7 @@
     },
     "pages": {
       "network": "Réseau",
-      "http": "HTTP",
+      "http": "HTTP/SSH",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
       "evse": "Chargeur",
@@ -408,6 +415,13 @@
       "tls_certificates": "Certificats TLS"
     },
     "certificates": {
+      "https": "HTTPS (administration web)",
+      "https_enable": "Activer HTTPS",
+      "https_cert": "Certificat actif",
+      "https_cert_desc": "Le certificat utilisé pour servir l'interface d'administration en HTTPS. Laisser vide pour ne servir que le HTTP.",
+      "https_none": "Aucun (HTTP uniquement)",
+      "https_port": "Port HTTPS",
+      "generate_self_signed": "Générer un certificat auto-signé",
       "installed": "Certificats installés",
       "empty": "Aucun certificat installé.",
       "add": "Ajouter un certificat",

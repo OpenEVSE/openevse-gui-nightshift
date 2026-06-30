@@ -27,13 +27,20 @@ function createCertificateStore() {
     else return false
   }
 
+  async function generateSelfSigned() {
+    let res = await httpAPI("POST", "/certificates/self-signed")
+    res.success = res && res.msg == "done"
+    return res
+  }
+
   return {
     subscribe,
     set,
     update,
     download,
     remove: (id) => remove(id),
-    upload: (certificate) => upload(certificate)
+    upload: (certificate) => upload(certificate),
+    generateSelfSigned
   }
 }
 

@@ -18,6 +18,30 @@
   let reconnectDelay = RECONNECT_MIN
   let reconnectTimer
 
+  // This device's HTTPS listener only sustains one concurrent TLS session.
+  // The wss:// connection below holds that slot for as long as it's open,
+  // which starves any other HTTPS request (e.g. a firmware upload) of a
+  // handshake entirely. Callers that need the slot for themselves set
+  // uistates_store.ws_paused — we drop the socket while that's true and
+  // reconnect as soon as it clears. No-op (just an unnecessary reconnect
+  // cycle) over plain HTTP, where there's no such limit.
+  let wsPaused = false
+
+  $effect(() => {
+    const shouldPause = !!$uistates_store.ws_paused
+    if (shouldPause && !wsPaused) {
+      wsPaused = true
+      cancelReconnect()
+      cancelKeepAlive()
+      const old = socket
+      socket = null
+      if (old) try { old.close() } catch { /* already closed */ }
+    } else if (!shouldPause && wsPaused) {
+      wsPaused = false
+      connect2socket()
+    }
+  })
+
   onMount(() => {
     connect2socket()
     if (typeof window !== 'undefined') {

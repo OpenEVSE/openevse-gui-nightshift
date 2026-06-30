@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 import { compression } from 'vite-plugin-compression2'
 import { mockPlugin } from './dev/mock-plugin.js'
 import { readFileSync } from 'node:fs'
@@ -24,6 +25,11 @@ export default defineConfig(({ mode }) => {
       svelte(),
       tailwindcss(),
       ...(isMock ? [mockPlugin()] : []),
+      // Injects the built CSS into the JS bundle at runtime instead of
+      // emitting a separate .css file — one less file the browser needs a
+      // fresh TLS handshake for on page load (see the build.rollupOptions
+      // comment below for why that matters on this device).
+      cssInjectedByJsPlugin(),
       VitePWA({
         // Graceful PWA sunset: new users never get a SW registered
         // (`injectRegister: null`), and any user who installed an older
@@ -58,14 +64,23 @@ export default defineConfig(({ mode }) => {
     ],
     build: {
       sourcemap: false,
+      // Single JS/CSS bundle rather than splitting into vendor/charts/app
+      // chunks — the device's HTTPS listener closes every connection after
+      // one response (no keep-alive in the vendored Mongoose), so each
+      // extra file the browser fetches in parallel on page load is another
+      // full TLS handshake. The ESP32 can only sustain about one of those
+      // at a time; more than that and most get reset, leaving the page
+      // blank. Fewer files served narrows that window. See git log for the
+      // device-side investigation.
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
-            if (id.includes('/node_modules/uplot/')) return 'charts'
-            if (['luxon', 'svelte-i18n', 'iconify-icon'].some((pkg) => id.includes(`/node_modules/${pkg}/`))) {
-              return 'vendor'
-            }
-          },
+          manualChunks: undefined,
+          // codeSplitting: false (the non-deprecated replacement) still
+          // splits off dynamic import() boundaries (the per-locale i18n
+          // chunks), recreating the multi-file problem this is solving.
+          // inlineDynamicImports actually merges those too, at the cost of
+          // a build-time deprecation warning only.
+          inlineDynamicImports: true,
         },
       },
     },
