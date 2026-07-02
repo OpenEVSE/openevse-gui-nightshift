@@ -3,17 +3,15 @@
   import { onMount } from 'svelte'
   import { status_store } from '../lib/stores/status.js'
   import { config_store } from '../lib/stores/config.js'
-  import { claims_target_store } from '../lib/stores/claims_target.js'
   import { uistates_store } from '../lib/stores/uistates.js'
   import { uisettings_store } from '../lib/stores/uisettings.js'
   import {
     energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
-    showVehicle, homeBatteryMetrics, showHomeBattery, safetyData, claimRows,
+    showVehicle, homeBatteryMetrics, showHomeBattery, safetyData,
   } from '../lib/monitoring/metrics.js'
   import Tabs from '../lib/components/ui/Tabs.svelte'
   import MetricsTab from '../lib/components/monitoring/MetricsTab.svelte'
   import SafetyTab from '../lib/components/monitoring/SafetyTab.svelte'
-  import ManagerTab from '../lib/components/monitoring/ManagerTab.svelte'
   import EnergyTab from '../lib/components/monitoring/EnergyTab.svelte'
 
   let hasError = $derived(!!$uistates_store?.error)
@@ -51,13 +49,11 @@
     { group: serviceMetrics($status_store, $config_store), expanded: desktop },
   ])
   let safety = $derived(safetyData($status_store, hasError))
-  let claims = $derived(claimRows($claims_target_store))
 
   let tabs = $derived([
     ...(devOn ? [{ id: 'energy',  label: $_('monitoring.tab.energy'),  alert: false }] : []),
     { id: 'data',    label: $_('monitoring.tab.data'),    alert: false },
     { id: 'safety',  label: $_('monitoring.tab.safety'),  alert: hasError },
-    { id: 'manager', label: $_('monitoring.tab.manager'), alert: false },
   ])
 
   // If the user disables dev features while sitting on the Energy tab,
@@ -79,13 +75,9 @@
       <EnergyTab />
     {:else if activeId === 'data'}
       <MetricsTab {groups} />
-    {:else if activeId === 'safety'}
-      <div class="lg:mx-auto lg:w-full lg:max-w-3xl">
-        <SafetyTab data={safety} />
-      </div>
     {:else}
       <div class="lg:mx-auto lg:w-full lg:max-w-3xl">
-        <ManagerTab rows={claims} />
+        <SafetyTab data={safety} />
       </div>
     {/if}
   </div>

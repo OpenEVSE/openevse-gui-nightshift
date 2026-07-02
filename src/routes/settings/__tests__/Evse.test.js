@@ -60,15 +60,10 @@ describe('EVSE page', () => {
     })
   })
 
-  it('shows the default-state select only when the device reports it', async () => {
-    config_store.set({ ...BASE })
-    const { queryByText, rerender } = render(Evse)
-    expect(queryByText('config.evse.defaultstate')).not.toBeInTheDocument()
+  it('no longer renders the default-state control (moved to Charge Manager)', () => {
     config_store.set({ ...BASE, default_state: false })
-    await rerender({})
-    await vi.waitFor(() => {
-      expect(queryByText('config.evse.defaultstate')).toBeInTheDocument()
-    })
+    const { queryByText } = render(Evse)
+    expect(queryByText('config.evse.defaultstate')).not.toBeInTheDocument()
   })
 
   it('shows the front-button toggle only when the device reports it', async () => {
@@ -103,10 +98,27 @@ describe('EVSE page', () => {
   it('saves the service level as a number', async () => {
     config_store.set({ ...BASE })
     const { getAllByRole } = render(Evse)
-    // service is the first <select> on the page; system-limit is the last
+    // service is the first <select> on the page
     const selects = getAllByRole('combobox')
     await fireEvent.change(selects[0], { target: { value: '2' } })
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ service: 2 }))
+  })
+
+  it('moves PP auto-ampacity directly under the service-level control', () => {
+    config_store.set({ ...BASE, pp_auto: false })
+    const { getByText } = render(Evse)
+    const service = getByText('config.evse.service')
+    const pp = getByText('config.evse.pp_auto')
+    // service appears before pp_auto in document order
+    expect(service.compareDocumentPosition(pp) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('makes the relay control card collapsible and collapsed by default', async () => {
+    config_store.set({ ...BASE, relay_ac: true, zero_cross: false })
+    const { getByText, queryByLabelText } = render(Evse)
+    expect(queryByLabelText('config.evse.relay_ac')).toBeNull()
+    await fireEvent.click(getByText('config.evse.relays'))
+    expect(queryByLabelText('config.evse.relay_ac')).toBeInTheDocument()
   })
 
   it('shows the alert box when a save fails', async () => {
@@ -119,85 +131,11 @@ describe('EVSE page', () => {
     })
   })
 
-  it('renders the system limit section', () => {
-    config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
-    const { getByText } = render(Evse)
-    expect(getByText('config.evse.system_limit')).toBeInTheDocument()
-    expect(getByText('config.evse.limit_type')).toBeInTheDocument()
-  })
-
-  it('saves type with a zeroed value when picking a system limit type', async () => {
-    config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
-    const { getAllByRole } = render(Evse)
-    const selects = getAllByRole('combobox')
-    const typeSelect = selects[selects.length - 1] // system-limit select is the page's last combobox
-    await fireEvent.change(typeSelect, { target: { value: 'energy' } })
-    expect(httpAPI).toHaveBeenCalledWith(
-      'POST', '/config',
-      JSON.stringify({ limit_default_type: 'energy', limit_default_value: 0 }),
-    )
-  })
-
-  it('shows the energy value in kWh and saves it in Wh', async () => {
-    config_store.set({ ...BASE, limit_default_type: 'energy', limit_default_value: 10000 })
-    const { getByDisplayValue } = render(Evse)
-    const input = getByDisplayValue('10') // 10000 Wh shown as 10 kWh
-    await fireEvent.input(input, { target: { value: '12' } })
-    await fireEvent.blur(input)
-    expect(httpAPI).toHaveBeenCalledWith(
-      'POST', '/config',
-      JSON.stringify({ limit_default_value: 12000 }),
-    )
-  })
-
-  it('saves a non-energy value unconverted', async () => {
-    config_store.set({ ...BASE, limit_default_type: 'time', limit_default_value: 120 })
-    const { getByDisplayValue } = render(Evse)
-    const input = getByDisplayValue('120')
-    await fireEvent.input(input, { target: { value: '90' } })
-    await fireEvent.blur(input)
-    expect(httpAPI).toHaveBeenCalledWith(
-      'POST', '/config',
-      JSON.stringify({ limit_default_value: 90 }),
-    )
-  })
-
-  it('removes the system limit by writing type none', async () => {
-    config_store.set({ ...BASE, limit_default_type: 'energy', limit_default_value: 10000 })
-    const { getAllByRole } = render(Evse)
-    const selects = getAllByRole('combobox')
-    await fireEvent.change(selects[selects.length - 1], { target: { value: 'none' } })
-    expect(httpAPI).toHaveBeenCalledWith(
-      'POST', '/config',
-      JSON.stringify({ limit_default_type: 'none' }),
-    )
-  })
-
-  it('hides the value field when no system limit type is set', () => {
+  it('no longer renders the system limit section (removed)', () => {
     config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
     const { queryByText } = render(Evse)
-    expect(queryByText('config.evse.limit_value')).not.toBeInTheDocument()
-  })
-
-  it('saves the energy-slider max to local UI settings (kWh, not the device)', async () => {
-    config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
-    uisettings_store.update((s) => ({ ...s, max_energy_kwh: 100 }))
-    const { getByDisplayValue } = render(Evse)
-    const input = getByDisplayValue('100')
-    await fireEvent.input(input, { target: { value: '40' } })
-    await fireEvent.blur(input)
-    expect(get(uisettings_store).max_energy_kwh).toBe(40)
-    // It's a local preference — nothing goes to the device.
-    expect(httpAPI).not.toHaveBeenCalled()
-  })
-
-  it('caps an over-large energy-slider max at the hard ceiling', async () => {
-    config_store.set({ ...BASE, limit_default_type: '', limit_default_value: 0 })
-    uisettings_store.update((s) => ({ ...s, max_energy_kwh: 100 }))
-    const { getByDisplayValue } = render(Evse)
-    const input = getByDisplayValue('100')
-    await fireEvent.input(input, { target: { value: '100000' } })
-    await fireEvent.blur(input)
-    expect(get(uisettings_store).max_energy_kwh).toBe(500)
+    expect(queryByText('config.evse.system_limit')).not.toBeInTheDocument()
+    expect(queryByText('config.evse.limit_type')).not.toBeInTheDocument()
+    expect(queryByText('config.evse.energy_slider_max')).not.toBeInTheDocument()
   })
 })

@@ -7,7 +7,7 @@
 
   const items = [
     { href: '/', key: 'nav.home', icon: 'mdi:home-outline' },
-    { href: '/schedule', key: 'nav.schedule', icon: 'mdi:calendar-clock-outline' },
+    { href: '/schedule', key: 'nav.charge_manager', icon: 'mdi:lightning-bolt-circle' },
     { href: '/monitoring', key: 'nav.monitoring', icon: 'mdi:chart-line' },
     { href: '/history', key: 'nav.history', icon: 'mdi:history' },
     { href: '/settings', key: 'nav.settings', icon: 'mdi:cog-outline' },

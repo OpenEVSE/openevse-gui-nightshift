@@ -24,10 +24,20 @@ beforeEach(() => {
 })
 
 describe('Solar page', () => {
-  it('hides the form until divert is enabled', () => {
+  it('shows the tuning settings expanded by default (no enable switch)', () => {
     config_store.set({ divert_enabled: false })
-    const { queryByText } = render(Solar)
-    expect(queryByText('config.solar.ratio')).not.toBeInTheDocument()
+    const { getByText, queryByText } = render(Solar)
+    expect(getByText('config.solar.ratio')).toBeInTheDocument()
+    expect(queryByText('config.solar.enable')).not.toBeInTheDocument()
+    // No "eco mode on power-up" switch either.
+    expect(queryByText('config.solar.default_mode')).not.toBeInTheDocument()
+  })
+
+  it('links to the Charge Manager to enable/schedule self-production', () => {
+    config_store.set({ divert_enabled: false })
+    const { getByText } = render(Solar)
+    const link = getByText('config.add_in_charge_manager', { exact: false }).closest('a')
+    expect(link).toHaveAttribute('href', '#/schedule')
   })
 
   it('shows the production topic for divert type 0', () => {

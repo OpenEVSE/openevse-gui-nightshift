@@ -44,10 +44,9 @@ describe('Monitoring', () => {
     expect(getByText('monitoring.safety.gfci')).toBeInTheDocument()
   })
 
-  it('switches to the Manager tab and shows the claim row', async () => {
-    const { getByText } = render(Monitoring)
-    await fireEvent.click(getByText('monitoring.tab.manager'))
-    expect(getByText('state')).toBeInTheDocument()
+  it('no longer shows the Manager tab (removed)', () => {
+    const { queryByText } = render(Monitoring)
+    expect(queryByText('monitoring.tab.manager')).not.toBeInTheDocument()
   })
 
   it('opens on the Safety tab when the device is in a fault state', () => {

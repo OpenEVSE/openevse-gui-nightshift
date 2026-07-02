@@ -28,16 +28,34 @@ beforeEach(() => {
 })
 
 describe('RFID page', () => {
-  it('hides the tag manager until rfid is enabled', () => {
+  it('shows the tag manager expanded by default (no enable switch)', () => {
     config_store.set({ rfid_enabled: false, rfid_storage: '' })
-    const { queryByText } = render(Rfid)
-    expect(queryByText('config.rfid.scan')).not.toBeInTheDocument()
+    const { getByText, queryByText } = render(Rfid)
+    expect(getByText('config.rfid.scan')).toBeInTheDocument()
+    expect(queryByText('config.rfid.enable')).not.toBeInTheDocument()
   })
 
-  it('shows the scan button when rfid is enabled', () => {
-    config_store.set({ rfid_enabled: true, rfid_storage: '' })
+  it('links to the Charge Manager to enable/schedule RFID', () => {
+    config_store.set({ rfid_enabled: false, rfid_storage: '' })
     const { getByText } = render(Rfid)
-    expect(getByText('config.rfid.scan')).toBeInTheDocument()
+    const link = getByText('config.add_in_charge_manager', { exact: false }).closest('a')
+    expect(link).toHaveAttribute('href', '#/schedule')
+  })
+
+  it('shows the reader-found badge when a reader is present', () => {
+    status_store.set({ rfid_input: '', rfid_reader: 1 })
+    config_store.set({ rfid_enabled: false, rfid_storage: '' })
+    const { getByText, queryByText } = render(Rfid)
+    expect(getByText('config.rfid.reader_found')).toBeInTheDocument()
+    expect(queryByText('config.rfid.no_reader')).not.toBeInTheDocument()
+  })
+
+  it('shows the no-reader badge when no reader is present', () => {
+    status_store.set({ rfid_input: '', rfid_reader: 0 })
+    config_store.set({ rfid_enabled: false, rfid_storage: '' })
+    const { getByText, queryByText } = render(Rfid)
+    expect(getByText('config.rfid.no_reader')).toBeInTheDocument()
+    expect(queryByText('config.rfid.reader_found')).not.toBeInTheDocument()
   })
 
   it('lists registered tags', () => {

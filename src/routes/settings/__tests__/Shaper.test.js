@@ -24,16 +24,18 @@ beforeEach(() => {
 })
 
 describe('Shaper page', () => {
-  it('hides the form until the shaper is enabled', () => {
+  it('shows the settings expanded by default (no enable switch)', () => {
     config_store.set({ current_shaper_enabled: false })
-    const { queryByText } = render(Shaper)
-    expect(queryByText('config.shaper.max_power')).not.toBeInTheDocument()
+    const { getByText, queryByText } = render(Shaper)
+    expect(getByText('config.shaper.max_power')).toBeInTheDocument()
+    expect(queryByText('config.shaper.enable')).not.toBeInTheDocument()
   })
 
-  it('shows the form when the shaper is enabled', () => {
-    config_store.set({ current_shaper_enabled: true })
+  it('links to the Charge Manager to enable/schedule grid shaping', () => {
+    config_store.set({ current_shaper_enabled: false })
     const { getByText } = render(Shaper)
-    expect(getByText('config.shaper.max_power')).toBeInTheDocument()
+    const link = getByText('config.add_in_charge_manager', { exact: false }).closest('a')
+    expect(link).toHaveAttribute('href', '#/schedule')
   })
 
   it('saves the max-power field on blur', async () => {
