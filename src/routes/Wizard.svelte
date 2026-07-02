@@ -33,17 +33,31 @@
 
   // The EVSE step configures the controller (max current, phase, default
   // state). If the WiFi module can't reach it over serial the device reports
-  // evse_connected: 0, and those reads/writes are meaningless — so block
-  // advancing past this step until comms are restored (gui-nightshift#17).
+  // evse_connected: 0, and those reads/writes are meaningless — so hold the
+  // wizard on this step until comms are restored (gui-nightshift#17).
   let evseConnected = $derived($status_store?.evse_connected ?? true)
   let commsBlocked = $derived(STEPS[step] === 'evse' && !evseConnected)
 
+  // Escape hatch: a charger may be genuinely absent (bench-flashing a module,
+  // a dead serial link the user will fix later) yet the person still needs to
+  // finish WiFi/time setup. Rather than trap them, we let a deliberate triple
+  // tap on Next break through — obvious enough to find on purpose, deliberate
+  // enough not to skip setup by accident. The hint appears after the first tap.
+  const BYPASS_TAPS = 3
+  let bypassTaps = $state(0)
+  let bypassRemaining = $derived(
+    commsBlocked && bypassTaps > 0 ? BYPASS_TAPS - bypassTaps : 0,
+  )
+
   function goPrev() {
+    bypassTaps = 0
     if (step > 0) step -= 1
   }
   function goNext() {
-    if (commsBlocked) return
+    if (finishing) return
+    if (commsBlocked && ++bypassTaps < BYPASS_TAPS) return
     if (step < TOTAL - 1) step += 1
+    bypassTaps = 0
   }
 
   // Browser is still on the device AP if it's talking to 192.168.4.1.
@@ -82,7 +96,7 @@
   {step}
   total={TOTAL}
   title={$_(titleKey)}
-  canAdvance={!finishing && !commsBlocked}
+  canAdvance={!finishing}
   onPrev={goPrev}
   onNext={goNext}
   onFinish={finish}
@@ -90,7 +104,7 @@
   {#if step === 0}
     <Welcome />
   {:else if step === 1}
-    <EvseBasics {evseConnected} />
+    <EvseBasics {evseConnected} {bypassRemaining} />
   {:else if step === 2}
     <Wifi />
   {:else if step === 3}

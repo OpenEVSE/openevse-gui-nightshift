@@ -777,7 +777,8 @@
     },
     "evse": {
       "title": "Charger basics",
-      "intro": "Set what the charger needs to know about your installation. You can change any of this later in Settings."
+      "intro": "Set what the charger needs to know about your installation. You can change any of this later in Settings.",
+      "bypass_hint": "Charger still not found. Tap Next {count} more time(s) to skip charger setup."
     },
     "wifi": {
       "title": "WiFi",

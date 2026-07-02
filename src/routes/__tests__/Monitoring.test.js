@@ -24,17 +24,16 @@ describe('Monitoring', () => {
     uisettings_store.update((s) => ({ ...s, dev_features: false }))
   })
 
-  it('hides the Energy tab when dev features are off', () => {
-    const { queryByText, getByText } = render(Monitoring)
-    expect(queryByText('monitoring.tab.energy')).not.toBeInTheDocument()
-    // Data is the default landing in this mode — energy group is from the metrics page
+  it('shows the Energy tab even with dev features off (ungated)', () => {
+    const { getByText } = render(Monitoring)
+    expect(getByText('monitoring.tab.energy')).toBeInTheDocument()
+    // Data remains the default landing — its energy metric group is shown.
     expect(getByText('monitoring.group.energy')).toBeInTheDocument()
   })
 
-  it('reveals the Energy tab and makes it default when dev features are on', () => {
-    uisettings_store.update((s) => ({ ...s, dev_features: true }))
+  it('shows the live energy view when the Energy tab is selected', async () => {
     const { getByText } = render(Monitoring)
-    expect(getByText('monitoring.tab.energy')).toBeInTheDocument()
+    await fireEvent.click(getByText('monitoring.tab.energy'))
     expect(getByText('monitoring.energy.live')).toBeInTheDocument()
   })
 

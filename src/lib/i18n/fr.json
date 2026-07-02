@@ -777,7 +777,8 @@
     },
     "evse": {
       "title": "Réglages du chargeur",
-      "intro": "Indiquez au chargeur les bases de votre installation. Vous pouvez tout modifier plus tard dans les Paramètres."
+      "intro": "Indiquez au chargeur les bases de votre installation. Vous pouvez tout modifier plus tard dans les Paramètres.",
+      "bypass_hint": "Chargeur toujours introuvable. Appuyez sur Suivant {count} fois de plus pour ignorer la configuration du chargeur."
     },
     "wifi": {
       "title": "WiFi",

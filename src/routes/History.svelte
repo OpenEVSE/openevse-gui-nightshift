@@ -21,12 +21,8 @@
   let phase = $state('loading')
   let progress = $state(0)
 
-  let labsOn = $derived(!!$uisettings_store?.dev_features)
-
-  // Resolve the "User" cell for one log entry. Labs-only: returns null when
-  // the feature is off so LogRow can hide the line entirely.
+  // Resolve the "User" cell for one log entry from the RFID name map.
   function userTextFor(entry) {
-    if (!labsOn) return null
     const uid = entry?.rfidTag
     if (!uid) return '—'
     return $rfid_users_store.users[uid] ?? uid
@@ -100,7 +96,7 @@
   }
 
   onMount(() => {
-    if (labsOn) rfid_users_store.download()
+    rfid_users_store.download()
     load()
   })
 </script>
@@ -108,7 +104,7 @@
 <section class="p-4 lg:mx-auto lg:max-w-3xl">
   <div class="mb-3 flex items-center gap-2">
     <h1 class="flex-1 text-lg font-semibold text-text">{$_('screen.history')}</h1>
-    {#if labsOn && phase === 'ready' && rows.length > 0}
+    {#if phase === 'ready' && rows.length > 0}
       <div class="w-32 shrink-0">
         <Button label={$_('history.export_csv')} variant="ghost" onclick={exportCsv} />
       </div>

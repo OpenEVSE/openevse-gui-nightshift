@@ -36,6 +36,15 @@ describe('Dashboard', () => {
     expect(getByText('dashboard.status.charging')).toBeInTheDocument()
   })
 
+  it('shows the session chart hero while charging with dev features off (ungated)', () => {
+    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 32000, session_energy: 0, session_elapsed: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0 })
+    const { getByText } = render(Dashboard)
+    // ChargingHero → SessionChart renders the "collecting…" placeholder until
+    // there are ≥2 raw samples; its presence proves the chart path is live
+    // without needing Labs enabled.
+    expect(getByText('dashboard.session.collecting')).toBeInTheDocument()
+  })
+
   it('renders the idle composition when state is 1', () => {
     status_store.set({ state: 1, total_day: 3.2, total_energy: 7523 })
     const { getByText } = render(Dashboard)

@@ -70,20 +70,52 @@ describe('Wizard route', () => {
     expect(getByText('20 A')).toBeInTheDocument()
   })
 
-  it('blocks the EVSE step and shows a comms error when the safety module is unreachable', async () => {
+  it('holds the EVSE step and shows a comms error when the safety module is unreachable', async () => {
     // Firmware publishes evse_connected as 0 when the WiFi module can't reach
     // the EVSE controller over serial (gui-nightshift#17).
     status_store.set({ ipaddress: '10.0.0.5', evse_connected: 0 })
-    const { getByText, queryByRole } = render(Wizard)
+    const { getByText, queryByRole, queryByText } = render(Wizard)
 
     await fireEvent.click(getByText('wizard.next')) // -> EVSE step
 
     // The error is surfaced and the (untrustworthy) controls are hidden.
     expect(getByText('connection.evse_missing')).toBeInTheDocument()
     expect(queryByRole('slider')).toBeNull()
+    // No bypass hint until the user actually tries to advance.
+    expect(queryByText('wizard.evse.bypass_hint')).toBeNull()
 
-    // Next is disabled, so clicking it can't blindly continue past setup.
+    // A single Next tap can't blindly continue past setup — it holds and
+    // reveals the tap-to-skip hint instead.
     await fireEvent.click(getByText('wizard.next'))
+    expect(getByText('wizard.evse.title')).toBeInTheDocument()
+    expect(getByText('wizard.evse.bypass_hint')).toBeInTheDocument()
+  })
+
+  it('lets a determined user tap Next three times to skip the EVSE comms block', async () => {
+    status_store.set({ ipaddress: '10.0.0.5', evse_connected: 0 })
+    const { getByText } = render(Wizard)
+
+    await fireEvent.click(getByText('wizard.next')) // -> EVSE step
+    await fireEvent.click(getByText('wizard.next')) // tap 1 — holds
+    expect(getByText('wizard.evse.title')).toBeInTheDocument()
+    await fireEvent.click(getByText('wizard.next')) // tap 2 — holds
+    expect(getByText('wizard.evse.title')).toBeInTheDocument()
+    await fireEvent.click(getByText('wizard.next')) // tap 3 — breaks through
+    expect(getByText('wizard.wifi.title')).toBeInTheDocument()
+  })
+
+  it('resets the bypass tap count when the EVSE step is revisited', async () => {
+    status_store.set({ ipaddress: '10.0.0.5', evse_connected: 0 })
+    const { getByText } = render(Wizard)
+
+    await fireEvent.click(getByText('wizard.next')) // -> EVSE step
+    await fireEvent.click(getByText('wizard.next')) // tap 1
+    await fireEvent.click(getByText('wizard.next')) // tap 2
+    await fireEvent.click(getByText('wizard.previous')) // back to welcome — resets
+    await fireEvent.click(getByText('wizard.next')) // -> EVSE step again
+
+    // Prior taps were cleared: one tap here must not break through.
+    await fireEvent.click(getByText('wizard.next')) // tap 1 of a fresh count
     expect(getByText('wizard.evse.title')).toBeInTheDocument()
   })
 

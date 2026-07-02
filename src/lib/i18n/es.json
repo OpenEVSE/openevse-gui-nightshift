@@ -777,7 +777,8 @@
     },
     "evse": {
       "title": "Cargador",
-      "intro": "Indica al cargador los datos básicos de tu instalación. Puedes cambiarlo todo más tarde en Ajustes."
+      "intro": "Indica al cargador los datos básicos de tu instalación. Puedes cambiarlo todo más tarde en Ajustes.",
+      "bypass_hint": "El cargador sigue sin encontrarse. Toca Siguiente {count} vez(ces) más para omitir la configuración del cargador."
     },
     "wifi": {
       "title": "WiFi",

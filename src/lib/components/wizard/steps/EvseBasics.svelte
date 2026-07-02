@@ -16,7 +16,9 @@
   // When the WiFi module can't reach the EVSE controller the config values
   // here are stale/meaningless, so the wizard hides the controls and shows an
   // error instead of letting setup continue (gui-nightshift#17).
-  let { evseConnected = true } = $props()
+  // `bypassRemaining` (>0) is how many more Next taps skip charger setup — the
+  // wizard's triple-tap escape hatch; 0 hides the hint.
+  let { evseConnected = true, bypassRemaining = 0 } = $props()
 
   const form = createConfigForm()
   const ss = form.saveState
@@ -47,6 +49,11 @@
     <div role="alert" class="rounded-xl bg-warning/15 px-4 py-3 text-sm text-warning">
       <p class="font-semibold">{$_('connection.evse_missing')}</p>
       <p class="mt-1">{$_('connection.evse_missing_body')}</p>
+      {#if bypassRemaining > 0}
+        <p class="mt-2 text-text-dim">
+          {$_('wizard.evse.bypass_hint', { values: { count: bypassRemaining } })}
+        </p>
+      {/if}
     </div>
   {:else}
     <p class="text-sm text-text-dim">{$_('wizard.evse.intro')}</p>
