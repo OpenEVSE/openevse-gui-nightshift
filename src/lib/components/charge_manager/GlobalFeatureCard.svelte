@@ -22,10 +22,17 @@
     return String(limit.value)
   }
 
+  // Hide the description instead of rendering the raw key when a
+  // feature_*_desc translation is missing (same fallback as RuleCard).
+  function featureDesc(key) {
+    const k = 'charge_manager.feature_' + key + '_desc'
+    return $_(k) !== k ? $_(k) : ''
+  }
+
   let valueDesc = $derived(
     featureKey === 'session_limit'
       ? formatLimitValue(limit)
-      : $_('charge_manager.feature_' + featureKey + '_desc')
+      : featureDesc(featureKey)
   )
 </script>
 
