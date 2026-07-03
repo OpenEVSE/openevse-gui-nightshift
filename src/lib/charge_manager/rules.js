@@ -96,14 +96,18 @@ function shiftDaysForward(days) {
 /**
  * Derive Rule[] from a flat list of backend timer events.
  *
- * Two-phase pairing:
- *  1. For each non-disabled (start) timer A, prefer a same-day stop
- *     (disabled, same days, later time).  If none, accept a next-day stop
- *     (disabled timer whose days set equals shiftDaysForward(A.days)).
- *  2. Unmatched disabled timers become standalone disable rules.
+ * Pairing, most deterministic first:
+ *  1. Id-adjacency — rulesToTimers writes stopId = startId + 1, so a disabled
+ *     timer at A.id + 1 that is also day/time-consistent is A's stop, even
+ *     when several stops share the same day set.
+ *  2. Same-day heuristic (identical days, later time) for legacy data.
+ *  3. Next-day heuristic (days shifted forward one, time at or before the
+ *     start — a shifted stop only exists for windows that wrap midnight).
+ *  4. Unmatched disabled timers become standalone disable rules.
  *
- * Processing actives before disableds means a disabled that appears earlier
- * in time-sorted order can still be matched as a next-day stop.
+ * A stop written for a feature rule carries the same feature (feature_value 0)
+ * while a charge rule's stop is plain ('current' lives only on the start), so
+ * candidates must also match on feature or they belong to another rule.
  * @param {any[]} timers
  */
 export function timersToRules(timers) {
@@ -113,26 +117,40 @@ export function timersToRules(timers) {
   const actives  = sorted.filter((t) => t.state !== 'disabled')
   const disableds = sorted.filter((t) => t.state === 'disabled')
   const usedIds  = new Set()
+  const stopFor  = new Map() // active timer id → its stop timer
   const rules    = []
 
-  for (const A of actives) {
+  const stopFeature = (/** @type {any} */ A) =>
+    A.feature && A.feature !== 'current' ? A.feature : null
+
+  const matchers = (/** @type {any} */ A) => {
     const daysKey    = daysSetKey(A.days)
     const shiftedKey = daysSetKey(shiftDaysForward(A.days ?? []))
+    const feat       = stopFeature(A)
+    const usable  = (/** @type {any} */ B) => !usedIds.has(B.id) && (B.feature ?? null) === feat
+    const sameDay = (/** @type {any} */ B) => daysSetKey(B.days) === daysKey && B.time > A.time
+    const nextDay = (/** @type {any} */ B) => daysSetKey(B.days) === shiftedKey && B.time <= A.time
+    return { usable, sameDay, nextDay }
+  }
 
-    // Pass 1: same-day stop (later time on identical days)
-    let stop = null
-    for (const B of disableds) {
-      if (usedIds.has(B.id)) continue
-      if (daysSetKey(B.days) === daysKey && B.time > A.time) { stop = B; break }
-    }
-    // Pass 2: next-day stop (shifted days, any time)
-    if (!stop) {
-      for (const B of disableds) {
-        if (usedIds.has(B.id)) continue
-        if (daysSetKey(B.days) === shiftedKey) { stop = B; break }
-      }
-    }
-    if (stop) usedIds.add(stop.id)
+  // Pass 1: resolve every id-adjacent pair first, so a time-sorted neighbour
+  // can't steal a stop that provably belongs to another start.
+  for (const A of actives) {
+    const { usable, sameDay, nextDay } = matchers(A)
+    const B = disableds.find((B) => B.id === A.id + 1 && usable(B) && (sameDay(B) || nextDay(B)))
+    if (B) { stopFor.set(A.id, B); usedIds.add(B.id) }
+  }
+  // Passes 2/3: day-set heuristics for legacy pairs with non-adjacent ids.
+  for (const A of actives) {
+    if (stopFor.has(A.id)) continue
+    const { usable, sameDay, nextDay } = matchers(A)
+    const B = disableds.find((B) => usable(B) && sameDay(B))
+           ?? disableds.find((B) => usable(B) && nextDay(B))
+    if (B) { stopFor.set(A.id, B); usedIds.add(B.id) }
+  }
+
+  for (const A of actives) {
+    const stop = stopFor.get(A.id) ?? null
 
     const action        = timerStateToAction(A.state, A.feature ?? null)
     const chargeCurrent = A.feature === 'current' ? (A.feature_value ?? null) : null
@@ -193,10 +211,7 @@ export function rulesToTimers(rule, existingTimers) {
 
   const isNew = startId == null
 
-  if (isNew) {
-    startId = nextTimerId(timers)
-    stopId = startId + 1
-  }
+  if (isNew) startId = nextTimerId(timers)
 
   // If the rule now has no stop time but previously had a stop event, delete it
   if (!isNew && rule.stopTime == null && stopId != null) {
@@ -223,11 +238,10 @@ export function rulesToTimers(rule, existingTimers) {
 
   // Build stop timer (if stopTime is set)
   if (rule.stopTime) {
-    // If new and we need a fresh stop ID, ensure it doesn't clash
-    if (isNew || stopId == null) {
-      const allIds = [...timers.map((t) => t.id), startId]
-      stopId = Math.max(...allIds) + 1
-    }
+    // No existing stop event: prefer the slot right after the start —
+    // timersToRules relies on this adjacency to re-pair the events — but
+    // never collide with an existing timer id (a rule gaining a stop later).
+    if (stopId == null) stopId = Math.max(startId + 1, nextTimerId(timers))
     const stopDays = isNextDay(rule.startTime, rule.stopTime)
       ? shiftDaysForward(rule.days)
       : rule.days

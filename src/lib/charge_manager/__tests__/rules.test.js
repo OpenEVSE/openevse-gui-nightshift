@@ -194,6 +194,85 @@ describe('timersToRules', () => {
     expect(rules).toHaveLength(1)
     expect(rules[0].stopTime).toBe('06:00')
   })
+
+  it('does NOT swallow a standalone disable rule as a next-day stop when its time is after the start', () => {
+    // "Charge from Monday 08:00" + separate "disable on Tuesday 09:00" rule.
+    // Tuesday equals shiftDaysForward([monday]) but 09:00 can't be a wrapped
+    // stop for an 08:00 start — a next-day stop is always <= the start time.
+    const rules = timersToRules([
+      timer(1, '08:00', 'active', ['monday']),
+      timer(5, '09:00', 'disabled', ['tuesday']),
+    ])
+    expect(rules).toHaveLength(2)
+    expect(rules.every((r) => r.stopTime === null)).toBe(true)
+  })
+
+  it('prefers the id-adjacent stop when several disabled timers share the day set', () => {
+    // Two identical next-day stops; id 2 is the one rulesToTimers wrote for id 1.
+    const shiftedWeekdays = ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    const rules = timersToRules([
+      timer(7, '06:00', 'disabled', shiftedWeekdays),
+      timer(2, '06:00', 'disabled', shiftedWeekdays),
+      timer(1, '23:00', 'active', weekdays),
+    ])
+    const paired = rules.find((r) => r._startEventId === 1)
+    expect(paired._stopEventId).toBe(2)
+    // the non-adjacent stop stays a standalone disable rule
+    expect(rules.find((r) => r._startEventId === 7)).toBeDefined()
+  })
+
+  it('id-adjacent pairing is resolved before a time-sorted rule can steal the stop', () => {
+    // Both actives share days; the stop is id-adjacent to the SECOND active.
+    const rules = timersToRules([
+      timer(1, '08:00', 'active', weekdays),
+      timer(3, '10:00', 'active', weekdays),
+      timer(4, '18:00', 'disabled', weekdays),
+    ])
+    expect(rules.find((r) => r._startEventId === 3)._stopEventId).toBe(4)
+    expect(rules.find((r) => r._startEventId === 1)._stopEventId).toBeNull()
+  })
+
+  it('does not pair a feature rule with a plain disabled timer (stop must carry the feature)', () => {
+    const start = { id: 1, time: '13:00', state: 'active', days: weekdays, feature: 'divert', feature_value: 1 }
+    const rules = timersToRules([start, timer(9, '18:00', 'disabled', weekdays)])
+    expect(rules).toHaveLength(2)
+    expect(rules.find((r) => r._startEventId === 1).stopTime).toBeNull()
+  })
+
+  it('pairs a feature rule with its feature-carrying stop', () => {
+    const start = { id: 1, time: '13:00', state: 'active', days: weekdays, feature: 'divert', feature_value: 1 }
+    const stop  = { id: 2, time: '18:00', state: 'disabled', days: weekdays, feature: 'divert', feature_value: 0 }
+    const rules = timersToRules([start, stop])
+    expect(rules).toHaveLength(1)
+    expect(rules[0].action).toBe('eco_divert')
+    expect(rules[0]._stopEventId).toBe(2)
+  })
+
+  it('charge rule with a current feature pairs with a plain stop', () => {
+    // 'current' lives only on the start timer; its stop is written plain.
+    const start = { id: 1, time: '13:00', state: 'active', days: weekdays, feature: 'current', feature_value: 16 }
+    const rules = timersToRules([start, timer(2, '18:00', 'disabled', weekdays)])
+    expect(rules).toHaveLength(1)
+    expect(rules[0].chargeCurrent).toBe(16)
+    expect(rules[0]._stopEventId).toBe(2)
+  })
+
+  it('round-trips a rule written by rulesToTimers back to the same pairing', () => {
+    const rule = {
+      id: null, alwaysOn: false, days: weekdays, startTime: '22:00', stopTime: '04:00',
+      action: 'eco_divert', chargeCurrent: null, limit: null,
+      _startEventId: null, _stopEventId: null,
+    }
+    const existing = [timer(1, '09:00', 'active', weekend), timer(2, '17:00', 'disabled', weekend)]
+    const { add } = rulesToTimers(rule, existing)
+    const rules = timersToRules([...existing, ...add])
+    expect(rules).toHaveLength(2)
+    const rt = rules.find((r) => r.action === 'eco_divert')
+    expect(rt.startTime).toBe('22:00')
+    expect(rt.stopTime).toBe('04:00')
+    expect(rt._startEventId).toBe(add[0].id)
+    expect(rt._stopEventId).toBe(add[1].id)
+  })
 })
 
 // ── rulesToTimers ─────────────────────────────────────────────────────────────
