@@ -48,7 +48,9 @@ describe('Terminal page', () => {
     await fireEvent.input(input, { target: { value: '   ' } })
     await fireEvent.keyDown(input, { key: 'Enter' })
 
-    expect(httpAPI).not.toHaveBeenCalled()
+    // The page fetches /config on mount for the storage panel, so assert the
+    // RAPI send specifically stayed a no-op rather than that nothing was called.
+    expect(httpAPI).not.toHaveBeenCalledWith('GET', expect.stringContaining('/r?'))
   })
 
   it('clears the RAPI result log', async () => {
@@ -58,5 +60,23 @@ describe('Terminal page', () => {
     await vi.waitFor(() => expect(queryByText(/\$OK/)).toBeInTheDocument())
     await fireEvent.click(getByText('config.terminal.clear'))
     expect(queryByText(/\$OK/)).not.toBeInTheDocument()
+  })
+
+  it('shows the Expand-to-16MB button only when the gateway reports it', async () => {
+    httpAPI.mockImplementation((method, url) =>
+      Promise.resolve(url === '/config' ? { can_expand_16mb: true, espflash: 16777216 } : { cmd: '', ret: '' }),
+    )
+    const { findByText } = render(Terminal)
+    expect(await findByText('config.terminal.expand16mb_button')).toBeInTheDocument()
+  })
+
+  it('hides the Expand-to-16MB button when not eligible', async () => {
+    httpAPI.mockImplementation((method, url) =>
+      Promise.resolve(url === '/config' ? { can_expand_16mb: false } : { cmd: '', ret: '' }),
+    )
+    const { queryByText } = render(Terminal)
+    await vi.waitFor(() =>
+      expect(queryByText('config.terminal.expand16mb_button')).not.toBeInTheDocument(),
+    )
   })
 })
