@@ -15,6 +15,7 @@
     busy = false,
     socAvailable = false,
     rangeAvailable = false,
+    rangeMiles = false,   // range limit unit: miles when true, km otherwise
     // Feature availability — greys out the matching action option when false.
     ocppAvailable = true,
     rfidAvailable = true,
@@ -265,10 +266,10 @@
         <option value="time">{$_('charge_manager.rule_limit_time')}</option>
         <option value="energy">{$_('charge_manager.rule_limit_energy')}</option>
         <option value="soc" disabled={!socAvailable}>
-          {$_('charge_manager.rule_limit_soc')}{!socAvailable ? ' (not configured)' : ''}
+          {$_('charge_manager.rule_limit_soc')}{!socAvailable ? ' — ' + $_('charge_manager.limit_soc_unavailable') : ''}
         </option>
         <option value="range" disabled={!rangeAvailable}>
-          {$_('charge_manager.rule_limit_range')}{!rangeAvailable ? ' (not configured)' : ''}
+          {$_('charge_manager.rule_limit_range')}{!rangeAvailable ? ' — ' + $_('charge_manager.limit_range_unavailable') : ''}
         </option>
       </select>
 

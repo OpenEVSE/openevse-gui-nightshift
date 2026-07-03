@@ -564,6 +564,8 @@
     "feature_ocpp_desc": "Hand control to your OCPP backend",
     "feature_ocpp_unavailable": "Nincs OCPP-kiszolgáló beállítva",
     "feature_rfid_unavailable": "Nem található RFID-olvasó",
+    "limit_soc_unavailable": "Nincs beállított SOC MQTT-téma",
+    "limit_range_unavailable": "Nincs beállított hatótáv MQTT-téma",
     "feature_charge_current": "Charge Current",
     "feature_charge_current_desc": "Set a fixed current for every session",
     "rule_always_on": "Always On",

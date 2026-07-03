@@ -564,6 +564,8 @@
     "feature_ocpp_desc": "Hand control to your OCPP backend",
     "feature_ocpp_unavailable": "No hay servidor OCPP configurado",
     "feature_rfid_unavailable": "No se encontró lector RFID",
+    "limit_soc_unavailable": "Sin tema MQTT de SOC configurado",
+    "limit_range_unavailable": "Sin tema MQTT de autonomía configurado",
     "feature_charge_current": "Charge Current",
     "feature_charge_current_desc": "Set a fixed current for every session",
     "rule_always_on": "Always On",

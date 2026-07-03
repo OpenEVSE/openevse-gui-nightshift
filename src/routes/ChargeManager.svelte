@@ -41,7 +41,10 @@
   let shapingEnabled = $derived(!!$config_store?.current_shaper_enabled)
   let rfidEnabled    = $derived(!!$config_store?.rfid_enabled)
   let ocppEnabled    = $derived(!!$config_store?.ocpp_enabled)
-  let socAvailable    = $derived(!!$config_store?.mqtt_vehiclesoc)
+  // Vehicle telemetry limits need their MQTT topics configured (Settings → Vehicle).
+  let socAvailable    = $derived(!!$config_store?.mqtt_vehicle_soc)
+  let rangeAvailable  = $derived(!!$config_store?.mqtt_vehicle_range)
+  let rangeMiles      = $derived(!!$config_store?.mqtt_vehicle_range_miles)
   // default_state: true = Active on power-up, false = Disabled
   let defaultActive   = $derived($config_store?.default_state !== false)
   // Hardware current bounds (same as Settings > EVSE slider)
@@ -447,6 +450,8 @@
   rule={editingRule}
   {busy}
   {socAvailable}
+  {rangeAvailable}
+  {rangeMiles}
   {ocppAvailable}
   {rfidAvailable}
   {minCurrent}
