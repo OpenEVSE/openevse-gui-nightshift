@@ -500,7 +500,6 @@
   },
   "nav": {
     "home": "Accueil",
-    "schedule": "Planificateur",
     "charge_manager": "Charge Manager",
     "monitoring": "Supervision",
     "history": "Historique",
@@ -601,7 +600,6 @@
     "rule_error_no_day": "Select at least one day",
     "rule_error_same_time": "L'heure de début et de fin doivent être différentes",
     "rule_error_no_limit": "Définissez d'abord une valeur de limite",
-    "rule_error_stop_before_start": "Stop time must be after start time",
     "window_from": "from {start}",
     "window_range": "{start} – {stop}",
     "settings_link": "Full settings →",

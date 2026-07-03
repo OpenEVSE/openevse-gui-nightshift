@@ -500,7 +500,6 @@
   },
   "nav": {
     "home": "Home",
-    "schedule": "Schedule",
     "charge_manager": "Charge Manager",
     "monitoring": "Monitoring",
     "history": "History",
@@ -601,7 +600,6 @@
     "rule_error_no_day": "Select at least one day",
     "rule_error_same_time": "Start and stop time must differ",
     "rule_error_no_limit": "Set a limit value first",
-    "rule_error_stop_before_start": "Stop time must be after start time",
     "window_from": "from {start}",
     "window_range": "{start} – {stop}",
     "settings_link": "Full settings →",
