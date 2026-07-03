@@ -72,6 +72,14 @@
   // Boot Lock surfaces on RFID/OCPP cards; Heartbeat on Eco/Grid-shaping cards.
   let showBootLock   = $derived(bootLockSupported && ['rfid', 'ocpp'].includes(action))
   let showHeartbeat  = $derived(heartbeatSupported && ['eco_divert', 'shaper'].includes(action))
+  // SOC is a percentage, range a distance — neither fits LimitSliderBar's
+  // time/energy tick scales, so they get plain sliders with their own units.
+  let rangeUnit  = $derived(rangeMiles ? $_('units.miles') : $_('units.km'))
+  let vehicleLimit = $derived(
+    limitType === 'soc'   ? { min: 0, max: 100, step: 5,  unit: '%' } :
+    limitType === 'range' ? { min: 0, max: 500, step: 10, unit: ' ' + rangeUnit } :
+    null
+  )
 
   function validate() {
     if (!alwaysOn && !flags.some((f) => f)) { showDayError = true; return false }
@@ -273,7 +281,27 @@
         </option>
       </select>
 
-      {#if limitType !== 'none'}
+      {#if vehicleLimit}
+        <div class="mt-3">
+          <div class="mb-1 flex items-baseline justify-between text-[10px] uppercase tracking-wide text-text-dim">
+            <span>{$_(limitType === 'soc' ? 'charge_manager.rule_limit_soc' : 'charge_manager.rule_limit_range')}</span>
+            <span class="font-semibold normal-case text-text">{limitValue}{vehicleLimit.unit}</span>
+          </div>
+          <Slider
+            min={vehicleLimit.min}
+            max={vehicleLimit.max}
+            step={vehicleLimit.step}
+            value={limitValue}
+            format={(v) => `${v}${vehicleLimit.unit}`}
+            ariaLabel={$_(limitType === 'soc' ? 'charge_manager.rule_limit_soc' : 'charge_manager.rule_limit_range')}
+            onchange={(v) => { limitValue = v; showLimitError = false }}
+          />
+          <div class="mt-1 flex justify-between text-[10px] text-text-dim">
+            <span>{vehicleLimit.min}{vehicleLimit.unit}</span>
+            <span>{vehicleLimit.max}{vehicleLimit.unit}</span>
+          </div>
+        </div>
+      {:else if limitType !== 'none'}
         <div class="mt-3">
           <LimitSliderBar
             kind={limitType === 'energy' ? 'energy' : 'time'}
