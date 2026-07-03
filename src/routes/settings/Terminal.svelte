@@ -35,11 +35,13 @@
   let migrateState = $derived($status_store?.migrate)
   let migrateProgress = $derived($status_store?.migrate_progress ?? 0)
   let migrateReload = $state(0)
+  let reloadStarted = false // plain guard: the effect must not re-track migrateReload
 
   // After the commit the device reboots into the new layout; give it longer
   // than a normal OTA before reloading the page against the new firmware.
   $effect(() => {
-    if (migrateState === 'done' && migrateReload === 0) {
+    if (migrateState === 'done' && !reloadStarted) {
+      reloadStarted = true
       migrateReload = 15
       const interval = setInterval(() => {
         migrateReload -= 1
@@ -48,6 +50,7 @@
           location.reload()
         }
       }, 1000)
+      return () => clearInterval(interval)
     }
   })
   $effect(() => {
