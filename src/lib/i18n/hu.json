@@ -777,7 +777,8 @@
     },
     "evse": {
       "title": "Töltő alapok",
-      "intro": "Állítsd be, amit a töltőnek tudnia kell a telepítésről. Bármit megváltoztathatsz később a Beállításokban."
+      "intro": "Állítsd be, amit a töltőnek tudnia kell a telepítésről. Bármit megváltoztathatsz később a Beállításokban.",
+      "bypass_hint": "A töltő továbbra sem található. Koppints a Tovább gombra még {count} alkalommal a töltő beállításának kihagyásához."
     },
     "wifi": {
       "title": "WiFi",

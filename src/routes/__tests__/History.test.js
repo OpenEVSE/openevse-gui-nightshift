@@ -68,19 +68,17 @@ describe('History', () => {
     })
   })
 
-  it('hides the export button when Labs is off', async () => {
+  it('shows the export button once the log loads (no longer Labs-gated)', async () => {
     httpAPI.mockImplementation((method, path) =>
       path === '/logs' ? Promise.resolve({ min: 1, max: 1 }) : Promise.resolve(LOGS),
     )
-    const { queryByText } = render(History)
+    const { getByText } = render(History)
     await vi.waitFor(() => {
-      expect(queryByText('logs-states.active-charge')).toBeInTheDocument()
+      expect(getByText('history.export_csv')).toBeInTheDocument()
     })
-    expect(queryByText('history.export_csv')).not.toBeInTheDocument()
   })
 
-  it('shows the export button and user names when Labs is on', async () => {
-    uisettings_store.update((s) => ({ ...s, dev_features: true }))
+  it('resolves RFID user names in the log with dev features off (ungated)', async () => {
     rfid_users_store.set({ users: { AA11: 'Alice' }, loading: false, error: false })
     httpAPI.mockImplementation((method, path) => {
       if (path === '/rfid/users') return Promise.resolve({ AA11: 'Alice' })
@@ -89,7 +87,6 @@ describe('History', () => {
     })
     const { getByText } = render(History)
     await vi.waitFor(() => {
-      expect(getByText('history.export_csv')).toBeInTheDocument()
       expect(getByText('Alice')).toBeInTheDocument()
     })
   })

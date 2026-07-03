@@ -17,16 +17,13 @@
   import EnergyTab from '../lib/components/monitoring/EnergyTab.svelte'
 
   let hasError = $derived(!!$uistates_store?.error)
-  let devOn = $derived(!!$uisettings_store?.dev_features)
 
-  // Track the selected tab by id, not index — the Energy tab appears only
-  // when dev features are on, and index-based tracking would jump tabs
-  // around as the user toggles the gate.
+  // Track the selected tab by id, not index, so the alert-driven Safety jump
+  // (and any future change to the tab set) doesn't shuffle the selection.
   let activeId = $state('data')
 
   onMount(() => {
     if ($uistates_store?.error) activeId = 'safety'
-    else if (devOn) activeId = 'energy'
   })
 
   // Desktop has room for everything at once, so the Data groups start
@@ -54,8 +51,8 @@
   let claims = $derived(claimRows($claims_target_store))
 
   let tabs = $derived([
-    ...(devOn ? [{ id: 'energy',  label: $_('monitoring.tab.energy'),  alert: false }] : []),
     { id: 'data',    label: $_('monitoring.tab.data'),    alert: false },
+    { id: 'energy',  label: $_('monitoring.tab.energy'),  alert: false },
     { id: 'safety',  label: $_('monitoring.tab.safety'),  alert: hasError },
     { id: 'manager', label: $_('monitoring.tab.manager'), alert: false },
   ])

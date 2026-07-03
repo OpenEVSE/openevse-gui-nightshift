@@ -38,11 +38,9 @@
   let mode = $derived($uistates_store?.mode ?? 0)
   let display = $derived(displayState($status_store, mode))
   let charging = $derived(display === 'charging')
-  // The charging session chart is a Labs feature, gated like the Energy tab —
-  // it polls /energy/raw and isn't hardware-validated yet. When Labs is off,
-  // charging keeps the existing PowerRing.
-  let labsOn = $derived(!!$uisettings_store?.dev_features)
-  let showChart = $derived(charging && labsOn)
+  // While charging, show the session chart hero (it polls /energy/raw); every
+  // other state keeps the PowerRing.
+  let showChart = $derived(charging)
   let maxAmps = $derived($config_store?.max_current_soft ?? 48)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
 
