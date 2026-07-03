@@ -25,7 +25,7 @@ describe('legacy route aliases', () => {
     // The short-lived combined Security page reverted to Certificates
     expect(LEGACY_ROUTES['/settings/security']).toBe('/settings/certificates')
     expect(LEGACY_ROUTES['/configuration/certificates']).toBe('/settings/certificates')
-    // 14 straight moves + 2 renames + the index + the security->certificates revert
-    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(18)
+    // 15 straight moves + 2 renames + the index + the security->certificates revert
+    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(19)
   })
 })

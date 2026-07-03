@@ -136,6 +136,7 @@
       "rfid": "RFID",
       "vehicle": "Vehículo",
       "solar": "Producción propia",
+      "loadsharing": "Load Sharing",
       "shaper": "Limitador de carga",
       "emoncms": "EmonCMS",
       "ohmconnect": "OhmConnect",
@@ -369,6 +370,37 @@
       "max_interval_desc": "Tiempo de seguridad si no llegan datos en vivo en este número de segundos.",
       "smoothing": "Suavizado de entrada",
       "smoothing_desc": "Constante de tiempo del filtro para la lectura de potencia en vivo."
+    },
+    "loadsharing": {
+      "enable": "Enable load sharing",
+      "settings": "Load sharing settings",
+      "group_id": "Group ID",
+      "site_max_current": "Site max current (A)",
+      "min_per_evse_current": "Minimum per-EVSE current (A)",
+      "peers": "Peer management",
+      "add_peer": "Add peer",
+      "remove_peer": "Remove peer",
+      "test_peer": "Test peer",
+      "discover": "Discover",
+      "refresh": "Refresh",
+      "no_peers": "No peers yet.",
+      "peer_name": "Name",
+      "peer_host": "Host/IP",
+      "peer_id": "Device ID",
+      "peer_online": "Online",
+      "peer_allocated": "Allocated",
+      "peer_status": "Status",
+      "actions": "Actions",
+      "joined": "Joined",
+      "discovered": "Discovered",
+      "controlled_by": "Controlled by",
+      "controller_name": "Controller name",
+      "controller_link": "Controller link",
+      "controller_id": "Controller ID",
+      "last_command_age": "Last command age",
+      "assigned_limit": "Assigned limit (A)",
+      "comms_status": "Comms status",
+      "unknown": "Unknown"
     },
     "emoncms": {
       "enable": "Activar EmonCMS",
@@ -661,6 +693,17 @@
     },
     "throttle": {
       "active": "Limitado · {amps} A"
+    },
+    "loadsharing": {
+      "badge_active": "Load Sharing Active",
+      "badge_limited": "Load Sharing Limited",
+      "badge_controlled": "Load Sharing Controlled",
+      "local_max": "Local max",
+      "shared_cap": "Shared cap",
+      "applied_pilot": "Applied pilot",
+      "reason": "Reason",
+      "reduced": "Reduced due to load sharing",
+      "controlled_by": "Controlled by {controller}"
     },
     "session": {
       "collecting": "Recopilando datos de la sesión…",
