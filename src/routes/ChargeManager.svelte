@@ -179,16 +179,17 @@
       case 'ocpp':
         return await serialQueue.add(() => config_store.saveParam('ocpp_enabled', true))
       default: {
-        let ok = true
-        if (rule.limit && rule.limit.type !== 'none' && rule.limit.value > 0) {
-          ok = await serialQueue.add(() =>
-            config_store.saveParam('limit_default_type', rule.limit.type)
-          )
-          if (ok) ok = await serialQueue.add(() =>
-            config_store.saveParam('limit_default_value', rule.limit.value)
-          )
-          if (ok) await serialQueue.add(() => limit_store.download())
-        }
+        // Session limit: a missing/zero limit writes nothing — report it as a
+        // failure instead of pretending the save happened. (The modal already
+        // validates this; this is the backstop.)
+        if (!(rule.limit && rule.limit.type !== 'none' && rule.limit.value > 0)) return false
+        let ok = await serialQueue.add(() =>
+          config_store.saveParam('limit_default_type', rule.limit.type)
+        )
+        if (ok) ok = await serialQueue.add(() =>
+          config_store.saveParam('limit_default_value', rule.limit.value)
+        )
+        if (ok) await serialQueue.add(() => limit_store.download())
         return ok
       }
     }
@@ -204,12 +205,15 @@
         return await serialQueue.add(() => config_store.saveParam('rfid_enabled', false))
       case 'ocpp':
         return await serialQueue.add(() => config_store.saveParam('ocpp_enabled', false))
-      default:
-        await serialQueue.add(() => config_store.saveParam('limit_default_type', 'none'))
-        await serialQueue.add(() => limit_store.remove())
+      default: {
+        // Report config/limit write failures; removeProp stays best-effort —
+        // it returns false for the common no-override-set case too.
+        let ok = await serialQueue.add(() => config_store.saveParam('limit_default_type', 'none'))
+        if (!(await serialQueue.add(() => limit_store.remove()))) ok = false
         await serialQueue.add(() => override_store.removeProp('charge_current'))
         await serialQueue.add(() => limit_store.download())
-        return true
+        return ok
+      }
     }
   }
 
@@ -305,7 +309,8 @@
         }
         // Action changed on global card → clear old config
         if (wasGlobal && rule._prevAction && rule._prevAction !== rule.action) {
-          await clearAlwaysOnAction(rule._prevAction)
+          const ok = await clearAlwaysOnAction(rule._prevAction)
+          if (!ok) { showWriteError(); return }
         }
         const ok = await applyAlwaysOnAction(rule.action, rule)
         if (!ok) showWriteError()
