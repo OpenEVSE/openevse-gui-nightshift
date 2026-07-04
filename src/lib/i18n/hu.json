@@ -562,6 +562,7 @@
     "feature_ocpp": "OCPP-vezérlés",
     "feature_ocpp_desc": "Vezérlés átadása az OCPP-háttérrendszernek",
     "feature_ocpp_unavailable": "Nincs OCPP-kiszolgáló beállítva",
+    "feature_ocpp_not_implemented": "Az ütemezett OCPP még nem támogatott",
     "feature_rfid_unavailable": "Nem található RFID-olvasó",
     "limit_soc_unavailable": "Nincs beállított SOC MQTT-téma",
     "limit_range_unavailable": "Nincs beállított hatótáv MQTT-téma",

@@ -562,6 +562,7 @@
     "feature_ocpp": "Contrôle OCPP",
     "feature_ocpp_desc": "Confier le contrôle à votre backend OCPP",
     "feature_ocpp_unavailable": "Aucun serveur OCPP configuré",
+    "feature_ocpp_not_implemented": "L'OCPP planifié n'est pas encore pris en charge",
     "feature_rfid_unavailable": "Aucun lecteur RFID détecté",
     "limit_soc_unavailable": "Aucun sujet MQTT de SOC configuré",
     "limit_range_unavailable": "Aucun sujet MQTT d'autonomie configuré",

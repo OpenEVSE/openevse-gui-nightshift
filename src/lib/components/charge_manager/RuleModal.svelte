@@ -196,8 +196,11 @@
         <option value="rfid" disabled={!rfidAvailable}>
           {$_('charge_manager.rule_action_rfid')}{!rfidAvailable ? ' — ' + $_('charge_manager.feature_rfid_unavailable') : ''}
         </option>
-        <option value="ocpp" disabled={!ocppAvailable}>
-          {$_('charge_manager.rule_action_ocpp')}{!ocppAvailable ? ' — ' + $_('charge_manager.feature_ocpp_unavailable') : ''}
+        <!-- Scheduled OCPP windows are a firmware no-op (applyFeature(OCPP) is a
+             placeholder) — keep the option visible but unselectable until the
+             firmware actually acts on it. The Always Active OCPP card is real. -->
+        <option value="ocpp" disabled>
+          {$_('charge_manager.rule_action_ocpp')} — {$_('charge_manager.feature_ocpp_not_implemented')}
         </option>
         <option value="disable">{$_('charge_manager.rule_action_disable')}</option>
       </select>

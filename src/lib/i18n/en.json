@@ -562,6 +562,7 @@
     "feature_ocpp": "OCPP Control",
     "feature_ocpp_desc": "Hand control to your OCPP backend",
     "feature_ocpp_unavailable": "No OCPP server configured",
+    "feature_ocpp_not_implemented": "Scheduled OCPP is not supported yet",
     "feature_rfid_unavailable": "No RFID reader found",
     "limit_soc_unavailable": "No SOC topic configured",
     "limit_range_unavailable": "No range topic configured",
