@@ -842,7 +842,16 @@
       "uploading": "Feltöltés... {pct}%",
       "rebooting": "Telepítés és újraindítás – ne kapcsold ki...",
       "done": "A frissítés kész. Újratöltés...",
-      "failed": "A frissítés nem sikerült. Ellenőrizd a fájlt és próbáld újra."
+      "failed": "A frissítés nem sikerült. Ellenőrizd a fájlt és próbáld újra.",
+      "build": "Build",
+      "github_title": "Telepítés GitHubról",
+      "github_check": "Kiadások keresése",
+      "github_checking": "Keresés...",
+      "github_error": "A GitHub nem érhető el.",
+      "github_none": "Ehhez az eszközhöz még nincs kiadott build.",
+      "github_install": "Telepítés",
+      "github_pre": "előzetes",
+      "github_downloading": "Letöltés GitHubról és telepítés – ne kapcsold ki..."
     },
     "reconnect": {
       "title": "Csatlakozz vissza az otthoni WiFi-hez",
@@ -872,7 +881,8 @@
       "standby_brightness": "Készenléti fényerő",
       "standby_hint": "0 esetén a képernyő teljesen kikapcsol tétlenség esetén.",
       "timeout": "Készenléti időkorlát (másodperc)",
-      "timeout_hint": "Tétlenségi idő a készenléti képernyőre váltás előtt. 0 = soha."
+      "timeout_hint": "Tétlenségi idő a készenléti képernyőre váltás előtt. 0 = soha.",
+      "language": "Nyelv"
     }
   }
 }

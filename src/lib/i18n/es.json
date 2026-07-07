@@ -842,7 +842,16 @@
       "uploading": "Subiendo... {pct}%",
       "rebooting": "Instalando y reiniciando: no apagues el equipo...",
       "done": "Actualización completada. Recargando...",
-      "failed": "Error en la actualización. Comprueba el archivo e inténtalo de nuevo."
+      "failed": "Error en la actualización. Comprueba el archivo e inténtalo de nuevo.",
+      "build": "Compilación",
+      "github_title": "Instalar desde GitHub",
+      "github_check": "Buscar versiones",
+      "github_checking": "Buscando...",
+      "github_error": "No se pudo conectar con GitHub.",
+      "github_none": "Todavía no hay una versión para este dispositivo.",
+      "github_install": "Instalar",
+      "github_pre": "preliminar",
+      "github_downloading": "Descargando desde GitHub e instalando: no apagues el equipo..."
     },
     "reconnect": {
       "title": "Vuelve a conectarte a tu WiFi doméstica",
@@ -872,7 +881,8 @@
       "standby_brightness": "Brillo en reposo",
       "standby_hint": "0 apaga la pantalla por completo cuando está inactiva.",
       "timeout": "Tiempo de reposo (segundos)",
-      "timeout_hint": "Tiempo de inactividad antes de atenuar a la pantalla de reposo. 0 = nunca atenuar."
+      "timeout_hint": "Tiempo de inactividad antes de atenuar a la pantalla de reposo. 0 = nunca atenuar.",
+      "language": "Idioma"
     }
   }
 }

@@ -6,9 +6,10 @@
   and the idle timeout before the standby screen (0 = never dim).
 -->
 <script>
-  import { _ } from 'svelte-i18n'
+  import { _, locales } from 'svelte-i18n'
   import { config_store } from '../../../stores/config.js'
   import { createConfigForm } from '../../../config/configForm.svelte.js'
+  import { LOCALE_NAMES } from '../../../i18n/locales.js'
   import FormField from '../../config/FormField.svelte'
   import Select from '../../ui/Select.svelte'
   import Slider from '../../ui/Slider.svelte'
@@ -21,10 +22,24 @@
     { value: 'dark', label: $_('wizard.lcd.theme_dark') },
     { value: 'light', label: $_('wizard.lcd.theme_light') },
   ])
+
+  // Same source as Settings -> Web: the device-stored lang; DataManager
+  // switches the live locale when it changes.
+  let langOptions = $derived(
+    ($locales ?? ['en']).map((l) => ({ value: l, label: LOCALE_NAMES[l] ?? l })),
+  )
 </script>
 
 <div class="space-y-4">
   <p class="text-sm text-text-dim">{$_('wizard.lcd.intro')}</p>
+
+  <FormField label={$_('wizard.lcd.language')} status={$ss.lang ?? 'idle'}>
+    <Select
+      options={langOptions}
+      value={$config_store?.lang ?? 'en'}
+      onchange={(v) => form.saveField('lang', v)}
+    />
+  </FormField>
 
   <FormField label={$_('wizard.lcd.theme')} status={$ss.tft_theme ?? 'idle'}>
     <Select

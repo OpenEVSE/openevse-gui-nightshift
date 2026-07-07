@@ -55,8 +55,19 @@
     )
   }
 
+  // Prefer the mDNS name over the raw IP: it survives DHCP lease changes
+  // (the display's firmware resolves .local itself). Fall back to the IP for
+  // a station that somehow answered without a hostname.
+  function stationHost(s) {
+    return s.name ? `${s.name}.local` : s.ip
+  }
+
+  function isPicked(s) {
+    return currentHost === stationHost(s) || currentHost === s.ip
+  }
+
   function pickStation(s) {
-    form.saveField('remote_display_host', s.ip)
+    form.saveField('remote_display_host', stationHost(s))
   }
 
   onMount(scanStations)
@@ -100,14 +111,14 @@
               type="button"
               onclick={() => pickStation(s)}
               class="flex w-full items-center gap-3 py-2 text-left text-sm
-                     {currentHost === s.ip ? 'text-accent' : 'text-text'}"
+                     {isPicked(s) ? 'text-accent' : 'text-text'}"
             >
               <Icon icon="mdi:ev-station" size={18} class="text-text-dim" />
               <span class="flex-1">
-                <span class="block font-medium">{s.name || s.ip}</span>
+                <span class="block font-medium">{stationHost(s)}</span>
                 <span class="block text-xs text-text-dim">{s.ip}</span>
               </span>
-              {#if currentHost === s.ip}
+              {#if isPicked(s)}
                 <Icon icon="mdi:check" size={16} />
               {/if}
             </button>

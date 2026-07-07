@@ -842,7 +842,16 @@
       "uploading": "Uploading... {pct}%",
       "rebooting": "Installing and rebooting - do not power off...",
       "done": "Update complete. Reloading...",
-      "failed": "Update failed. Check the file and try again."
+      "failed": "Update failed. Check the file and try again.",
+      "build": "Build",
+      "github_title": "Install from GitHub",
+      "github_check": "Check releases",
+      "github_checking": "Checking...",
+      "github_error": "Couldn't reach GitHub.",
+      "github_none": "No release build for this device yet.",
+      "github_install": "Install",
+      "github_pre": "pre-release",
+      "github_downloading": "Downloading from GitHub and installing - do not power off..."
     },
     "reconnect": {
       "title": "Reconnect to your home WiFi",
@@ -872,7 +881,8 @@
       "standby_brightness": "Standby brightness",
       "standby_hint": "0 turns the screen fully off when idle.",
       "timeout": "Standby timeout (seconds)",
-      "timeout_hint": "Idle time before dimming to the standby screen. 0 = never dim."
+      "timeout_hint": "Idle time before dimming to the standby screen. 0 = never dim.",
+      "language": "Language"
     }
   }
 }

@@ -842,7 +842,16 @@
       "uploading": "Envoi... {pct}%",
       "rebooting": "Installation et redémarrage : ne coupez pas l'alimentation...",
       "done": "Mise à jour terminée. Rechargement...",
-      "failed": "Échec de la mise à jour. Vérifiez le fichier et réessayez."
+      "failed": "Échec de la mise à jour. Vérifiez le fichier et réessayez.",
+      "build": "Version de build",
+      "github_title": "Installer depuis GitHub",
+      "github_check": "Vérifier les versions",
+      "github_checking": "Vérification...",
+      "github_error": "Impossible de joindre GitHub.",
+      "github_none": "Aucune version disponible pour cet appareil pour le moment.",
+      "github_install": "Installer",
+      "github_pre": "préversion",
+      "github_downloading": "Téléchargement depuis GitHub et installation : ne coupez pas l'alimentation..."
     },
     "reconnect": {
       "title": "Reconnectez-vous à votre WiFi domestique",
@@ -872,7 +881,8 @@
       "standby_brightness": "Luminosité en veille",
       "standby_hint": "0 éteint complètement l'écran en cas d'inactivité.",
       "timeout": "Délai de veille (secondes)",
-      "timeout_hint": "Durée d'inactivité avant de passer à l'écran de veille. 0 = jamais."
+      "timeout_hint": "Durée d'inactivité avant de passer à l'écran de veille. 0 = jamais.",
+      "language": "Langue"
     }
   }
 }
