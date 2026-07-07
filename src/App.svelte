@@ -11,6 +11,7 @@
   import DataManager from './lib/data/DataManager.svelte'
   import { config_store } from './lib/stores/config.js'
   import { uistates_store } from './lib/stores/uistates.js'
+  import { isRemoteDisplay } from './lib/config/remoteDisplay.js'
   import { _, isLoading } from 'svelte-i18n'
 
   setupI18n()
@@ -41,8 +42,10 @@
     closable={false}
     action={() => location.reload()}
   />
-{:else if !$config_store?.wizard_passed}
-  <!-- First-run / unprovisioned device: gate the rest of the UI behind setup. -->
+{:else if isRemoteDisplay($config_store) || !$config_store?.wizard_passed}
+  <!-- First-run / unprovisioned device: gate the rest of the UI behind setup.
+       Remote displays stay here permanently — the wizard IS their whole UI
+       (there is no charger behind this device to manage). -->
   <Wizard />
   <WebSocket />
   <DataManager />

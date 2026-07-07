@@ -619,14 +619,20 @@
       "temp": "Temp",
       "pilot": "Pilote"
     },
-    "summary": { "today": "Aujourd'hui", "total": "Total" },
+    "summary": {
+      "today": "Aujourd'hui",
+      "total": "Total"
+    },
     "mode": {
       "auto": "Auto",
       "on": "Marche",
       "off": "Arrêt",
       "aria": "Mode de charge"
     },
-    "rate": { "claimed": "Défini par {client}", "aria": "Vitesse de charge" },
+    "rate": {
+      "claimed": "Défini par {client}",
+      "aria": "Vitesse de charge"
+    },
     "vehicle": {
       "to_full": "{time} avant la charge complète",
       "vehicle_limit": "limite du véhicule {value}",
@@ -668,7 +674,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Données", "energy": "Énergie", "safety": "Sécurité", "manager": "Commandes" },
+    "tab": {
+      "data": "Données",
+      "energy": "Énergie",
+      "safety": "Sécurité",
+      "manager": "Commandes"
+    },
     "group": {
       "energy": "Énergie délivrée",
       "sensors": "Capteurs",
@@ -695,7 +706,11 @@
       "loading": "Chargement…",
       "error": "Échec du chargement des données d'énergie",
       "no_samples": "Aucun échantillon enregistré",
-      "axis": { "current": "Courant (A)", "temperature": "Température (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Courant (A)",
+        "temperature": "Température (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Pilote",
@@ -819,7 +834,15 @@
     "firmware": {
       "title": "Micrologiciel",
       "intro": "Ce qui tourne sur ce chargeur aujourd'hui.",
-      "update_hint": "Les mises à jour du micrologiciel se trouvent dans Paramètres → Micrologiciel après la configuration."
+      "update_hint": "Les mises à jour du micrologiciel se trouvent dans Paramètres → Micrologiciel après la configuration.",
+      "update_title": "Mettre à jour le firmware",
+      "choose": "Choisir un fichier",
+      "no_file": "Aucun fichier sélectionné",
+      "upload": "Installer",
+      "uploading": "Envoi... {pct}%",
+      "rebooting": "Installation et redémarrage : ne coupez pas l'alimentation...",
+      "done": "Mise à jour terminée. Rechargement...",
+      "failed": "Échec de la mise à jour. Vérifiez le fichier et réessayez."
     },
     "reconnect": {
       "title": "Reconnectez-vous à votre WiFi domestique",
@@ -827,6 +850,29 @@
       "address_label": "Adresse",
       "copied": "Copié dans le presse-papiers.",
       "dismiss": "Compris"
+    },
+    "remote": {
+      "title": "Écran distant",
+      "intro": "Cet écran reflète une borne OpenEVSE via votre réseau. Saisissez l'adresse de la borne ou choisissez-en une trouvée à proximité.",
+      "host": "Adresse de la borne",
+      "host_hint": "Adresse IP ou nom mDNS (p. ex. openevse-1234.local) de l'OpenEVSE à afficher.",
+      "found": "Bornes sur votre réseau",
+      "scan": "Rechercher",
+      "scanning": "Recherche...",
+      "scan_error": "Échec de la recherche. Réessayez.",
+      "empty": "Aucune borne trouvée. Elles sont peut-être sur un autre réseau ; saisissez l'adresse ci-dessus."
+    },
+    "lcd": {
+      "title": "Écran",
+      "intro": "Réglages de l'écran de ce panneau. Les modifications s'appliquent immédiatement.",
+      "theme": "Thème",
+      "theme_dark": "Sombre",
+      "theme_light": "Clair",
+      "brightness": "Luminosité",
+      "standby_brightness": "Luminosité en veille",
+      "standby_hint": "0 éteint complètement l'écran en cas d'inactivité.",
+      "timeout": "Délai de veille (secondes)",
+      "timeout_hint": "Durée d'inactivité avant de passer à l'écran de veille. 0 = jamais."
     }
   }
 }

@@ -6,7 +6,8 @@
 
   Footer rules:
     - first step: only "Next" (no Previous)
-    - last step:  Previous + "Finish"
+    - last step:  Previous + "Finish" (or just Previous when showFinish is
+                  false — remote displays live in the wizard permanently)
     - else:       Previous + Next
 -->
 <script>
@@ -20,6 +21,7 @@
     total = 5,
     title = '',
     canAdvance = true,
+    showFinish = true,
     onPrev = () => {},
     onNext = () => {},
     onFinish = () => {},
@@ -80,9 +82,11 @@
     {/if}
     <div class="flex-1"></div>
     {#if isLast}
-      <div class="min-w-[120px]">
-        <Button label={$_('wizard.finish')} onclick={onFinish} disabled={!canAdvance} />
-      </div>
+      {#if showFinish}
+        <div class="min-w-[120px]">
+          <Button label={$_('wizard.finish')} onclick={onFinish} disabled={!canAdvance} />
+        </div>
+      {/if}
     {:else}
       <button
         type="button"

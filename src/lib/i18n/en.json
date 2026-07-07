@@ -619,14 +619,20 @@
       "temp": "Temp",
       "pilot": "Pilot"
     },
-    "summary": { "today": "Today", "total": "Total" },
+    "summary": {
+      "today": "Today",
+      "total": "Total"
+    },
     "mode": {
       "auto": "Auto",
       "on": "On",
       "off": "Off",
       "aria": "Charge mode"
     },
-    "rate": { "claimed": "Set by {client}", "aria": "Charge rate" },
+    "rate": {
+      "claimed": "Set by {client}",
+      "aria": "Charge rate"
+    },
     "vehicle": {
       "to_full": "{time} to full",
       "vehicle_limit": "vehicle limit {value}",
@@ -668,7 +674,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Data", "energy": "Energy", "safety": "Safety", "manager": "Manager" },
+    "tab": {
+      "data": "Data",
+      "energy": "Energy",
+      "safety": "Safety",
+      "manager": "Manager"
+    },
     "group": {
       "energy": "Energy delivered",
       "sensors": "Sensors",
@@ -695,7 +706,11 @@
       "loading": "Loading…",
       "error": "Failed to load energy data",
       "no_samples": "No samples recorded yet",
-      "axis": { "current": "Current (A)", "temperature": "Temperature (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Current (A)",
+        "temperature": "Temperature (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Pilot",
@@ -819,7 +834,15 @@
     "firmware": {
       "title": "Firmware",
       "intro": "What's running on this charger today.",
-      "update_hint": "Full firmware updates live on Settings → Firmware after setup."
+      "update_hint": "Full firmware updates live on Settings → Firmware after setup.",
+      "update_title": "Update firmware",
+      "choose": "Choose file",
+      "no_file": "No file selected",
+      "upload": "Install",
+      "uploading": "Uploading... {pct}%",
+      "rebooting": "Installing and rebooting - do not power off...",
+      "done": "Update complete. Reloading...",
+      "failed": "Update failed. Check the file and try again."
     },
     "reconnect": {
       "title": "Reconnect to your home WiFi",
@@ -827,6 +850,29 @@
       "address_label": "Address",
       "copied": "Copied to clipboard.",
       "dismiss": "Got it"
+    },
+    "remote": {
+      "title": "Remote display",
+      "intro": "This display mirrors an OpenEVSE station over your network. Enter the station address, or pick one found nearby.",
+      "host": "Station address",
+      "host_hint": "IP address or mDNS name (e.g. openevse-1234.local) of the OpenEVSE to display.",
+      "found": "Stations on your network",
+      "scan": "Scan",
+      "scanning": "Scanning...",
+      "scan_error": "Scan failed. Try again.",
+      "empty": "No stations found. They may be on another network - enter the address above."
+    },
+    "lcd": {
+      "title": "Display",
+      "intro": "This panel's own screen settings. Changes apply immediately.",
+      "theme": "Theme",
+      "theme_dark": "Dark",
+      "theme_light": "Light",
+      "brightness": "Brightness",
+      "standby_brightness": "Standby brightness",
+      "standby_hint": "0 turns the screen fully off when idle.",
+      "timeout": "Standby timeout (seconds)",
+      "timeout_hint": "Idle time before dimming to the standby screen. 0 = never dim."
     }
   }
 }

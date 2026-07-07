@@ -619,14 +619,20 @@
       "temp": "Hőmérséklet",
       "pilot": "Pilot"
     },
-    "summary": { "today": "Ma", "total": "Összes" },
+    "summary": {
+      "today": "Ma",
+      "total": "Összes"
+    },
     "mode": {
       "auto": "Auto",
       "on": "Be",
       "off": "Ki",
       "aria": "Töltési mód"
     },
-    "rate": { "claimed": "{client} állítja", "aria": "Töltési sebesség" },
+    "rate": {
+      "claimed": "{client} állítja",
+      "aria": "Töltési sebesség"
+    },
     "vehicle": {
       "to_full": "{time} a teljes töltésig",
       "vehicle_limit": "jármű korlátja {value}",
@@ -668,7 +674,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Adat", "energy": "Energia", "safety": "Biztonság", "manager": "Kezelő" },
+    "tab": {
+      "data": "Adat",
+      "energy": "Energia",
+      "safety": "Biztonság",
+      "manager": "Kezelő"
+    },
     "group": {
       "energy": "Leadott energia",
       "sensors": "Érzékelők",
@@ -695,7 +706,11 @@
       "loading": "Betöltés…",
       "error": "Nem sikerült betölteni az energia adatokat",
       "no_samples": "Még nincs rögzített minta",
-      "axis": { "current": "Áram (A)", "temperature": "Hőmérséklet (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Áram (A)",
+        "temperature": "Hőmérséklet (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Pilot",
@@ -819,7 +834,15 @@
     "firmware": {
       "title": "Firmware",
       "intro": "Ez fut ma a töltőn.",
-      "update_hint": "A firmware-frissítések a beállítás után a Beállítások → Firmware menüben találhatók."
+      "update_hint": "A firmware-frissítések a beállítás után a Beállítások → Firmware menüben találhatók.",
+      "update_title": "Firmware frissítése",
+      "choose": "Fájl kiválasztása",
+      "no_file": "Nincs kiválasztott fájl",
+      "upload": "Telepítés",
+      "uploading": "Feltöltés... {pct}%",
+      "rebooting": "Telepítés és újraindítás – ne kapcsold ki...",
+      "done": "A frissítés kész. Újratöltés...",
+      "failed": "A frissítés nem sikerült. Ellenőrizd a fájlt és próbáld újra."
     },
     "reconnect": {
       "title": "Csatlakozz vissza az otthoni WiFi-hez",
@@ -827,6 +850,29 @@
       "address_label": "Cím",
       "copied": "Vágólapra másolva.",
       "dismiss": "Rendben"
+    },
+    "remote": {
+      "title": "Távoli kijelző",
+      "intro": "Ez a kijelző egy OpenEVSE töltőállomást tükröz a hálózaton keresztül. Add meg az állomás címét, vagy válassz egyet a megtaláltak közül.",
+      "host": "Állomás címe",
+      "host_hint": "A megjelenítendő OpenEVSE IP-címe vagy mDNS neve (pl. openevse-1234.local).",
+      "found": "Állomások a hálózaton",
+      "scan": "Keresés",
+      "scanning": "Keresés...",
+      "scan_error": "A keresés nem sikerült. Próbáld újra.",
+      "empty": "Nem található állomás. Lehet, hogy másik hálózaton vannak – add meg a címet fent."
+    },
+    "lcd": {
+      "title": "Kijelző",
+      "intro": "A panel saját képernyő-beállításai. A módosítások azonnal érvénybe lépnek.",
+      "theme": "Téma",
+      "theme_dark": "Sötét",
+      "theme_light": "Világos",
+      "brightness": "Fényerő",
+      "standby_brightness": "Készenléti fényerő",
+      "standby_hint": "0 esetén a képernyő teljesen kikapcsol tétlenség esetén.",
+      "timeout": "Készenléti időkorlát (másodperc)",
+      "timeout_hint": "Tétlenségi idő a készenléti képernyőre váltás előtt. 0 = soha."
     }
   }
 }

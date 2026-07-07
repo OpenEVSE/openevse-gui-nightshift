@@ -619,14 +619,20 @@
       "temp": "Temp",
       "pilot": "Piloto"
     },
-    "summary": { "today": "Hoy", "total": "Total" },
+    "summary": {
+      "today": "Hoy",
+      "total": "Total"
+    },
     "mode": {
       "auto": "Auto",
       "on": "Activado",
       "off": "Desactivado",
       "aria": "Modo de carga"
     },
-    "rate": { "claimed": "Establecido por {client}", "aria": "Velocidad de carga" },
+    "rate": {
+      "claimed": "Establecido por {client}",
+      "aria": "Velocidad de carga"
+    },
     "vehicle": {
       "to_full": "{time} para completar",
       "vehicle_limit": "límite del vehículo {value}",
@@ -668,7 +674,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Datos", "energy": "Energía", "safety": "Seguridad", "manager": "Gestor" },
+    "tab": {
+      "data": "Datos",
+      "energy": "Energía",
+      "safety": "Seguridad",
+      "manager": "Gestor"
+    },
     "group": {
       "energy": "Energía entregada",
       "sensors": "Sensores",
@@ -695,7 +706,11 @@
       "loading": "Cargando…",
       "error": "No se pudieron cargar los datos de energía",
       "no_samples": "Aún no hay muestras registradas",
-      "axis": { "current": "Corriente (A)", "temperature": "Temperatura (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Corriente (A)",
+        "temperature": "Temperatura (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Piloto",
@@ -819,7 +834,15 @@
     "firmware": {
       "title": "Firmware",
       "intro": "Esto es lo que se ejecuta hoy en este cargador.",
-      "update_hint": "Las actualizaciones de firmware están en Ajustes → Firmware después de la configuración."
+      "update_hint": "Las actualizaciones de firmware están en Ajustes → Firmware después de la configuración.",
+      "update_title": "Actualizar firmware",
+      "choose": "Elegir archivo",
+      "no_file": "Ningún archivo seleccionado",
+      "upload": "Instalar",
+      "uploading": "Subiendo... {pct}%",
+      "rebooting": "Instalando y reiniciando: no apagues el equipo...",
+      "done": "Actualización completada. Recargando...",
+      "failed": "Error en la actualización. Comprueba el archivo e inténtalo de nuevo."
     },
     "reconnect": {
       "title": "Vuelve a conectarte a tu WiFi doméstica",
@@ -827,6 +850,29 @@
       "address_label": "Dirección",
       "copied": "Copiado al portapapeles.",
       "dismiss": "Entendido"
+    },
+    "remote": {
+      "title": "Pantalla remota",
+      "intro": "Esta pantalla refleja una estación OpenEVSE a través de tu red. Introduce la dirección de la estación o elige una encontrada cerca.",
+      "host": "Dirección de la estación",
+      "host_hint": "Dirección IP o nombre mDNS (p. ej. openevse-1234.local) del OpenEVSE a mostrar.",
+      "found": "Estaciones en tu red",
+      "scan": "Buscar",
+      "scanning": "Buscando...",
+      "scan_error": "Error en la búsqueda. Inténtalo de nuevo.",
+      "empty": "No se encontraron estaciones. Pueden estar en otra red; introduce la dirección arriba."
+    },
+    "lcd": {
+      "title": "Pantalla",
+      "intro": "Ajustes de la pantalla de este panel. Los cambios se aplican inmediatamente.",
+      "theme": "Tema",
+      "theme_dark": "Oscuro",
+      "theme_light": "Claro",
+      "brightness": "Brillo",
+      "standby_brightness": "Brillo en reposo",
+      "standby_hint": "0 apaga la pantalla por completo cuando está inactiva.",
+      "timeout": "Tiempo de reposo (segundos)",
+      "timeout_hint": "Tiempo de inactividad antes de atenuar a la pantalla de reposo. 0 = nunca atenuar."
     }
   }
 }
