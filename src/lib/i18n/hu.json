@@ -409,7 +409,6 @@
       "heartbeat_desc": "A kommunikáció megszakadása életjel-hibaáramot vált ki",
       "heartbeat_interval": "Életjel intervallum (s)",
       "heartbeat_current": "Életjel-hibaáram",
-      "heartbeat_tooltip": "Életjel {interval} másodpercenként, {current} A-re esik vissza.",
       "tls_certificates": "TLS tanúsítványok"
     },
     "certificates": {
@@ -562,6 +561,7 @@
     "title": "Töltéskezelő",
     "default_state": "Alapértelmezett állapot",
     "station": "Állomás",
+    "station_defaults": "Állomás alapértékei",
     "current": "Áram",
     "default_state_active": "Bekapcsoláskor aktív",
     "default_state_disabled": "Bekapcsoláskor letiltva",
@@ -622,6 +622,7 @@
     "rule_edit_title": "Szabály szerkesztése",
     "rule_save": "Mentés",
     "rule_cancel": "Mégse",
+    "default_state_close": "Bezárás",
     "rule_delete": "Szabály törlése",
     "rule_error_no_day": "Válasszon ki legalább egy napot",
     "rule_error_same_time": "A kezdési és a befejezési időpont nem lehet azonos",

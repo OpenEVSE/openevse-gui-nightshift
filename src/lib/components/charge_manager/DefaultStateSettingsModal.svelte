@@ -70,7 +70,7 @@
           <span class="text-xs text-text-dim">{$_('config.security.heartbeat_interval')}</span>
           <NumberInput
             value={heartbeatInterval}
-            min={1}
+            min={0}
             max={60}
             disabled={busy}
             onchange={onHeartbeatInterval}
@@ -114,6 +114,6 @@
   {/if}
 
   <div class="mt-6 flex">
-    <Button label={$_('charge_manager.rule_cancel')} variant="ghost" disabled={busy} onclick={onclose} />
+    <Button label={$_('charge_manager.default_state_close')} variant="ghost" disabled={busy} onclick={onclose} />
   </div>
 </Modal>

@@ -41,7 +41,10 @@
   // While charging, show the session chart hero (it polls /energy/raw); every
   // other state keeps the PowerRing.
   let showChart = $derived(charging)
-  let maxAmps = $derived($config_store?.max_current_soft ?? 48)
+  // Rate pill slider spans the full hardware range, not the configured default.
+  let minAmps = $derived($config_store?.min_current_hard ?? 6)
+  let maxAmps = $derived($config_store?.max_current_hard ?? 48)
+  let defaultAmps = $derived($config_store?.max_current_soft ?? maxAmps)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
 
   let socRangeLimit = $derived($limit_store?.type === 'soc' || $limit_store?.type === 'range')
@@ -96,7 +99,7 @@
   let chargeAmps = $derived(
     $claims_target_store?.properties?.charge_current
       ? Math.min($claims_target_store.properties.charge_current, maxAmps)
-      : maxAmps,
+      : defaultAmps,
   )
   let rateClaimedBy = $derived(
     $claims_target_store?.claims?.charge_current &&
@@ -218,7 +221,7 @@
     if (busy) return
     busy = true
     try {
-      if (val >= maxAmps) {
+      if (val === defaultAmps) {
         await serialQueue.add(() => override_store.removeProp('charge_current'))
       } else {
         const current = $override_store ?? {}
@@ -426,6 +429,7 @@
         target={socTarget}
         {hasSoc}
         amps={chargeAmps}
+        {minAmps}
         {maxAmps}
         {rateClaimedBy}
         {rateNonce}
@@ -449,7 +453,7 @@
         {#key rateNonce}
           <RatePill
             amps={chargeAmps}
-            min={6}
+            min={minAmps}
             max={maxAmps}
             claimedBy={rateClaimedBy}
             disabled={busy || ecoOn || display === 'error'}

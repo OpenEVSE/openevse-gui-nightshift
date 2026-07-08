@@ -10,6 +10,7 @@
     target = null,
     hasSoc = false,
     amps = 6,
+    minAmps = 6,
     maxAmps = 48,
     rateClaimedBy = '',
     rateNonce = 0,
@@ -28,7 +29,7 @@
   <div class="flex items-center justify-between gap-2 px-1">
     <StatusLine display="charging" />
     {#key rateNonce}
-      <RatePill {amps} min={6} max={maxAmps} claimedBy={rateClaimedBy} disabled={rateDisabled} onchange={onrate} />
+      <RatePill {amps} min={minAmps} max={maxAmps} claimedBy={rateClaimedBy} disabled={rateDisabled} onchange={onrate} />
     {/key}
   </div>
 

@@ -409,7 +409,6 @@
       "heartbeat_desc": "Communication loss triggers failsafe current",
       "heartbeat_interval": "Heartbeat interval (s)",
       "heartbeat_current": "Heartbeat Fail Current",
-      "heartbeat_tooltip": "Heartbeat every {interval}s, fails to {current} A.",
       "tls_certificates": "TLS certificates"
     },
     "certificates": {
@@ -562,6 +561,7 @@
     "title": "Charge Manager",
     "default_state": "Default State",
     "station": "Station",
+    "station_defaults": "Station Defaults",
     "current": "Current",
     "default_state_active": "Active on power up",
     "default_state_disabled": "Disabled on power up",
@@ -622,6 +622,7 @@
     "rule_edit_title": "Edit rule",
     "rule_save": "Save",
     "rule_cancel": "Cancel",
+    "default_state_close": "Close",
     "rule_delete": "Delete rule",
     "rule_error_no_day": "Select at least one day",
     "rule_error_same_time": "Start and stop time must differ",

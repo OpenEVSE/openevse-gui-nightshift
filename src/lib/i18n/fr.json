@@ -409,7 +409,6 @@
       "heartbeat_desc": "Une perte de communication déclenche le courant de repli",
       "heartbeat_interval": "Intervalle du signal de vie (s)",
       "heartbeat_current": "Courant de repli du signal de vie",
-      "heartbeat_tooltip": "Signal de vie toutes les {interval}s, retombe à {current} A.",
       "tls_certificates": "Certificats TLS"
     },
     "certificates": {
@@ -562,6 +561,7 @@
     "title": "Gestionnaire de charge",
     "default_state": "État par défaut",
     "station": "Station",
+    "station_defaults": "Valeurs par défaut de la station",
     "current": "Courant",
     "default_state_active": "Actif à la mise sous tension",
     "default_state_disabled": "Désactivé à la mise sous tension",
@@ -622,6 +622,7 @@
     "rule_edit_title": "Modifier la règle",
     "rule_save": "Enregistrer",
     "rule_cancel": "Annuler",
+    "default_state_close": "Fermer",
     "rule_delete": "Supprimer la règle",
     "rule_error_no_day": "Sélectionnez au moins un jour",
     "rule_error_same_time": "L'heure de début et de fin doivent être différentes",

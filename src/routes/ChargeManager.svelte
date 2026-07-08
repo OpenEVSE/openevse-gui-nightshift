@@ -238,7 +238,9 @@
 
   // ── Safety toggles (Default State card) ───────────────────────────────────
   const saveBootLock = (enabled) => saveConfigParam('boot_lock', enabled)
-  const saveHeartbeatInterval = (sec) => saveConfigParam('heartbeat_interval', sec)
+  // 0 means "disabled" throughout the stack, so route it through the same
+  // path as the toggle (also zeroes the fail current and flips the toggle).
+  const saveHeartbeatInterval = (sec) => (sec > 0 ? saveConfigParam('heartbeat_interval', sec) : saveHeartbeat(false))
   const saveHeartbeatCurrent  = (amps) => saveConfigParam('heartbeat_current', amps)
 
   async function saveHeartbeat(enabled) {
@@ -400,6 +402,12 @@
     </button>
   </div>
 
+  <div class="mb-2">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-text-dim">
+      {$_('charge_manager.station_defaults')}
+    </h2>
+  </div>
+
   <DefaultStateCard
     current={defaultCurrent}
     {minCurrent}
@@ -407,8 +415,6 @@
     {busy}
     {heartbeatSupported}
     heartbeatActive={heartbeatEnabled}
-    {heartbeatInterval}
-    {heartbeatCurrent}
     {bootLockSupported}
     {bootLock}
     onCurrentChange={saveDefaultCurrent}

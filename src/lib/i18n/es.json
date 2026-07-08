@@ -409,7 +409,6 @@
       "heartbeat_desc": "La pérdida de comunicación activa la corriente de seguridad",
       "heartbeat_interval": "Intervalo de latido (s)",
       "heartbeat_current": "Corriente de seguridad del latido",
-      "heartbeat_tooltip": "Latido cada {interval}s, cae a {current} A.",
       "tls_certificates": "Certificados TLS"
     },
     "certificates": {
@@ -562,6 +561,7 @@
     "title": "Gestor de carga",
     "default_state": "Estado predeterminado",
     "station": "Estación",
+    "station_defaults": "Valores predeterminados de la estación",
     "current": "Corriente",
     "default_state_active": "Activo al encender",
     "default_state_disabled": "Desactivado al encender",
@@ -622,6 +622,7 @@
     "rule_edit_title": "Editar regla",
     "rule_save": "Guardar",
     "rule_cancel": "Cancelar",
+    "default_state_close": "Cerrar",
     "rule_delete": "Eliminar regla",
     "rule_error_no_day": "Selecciona al menos un día",
     "rule_error_same_time": "La hora de inicio y la de fin deben ser distintas",
