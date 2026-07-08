@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "icons": "node scripts/gen-icons.mjs"
+    "icons": "node scripts/gen-icons.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
@@ -21,6 +22,7 @@
     "@testing-library/svelte": "^5.4.2",
     "@vitest/coverage-v8": "^4.1.9",
     "jsdom": "^29.1.1",
+    "playwright": "^1.61.1",
     "sharp": "^0.35.3",
     "svelte": "^5.56.4",
     "tailwindcss": "^4.3.2",

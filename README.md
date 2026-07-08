@@ -23,19 +23,23 @@ to be flashed onto the WiFi module and served from its embedded web server.
 
 ## Screenshots
 
-Running against a real OpenEVSE charger. The UI ships light and dark themes —
-toggle from the header.
+All screenshots are generated automatically with `npm run screenshots` (see
+[Screenshots](#screenshots-1) below) — the full set, covering every screen and
+settings page, lives in [docs/screenshots/](docs/screenshots/). The UI ships
+light and dark themes — toggle from the header.
 
 <table>
   <tr>
-    <td width="33%"><img src="docs/images/IMG_1092.PNG" alt="Dashboard during a charging session" width="260"><br><sub>Dashboard — live session</sub></td>
-    <td width="33%"><img src="docs/images/IMG_1085.JPG" alt="Dashboard in the light theme" width="260"><br><sub>Dashboard — light theme</sub></td>
-    <td width="33%"><img src="docs/images/IMG_1081.PNG" alt="Charger fault shown on the power ring" width="260"><br><sub>Charger fault state</sub></td>
+    <td width="50%"><img src="docs/screenshots/dashboard-charging-dark-desktop.png" alt="Dashboard during a charging session, dark theme"><br><sub>Dashboard — charging (dark)</sub></td>
+    <td width="50%"><img src="docs/screenshots/dashboard-charging-light-desktop.png" alt="Dashboard during a charging session, light theme"><br><sub>Dashboard — charging (light)</sub></td>
   </tr>
   <tr>
-    <td width="33%"><img src="docs/images/IMG_1087.JPG" alt="Monitoring safety counters" width="260"><br><sub>Monitoring — safety</sub></td>
-    <td width="33%"><img src="docs/images/IMG_1073.JPG" alt="Event history list" width="260"><br><sub>Event history</sub></td>
-    <td width="33%"><img src="docs/images/IMG_1075.JPG" alt="Charger settings page" width="260"><br><sub>Settings — charger</sub></td>
+    <td width="50%"><img src="docs/screenshots/dashboard-fault-dark-desktop.png" alt="Charger fault shown on the power ring"><br><sub>Charger fault state</sub></td>
+    <td width="50%"><img src="docs/screenshots/settings-dark-desktop.png" alt="Settings hub"><br><sub>Settings hub</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/monitoring-dark-desktop.png" alt="Monitoring metrics"><br><sub>Monitoring</sub></td>
+    <td width="50%"><img src="docs/screenshots/history-dark-desktop.png" alt="Event history and energy log"><br><sub>History</sub></td>
   </tr>
 </table>
 
@@ -83,6 +87,18 @@ states (e.g. set `state` in `status.json` to `1` for standby or `3` for charging
 Note: the mock serves reads only — it does not accept config writes, so Settings-page
 saves report a write error in mock mode. They work against a real device.
 
+Two dev-only endpoints switch the simulated device at runtime, no restart needed:
+
+- `GET /api/_mock/state/<code>` — flip the EVSE state (1 idle, 2 connected,
+  3 charging, 4+ fault, 254 sleeping, 255 off; `reset` returns to the fixture).
+- `GET /api/_mock/scenario/<name>` — overlay `dev/fixtures/scenarios/<name>.json`
+  onto the base fixtures (`reset` clears). A scenario file holds partial fixture
+  objects keyed by fixture stem, e.g. `{ "config": { "wizard_passed": false } }`
+  re-enables the first-run wizard.
+
+Setting `MOCK_STATIC=1` freezes the mock completely (no WebSocket ticks, fixed
+server clock) — this is what the screenshot generator uses.
+
 ### Docker (emulator — no hardware needed)
 
 A `docker-compose.yml` is included that spins up a complete development
@@ -123,6 +139,20 @@ npm run test:coverage # with a coverage report
 Tests use Vitest and `@testing-library/svelte`. Coverage is scoped to the pure logic
 in `src/lib/**/*.js`.
 
+## Screenshots
+
+```bash
+npm run screenshots                          # regenerate docs/screenshots/*.png
+node scripts/screenshots.mjs --only dashboard-charging,settings   # a subset
+```
+
+Every image in `docs/screenshots/` is generated headlessly from mock mode —
+no hardware, deterministic output (frozen clock, fixed locale/timezone/viewport,
+animations disabled), so an unchanged UI reproduces byte-identical files.
+The manifest in `scripts/screenshots.config.js` declares each capture (route,
+scenario, EVSE state, themes, viewports); add an entry there when adding a screen.
+Regenerate and commit the images whenever a UI change alters them.
+
 ## Project layout
 
 ```
@@ -138,6 +168,11 @@ src/
 dev/
   mock-plugin.js     the mock-mode Vite plugin
   fixtures/          canned device responses for mock mode
+    scenarios/       named fixture overlays (wizard, display, ...)
+scripts/
+  screenshots.mjs    automated screenshot generator (npm run screenshots)
+  screenshots.config.js  the capture manifest
+docs/screenshots/    generated UI screenshots — do not edit by hand
 docs/superpowers/    design specs and implementation plans
 ```
 
