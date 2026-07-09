@@ -48,19 +48,19 @@
     <div class="flex shrink-0 items-center gap-1">
       <IconButton
         icon="mdi:pencil-outline"
-        size={16}
+        size={18}
         label={$_('charge_manager.rule_edit_title')}
         disabled={busy}
         onclick={onedit}
       />
       {#if removing}
         <span class="grid place-items-center p-2 text-text-dim">
-          <Icon icon="mdi:loading" size={16} class="animate-spin" />
+          <Icon icon="mdi:loading" size={18} class="animate-spin" />
         </span>
       {:else}
         <IconButton
           icon="mdi:trash-can-outline"
-          size={16}
+          size={18}
           label={$_('charge_manager.rule_delete')}
           disabled={busy}
           onclick={onremove}

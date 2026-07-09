@@ -32,10 +32,14 @@
     <div class="text-sm font-semibold text-text">{$_('charge_manager.station')}</div>
     <div class="flex items-center gap-2">
       {#if heartbeatSupported}
+        <!-- grid place-items-center matches the pencil IconButton's centering so
+             these status icons sit on the same baseline. Without it the icon's
+             default vertical-align (-0.125em on iconify-icon) shifts it off centre
+             relative to the grid-centred pencil button. -->
         <span
           role="img"
           aria-label={$_('config.security.heartbeat')}
-          class="block {heartbeatActive ? 'text-error' : 'text-text-dim'}"
+          class="grid place-items-center {heartbeatActive ? 'text-error' : 'text-text-dim'}"
         >
           <Icon icon={heartbeatActive ? 'mdi:heart' : 'mdi:heart-outline'} size={18} />
         </span>
@@ -44,7 +48,7 @@
         <span
           role="img"
           aria-label={$_('config.security.boot_lock')}
-          class={bootLock ? 'text-text' : 'text-text-dim'}
+          class="grid place-items-center {bootLock ? 'text-text' : 'text-text-dim'}"
         >
           <Icon icon={bootLock ? 'mdi:lock' : 'mdi:lock-open-variant'} size={18} />
         </span>

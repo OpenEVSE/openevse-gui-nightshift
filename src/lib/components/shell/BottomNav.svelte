@@ -33,9 +33,9 @@
          pb-[env(safe-area-inset-bottom)]
          pl-[env(safe-area-inset-left)]
          pr-[env(safe-area-inset-right)]
-         sm:h-full sm:w-20 sm:flex-col sm:border-r sm:border-t-0
+         sm:h-full sm:w-24 sm:flex-col sm:border-r sm:border-t-0
          sm:pb-0 sm:pl-0 sm:pr-0
-         lg:w-44"
+         lg:w-52"
 >
   <!-- Desktop rail brand: lives in the sidebar at lg (the header hides its
        copy there); a rule + breathing room separates it from the nav items. -->
@@ -54,7 +54,17 @@
              {isActive(item, path) ? 'text-accent' : 'text-text-dim'}"
     >
       <Icon icon={item.icon} size={22} />
-      <span>{$_(item.key)}</span>
+      <!-- Only the tablet rail (sm..lg) reserves label height: it is widened
+           (w-24) so English/most labels fit on one line, but a long translation
+           like fr "Gestionnaire de charge" still wraps to two lines, so every
+           item reserves two lines to keep a wrap from knocking its icon off the
+           shared baseline. Scoped to sm:max-lg so mobile (short bottom bar) and
+           lg (icon-beside-text row) keep their natural single-line flow. -->
+      <span
+        class="sm:max-lg:flex sm:max-lg:h-[26px] sm:max-lg:items-start sm:max-lg:justify-center
+               sm:max-lg:overflow-hidden sm:max-lg:text-center sm:max-lg:leading-tight"
+        >{$_(item.key)}</span
+      >
     </a>
   {/each}
 </nav>

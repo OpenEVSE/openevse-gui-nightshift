@@ -3,6 +3,7 @@
   import { untrack } from 'svelte'
   import Card from '../ui/Card.svelte'
   import Icon from '../../icons/Icon.svelte'
+  import { cToF } from '../../temperature.js'
 
   let {
     title    = null,      // card heading (defaults to "Temperature Protection")
@@ -14,9 +15,18 @@
     busy     = false,
     checksAllOn  = null,  // null = hide banner; true/false = show on/off banner
     temperature  = null,  // current EVSE temperature °C (marker on the track)
+    unit     = 'c',       // display unit for the labels: 'c' | 'f' (device is always °C)
     onThrottleChange = () => {},   // (°C) => void
     onPanicChange    = () => {},   // (°C) => void
   } = $props()
+
+  // The device stores/streams every temperature in °C — only the *labels* here
+  // follow the user's uisettings.temp_unit preference. The slider itself keeps
+  // working in °C (setpoints, bounds, commit callbacks), so only the displayed
+  // numbers are converted.
+  let isF = $derived(unit === 'f')
+  let unitLabel = $derived(isF ? $_('units.fahrenheit') : $_('units.celsius'))
+  const disp = (c) => Math.round(isF ? cToF(c) : c)
 
   // Live thumb positions during a drag (committed on change). Same prop-mirror
   // pattern as Slider.svelte / LimitSliderBar.
@@ -33,6 +43,11 @@
   let tempPct = $derived(
     hasTemp ? Math.min(100, Math.max(0, ((temperature - min) / (max - min)) * 100)) : 0
   )
+  // Reading pill offset — shifted by -pillShift% of its own width (clamped 20–80%,
+  // the same treatment as the limit sliders' value pill) so a reading near the
+  // rails doesn't spill past the card edge. Placing the stem at pillShift% across
+  // the shifted pill cancels the offset, so it still points at the true tempPct.
+  let pillShift = $derived(Math.min(80, Math.max(20, tempPct)))
 
   // Lower thumb may not cross within `gap` of the upper, and vice-versa.
   // Instead of stopping the dragged thumb at the gap, push the other thumb
@@ -83,11 +98,11 @@
   <div class="mb-1 flex items-baseline justify-between text-[10px] uppercase tracking-wide text-text-dim">
     <span>
       {$_('config.safety.temp_throttle')}
-      <span class="font-semibold normal-case text-accent">{lo}°C</span>
+      <span class="font-semibold normal-case text-accent">{disp(lo)}{unitLabel}</span>
     </span>
     <span>
       {$_('config.safety.temp_panic')}
-      <span class="font-semibold normal-case text-warning">{hi}°C</span>
+      <span class="font-semibold normal-case text-warning">{disp(hi)}{unitLabel}</span>
     </span>
   </div>
 
@@ -97,14 +112,17 @@
   <div class="relative pt-6">
     {#if hasTemp}
       <div
-        class="pointer-events-none absolute top-0 z-10 flex -translate-x-1/2 flex-col items-center text-text"
-        style="left: {tempPct}%"
+        class="pointer-events-none absolute top-0 z-10 flex items-center gap-0.5 whitespace-nowrap rounded bg-surface-3 px-1 py-0.5 text-[10px] font-semibold text-text ring-1 ring-border"
+        style="left: {tempPct}%; transform: translateX(-{pillShift}%)"
       >
-        <span class="flex items-center gap-0.5 whitespace-nowrap rounded bg-surface-3 px-1 py-0.5 text-[10px] font-semibold ring-1 ring-border">
-          <Icon icon="mdi:thermometer" size={11} />
-          {Math.round(temperature)}°C
-        </span>
-        <span class="h-2 w-px bg-text-dim"></span>
+        <Icon icon="mdi:thermometer" size={11} />
+        {disp(temperature)}{unitLabel}
+        <!-- Stem points down at the reading on the track. At pillShift% across the
+             edge-clamped pill it lands on the true tempPct (the shift cancels). -->
+        <span
+          class="absolute top-full h-2 w-px -translate-x-1/2 bg-text-dim"
+          style="left: {pillShift}%"
+        ></span>
       </div>
     {/if}
 
@@ -139,8 +157,8 @@
   </div>
 
   <div class="mt-1 flex justify-between text-[10px] text-text-dim">
-    <span>{min}°C</span>
-    <span>{max}°C</span>
+    <span>{disp(min)}{unitLabel}</span>
+    <span>{disp(max)}{unitLabel}</span>
   </div>
 </Card>
 

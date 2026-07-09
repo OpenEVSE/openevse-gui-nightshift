@@ -75,6 +75,23 @@ describe('TempProtectionCard', () => {
     const { container } = render(TempProtectionCard, {
       props: { throttle: 65, panic: 72, temperature: 55 },
     })
-    expect(container.textContent).toContain('55°C')
+    // Default unit is celsius; the unit suffix renders via its i18n key (the
+    // mock echoes keys), so the marker reads "55" + units.celsius.
+    expect(container.textContent).toContain('55units.celsius')
+  })
+
+  it('converts every displayed temperature to fahrenheit when unit is "f"', () => {
+    // The device always reports °C; passing unit: 'f' must convert the labels
+    // only (marker, throttle/panic legend, min/max end labels).
+    const { container } = render(TempProtectionCard, {
+      props: { throttle: 65, panic: 72, temperature: 55, min: 40, max: 82, unit: 'f' },
+    })
+    const text = container.textContent
+    expect(text).toContain('131units.fahrenheit') // marker: 55°C
+    expect(text).toContain('149units.fahrenheit') // throttle: 65°C
+    expect(text).toContain('162units.fahrenheit') // panic: 72°C
+    expect(text).toContain('104units.fahrenheit') // min: 40°C
+    expect(text).toContain('180units.fahrenheit') // max: 82°C
+    expect(text).not.toContain('units.celsius')
   })
 })

@@ -22,10 +22,23 @@ describe('BottomNav', () => {
 
   it('carries the desktop labeled-rail classes', () => {
     const { container, getAllByRole } = render(BottomNav, { props: { path: '/' } })
-    expect(container.querySelector('nav').className).toContain('lg:w-44')
+    expect(container.querySelector('nav').className).toContain('sm:w-24')
+    expect(container.querySelector('nav').className).toContain('lg:w-52')
     for (const link of getAllByRole('link')) {
       expect(link.className).toContain('lg:flex-row')
     }
+  })
+
+  it('reserves a fixed two-line label height only on the tablet rail (sm..lg)', () => {
+    // A label that wraps to two lines in the narrow tablet rail must not push its
+    // icon off the shared baseline, so every label reserves two lines — but only
+    // in the sm..lg window, leaving the mobile bar and the lg row layout in their
+    // natural single-line flow.
+    const { getByLabelText } = render(BottomNav, { props: { path: '/' } })
+    const label = getByLabelText('nav.charge_manager').querySelector('span')
+    expect(label.className).toContain('sm:max-lg:h-[26px]')
+    // No unscoped/lg height override — desktop keeps the natural flow.
+    expect(label.className).not.toContain('lg:block')
   })
 
   it('shows the desktop-only brand above the nav items', () => {

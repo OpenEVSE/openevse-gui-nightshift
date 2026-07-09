@@ -10,6 +10,7 @@
     busy = false,
     // Temperature protection (rendered at the top when throttling is enabled).
     tempProtection = null, // { throttle, panic, min, max } | null
+    tempUnit = 'c',        // display unit for temp labels: 'c' | 'f'
     onedit = () => {},    // called with featureKey
     onremove = () => {},  // called with featureKey
     onThrottleChange = () => {},  // (°C) => void
@@ -33,6 +34,7 @@
       max={tempProtection.max}
       checksAllOn={tempProtection.checksAllOn}
       temperature={tempProtection.temperature}
+      unit={tempUnit}
       {busy}
       {onThrottleChange}
       {onPanicChange}

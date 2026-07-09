@@ -4,6 +4,7 @@
   import { limit_store } from '../lib/stores/limit.js'
   import { config_store } from '../lib/stores/config.js'
   import { status_store } from '../lib/stores/status.js'
+  import { uisettings_store } from '../lib/stores/uisettings.js'
   import { override_store } from '../lib/stores/override.js'
   import { claims_target_store } from '../lib/stores/claims_target.js'
   import { claims_store } from '../lib/stores/claims.js'
@@ -427,6 +428,7 @@
     {busy}
     {removingKey}
     {tempProtection}
+    tempUnit={$uisettings_store?.temp_unit ?? 'c'}
     onedit={openGlobalEdit}
     onremove={removeGlobalFeature}
     onThrottleChange={saveTempThrottle}
