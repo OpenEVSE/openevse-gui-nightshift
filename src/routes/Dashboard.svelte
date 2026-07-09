@@ -41,9 +41,13 @@
   // While charging, show the session chart hero (it polls /energy/raw); every
   // other state keeps the PowerRing.
   let showChart = $derived(charging)
-  // Rate pill slider spans the full hardware range, not the configured default.
+  // Rate pill slider stops at the configured soft max (Settings > Charger), so
+  // the home page can't request — or display — more current than the user has
+  // allowed. Falls back to the hardware ceiling when the soft max is unset.
   let minAmps = $derived($config_store?.min_current_hard ?? 6)
-  let maxAmps = $derived($config_store?.max_current_hard ?? 48)
+  let maxAmps = $derived(
+    Math.min($config_store?.max_current_soft ?? Infinity, $config_store?.max_current_hard ?? 48),
+  )
   let defaultAmps = $derived($config_store?.max_current_soft ?? maxAmps)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
 
