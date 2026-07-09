@@ -35,7 +35,8 @@ const entries = [
   { name: 'dashboard-sleeping', route: '/', state: 254 },
   { name: 'dashboard-off', route: '/', state: 255 },
   { name: 'dashboard-fault', route: '/', state: 6 }, // GFCI fault
-  { name: 'schedule', route: '/schedule', viewports: ['desktop', 'mobile'] },
+  { name: 'charge-manager', route: '/schedule', viewports: ['desktop', 'mobile'] },
+  { name: 'schedule-legacy', route: '/schedule/legacy' },
   { name: 'monitoring', route: '/monitoring', viewports: ['desktop', 'mobile'] },
   { name: 'history', route: '/history', viewports: ['desktop', 'mobile'] },
   { name: 'wizard', route: '/', scenario: 'wizard', viewports: ['desktop', 'mobile'] },
