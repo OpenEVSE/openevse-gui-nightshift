@@ -44,6 +44,7 @@ export function mockPlugin() {
     '/api/schedule/plan': 'plan.json',
     '/api/config':        'config.json',
     '/api/override':      'override.json',
+    '/api/claims':        'claims.json',
     '/api/claims/target': 'claims_target.json',
     '/api/certificates':  'certificates.json',
     '/api/energy/raw':    'energy_raw.json',

@@ -1,0 +1,3 @@
+[
+  { "client": 65537, "priority": 1000, "state": "disabled", "charge_current": 0, "auto_release": false }
+]
