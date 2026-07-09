@@ -15,30 +15,28 @@
   const form = createConfigForm()
   const ss = form.saveState
 
-  let enabled = $derived(!!$config_store?.ocpp_enabled)
   let autoAuth = $derived(!!$config_store?.ocpp_auth_auto)
 </script>
 
 <ConfigPage title={$_('config.pages.ocpp')}>
+  <!-- Enabling/scheduling OCPP control is done from the Charge Manager. -->
+  <a
+    href="#/schedule"
+    class="mb-4 inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5
+           text-sm font-semibold text-white transition hover:opacity-90"
+  >
+    + {$_('config.add_in_charge_manager')}
+  </a>
+
   <ConfigSection>
-    <FormField label={$_('config.ocpp.enable')}>
-      <Toggle
-        checked={enabled}
-        label={$_('config.ocpp.enable')}
-        onchange={(v) => form.saveField('ocpp_enabled', v)}
-      />
-    </FormField>
-    {#if enabled}
-      <ReadOnlyRow
-        label={$_('config.connected')}
-        value={$status_store?.ocpp_connected ? $_('config.connected') : $_('config.not_connected')}
-        tone={$status_store?.ocpp_connected ? 'ok' : 'error'}
-      />
-    {/if}
+    <ReadOnlyRow
+      label={$_('config.connected')}
+      value={$status_store?.ocpp_connected ? $_('config.connected') : $_('config.not_connected')}
+      tone={$status_store?.ocpp_connected ? 'ok' : 'error'}
+    />
   </ConfigSection>
 
-  {#if enabled}
-    <ConfigSection title={$_('config.ocpp.server_section')}>
+  <ConfigSection title={$_('config.ocpp.server_section')}>
       <FormField label={$_('config.ocpp.server')} status={$ss.ocpp_server ?? 'idle'}>
         <TextInput
           value={$config_store?.ocpp_server ?? ''}
@@ -106,5 +104,4 @@
         />
       </FormField>
     </ConfigSection>
-  {/if}
 </ConfigPage>

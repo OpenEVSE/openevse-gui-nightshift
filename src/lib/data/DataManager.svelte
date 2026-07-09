@@ -10,6 +10,7 @@
   import { plan_store } from '../stores/plan.js'
   import { config_store } from '../stores/config.js'
   import { claims_target_store } from '../stores/claims_target.js'
+  import { claims_store } from '../stores/claims.js'
   import { override_store } from '../stores/override.js'
   import { clientid2name, formatDate } from '../utils.js'
   import { serialQueue } from '../queue.js'
@@ -111,6 +112,9 @@
       refresh_target = true
       $uistates_store.claims_version = ver
       const res = await serialQueue.add(claims_target_store.download)
+      // The claims list (with real per-claim priorities) changes in lockstep
+      // with the target, so refresh it on the same version bump.
+      await serialQueue.add(claims_store.download)
       if (res) {
         getMode($claims_target_store?.properties?.state, $claims_target_store?.claims?.state)
       }

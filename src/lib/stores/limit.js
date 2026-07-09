@@ -34,7 +34,8 @@ function createLimitStore() {
 
     async function remove(id) {
         let res = await httpAPI("DELETE", "/limit")
-        if (res.msg == "done") {
+        // "no limit" = nothing to delete — success for an idempotent remove
+        if (res.msg == "done" || res.msg == "no limit") {
             P.update(()=>model)
             return true
         }
