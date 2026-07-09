@@ -22,6 +22,11 @@
       <div class="flex items-center justify-between border-b border-border py-2.5 last:border-0">
         <span class="text-sm text-text-dim">{row.property}</span>
         <span class="flex items-center gap-1.5">
+          {#if row.priority != null}
+            <span class="rounded-full bg-surface-3 px-2.5 py-0.5 text-xs font-semibold text-text-dim">
+              {$_('monitoring.manager.priority')}: {row.priority}
+            </span>
+          {/if}
           <span class="rounded-full bg-surface-3 px-2.5 py-0.5 text-xs font-semibold text-text">
             {$_('clients.' + clientid2name(row.clientId))}
           </span>

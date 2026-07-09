@@ -24,16 +24,18 @@ beforeEach(() => {
 })
 
 describe('OCPP page', () => {
-  it('hides the form until ocpp is enabled', () => {
-    config_store.set({ ocpp_enabled: false })
-    const { queryByText } = render(Ocpp)
-    expect(queryByText('config.ocpp.server')).not.toBeInTheDocument()
+  it('shows the settings expanded by default (no enable switch)', () => {
+    config_store.set({ ocpp_enabled: false, ocpp_auth_auto: false })
+    const { getByText, queryByText } = render(Ocpp)
+    expect(getByText('config.ocpp.server')).toBeInTheDocument()
+    expect(queryByText('config.ocpp.enable')).not.toBeInTheDocument()
   })
 
-  it('shows the form when ocpp is enabled', () => {
-    config_store.set({ ocpp_enabled: true, ocpp_auth_auto: false })
+  it('links to the Charge Manager to enable/schedule OCPP', () => {
+    config_store.set({ ocpp_enabled: false, ocpp_auth_auto: false })
     const { getByText } = render(Ocpp)
-    expect(getByText('config.ocpp.server')).toBeInTheDocument()
+    const link = getByText('config.add_in_charge_manager', { exact: false }).closest('a')
+    expect(link).toHaveAttribute('href', '#/schedule')
   })
 
   it('shows the idtag field only when auto-auth is on', async () => {

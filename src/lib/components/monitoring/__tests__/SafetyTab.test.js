@@ -1,12 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render } from '@testing-library/svelte'
+import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
   t.subscribe = (fn) => { fn(t); return () => {} }
   return { _: t }
 })
+vi.mock('../../../api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.resolve({ msg: 'done' })) }))
 
+import { httpAPI } from '../../../api/httpAPI.js'
 import SafetyTab from '../SafetyTab.svelte'
 
 describe('SafetyTab', () => {
@@ -36,5 +38,17 @@ describe('SafetyTab', () => {
     }
     const { getByText } = render(SafetyTab, { props: { data } })
     expect(getByText('monitoring.safety.fault')).toBeInTheDocument()
+  })
+
+  it('resets the fault counters via $FC when the reset button is clicked', async () => {
+    httpAPI.mockClear()
+    const { getByText } = render(SafetyTab, { props: { data: { errors: [], infos: [] } } })
+    await fireEvent.click(getByText('config.safety.reset_faults'))
+    await vi.waitFor(() => {
+      const call = httpAPI.mock.calls.find(
+        ([m, u]) => m === 'GET' && String(u).includes('$FC'),
+      )
+      expect(call).toBeTruthy()
+    })
   })
 })

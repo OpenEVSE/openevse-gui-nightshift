@@ -7,6 +7,7 @@ const { config, status, saveField } = vi.hoisted(() => {
     gfci_check: true, ground_check: true, relay_check: true,
     temp_check: true, diode_check: true, vent_check: true,
     temp_throttle_enabled: false, temp_throttle_setpoint: 65,
+    over_temp_shutdown: 78,
   })
   const status = writable({ gfcicount: 0, nogndcount: 0, stuckcount: 0 })
   const saveField = vi.fn(async () => true)
@@ -34,20 +35,30 @@ describe('Safety — temp throttle', () => {
       gfci_check: true, ground_check: true, relay_check: true,
       temp_check: true, diode_check: true, vent_check: true,
       temp_throttle_enabled: false, temp_throttle_setpoint: 65,
+      over_temp_shutdown: 78,
     })
   })
 
-  it('hides the setpoint slider when throttle is disabled', () => {
+  it('hides the temperature sliders when throttle is disabled', () => {
     render(Safety)
     expect(screen.queryByRole('slider')).toBeNull()
   })
 
-  it('shows slider when throttle is enabled and commits via saveField', async () => {
+  it('shows the combined throttle/panic slider when enabled and commits throttle via saveField', async () => {
     config.update((c) => ({ ...c, temp_throttle_enabled: true }))
     render(Safety)
-    const slider = screen.getByRole('slider')
-    expect(slider).toBeInTheDocument()
-    await fireEvent.change(slider, { target: { value: '72' } })
+    // Dual-thumb: two range inputs (throttle + panic).
+    expect(screen.getAllByRole('slider')).toHaveLength(2)
+    const throttle = screen.getByLabelText('config.safety.temp_throttle')
+    await fireEvent.change(throttle, { target: { value: '72' } })
     expect(saveField).toHaveBeenCalledWith('temp_throttle_setpoint', 72)
+  })
+
+  it('commits the panic threshold via saveField', async () => {
+    config.update((c) => ({ ...c, temp_throttle_enabled: true }))
+    render(Safety)
+    const panic = screen.getByLabelText('config.safety.temp_panic')
+    await fireEvent.change(panic, { target: { value: '80' } })
+    expect(saveField).toHaveBeenCalledWith('over_temp_shutdown', 80)
   })
 })

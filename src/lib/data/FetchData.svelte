@@ -6,6 +6,7 @@
   import { config_store } from '../stores/config.js'
   import { override_store } from '../stores/override.js'
   import { claims_target_store } from '../stores/claims_target.js'
+  import { claims_store } from '../stores/claims.js'
   import { certificate_store } from '../stores/certificates.js'
   import { uistates_store } from '../stores/uistates.js'
 
@@ -18,6 +19,7 @@
     { store: config_store, progress: 60, after: () => ($uistates_store.config_version = $status_store.config_version) },
     { store: override_store, progress: 80, after: () => ($uistates_store.override_version = $status_store.override_version) },
     { store: claims_target_store, progress: 90, after: () => ($uistates_store.claims_version = $status_store.claims_version) },
+    { store: claims_store, progress: 95 },
     { store: certificate_store, progress: 100 },
   ]
 

@@ -41,17 +41,27 @@ describe('Safety page', () => {
     expect(queryByText('config.safety.warning')).not.toBeInTheDocument()
   })
 
-  it('shows the fault counters', () => {
+  it('no longer shows the fault counters (moved to Monitoring → Safety)', () => {
     config_store.set({ ...ALL_ON })
     status_store.set({ gfcicount: 3, nogndcount: 0, stuckcount: 1 })
-    const { getByText } = render(Safety)
-    expect(getByText('3')).toBeInTheDocument()
-    expect(getByText('1')).toBeInTheDocument()
+    const { queryByText } = render(Safety)
+    expect(queryByText('config.safety.faults')).not.toBeInTheDocument()
+    expect(queryByText('config.safety.reset_faults')).not.toBeInTheDocument()
+  })
+
+  it('marks all required checks on even when GFCI self-test is off', () => {
+    // GFCI is optional — it must not drop the all-required-on status.
+    config_store.set({ ...ALL_ON, gfci_check: false })
+    const { getByText, queryByText } = render(Safety)
+    expect(getByText('config.safety.all_on')).toBeInTheDocument()
+    expect(queryByText('config.safety.warning')).not.toBeInTheDocument()
   })
 
   it('saves a check toggle on change', async () => {
     config_store.set({ ...ALL_ON })
-    const { getAllByRole } = render(Safety)
+    const { getByText, getAllByRole } = render(Safety)
+    // Checks card is collapsed by default — expand it to reach the toggles.
+    await fireEvent.click(getByText('config.safety.checks'))
     await fireEvent.click(getAllByRole('switch')[0])
     expect(httpAPI).toHaveBeenCalled()
     const [, , body] = httpAPI.mock.calls[0]
@@ -61,7 +71,8 @@ describe('Safety page', () => {
   it('shows the alert box when a save fails', async () => {
     httpAPI.mockResolvedValue('error')
     config_store.set({ ...ALL_ON })
-    const { getAllByRole } = render(Safety)
+    const { getByText, getAllByRole } = render(Safety)
+    await fireEvent.click(getByText('config.safety.checks'))
     await fireEvent.click(getAllByRole('switch')[0])
     await vi.waitFor(() => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
@@ -69,32 +80,26 @@ describe('Safety page', () => {
   })
 })
 
-describe('Safety page — firmware security', () => {
-  it('hides the heartbeat controls when the device does not report them', () => {
+describe('Safety page — collapsible checks', () => {
+  it('hides the check toggles until the card is expanded', async () => {
     config_store.set({ ...ALL_ON })
+    const { getByText, queryByLabelText, getByLabelText } = render(Safety)
+    expect(queryByLabelText('config.safety.gfci_check')).toBeNull()
+    await fireEvent.click(getByText('config.safety.checks'))
+    expect(getByLabelText('config.safety.gfci_check')).toBeInTheDocument()
+  })
+
+  it('shows the all-checks-on status when every check is on', () => {
+    config_store.set({ ...ALL_ON })
+    const { getByText, queryByText } = render(Safety)
+    expect(getByText('config.safety.all_on')).toBeInTheDocument()
+    expect(queryByText('config.safety.warning')).not.toBeInTheDocument()
+  })
+
+  it('does not render the moved firmware-security controls', () => {
+    config_store.set({ ...ALL_ON, heartbeat_interval: 5, heartbeat_current: 6, boot_lock: true })
     const { queryByText } = render(Safety)
     expect(queryByText('config.security.heartbeat')).not.toBeInTheDocument()
-  })
-
-  it('shows interval + fail-current controls when heartbeat is enabled', () => {
-    config_store.set({ ...ALL_ON, heartbeat_interval: 5, heartbeat_current: 6 })
-    const { getByText } = render(Safety)
-    expect(getByText('config.security.heartbeat_interval')).toBeInTheDocument()
-    expect(getByText('config.security.heartbeat_current')).toBeInTheDocument()
-  })
-
-  it('disabling heartbeat zeroes both interval and fail-current ($SY off)', async () => {
-    httpAPI.mockResolvedValue({ msg: 'done' })
-    config_store.set({ ...ALL_ON, heartbeat_interval: 5, heartbeat_current: 6 })
-    const { getAllByLabelText } = render(Safety)
-    // The heartbeat enable toggle is the one labelled config.security.heartbeat.
-    await fireEvent.click(getAllByLabelText('config.security.heartbeat')[0])
-    await vi.waitFor(() => {
-      const post = httpAPI.mock.calls.find(([m, u]) => m === 'POST' && u === '/config')
-      expect(post).toBeTruthy()
-      const body = JSON.parse(post[2])
-      expect(body.heartbeat_interval).toBe(0)
-      expect(body.heartbeat_current).toBe(0)
-    })
+    expect(queryByText('config.security.boot_lock')).not.toBeInTheDocument()
   })
 })

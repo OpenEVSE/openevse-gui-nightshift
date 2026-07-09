@@ -14,15 +14,14 @@
   import { parseTags, serializeTags, addTag, removeTag } from '../../lib/config/rfid.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
-  import FormField from '../../lib/components/config/FormField.svelte'
-  import Toggle from '../../lib/components/ui/Toggle.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
   import IconButton from '../../lib/components/ui/IconButton.svelte'
   import RfidUserModal from '../../lib/components/config/RfidUserModal.svelte'
 
   const form = createConfigForm()
 
-  let enabled = $derived(!!$config_store?.rfid_enabled)
+  // Reader present on the I2C bus, reported independent of RFID being enabled.
+  let readerPresent = $derived($status_store?.rfid_reader)
   let tags = $derived(parseTags($config_store?.rfid_storage))
   let scanned = $derived($status_store?.rfid_input ?? '')
   let scanWaiting = $derived($uistates_store?.rfid_waiting ?? 0)
@@ -33,10 +32,10 @@
   let editingInitial = $state('')
   let editBusy = $state(false)
 
-  // Pull the user-name map when Labs is on and RFID is enabled. The endpoint
-  // is firmware-side dev work — the store flips error=true if missing.
+  // Pull the user-name map when Labs is on. The endpoint is firmware-side dev
+  // work — the store flips error=true if missing.
   onMount(() => {
-    if (labsOn && enabled) rfid_users_store.download()
+    if (labsOn) rfid_users_store.download()
   })
 
   async function scan() {
@@ -84,17 +83,30 @@
 </script>
 
 <ConfigPage title={$_('config.pages.rfid')}>
-  <ConfigSection>
-    <FormField label={$_('config.rfid.enable')}>
-      <Toggle
-        checked={enabled}
-        label={$_('config.rfid.enable')}
-        onchange={(v) => form.saveField('rfid_enabled', v)}
-      />
-    </FormField>
-  </ConfigSection>
+  <!-- Reader status badge + Charge Manager link (enable lives in Charge Manager) -->
+  <div class="mb-4 flex flex-wrap items-center gap-3">
+    <a
+      href="#/schedule"
+      class="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5
+             text-sm font-semibold text-white transition hover:opacity-90"
+    >
+      + {$_('config.add_in_charge_manager')}
+    </a>
+    {#if readerPresent !== undefined}
+      {#if readerPresent}
+        <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-semibold text-success">
+          <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+          {$_('config.rfid.reader_found')}
+        </span>
+      {:else}
+        <span class="inline-flex items-center gap-1 rounded-full bg-error/15 px-2.5 py-0.5 text-xs font-semibold text-error">
+          <span class="h-1.5 w-1.5 rounded-full bg-error"></span>
+          {$_('config.rfid.no_reader')}
+        </span>
+      {/if}
+    {/if}
+  </div>
 
-  {#if enabled}
     <ConfigSection title={$_('config.rfid.manage')}>
       <div class="flex flex-col items-center gap-2 py-2">
         <Button
@@ -152,7 +164,6 @@
         </div>
       </ConfigSection>
     {/if}
-  {/if}
 </ConfigPage>
 
 {#if labsOn}
