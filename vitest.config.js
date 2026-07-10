@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
 
 export default defineConfig({
-  plugins: [svelte({ hot: !process.env.VITEST })],
+  plugins: [svelte()],
   resolve: {
     conditions: ['browser'],
   },
