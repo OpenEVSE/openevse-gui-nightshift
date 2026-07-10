@@ -9,7 +9,7 @@
 // clock, fixed locale/timezone and animations disabled — so successive runs
 // of an unchanged UI produce identical images.
 
-import { mkdirSync, readdirSync, unlinkSync } from 'node:fs'
+import { mkdirSync, readdirSync, readFileSync, unlinkSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { chromium } from 'playwright'
@@ -17,6 +17,13 @@ import { SHOTS, VIEWPORTS, FROZEN_TIME, TIMEZONE, LOCALE } from './screenshots.c
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = join(root, 'docs', 'screenshots')
+
+// The Firmware page fetches its release list straight from api.github.com,
+// which the mock server doesn't proxy. Unauthenticated CI hits GitHub's rate
+// limit (403) — the app swallows it, but the harness flags any 4xx as a hard
+// failure. Intercept the call and serve a deterministic fixture instead.
+const GITHUB_RELEASES_GLOB = 'https://api.github.com/repos/OpenEVSE/ESP32_WiFi_V4.x/releases*'
+const githubReleasesBody = readFileSync(join(root, 'dev', 'fixtures', 'github-releases.json'), 'utf8')
 
 const onlyArg = process.argv.indexOf('--only')
 const only = onlyArg !== -1 ? process.argv[onlyArg + 1].split(',') : null
@@ -64,6 +71,9 @@ try {
           reducedMotion: 'reduce',
         })
         const page = await context.newPage()
+        await context.route(GITHUB_RELEASES_GLOB, (route) =>
+          route.fulfill({ contentType: 'application/json', body: githubReleasesBody }),
+        )
         const requestErrors = []
         page.on('response', (r) => {
           if (r.status() >= 400) requestErrors.push(`${r.status()} ${r.url()}`)

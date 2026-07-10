@@ -1,0 +1,29 @@
+[
+  {
+    "tag_name": "latest",
+    "name": "Development build",
+    "prerelease": true,
+    "assets": [
+      { "name": "adafruit_featheresp32.bin" },
+      { "name": "openevse_wifi_v1.bin" }
+    ]
+  },
+  {
+    "tag_name": "v8.3.0-RC1",
+    "name": "8.3.0-RC1",
+    "prerelease": true,
+    "assets": [
+      { "name": "adafruit_featheresp32.bin" },
+      { "name": "openevse_wifi_v1.bin" }
+    ]
+  },
+  {
+    "tag_name": "v8.2.4",
+    "name": "8.2.4",
+    "prerelease": false,
+    "assets": [
+      { "name": "adafruit_featheresp32.bin" },
+      { "name": "openevse_wifi_v1.bin" }
+    ]
+  }
+]
