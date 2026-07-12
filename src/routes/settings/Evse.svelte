@@ -31,7 +31,6 @@
     { value: 'true', label: $_('config.evse.threephase_yes') },
   ])
   let serviceOptions = $derived([
-    { value: '0', label: $_('config.evse.service_auto') },
     { value: '1', label: $_('config.evse.service_l1') },
     { value: '2', label: $_('config.evse.service_l2') },
   ])
@@ -156,7 +155,7 @@
     <FormField label={$_('config.evse.service')} status={$ss.service ?? 'idle'}>
       <Select
         options={serviceOptions}
-        value={String($config_store?.service ?? 0)}
+        value={String($config_store?.service || 2)}
         onchange={(v) => form.saveField('service', Number(v))}
       />
     </FormField>
