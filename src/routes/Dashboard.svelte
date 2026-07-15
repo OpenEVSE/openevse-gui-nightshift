@@ -116,21 +116,21 @@
   let loadSharingControlled = $derived(loadSharingEnabled && loadSharingRole === 'member')
   let loadSharingController = $derived($config_store?.loadsharing_controller_host ?? '')
   let loadSharingClaimed = $derived(
-    $claims_target_store?.claims?.charge_current === EvseClients.loadsharing.id,
+    $claims_target_store?.claims?.max_current === EvseClients.shaper.id,
   )
   let loadSharingBadges = $derived({
     active: loadSharingEnabled,
     controlled: loadSharingControlled,
   })
   let loadSharingAssignedLimit = $derived(
-    loadSharingClaimed ? $claims_target_store?.properties?.charge_current ?? null : null,
+    loadSharingClaimed ? $claims_target_store?.properties?.max_current ?? null : null,
   )
   let loadSharingReason = $derived(loadSharingClaimed ? $_('dashboard.loadsharing.reduced') : '')
   let loadSharingSharedCap = $derived(loadSharingAssignedLimit)
   let loadSharingLimited = $derived(
     loadSharingClaimed &&
       Number.isFinite(loadSharingAssignedLimit) &&
-      Number(loadSharingAssignedLimit) > 0 &&
+      Number(loadSharingAssignedLimit) >= 0 &&
       Number(loadSharingAssignedLimit) < Number(maxAmps),
   )
 

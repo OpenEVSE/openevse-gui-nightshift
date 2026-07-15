@@ -26,7 +26,7 @@ function createLoadSharingStore() {
 
   async function addPeer(host) {
     const res = await serialQueue.add(() => httpAPI('POST', '/loadsharing/peers', JSON.stringify({ host })))
-    return res?.msg === 'done'
+    return res?.msg === 'done' || res?.msg === 'already in group'
   }
 
   async function removePeer(host) {

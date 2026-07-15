@@ -31,6 +31,10 @@
     { value: 'controller', label: $_('config.loadsharing.role_controller') },
     { value: 'member', label: $_('config.loadsharing.role_member') },
   ])
+  let failsafeModeOptions = $derived([
+    { value: 'safe_current', label: $_('config.loadsharing.failsafe_safe_current') },
+    { value: 'disable', label: $_('config.loadsharing.failsafe_disable') },
+  ])
 
   let peers = $derived(
     Array.isArray($loadsharing_store?.status?.peers) && $loadsharing_store.status.peers.length > 0
@@ -38,6 +42,7 @@
       : ($loadsharing_store?.peers ?? []),
   )
   let allocations = $derived($loadsharing_store?.status?.allocations ?? [])
+  let runtimeStatus = $derived($loadsharing_store?.status ?? {})
   let hasSafetyFactor = $derived($config_store?.loadsharing_safety_factor !== undefined)
   let hasHeartbeatTimeout = $derived($config_store?.loadsharing_heartbeat_timeout !== undefined)
   let hasFailsafeMode = $derived($config_store?.loadsharing_failsafe_mode !== undefined)
@@ -63,8 +68,8 @@
     controllerHost ? `http://${controllerHost}` : '',
   )
   let memberAssignedLimit = $derived(
-    $claims_target_store?.claims?.charge_current === EvseClients.loadsharing.id
-      ? $claims_target_store?.properties?.charge_current ?? null
+    $claims_target_store?.claims?.max_current === EvseClients.shaper.id
+      ? $claims_target_store?.properties?.max_current ?? null
       : null,
   )
   let memberComms = $derived(
@@ -83,8 +88,22 @@
     return hit?.target_current
   }
 
+  function reasonFor(peer) {
+    const key = peer.id ?? peer.host ?? peer.name
+    const hit = allocations.find((a) => a.id === key || a.id === peer.host || a.id === peer.name)
+    return hit?.reason ?? '—'
+  }
+
   function statusFor(peer) {
-    if (peer?.status?.state !== undefined) return String(peer.status.state)
+    const states = {
+      1: $_('config.loadsharing.state_idle'),
+      2: $_('config.loadsharing.state_connected'),
+      3: $_('config.loadsharing.state_charging'),
+      254: $_('config.loadsharing.state_sleeping'),
+    }
+    if (peer?.status?.state !== undefined) {
+      return states[peer.status.state] ?? $_('config.loadsharing.unknown')
+    }
     if (peer?.joined) return $_('config.loadsharing.joined')
     return $_('config.loadsharing.discovered')
   }
@@ -146,6 +165,7 @@
     <FormField label={$_('config.loadsharing.enable')}>
       <Toggle
         checked={enabled}
+        disabled={isMember}
         label={$_('config.loadsharing.enable')}
         onchange={(v) => form.saveField('loadsharing_enabled', v)}
       />
@@ -153,6 +173,7 @@
   </ConfigSection>
 
   {#if enabled}
+    {#if !isMember}
     <ConfigSection title={$_('config.loadsharing.settings')}>
       <FormField label={$_('config.loadsharing.group_id')} status={$ss.loadsharing_group_id ?? 'idle'}>
         <TextInput
@@ -214,9 +235,9 @@
           label={$_('config.loadsharing.failsafe_mode')}
           status={$ss.loadsharing_failsafe_mode ?? 'idle'}
         >
-          <TextInput
-            value={$config_store?.loadsharing_failsafe_mode ?? ''}
-            revert={form.revert}
+          <Select
+            options={failsafeModeOptions}
+            value={$config_store?.loadsharing_failsafe_mode ?? 'safe_current'}
             onchange={(v) => form.saveField('loadsharing_failsafe_mode', v)}
           />
         </FormField>
@@ -249,6 +270,48 @@
           />
         </FormField>
       {/if}
+      <FormField
+        label={$_('config.loadsharing.priority')}
+        status={$ss.loadsharing_priority ?? 'idle'}
+      >
+        <NumberInput
+          value={$config_store?.loadsharing_priority ?? 0}
+          min={0}
+          step={1}
+          revert={form.revert}
+          onchange={(v) => form.saveField('loadsharing_priority', v)}
+        />
+      </FormField>
+      <FormField
+        label={$_('config.loadsharing.rotation_interval')}
+        status={$ss.loadsharing_rotation_interval ?? 'idle'}
+      >
+        <NumberInput
+          value={$config_store?.loadsharing_rotation_interval ?? 1800}
+          min={0}
+          step={1}
+          revert={form.revert}
+          onchange={(v) => form.saveField('loadsharing_rotation_interval', v)}
+        />
+      </FormField>
+    </ConfigSection>
+    {/if}
+
+    <ConfigSection title={$_('config.loadsharing.runtime_status')}>
+      <ReadOnlyRow
+        label={$_('config.loadsharing.failsafe_active')}
+        value={runtimeStatus.failsafe_active
+          ? $_('config.loadsharing.active')
+          : $_('config.loadsharing.inactive')}
+      />
+      <ReadOnlyRow
+        label={$_('config.loadsharing.online_count')}
+        value={runtimeStatus.online_count ?? '—'}
+      />
+      <ReadOnlyRow
+        label={$_('config.loadsharing.offline_count')}
+        value={runtimeStatus.offline_count ?? '—'}
+      />
     </ConfigSection>
 
     {#if isController}
@@ -289,6 +352,7 @@
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_id')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_online')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_allocated')}</th>
+                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_reason')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_status')}</th>
                   <th class="px-3 py-2 text-right font-medium">{$_('config.loadsharing.actions')}</th>
                 </tr>
@@ -309,6 +373,7 @@
                     <td class="px-3 py-2 text-text">
                       {allocated !== undefined && allocated !== null ? `${allocated} A` : '—'}
                     </td>
+                    <td class="px-3 py-2 text-text">{reasonFor(peer)}</td>
                     <td class="px-3 py-2 text-text">{statusFor(peer)}</td>
                     <td class="px-3 py-2">
                       <div class="flex justify-end gap-1">

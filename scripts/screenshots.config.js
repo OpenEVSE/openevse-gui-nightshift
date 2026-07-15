@@ -53,6 +53,7 @@ const entries = [
   { name: 'settings-vehicle', route: '/settings/vehicle' },
   { name: 'settings-solar', route: '/settings/solar' },
   { name: 'settings-shaper', route: '/settings/shaper' },
+  { name: 'settings-loadsharing', route: '/settings/loadsharing' },
   { name: 'settings-emoncms', route: '/settings/emoncms' },
   { name: 'settings-ohmconnect', route: '/settings/ohmconnect' },
   { name: 'settings-firmware', route: '/settings/firmware' },
