@@ -51,12 +51,16 @@ describe('LoadSharing page', () => {
       loadsharing_failsafe_mode: 'safe_current',
       loadsharing_failsafe_safe_current: 6,
       loadsharing_failsafe_peer_assumed_current: 6,
+      loadsharing_priority: 0,
+      loadsharing_rotation_interval: 1800,
     })
     const { getByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.group_id')).toBeInTheDocument()
     expect(getByText('config.loadsharing.role')).toBeInTheDocument()
     expect(getByText('config.loadsharing.site_max_current')).toBeInTheDocument()
     expect(getByText('config.loadsharing.failsafe_peer_assumed_current')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.priority')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.rotation_interval')).toBeInTheDocument()
   })
 
   it('renders peer management for controller role', async () => {
@@ -97,8 +101,8 @@ describe('LoadSharing page', () => {
       },
     })
     claims_target_store.set({
-      properties: { charge_current: 10 },
-      claims: { state: null, charge_current: EvseClients.loadsharing.id },
+      properties: { max_current: 10 },
+      claims: { state: null, max_current: EvseClients.shaper.id },
     })
     config_store.set({
       loadsharing_enabled: true,
@@ -132,5 +136,6 @@ describe('LoadSharing page', () => {
     expect(getByText('config.loadsharing.controlled_by')).toBeInTheDocument()
     expect(getByText('Main Panel')).toBeInTheDocument()
     expect(queryByText('config.loadsharing.peers')).not.toBeInTheDocument()
+    expect(queryByText('config.loadsharing.group_id')).not.toBeInTheDocument()
   })
 })

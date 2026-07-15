@@ -338,8 +338,8 @@ describe('Dashboard', () => {
       loadsharing_group_max_current: 40,
     })
     claims_target_store.set({
-      properties: { charge_current: 16 },
-      claims: { state: null, charge_current: EvseClients.loadsharing.id },
+      properties: { max_current: 16 },
+      claims: { state: null, max_current: EvseClients.shaper.id },
     })
     status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
     const { getByText, getAllByText } = render(Dashboard)
