@@ -10,7 +10,6 @@
   import { energy_store } from '../lib/stores/energy.js'
   import { uistates_store } from '../lib/stores/uistates.js'
   import { uisettings_store } from '../lib/stores/uisettings.js'
-  import { loadsharing_store } from '../lib/stores/loadsharing.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { EvseClients } from '../lib/vars.js'
@@ -116,30 +115,23 @@
   let loadSharingRole = $derived($config_store?.loadsharing_role ?? '')
   let loadSharingControlled = $derived(loadSharingEnabled && loadSharingRole === 'member')
   let loadSharingController = $derived($config_store?.loadsharing_controller_host ?? '')
+  let loadSharingClaimed = $derived(
+    $claims_target_store?.claims?.charge_current === EvseClients.loadsharing.id,
+  )
   let loadSharingBadges = $derived({
-    active: loadSharingEnabled && !loadSharingControlled,
+    active: loadSharingEnabled,
     controlled: loadSharingControlled,
   })
   let loadSharingAssignedLimit = $derived(
-    $loadsharing_store?.status?.member?.assigned_limit ??
-      $loadsharing_store?.status?.assigned_limit ??
-      null,
+    loadSharingClaimed ? $claims_target_store?.properties?.charge_current ?? null : null,
   )
-  let loadSharingReason = $derived(
-    $loadsharing_store?.status?.member?.reason ??
-      $loadsharing_store?.status?.reason ??
-      '',
-  )
-  let loadSharingSharedCap = $derived(
-    loadSharingAssignedLimit ??
-      $config_store?.loadsharing_group_max_current ??
-      null,
-  )
+  let loadSharingReason = $derived(loadSharingClaimed ? $_('dashboard.loadsharing.reduced') : '')
+  let loadSharingSharedCap = $derived(loadSharingAssignedLimit)
   let loadSharingLimited = $derived(
-    loadSharingEnabled &&
-      Number.isFinite(loadSharingSharedCap) &&
-      Number(loadSharingSharedCap) > 0 &&
-      Number(loadSharingSharedCap) < Number(maxAmps),
+    loadSharingClaimed &&
+      Number.isFinite(loadSharingAssignedLimit) &&
+      Number(loadSharingAssignedLimit) > 0 &&
+      Number(loadSharingAssignedLimit) < Number(maxAmps),
   )
 
   // OCPP/RFID are external authorities that genuinely own the charge — lock the
@@ -449,13 +441,6 @@
     return () => clearInterval(id)
   })
 
-  $effect(() => {
-    if (!loadSharingEnabled) return
-    const tick = () => loadsharing_store.downloadStatus()
-    tick()
-    const id = setInterval(tick, 10000)
-    return () => clearInterval(id)
-  })
 </script>
 
 <section

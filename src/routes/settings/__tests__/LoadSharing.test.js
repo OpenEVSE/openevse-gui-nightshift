@@ -10,7 +10,9 @@ vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.res
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
+import { claims_target_store } from '../../../lib/stores/claims_target.js'
 import { loadsharing_store } from '../../../lib/stores/loadsharing.js'
+import { EvseClients } from '../../../lib/vars.js'
 import LoadSharing from '../LoadSharing.svelte'
 
 beforeEach(() => {
@@ -21,6 +23,12 @@ beforeEach(() => {
     }
     if (method === 'GET' && url === '/loadsharing/status') {
       return Promise.resolve({
+        enabled: true,
+        group_id: 'main',
+        computed_at: 1,
+        failsafe_active: false,
+        online_count: 1,
+        offline_count: 0,
         peers: [{ id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true }],
         allocations: [{ id: 'peer-1', target_current: 12, reason: 'equal_share' }],
       })
@@ -28,6 +36,7 @@ beforeEach(() => {
     return Promise.resolve({ msg: 'done' })
   })
   loadsharing_store.set({ peers: [], status: null })
+  claims_target_store.set({ properties: {}, claims: { state: null, charge_current: null } })
 })
 
 describe('LoadSharing page', () => {
@@ -37,12 +46,17 @@ describe('LoadSharing page', () => {
       loadsharing_role: 'controller',
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
+      loadsharing_safety_factor: 0.9,
+      loadsharing_heartbeat_timeout: 15,
+      loadsharing_failsafe_mode: 'safe_current',
+      loadsharing_failsafe_safe_current: 6,
       loadsharing_failsafe_peer_assumed_current: 6,
     })
     const { getByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.group_id')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.role')).toBeInTheDocument()
     expect(getByText('config.loadsharing.site_max_current')).toBeInTheDocument()
-    expect(getByText('config.loadsharing.min_per_evse_current')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.failsafe_peer_assumed_current')).toBeInTheDocument()
   })
 
   it('renders peer management for controller role', async () => {
@@ -58,6 +72,10 @@ describe('LoadSharing page', () => {
       loadsharing_role: 'controller',
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
+      loadsharing_safety_factor: 0.9,
+      loadsharing_heartbeat_timeout: 15,
+      loadsharing_failsafe_mode: 'safe_current',
+      loadsharing_failsafe_safe_current: 6,
       loadsharing_failsafe_peer_assumed_current: 6,
     })
     const { getByText, queryByText } = render(LoadSharing)
@@ -70,9 +88,17 @@ describe('LoadSharing page', () => {
     loadsharing_store.set({
       peers: [{ id: 'peer-controller', name: 'Main Panel', host: 'controller.local', online: true }],
       status: {
-        controller: { id: 'peer-controller', name: 'Main Panel', url: 'http://controller.local' },
-        member: { assigned_limit: 10, last_command_age: 4, comms_status: 'online' },
+        enabled: true,
+        group_id: 'main',
+        computed_at: 1,
+        failsafe_active: false,
+        online_count: 1,
+        offline_count: 0,
       },
+    })
+    claims_target_store.set({
+      properties: { charge_current: 10 },
+      claims: { state: null, charge_current: EvseClients.loadsharing.id },
     })
     config_store.set({
       loadsharing_enabled: true,
@@ -80,6 +106,10 @@ describe('LoadSharing page', () => {
       loadsharing_controller_host: 'controller.local',
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
+      loadsharing_safety_factor: 0.9,
+      loadsharing_heartbeat_timeout: 15,
+      loadsharing_failsafe_mode: 'safe_current',
+      loadsharing_failsafe_safe_current: 6,
       loadsharing_failsafe_peer_assumed_current: 6,
     })
     httpAPI.mockImplementation((method, url) => {
@@ -88,8 +118,12 @@ describe('LoadSharing page', () => {
       }
       if (method === 'GET' && url === '/loadsharing/status') {
         return Promise.resolve({
-          controller: { id: 'peer-controller', name: 'Main Panel', url: 'http://controller.local' },
-          member: { assigned_limit: 10, last_command_age: 4, comms_status: 'online' },
+          enabled: true,
+          group_id: 'main',
+          computed_at: 1,
+          failsafe_active: false,
+          online_count: 1,
+          offline_count: 0,
         })
       }
       return Promise.resolve({ msg: 'done' })

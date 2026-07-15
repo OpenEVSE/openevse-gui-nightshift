@@ -337,18 +337,16 @@ describe('Dashboard', () => {
       loadsharing_role: 'controller',
       loadsharing_group_max_current: 40,
     })
-    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
-    httpAPI.mockImplementation((method, url) => {
-      if (method === 'GET' && url === '/loadsharing/status') {
-        return Promise.resolve({ member: { assigned_limit: 16, reason: 'equal_share' } })
-      }
-      return Promise.resolve({})
+    claims_target_store.set({
+      properties: { charge_current: 16 },
+      claims: { state: null, charge_current: EvseClients.loadsharing.id },
     })
-    const { getByText } = render(Dashboard)
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
+    const { getByText, getAllByText } = render(Dashboard)
     await vi.waitFor(() => {
       expect(getByText('dashboard.loadsharing.badge_active')).toBeInTheDocument()
       expect(getByText('dashboard.loadsharing.badge_limited')).toBeInTheDocument()
-      expect(getByText('dashboard.loadsharing.reduced')).toBeInTheDocument()
+      expect(getAllByText('dashboard.loadsharing.reduced').length).toBeGreaterThan(0)
     })
   })
 
@@ -360,6 +358,10 @@ describe('Dashboard', () => {
       loadsharing_enabled: true,
       loadsharing_role: 'member',
       loadsharing_controller_host: 'controller.local',
+    })
+    claims_target_store.set({
+      properties: {},
+      claims: { state: null, charge_current: null },
     })
     status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 10 })
     const { getByText } = render(Dashboard)
