@@ -1,15 +1,17 @@
 <!-- src/routes/settings/LoadSharing.svelte -->
 <script>
-  import { onMount } from 'svelte'
   import { _ } from 'svelte-i18n'
   import { config_store } from '../../lib/stores/config.js'
+  import { claims_target_store } from '../../lib/stores/claims_target.js'
   import { loadsharing_store } from '../../lib/stores/loadsharing.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
+  import { EvseClients } from '../../lib/vars.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
   import FormField from '../../lib/components/config/FormField.svelte'
   import ReadOnlyRow from '../../lib/components/config/ReadOnlyRow.svelte'
   import NumberInput from '../../lib/components/ui/NumberInput.svelte'
+  import Select from '../../lib/components/ui/Select.svelte'
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import Toggle from '../../lib/components/ui/Toggle.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
@@ -24,7 +26,11 @@
   let enabled = $derived(!!$config_store?.loadsharing_enabled)
   let role = $derived($config_store?.loadsharing_role ?? '')
   let isMember = $derived(enabled && role === 'member')
-  let isController = $derived(enabled && !isMember)
+  let isController = $derived(enabled && role === 'controller')
+  let roleOptions = $derived([
+    { value: 'controller', label: $_('config.loadsharing.role_controller') },
+    { value: 'member', label: $_('config.loadsharing.role_member') },
+  ])
 
   let peers = $derived(
     Array.isArray($loadsharing_store?.status?.peers) && $loadsharing_store.status.peers.length > 0
@@ -32,52 +38,43 @@
       : ($loadsharing_store?.peers ?? []),
   )
   let allocations = $derived($loadsharing_store?.status?.allocations ?? [])
-
-  let minCurrentField = $derived(
-    $config_store?.loadsharing_min_current_per_evse !== undefined
-      ? 'loadsharing_min_current_per_evse'
-      : $config_store?.loadsharing_min_current !== undefined
-        ? 'loadsharing_min_current'
-        : $config_store?.loadsharing_failsafe_peer_assumed_current !== undefined
-          ? 'loadsharing_failsafe_peer_assumed_current'
-          : 'loadsharing_failsafe_safe_current',
+  let hasSafetyFactor = $derived($config_store?.loadsharing_safety_factor !== undefined)
+  let hasHeartbeatTimeout = $derived($config_store?.loadsharing_heartbeat_timeout !== undefined)
+  let hasFailsafeMode = $derived($config_store?.loadsharing_failsafe_mode !== undefined)
+  let hasFailsafeSafeCurrent = $derived($config_store?.loadsharing_failsafe_safe_current !== undefined)
+  let hasFailsafePeerAssumedCurrent = $derived(
+    $config_store?.loadsharing_failsafe_peer_assumed_current !== undefined,
   )
-  let minCurrentValue = $derived($config_store?.[minCurrentField] ?? null)
 
   let controllerHost = $derived($config_store?.loadsharing_controller_host ?? '')
   let controllerPeer = $derived(
     peers.find((p) => (p.host ?? p.name ?? '').toLowerCase() === controllerHost.toLowerCase()),
   )
   let controllerName = $derived(
-    $loadsharing_store?.status?.controller?.name ??
-      controllerPeer?.name ??
-      controllerHost ??
+    controllerPeer?.name ||
+      controllerHost ||
       $_('config.loadsharing.unknown'),
   )
   let controllerId = $derived(
-    $loadsharing_store?.status?.controller?.id ??
-      controllerPeer?.id ??
-      $loadsharing_store?.status?.controller_id ??
+    controllerPeer?.id ??
       $_('config.loadsharing.unknown'),
   )
   let controllerUrl = $derived(
-    $loadsharing_store?.status?.controller?.url ??
-      (controllerHost ? `http://${controllerHost}` : ''),
+    controllerHost ? `http://${controllerHost}` : '',
   )
   let memberAssignedLimit = $derived(
-    $loadsharing_store?.status?.member?.assigned_limit ??
-      $loadsharing_store?.status?.assigned_limit ??
-      null,
-  )
-  let memberLastCommandAge = $derived(
-    $loadsharing_store?.status?.member?.last_command_age ??
-      $loadsharing_store?.status?.last_command_age ??
-      null,
+    $claims_target_store?.claims?.charge_current === EvseClients.loadsharing.id
+      ? $claims_target_store?.properties?.charge_current ?? null
+      : null,
   )
   let memberComms = $derived(
-    $loadsharing_store?.status?.member?.comms_status ??
-      $loadsharing_store?.status?.comms_status ??
-      (controllerPeer?.online ? $_('config.connected') : $_('config.not_connected')),
+    controllerHost
+      ? controllerPeer?.online === true
+        ? $_('config.connected')
+        : controllerPeer?.online === false
+          ? $_('config.not_connected')
+          : $_('config.loadsharing.unknown')
+      : $_('config.loadsharing.unknown'),
   )
 
   function allocatedFor(peer) {
@@ -136,7 +133,8 @@
     }
   }
 
-  onMount(() => {
+  $effect(() => {
+    if (!enabled) return
     refreshPeers()
     const id = setInterval(refreshPeers, 10000)
     return () => clearInterval(id)
@@ -164,6 +162,13 @@
           onchange={(v) => form.saveField('loadsharing_group_id', v)}
         />
       </FormField>
+      <FormField label={$_('config.loadsharing.role')} status={$ss.loadsharing_role ?? 'idle'}>
+        <Select
+          options={roleOptions}
+          value={role}
+          onchange={(v) => form.saveField('loadsharing_role', v)}
+        />
+      </FormField>
       <FormField
         label={$_('config.loadsharing.site_max_current')}
         status={$ss.loadsharing_group_max_current ?? 'idle'}
@@ -176,18 +181,74 @@
           onchange={(v) => form.saveField('loadsharing_group_max_current', v)}
         />
       </FormField>
-      <FormField
-        label={$_('config.loadsharing.min_per_evse_current')}
-        status={$ss[minCurrentField] ?? 'idle'}
-      >
-        <NumberInput
-          value={minCurrentValue}
-          min={0}
-          step={0.1}
-          revert={form.revert}
-          onchange={(v) => form.saveField(minCurrentField, v)}
-        />
-      </FormField>
+      {#if hasSafetyFactor}
+        <FormField
+          label={$_('config.loadsharing.safety_factor')}
+          status={$ss.loadsharing_safety_factor ?? 'idle'}
+        >
+          <NumberInput
+            value={$config_store?.loadsharing_safety_factor ?? null}
+            min={0}
+            step={0.01}
+            revert={form.revert}
+            onchange={(v) => form.saveField('loadsharing_safety_factor', v)}
+          />
+        </FormField>
+      {/if}
+      {#if hasHeartbeatTimeout}
+        <FormField
+          label={$_('config.loadsharing.heartbeat_timeout')}
+          status={$ss.loadsharing_heartbeat_timeout ?? 'idle'}
+        >
+          <NumberInput
+            value={$config_store?.loadsharing_heartbeat_timeout ?? null}
+            min={0}
+            step={1}
+            revert={form.revert}
+            onchange={(v) => form.saveField('loadsharing_heartbeat_timeout', v)}
+          />
+        </FormField>
+      {/if}
+      {#if hasFailsafeMode}
+        <FormField
+          label={$_('config.loadsharing.failsafe_mode')}
+          status={$ss.loadsharing_failsafe_mode ?? 'idle'}
+        >
+          <TextInput
+            value={$config_store?.loadsharing_failsafe_mode ?? ''}
+            revert={form.revert}
+            onchange={(v) => form.saveField('loadsharing_failsafe_mode', v)}
+          />
+        </FormField>
+      {/if}
+      {#if hasFailsafeSafeCurrent}
+        <FormField
+          label={$_('config.loadsharing.failsafe_safe_current')}
+          status={$ss.loadsharing_failsafe_safe_current ?? 'idle'}
+        >
+          <NumberInput
+            value={$config_store?.loadsharing_failsafe_safe_current ?? null}
+            min={0}
+            step={0.1}
+            revert={form.revert}
+            onchange={(v) => form.saveField('loadsharing_failsafe_safe_current', v)}
+          />
+        </FormField>
+      {/if}
+      {#if hasFailsafePeerAssumedCurrent}
+        <FormField
+          label={$_('config.loadsharing.failsafe_peer_assumed_current')}
+          status={$ss.loadsharing_failsafe_peer_assumed_current ?? 'idle'}
+        >
+          <NumberInput
+            value={$config_store?.loadsharing_failsafe_peer_assumed_current ?? null}
+            min={0}
+            step={0.1}
+            revert={form.revert}
+            onchange={(v) => form.saveField('loadsharing_failsafe_peer_assumed_current', v)}
+          />
+        </FormField>
+      {/if}
     </ConfigSection>
 
     {#if isController}
@@ -275,7 +336,7 @@
           <p class="text-sm text-text-dim">{$_('config.loadsharing.no_peers')}</p>
         {/if}
       </ConfigSection>
-    {:else}
+    {:else if isMember}
       <ConfigSection title={$_('config.loadsharing.controlled_by')}>
         <ReadOnlyRow label={$_('config.loadsharing.controller_name')} value={controllerName} />
         <div class="flex items-center justify-between gap-3 py-2 text-sm">
@@ -295,14 +356,14 @@
         </div>
         <ReadOnlyRow label={$_('config.loadsharing.controller_id')} value={controllerId} />
         <ReadOnlyRow
-          label={$_('config.loadsharing.last_command_age')}
-          value={memberLastCommandAge !== null && memberLastCommandAge !== undefined ? `${memberLastCommandAge}s` : '—'}
-        />
-        <ReadOnlyRow
           label={$_('config.loadsharing.assigned_limit')}
           value={memberAssignedLimit !== null && memberAssignedLimit !== undefined ? `${memberAssignedLimit} A` : '—'}
         />
         <ReadOnlyRow label={$_('config.loadsharing.comms_status')} value={memberComms} />
+      </ConfigSection>
+    {:else}
+      <ConfigSection title={$_('config.loadsharing.settings')}>
+        <p class="text-sm text-text-dim">{$_('config.loadsharing.role_required')}</p>
       </ConfigSection>
     {/if}
   {/if}

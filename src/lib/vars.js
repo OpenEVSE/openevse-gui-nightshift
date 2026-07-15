@@ -10,6 +10,7 @@ export const EvseClients = {
 	rfid:	{ id: 65546, priority: 1030},
 	mqtt: 	{ id: 65547, priority: 500},
 	shaper: { id: 65548, priority: 5000},
+	loadsharing: { id: 0x0001000E, priority: 5000},
 	tempThrottle: { id: 0x0001000D, priority: 10000}
 
 }

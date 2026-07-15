@@ -1,12 +1,13 @@
 import { writable } from 'svelte/store'
 import { httpAPI } from '../api/httpAPI.js'
+import { serialQueue } from '../queue.js'
 
 function createLoadSharingStore() {
   const P = writable({ peers: [], status: null })
   const { subscribe, set, update } = P
 
   async function downloadPeers() {
-    const res = await httpAPI('GET', '/loadsharing/peers')
+    const res = await serialQueue.add(() => httpAPI('GET', '/loadsharing/peers'))
     if (res && res !== 'error' && res.msg !== 'error') {
       update((s) => ({ ...s, peers: Array.isArray(res) ? res : [] }))
       return true
@@ -15,7 +16,7 @@ function createLoadSharingStore() {
   }
 
   async function downloadStatus() {
-    const res = await httpAPI('GET', '/loadsharing/status')
+    const res = await serialQueue.add(() => httpAPI('GET', '/loadsharing/status'))
     if (res && res !== 'error' && res.msg !== 'error') {
       update((s) => ({ ...s, status: res }))
       return true
@@ -24,22 +25,23 @@ function createLoadSharingStore() {
   }
 
   async function addPeer(host) {
-    const res = await httpAPI('POST', '/loadsharing/peers', JSON.stringify({ host }))
+    const res = await serialQueue.add(() => httpAPI('POST', '/loadsharing/peers', JSON.stringify({ host })))
     return res?.msg === 'done'
   }
 
   async function removePeer(host) {
-    const res = await httpAPI('DELETE', `/loadsharing/peers/${encodeURIComponent(host)}`)
+    const res = await serialQueue.add(() => httpAPI('DELETE', `/loadsharing/peers/${encodeURIComponent(host)}`))
     return res?.msg === 'done'
   }
 
   async function discover() {
-    const res = await httpAPI('POST', '/loadsharing/discover')
+    const res = await serialQueue.add(() => httpAPI('POST', '/loadsharing/discover'))
     return res?.msg === 'done'
   }
 
   async function refresh() {
-    const [peersOk, statusOk] = await Promise.all([downloadPeers(), downloadStatus()])
+    const peersOk = await downloadPeers()
+    const statusOk = await downloadStatus()
     return peersOk || statusOk
   }
 
