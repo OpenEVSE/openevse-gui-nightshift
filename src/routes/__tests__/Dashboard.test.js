@@ -51,6 +51,25 @@ describe('Dashboard', () => {
     expect(getByText('dashboard.ring.ready')).toBeInTheDocument()
   })
 
+  it('caps the rate slider at the configured soft max, not the hardware max', async () => {
+    // Settings > Charger sets max_current_soft; the home-page rate control must
+    // honour it rather than letting the user reach the hardware ceiling. The
+    // slider lives in the rate pill's popover, so open it first.
+    config_store.set({ max_current_soft: 32, max_current_hard: 48, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '32')
+  })
+
+  it('falls back to the hardware max for the rate slider when no soft max is set', async () => {
+    config_store.set({ max_current_hard: 40, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '40')
+  })
+
   it('locks the mode pill to the claim owner (RFID)', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     claims_target_store.set({ properties: {}, claims: { state: EvseClients.rfid.id } })

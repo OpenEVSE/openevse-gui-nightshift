@@ -24,4 +24,9 @@ describe('ManagerTab', () => {
     expect(getByText('charge_current')).toBeInTheDocument()
     expect(getByText('32')).toBeInTheDocument()
   })
+  it('shows a priority bubble with the claim priority', () => {
+    const rows = [{ property: 'state', clientId: 65537, value: 'disabled', priority: 1000 }]
+    const { getByText } = render(ManagerTab, { props: { rows } })
+    expect(getByText('monitoring.manager.priority: 1000')).toBeInTheDocument()
+  })
 })

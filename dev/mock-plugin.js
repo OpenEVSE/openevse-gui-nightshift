@@ -7,12 +7,27 @@
  * Activated only when Vite is started with --mode mock (npm run dev:mock).
  */
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+// Deep-merge for scenario overlays: objects merge recursively, everything
+// else (including arrays) replaces the base value.
+function deepMerge(base, overlay) {
+  if (
+    base && overlay
+    && typeof base === 'object' && typeof overlay === 'object'
+    && !Array.isArray(base) && !Array.isArray(overlay)
+  ) {
+    const out = { ...base }
+    for (const key of Object.keys(overlay)) out[key] = deepMerge(base[key], overlay[key])
+    return out
+  }
+  return overlay === undefined ? base : overlay
+}
 
 export function mockPlugin() {
   // Load fixture files lazily (only when mock mode is actually active)
@@ -20,26 +35,55 @@ export function mockPlugin() {
     return readFileSync(join(__dirname, 'fixtures', name), 'utf-8')
   }
 
-  const fixtures = {
-    '/api/status':        loadFixture('status.json'),
-    '/api/schedule':      loadFixture('schedule.json'),
-    '/api/schedule/plan': loadFixture('plan.json'),
-    '/api/config':        loadFixture('config.json'),
-    '/api/override':      loadFixture('override.json'),
-    '/api/claims/target': loadFixture('claims_target.json'),
-    '/api/certificates':  loadFixture('certificates.json'),
-    '/api/energy/raw':    loadFixture('energy_raw.json'),
-    '/api/energy/daily':  loadFixture('energy_daily.json'),
-    '/api/energy/monthly':loadFixture('energy_monthly.json'),
-    '/api/energy/annual': loadFixture('energy_annual.json'),
+  // Base fixtures, keyed by endpoint. Values are parsed objects so a
+  // scenario overlay can deep-merge onto them; the fixture key (used in
+  // scenario files) is the filename stem.
+  const fixtureFiles = {
+    '/api/status':        'status.json',
+    '/api/schedule':      'schedule.json',
+    '/api/schedule/plan': 'plan.json',
+    '/api/config':        'config.json',
+    '/api/override':      'override.json',
+    '/api/claims':        'claims.json',
+    '/api/claims/target': 'claims_target.json',
+    '/api/certificates':  'certificates.json',
+    '/api/energy/raw':    'energy_raw.json',
+    '/api/energy/daily':  'energy_daily.json',
+    '/api/energy/monthly':'energy_monthly.json',
+    '/api/energy/annual': 'energy_annual.json',
   }
+  const baseFixtures = {}
+  const fixtureKeyByUrl = {}
+  for (const [url, file] of Object.entries(fixtureFiles)) {
+    baseFixtures[url] = JSON.parse(loadFixture(file))
+    fixtureKeyByUrl[url] = file.replace(/\.json$/, '')
+  }
+
+  // Named scenario overlay, loaded from fixtures/scenarios/<name>.json.
+  // A scenario file is keyed by fixture stem (status, config, schedule, ...)
+  // with partial objects deep-merged over the base fixture. Switch at runtime
+  // with GET /api/_mock/scenario/<name> ("reset" clears). Used by the
+  // screenshot runner and handy for manual dev.
+  let scenario = null
+
+  function effectiveFixture(url) {
+    const base = baseFixtures[url]
+    const overlay = scenario?.[fixtureKeyByUrl[url]]
+    return overlay ? deepMerge(base, overlay) : base
+  }
+
+  // Static mode (MOCK_STATIC=1): no periodic WebSocket ticks and a frozen
+  // server-side clock, so every request is deterministic. The screenshot
+  // runner sets this so captured images are reproducible run-to-run.
+  const staticMode = process.env.MOCK_STATIC === '1'
+  const FROZEN_TIME_MS = Date.parse(
+    JSON.parse(loadFixture('status.json')).time ?? '2026-05-21T22:00:30Z',
+  )
+  const nowMs = () => (staticMode ? FROZEN_TIME_MS : Date.now())
 
   // In-memory state for endpoints that mutate. Seeded once per dev-server
   // run; reset by restarting the server.
   const rfidUsers = JSON.parse(loadFixture('rfid_users.json'))
-
-  // Base status object for WebSocket messages
-  const baseStatus = JSON.parse(fixtures['/api/status'])
 
   // Dev-only runtime state override. Lets the resting/charging layouts be
   // previewed without a real device: GET /api/_mock/state/<code> flips it
@@ -53,14 +97,15 @@ export function mockPlugin() {
   // derived mode coherent with the previewed state: Off only for the dedicated
   // off code (255), Auto otherwise (so 254 -> sleeping). Bumping claimsVersion
   // makes DataManager re-download claims/target live over the WebSocket.
-  const claimsOff = JSON.parse(fixtures['/api/claims/target'])
+  const claimsOff = baseFixtures['/api/claims/target']
   const claimsAuto = { properties: {}, claims: { state: null, charge_current: null } }
   let claimsState = claimsOff
-  let claimsVersion = baseStatus.claims_version ?? 1
+  let claimsVersion = baseFixtures['/api/status'].claims_version ?? 1
 
   function buildStatusMessage(tickCount) {
     // Mirror the device's real status shape; nudge only genuine live fields
     // so the connection looks alive without inventing nonexistent keys.
+    const baseStatus = effectiveFixture('/api/status')
     const state = stateOverride == null ? baseStatus.state : stateOverride
     const charging = state === 3
     return JSON.stringify({
@@ -93,13 +138,38 @@ export function mockPlugin() {
 
         const url = req.url?.split('?')[0] // strip query string
 
+        // Dev-only scenario switcher: overlay fixtures/scenarios/<name>.json
+        // onto the base fixtures and push a fresh status frame to every open
+        // tab ("reset" clears the overlay).
+        if (url && url.startsWith('/api/_mock/scenario/')) {
+          const name = url.slice('/api/_mock/scenario/'.length)
+          if (name === 'reset') {
+            scenario = null
+          } else {
+            const file = join(__dirname, 'fixtures', 'scenarios', name + '.json')
+            if (!/^[\w-]+$/.test(name) || !existsSync(file)) {
+              res.writeHead(404, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'unknown scenario: ' + name }))
+              return
+            }
+            scenario = JSON.parse(readFileSync(file, 'utf-8'))
+          }
+          const msg = buildStatusMessage(tickCount)
+          for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ scenario: name === 'reset' ? null : name }))
+          return
+        }
+
         // Dev-only runtime state switcher: flip the dashboard's EVSE state and
         // push the new frame to every open tab immediately (no restart).
         if (url && url.startsWith('/api/_mock/state/')) {
           const raw = url.slice('/api/_mock/state/'.length)
           stateOverride = raw === 'reset' ? null : Number(raw)
           // Keep the derived mode coherent: Off only for the explicit off code.
-          const effectiveState = stateOverride == null ? baseStatus.state : stateOverride
+          const effectiveState = stateOverride == null
+            ? effectiveFixture('/api/status').state
+            : stateOverride
           const nextClaims = effectiveState === 255 ? claimsOff : claimsAuto
           if (nextClaims !== claimsState) {
             claimsState = nextClaims
@@ -124,11 +194,11 @@ export function mockPlugin() {
             return
           }
           // GET: return a plausible NTP status snapshot
-          const nowSec = Math.floor(Date.now() / 1000)
+          const nowSec = Math.floor(nowMs() / 1000)
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({
             sntp_enabled: true,
-            time: new Date().toISOString(),
+            time: new Date(nowMs()).toISOString(),
             time_zone: 'Europe/London|GMT0BST,M3.5.0/1,M10.5.0',
             ntp_status: 'synchronized',
             ntp_last_sync: nowSec - 312,        // 5m 12s ago
@@ -270,9 +340,9 @@ export function mockPlugin() {
           return
         }
 
-        if (url && Object.prototype.hasOwnProperty.call(fixtures, url)) {
+        if (url && Object.prototype.hasOwnProperty.call(baseFixtures, url)) {
           res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(fixtures[url])
+          res.end(JSON.stringify(effectiveFixture(url)))
           return
         }
 
@@ -302,8 +372,9 @@ export function mockPlugin() {
         // Send an initial status message immediately
         ws.send(buildStatusMessage(tickCount))
 
-        // Then send a live update every 2 seconds
-        const interval = setInterval(() => {
+        // Then send a live update every 2 seconds — unless static mode is on,
+        // where nothing may change between frames (deterministic screenshots).
+        const interval = staticMode ? null : setInterval(() => {
           tickCount++
           if (ws.readyState === ws.OPEN) {
             ws.send(buildStatusMessage(tickCount))

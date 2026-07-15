@@ -1,5 +1,6 @@
 import Dashboard from '../routes/Dashboard.svelte'
 import Schedule from '../routes/Schedule.svelte'
+import ChargeManager from '../routes/ChargeManager.svelte'
 import Monitoring from '../routes/Monitoring.svelte'
 import History from '../routes/History.svelte'
 import Settings from '../routes/Settings.svelte'
@@ -28,7 +29,8 @@ import About from '../routes/settings/About.svelte'
 
 export const routes = {
   '/': Dashboard,
-  '/schedule': Schedule,
+  '/schedule': ChargeManager,
+  '/schedule/legacy': Schedule,
   '/monitoring': Monitoring,
   '/history': History,
   '/settings': Settings,

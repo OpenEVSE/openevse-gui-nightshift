@@ -152,14 +152,15 @@ describe('homeBatteryMetrics / showHomeBattery', () => {
 })
 
 describe('claimRows', () => {
-  it('maps each claim key to property / clientId / value', () => {
+  it('maps each claim to property / clientId / value / priority, sorted by priority desc', () => {
     const rows = claimRows({
-      claims: { state: 65537, charge_current: 65538 },
-      properties: { state: 'disabled', charge_current: 32 },
+      // divert (65538, priority 50) listed first but must sort below manual (65537, priority 1000)
+      claims: { charge_current: 65538, state: 65537 },
+      properties: { charge_current: 32, state: 'disabled' },
     })
     expect(rows).toEqual([
-      { property: 'state', clientId: 65537, value: 'disabled' },
-      { property: 'charge_current', clientId: 65538, value: 32 },
+      { property: 'state', clientId: 65537, value: 'disabled', priority: 1000 },
+      { property: 'charge_current', clientId: 65538, value: 32, priority: 50 },
     ])
   })
   it('returns an empty array for missing input', () => {
