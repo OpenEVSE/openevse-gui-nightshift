@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render } from '@testing-library/svelte'
+import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
@@ -84,7 +84,7 @@ describe('LoadSharing page', () => {
     })
     const { getByText, queryByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.peers')).toBeInTheDocument()
-    expect(getByText('Garage')).toBeInTheDocument()
+    expect(getByText('garage.local')).toBeInTheDocument()
     expect(queryByText('config.loadsharing.controlled_by')).not.toBeInTheDocument()
   })
 
@@ -137,5 +137,66 @@ describe('LoadSharing page', () => {
     expect(getByText('Main Panel')).toBeInTheDocument()
     expect(queryByText('config.loadsharing.peers')).not.toBeInTheDocument()
     expect(queryByText('config.loadsharing.group_id')).not.toBeInTheDocument()
+  })
+
+  it('allows adding discovered peers from the peers list', async () => {
+    loadsharing_store.set({
+      peers: [{ id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false }],
+      status: {
+        peers: [{ id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false }],
+        allocations: [],
+      },
+    })
+    config_store.set({
+      loadsharing_enabled: true,
+      loadsharing_role: 'controller',
+      loadsharing_group_id: 'main',
+      loadsharing_group_max_current: 50,
+      loadsharing_safety_factor: 0.9,
+    })
+
+    const addPeerSpy = vi.spyOn(loadsharing_store, 'addPeer').mockResolvedValue(true)
+    const refreshSpy = vi.spyOn(loadsharing_store, 'refresh').mockResolvedValue(true)
+
+    const { getByLabelText } = render(LoadSharing)
+    const addButton = getByLabelText('config.loadsharing.add_peer')
+    expect(addButton).toBeInTheDocument()
+
+    await fireEvent.click(addButton)
+
+    expect(addPeerSpy).toHaveBeenCalledWith('yard.local')
+    expect(refreshSpy).toHaveBeenCalled()
+  })
+
+  it('shows peer details in a modal when clicking the details info button', async () => {
+    loadsharing_store.set({
+      peers: [{ id: 'peer-details-1', name: 'Secret Garden', host: 'secret.local', online: true, joined: true }],
+      status: {
+        peers: [{ id: 'peer-details-1', name: 'Secret Garden', host: 'secret.local', online: true, joined: true }],
+        allocations: [{ id: 'peer-details-1', target_current: 16, reason: 'high_priority' }],
+      },
+    })
+    config_store.set({
+      loadsharing_enabled: true,
+      loadsharing_role: 'controller',
+      loadsharing_group_id: 'main',
+      loadsharing_group_max_current: 50,
+      loadsharing_safety_factor: 1.0,
+    })
+
+    const { getByLabelText, getByText, queryByText } = render(LoadSharing)
+    const detailsButton = getByLabelText('config.loadsharing.peer_details')
+    expect(detailsButton).toBeInTheDocument()
+
+    // Initially modal content should not be present (or closed)
+    expect(queryByText('Secret Garden')).not.toBeInTheDocument()
+
+    // Trigger details modal
+    await fireEvent.click(detailsButton)
+
+    // Now it should be visible showing the detailed fields
+    expect(getByText('Secret Garden')).toBeInTheDocument()
+    expect(getByText('peer-details-1')).toBeInTheDocument()
+    expect(getByText('16 A')).toBeInTheDocument()
   })
 })

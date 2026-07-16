@@ -427,6 +427,8 @@
       "state_connected": "Connected",
       "state_charging": "Charging",
       "state_sleeping": "Sleeping",
+      "peer_details": "Peer Details",
+      "close": "Close",
       "unknown": "Unknown"
     },
     "emoncms": {
