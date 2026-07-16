@@ -21,7 +21,7 @@
   } = $props()
 
   // The device stores/streams every temperature in °C — only the *labels* here
-  // follow the user's uisettings.temp_unit preference. The slider itself keeps
+  // follow the device temp_unit config. The slider itself keeps
   // working in °C (setpoints, bounds, commit callbacks), so only the displayed
   // numbers are converted.
   let isF = $derived(unit === 'f')

@@ -75,7 +75,7 @@
   let maxKw = $derived((maxPowerW($status_store, $config_store) / 1000).toFixed(1))
 
   let tempDisplay = $derived(
-    formatTemp(temp_round($status_store?.temp), $uisettings_store?.temp_unit),
+    formatTemp(temp_round($status_store?.temp), $config_store?.temp_unit ?? 'c'),
   )
   let live = $derived({
     sessionKwh: (($status_store?.session_energy ?? 0) / 1000).toFixed(2),
