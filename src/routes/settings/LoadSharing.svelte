@@ -16,12 +16,14 @@
   import Toggle from '../../lib/components/ui/Toggle.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
   import IconButton from '../../lib/components/ui/IconButton.svelte'
+  import Modal from '../../lib/components/ui/Modal.svelte'
 
   const form = createConfigForm()
   const ss = form.saveState
 
   let peerHost = $state('')
   let peersBusy = $state(false)
+  let detailsPeer = $state(null)
 
   let enabled = $derived(!!$config_store?.loadsharing_enabled)
   let role = $derived($config_store?.loadsharing_role ?? '')
@@ -117,14 +119,16 @@
     }
   }
 
-  async function addPeer() {
-    const host = (peerHost ?? '').trim()
-    if (!host) return
+  async function addPeer(host) {
+    const targetHost = (typeof host === 'string' ? host : peerHost ?? '').trim()
+    if (!targetHost) return
     peersBusy = true
     try {
-      const ok = await loadsharing_store.addPeer(host)
+      const ok = await loadsharing_store.addPeer(targetHost)
       if (ok) {
-        peerHost = ''
+        if (targetHost === peerHost) {
+          peerHost = ''
+        }
         await loadsharing_store.refresh()
       }
     } finally {
@@ -326,7 +330,7 @@
           <Button
             label={$_('config.loadsharing.add_peer')}
             disabled={peersBusy || !peerHost.trim()}
-            onclick={addPeer}
+            onclick={() => addPeer()}
           />
           <Button
             label={$_('config.loadsharing.discover')}
@@ -347,12 +351,8 @@
             <table class="w-full text-sm">
               <thead>
                 <tr class="bg-surface-3 text-text-dim">
-                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_name')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_host')}</th>
-                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_id')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_online')}</th>
-                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_allocated')}</th>
-                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_reason')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_status')}</th>
                   <th class="px-3 py-2 text-right font-medium">{$_('config.loadsharing.actions')}</th>
                 </tr>
@@ -360,23 +360,21 @@
               <tbody>
                 {#each peers as peer}
                   {@const host = peer.host ?? peer.ip ?? peer.name ?? ''}
-                  {@const allocated = allocatedFor(peer)}
                   <tr class="border-t border-border">
-                    <td class="px-3 py-2 font-medium text-text">{peer.name ?? '—'}</td>
                     <td class="px-3 py-2 text-text">{host || '—'}</td>
-                    <td class="px-3 py-2 text-text">{peer.id ?? '—'}</td>
                     <td class="px-3 py-2">
                       <span class={peer.online ? 'text-accent' : 'text-text-dim'}>
                         {peer.online ? $_('config.connected') : $_('config.not_connected')}
                       </span>
                     </td>
-                    <td class="px-3 py-2 text-text">
-                      {allocated !== undefined && allocated !== null ? `${allocated} A` : '—'}
-                    </td>
-                    <td class="px-3 py-2 text-text">{reasonFor(peer)}</td>
                     <td class="px-3 py-2 text-text">{statusFor(peer)}</td>
                     <td class="px-3 py-2">
                       <div class="flex justify-end gap-1">
+                        <IconButton
+                          icon="mdi:information-outline"
+                          label={$_('config.loadsharing.peer_details')}
+                          onclick={() => (detailsPeer = peer)}
+                        />
                         {#if host}
                           <a href={`http://${host}`} target="_blank" rel="noopener noreferrer">
                             <IconButton icon="mdi:open-in-new" label={$_('config.loadsharing.test_peer')} />
@@ -388,6 +386,13 @@
                             label={$_('config.loadsharing.remove_peer')}
                             disabled={peersBusy}
                             onclick={() => removePeer(host)}
+                          />
+                        {:else}
+                          <IconButton
+                            icon="mdi:plus"
+                            label={$_('config.loadsharing.add_peer')}
+                            disabled={peersBusy}
+                            onclick={() => addPeer(host)}
                           />
                         {/if}
                       </div>
@@ -432,4 +437,34 @@
       </ConfigSection>
     {/if}
   {/if}
+
+  <Modal visible={!!detailsPeer} closable={true} onclose={() => (detailsPeer = null)}>
+    {#if detailsPeer}
+      {@const host = detailsPeer.host ?? detailsPeer.ip ?? detailsPeer.name ?? ''}
+      {@const allocated = allocatedFor(detailsPeer)}
+      <div class="p-4">
+        <h2 class="mb-4 text-base font-semibold text-text">
+          {$_('config.loadsharing.peer_details')}
+        </h2>
+        <div class="divide-y divide-border/40">
+          <ReadOnlyRow label={$_('config.loadsharing.peer_name')} value={detailsPeer.name} />
+          <ReadOnlyRow label={$_('config.loadsharing.peer_host')} value={host} />
+          <ReadOnlyRow label={$_('config.loadsharing.peer_id')} value={detailsPeer.id} />
+          <ReadOnlyRow
+            label={$_('config.loadsharing.peer_online')}
+            value={detailsPeer.online ? $_('config.connected') : $_('config.not_connected')}
+          />
+          <ReadOnlyRow
+            label={$_('config.loadsharing.peer_allocated')}
+            value={allocated !== undefined && allocated !== null ? `${allocated} A` : '—'}
+          />
+          <ReadOnlyRow label={$_('config.loadsharing.peer_reason')} value={reasonFor(detailsPeer)} />
+          <ReadOnlyRow label={$_('config.loadsharing.peer_status')} value={statusFor(detailsPeer)} />
+        </div>
+        <div class="mt-5 flex justify-end">
+          <Button label={$_('config.loadsharing.close')} onclick={() => (detailsPeer = null)} />
+        </div>
+      </div>
+    {/if}
+  </Modal>
 </ConfigPage>
