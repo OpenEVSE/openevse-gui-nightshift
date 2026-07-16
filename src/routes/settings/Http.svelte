@@ -40,10 +40,6 @@
     { value: 'f', label: $_('config.http.temp_fahrenheit') },
   ])
 
-  function setTempUnit(unit) {
-    uisettings_store.update((s) => ({ ...s, temp_unit: unit }))
-  }
-
   function setEnergyRate(rate) {
     uisettings_store.update((s) => ({ ...s, energy_rate: rate ?? 0 }))
   }
@@ -98,12 +94,12 @@
         onchange={(v) => form.saveField('lang', v)}
       />
     </FormField>
-    <!-- Local-only preference — not synced to the device. -->
-    <FormField label={$_('config.http.temp_unit')}>
+    <!-- Device-wide setting: the on-device display reads the same temp_unit. -->
+    <FormField label={$_('config.http.temp_unit')} status={$ss.temp_unit ?? 'idle'}>
       <SegmentedControl
         options={tempUnitOptions}
-        value={$uisettings_store?.temp_unit ?? 'c'}
-        onchange={setTempUnit}
+        value={$config_store?.temp_unit ?? 'c'}
+        onchange={(v) => form.saveField('temp_unit', v)}
       />
     </FormField>
     <!-- Local-only tariff — used to show cost on Dashboard + History.

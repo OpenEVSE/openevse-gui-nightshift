@@ -4,7 +4,6 @@
   import { status_store } from '../lib/stores/status.js'
   import { config_store } from '../lib/stores/config.js'
   import { uistates_store } from '../lib/stores/uistates.js'
-  import { uisettings_store } from '../lib/stores/uisettings.js'
   import {
     energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
     showVehicle, homeBatteryMetrics, showHomeBattery, safetyData,
@@ -36,7 +35,7 @@
 
   let groups = $derived([
     { group: energyMetrics($status_store), expanded: true },
-    { group: sensorMetrics($status_store, $config_store, { tempUnit: $uisettings_store?.temp_unit }), expanded: desktop },
+    { group: sensorMetrics($status_store, $config_store, { tempUnit: $config_store?.temp_unit ?? 'c' }), expanded: desktop },
     ...(showVehicle($status_store, $config_store)
       ? [{ group: vehicleMetrics($status_store, $config_store), expanded: desktop }]
       : []),

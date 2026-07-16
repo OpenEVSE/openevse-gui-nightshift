@@ -31,7 +31,7 @@
   let rows = $derived(
     (Array.isArray($history_store) ? $history_store : []).map((e) => {
       const state = logStateInfo(e.evseState)
-      const t = formatTemp(logTempC(e), $uisettings_store?.temp_unit)
+      const t = formatTemp(logTempC(e), $config_store?.temp_unit ?? 'c')
       const kWh = logEnergyKwh(e)
       return {
         stateIcon: state.icon,
