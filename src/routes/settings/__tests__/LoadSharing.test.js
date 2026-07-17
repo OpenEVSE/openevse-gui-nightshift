@@ -85,6 +85,8 @@ describe('LoadSharing page', () => {
     const { getByText, queryByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.peers')).toBeInTheDocument()
     expect(getByText('garage.local')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.peer_online_value')).toBeInTheDocument()
+    expect(queryByText('config.connected')).not.toBeInTheDocument()
     expect(queryByText('config.loadsharing.controlled_by')).not.toBeInTheDocument()
   })
 
