@@ -364,7 +364,9 @@
                     <td class="px-3 py-2 text-text">{host || '—'}</td>
                     <td class="px-3 py-2">
                       <span class={peer.online ? 'text-accent' : 'text-text-dim'}>
-                        {peer.online ? $_('config.connected') : $_('config.not_connected')}
+                        {peer.online
+                          ? $_('config.loadsharing.peer_online_value')
+                          : $_('config.loadsharing.peer_offline_value')}
                       </span>
                     </td>
                     <td class="px-3 py-2 text-text">{statusFor(peer)}</td>

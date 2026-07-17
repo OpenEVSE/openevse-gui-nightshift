@@ -409,6 +409,8 @@
       "peer_host": "Host/IP",
       "peer_id": "Device ID",
       "peer_online": "Online",
+      "peer_online_value": "Online",
+      "peer_offline_value": "Offline",
       "peer_allocated": "Allocated",
       "peer_reason": "Reason",
       "peer_status": "Status",
