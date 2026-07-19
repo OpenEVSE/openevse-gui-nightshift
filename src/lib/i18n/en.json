@@ -520,7 +520,8 @@
       "knowledge_base": "Knowledge base",
       "guides": "Guides",
       "discord": "Community support on Discord"
-    }
+    },
+    "logout": "Sign out"
   },
   "nav": {
     "home": "Home",
@@ -924,6 +925,12 @@
       "address_label": "Address",
       "copied": "Copied to clipboard.",
       "dismiss": "Got it"
+    },
+    "security": {
+      "title": "Password",
+      "intro": "Protect the web interface with a password. Recommended if your network is shared. You can also set this later in Settings.",
+      "username_placeholder": "e.g. admin",
+      "skip_hint": "Leave both blank to skip — the charger stays open on your trusted network."
     }
   },
   "login": {

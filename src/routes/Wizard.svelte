@@ -20,9 +20,10 @@
   import EvseBasics from '../lib/components/wizard/steps/EvseBasics.svelte'
   import Wifi from '../lib/components/wizard/steps/Wifi.svelte'
   import TimeStep from '../lib/components/wizard/steps/TimeStep.svelte'
+  import Security from '../lib/components/wizard/steps/Security.svelte'
   import FirmwareInfo from '../lib/components/wizard/steps/FirmwareInfo.svelte'
 
-  const STEPS = ['welcome', 'evse', 'wifi', 'time', 'firmware']
+  const STEPS = ['welcome', 'evse', 'wifi', 'time', 'security', 'firmware']
   const TOTAL = STEPS.length
 
   let step = $state(0)
@@ -110,6 +111,8 @@
   {:else if step === 3}
     <TimeStep />
   {:else if step === 4}
+    <Security />
+  {:else if step === 5}
     <FirmwareInfo />
   {/if}
 </WizardShell>

@@ -5,8 +5,26 @@
   import Icon from '../lib/icons/Icon.svelte'
   import { pagesBySection } from '../lib/config/pages.js'
   import { config_store } from '../lib/stores/config.js'
+  import { redirect } from '../lib/router.js'
 
   let groups = $derived(pagesBySection($config_store))
+
+  // Auth is "on" when both credentials are set (same test as the HTTP page).
+  // Only then is there a session to sign out of.
+  let authOn = $derived(
+    !!($config_store?.www_username && $config_store?.www_password),
+  )
+
+  async function logout() {
+    try {
+      await fetch((import.meta.env.DEV ? '/api' : '') + '/logout', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'OpenEVSE' },
+      })
+    } finally {
+      redirect('/login')
+    }
+  }
 
   const supportLinks = [
     {
@@ -74,5 +92,17 @@
         {/each}
       </ul>
     </Card>
+
+    {#if authOn}
+      <Card class="mb-4 p-4 lg:col-span-2">
+        <button
+          onclick={logout}
+          class="flex w-full items-center gap-3 py-1 text-text hover:text-accent"
+        >
+          <Icon icon="mdi:logout" size={20} class="text-text-dim" />
+          <span class="flex-1 text-left text-sm">{$_('config.logout')}</span>
+        </button>
+      </Card>
+    {/if}
   </div>
 </section>
