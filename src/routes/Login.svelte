@@ -64,6 +64,12 @@
     <form
       onsubmit={(e) => {
         e.preventDefault()
+        // TextInput/PasswordInput commit their value on blur (change event),
+        // so blur the focused field first — otherwise Enter can submit before
+        // the last-typed field registers. blur() dispatches change synchronously.
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur()
+        }
         submit()
       }}
       class="flex flex-col gap-3"
