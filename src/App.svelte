@@ -5,6 +5,8 @@
   import Loader from './lib/components/ui/Loader.svelte'
   import AppShell from './lib/components/shell/AppShell.svelte'
   import Wizard from './routes/Wizard.svelte'
+  import Login from './routes/Login.svelte'
+  import { currentPath } from './lib/router.js'
   import AlertBox from './lib/components/ui/AlertBox.svelte'
   import FetchData from './lib/data/FetchData.svelte'
   import WebSocket from './lib/data/WebSocket.svelte'
@@ -25,6 +27,11 @@
 {#if $isLoading}
   <!-- Wait for the i18n catalog before rendering anything that uses $_ -->
   <Loader {progress} />
+{:else if $currentPath === '/login'}
+  <!-- Rendered standalone: a 401 blocks the config fetch, so this must sit
+       above the load/wizard gate or an unauthenticated user would land on
+       the wizard instead of the login page. -->
+  <Login />
 {:else if !loaded}
   <Loader {progress} />
   <FetchData

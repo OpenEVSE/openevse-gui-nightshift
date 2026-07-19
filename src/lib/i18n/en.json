@@ -700,14 +700,20 @@
       "temp": "Temp",
       "pilot": "Pilot"
     },
-    "summary": { "today": "Today", "total": "Total" },
+    "summary": {
+      "today": "Today",
+      "total": "Total"
+    },
     "mode": {
       "auto": "Auto",
       "on": "On",
       "off": "Off",
       "aria": "Charge mode"
     },
-    "rate": { "claimed": "Set by {client}", "aria": "Charge rate" },
+    "rate": {
+      "claimed": "Set by {client}",
+      "aria": "Charge rate"
+    },
     "vehicle": {
       "to_full": "{time} to full",
       "vehicle_limit": "vehicle limit {value}",
@@ -749,7 +755,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Data", "energy": "Energy", "safety": "Safety", "manager": "Manager" },
+    "tab": {
+      "data": "Data",
+      "energy": "Energy",
+      "safety": "Safety",
+      "manager": "Manager"
+    },
     "group": {
       "energy": "Energy delivered",
       "sensors": "Sensors",
@@ -776,7 +787,11 @@
       "loading": "Loading…",
       "error": "Failed to load energy data",
       "no_samples": "No samples recorded yet",
-      "axis": { "current": "Current (A)", "temperature": "Temperature (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Current (A)",
+        "temperature": "Temperature (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Pilot",
@@ -910,5 +925,16 @@
       "copied": "Copied to clipboard.",
       "dismiss": "Got it"
     }
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter your OpenEVSE credentials",
+    "username": "Username",
+    "password": "Password",
+    "remember": "Remember me",
+    "submit": "Sign in",
+    "invalid": "Incorrect username or password.",
+    "locked": "Too many attempts. Please wait a moment and try again.",
+    "error": "Could not reach the charger. Try again."
   }
 }
