@@ -82,19 +82,17 @@
       }}
       class="flex flex-col gap-3"
     >
-      <label class="text-sm text-text-dim" for="login-user">
-        {$_('login.username')}
-      </label>
       <TextInput
         value={user}
         placeholder={$_('login.username')}
         onchange={(v) => (user = v)}
       />
 
-      <label class="text-sm text-text-dim" for="login-pass">
-        {$_('login.password')}
-      </label>
-      <PasswordInput value={pass} onchange={(v) => (pass = v)} />
+      <PasswordInput
+        value={pass}
+        placeholder={$_('login.password')}
+        onchange={(v) => (pass = v)}
+      />
 
       <label class="mt-1 flex items-center gap-2 text-sm text-text">
         <Toggle
