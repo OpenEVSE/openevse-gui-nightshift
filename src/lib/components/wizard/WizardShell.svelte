@@ -20,6 +20,10 @@
     total = 5,
     title = '',
     canAdvance = true,
+    // Hide the Next/Finish button when the step owns its own terminal action
+    // (the WiFi step: connecting joins the network and ends the session, so a
+    // separate Finish button would be redundant and could strand the user).
+    hideAdvance = false,
     onPrev = () => {},
     onNext = () => {},
     onFinish = () => {},
@@ -79,21 +83,23 @@
       </button>
     {/if}
     <div class="flex-1"></div>
-    {#if isLast}
-      <div class="min-w-[120px]">
-        <Button label={$_('wizard.finish')} onclick={onFinish} disabled={!canAdvance} />
-      </div>
-    {:else}
-      <button
-        type="button"
-        onclick={onNext}
-        disabled={!canAdvance}
-        class="flex items-center gap-1 rounded-2xl bg-accent px-4 py-3 text-sm font-semibold text-surface
-               disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {$_('wizard.next')}
-        <Icon icon="mdi:chevron-right" size={16} />
-      </button>
+    {#if !hideAdvance}
+      {#if isLast}
+        <div class="min-w-[120px]">
+          <Button label={$_('wizard.finish')} onclick={onFinish} disabled={!canAdvance} />
+        </div>
+      {:else}
+        <button
+          type="button"
+          onclick={onNext}
+          disabled={!canAdvance}
+          class="flex items-center gap-1 rounded-2xl bg-accent px-4 py-3 text-sm font-semibold text-surface
+                 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {$_('wizard.next')}
+          <Icon icon="mdi:chevron-right" size={16} />
+        </button>
+      {/if}
     {/if}
   </footer>
 </div>

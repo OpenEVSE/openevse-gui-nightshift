@@ -23,7 +23,12 @@
   import Security from '../lib/components/wizard/steps/Security.svelte'
   import FirmwareInfo from '../lib/components/wizard/steps/FirmwareInfo.svelte'
 
-  const STEPS = ['welcome', 'evse', 'wifi', 'time', 'security', 'firmware']
+  // WiFi is provisioned LAST on purpose: joining the network makes the ESP32's
+  // softAP hop to the router's channel, which drops a phone/laptop that set the
+  // device up over that AP. Doing every other step first (all reachable on the
+  // AP) and connecting WiFi as the final action means the single network hand-
+  // off happens once, at the end, where it's expected.
+  const STEPS = ['welcome', 'evse', 'time', 'security', 'firmware', 'wifi']
   const TOTAL = STEPS.length
 
   let step = $state(0)
@@ -68,6 +73,21 @@
     return $status_store?.ipaddress === '192.168.4.1'
   }
 
+  // Persist the "setup done" flag. Called by the WiFi step BEFORE it joins the
+  // network — the join drops the softAP, so wizard_passed must be written while
+  // the device is still reachable, or the wizard would reappear next boot.
+  async function markComplete() {
+    if (!$config_store?.wizard_passed) {
+      await serialQueue.add(() => config_store.saveParam('wizard_passed', true))
+    }
+  }
+
+  // The WiFi step has joined (request sent, AP about to drop). Surface the
+  // reconnect address so the user knows where to find the charger next.
+  function onWifiJoined() {
+    finishDialog = true
+  }
+
   async function finish() {
     if (finishing) return
     finishing = true
@@ -98,6 +118,7 @@
   total={TOTAL}
   title={$_(titleKey)}
   canAdvance={!finishing}
+  hideAdvance={STEPS[step] === 'wifi'}
   onPrev={goPrev}
   onNext={goNext}
   onFinish={finish}
@@ -107,13 +128,13 @@
   {:else if step === 1}
     <EvseBasics {evseConnected} {bypassRemaining} />
   {:else if step === 2}
-    <Wifi />
-  {:else if step === 3}
     <TimeStep />
-  {:else if step === 4}
+  {:else if step === 3}
     <Security />
-  {:else if step === 5}
+  {:else if step === 4}
     <FirmwareInfo />
+  {:else if step === 5}
+    <Wifi beforeJoin={markComplete} onJoined={onWifiJoined} />
   {/if}
 </WizardShell>
 

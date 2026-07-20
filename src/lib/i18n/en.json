@@ -908,7 +908,10 @@
       "intro": "Pick the network the charger should join.",
       "current": "Currently joined",
       "joined": "Connection request sent. The charger will rejoin on the new network in a few seconds.",
-      "empty": "No networks found. Tap Scan to try again."
+      "empty": "No networks found. Tap Scan to try again.",
+      "handoff_title": "You'll lose this connection",
+      "handoff_body": "When you connect, the charger joins your WiFi and this setup hotspot turns off. Afterward, reconnect this phone or computer to your home WiFi to reach the charger again.",
+      "reach_at": "Then open the charger at"
     },
     "time": {
       "title": "Time",
