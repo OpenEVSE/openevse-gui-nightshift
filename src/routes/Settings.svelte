@@ -9,11 +9,10 @@
 
   let groups = $derived(pagesBySection($config_store))
 
-  // Auth is "on" when both credentials are set (same test as the HTTP page).
-  // Only then is there a session to sign out of.
-  let authOn = $derived(
-    !!($config_store?.www_username && $config_store?.www_password),
-  )
+  // Auth is "on" when a password is set (same test as the firmware and the HTTP
+  // page — a blank username falls back to a default). Only then is there a
+  // session to sign out of.
+  let authOn = $derived(!!$config_store?.www_password)
 
   async function logout() {
     try {

@@ -57,7 +57,10 @@
       "temp_fahrenheit": "Fahrenheit",
       "energy_rate": "Tarif d'énergie (par kWh)",
       "energy_rate_desc": "Sert à estimer le coût de la session. 0 masque l'affichage du coût.",
-      "currency": "Symbole monétaire"
+      "currency": "Symbole monétaire",
+      "set_credentials": "Save password",
+      "username_required": "Set a username too — a password on its own can't be used to sign in.",
+      "creds_saved": "Saved. You'll be asked to sign in with the new username and password."
     },
     "mqtt": {
       "enable": "Activer MQTT",
@@ -520,7 +523,8 @@
       "knowledge_base": "Base de connaissances",
       "guides": "Guides",
       "discord": "Assistance de la communauté sur Discord"
-    }
+    },
+    "logout": "Sign out"
   },
   "nav": {
     "home": "Accueil",
@@ -700,14 +704,20 @@
       "temp": "Temp",
       "pilot": "Pilote"
     },
-    "summary": { "today": "Aujourd'hui", "total": "Total" },
+    "summary": {
+      "today": "Aujourd'hui",
+      "total": "Total"
+    },
     "mode": {
       "auto": "Auto",
       "on": "Marche",
       "off": "Arrêt",
       "aria": "Mode de charge"
     },
-    "rate": { "claimed": "Défini par {client}", "aria": "Vitesse de charge" },
+    "rate": {
+      "claimed": "Défini par {client}",
+      "aria": "Vitesse de charge"
+    },
     "vehicle": {
       "to_full": "{time} avant la charge complète",
       "vehicle_limit": "limite du véhicule {value}",
@@ -749,7 +759,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Données", "energy": "Énergie", "safety": "Sécurité", "manager": "Commandes" },
+    "tab": {
+      "data": "Données",
+      "energy": "Énergie",
+      "safety": "Sécurité",
+      "manager": "Commandes"
+    },
     "group": {
       "energy": "Énergie délivrée",
       "sensors": "Capteurs",
@@ -776,7 +791,11 @@
       "loading": "Chargement…",
       "error": "Échec du chargement des données d'énergie",
       "no_samples": "Aucun échantillon enregistré",
-      "axis": { "current": "Courant (A)", "temperature": "Température (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Courant (A)",
+        "temperature": "Température (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Pilote",
@@ -892,7 +911,10 @@
       "intro": "Choisissez le réseau auquel le chargeur doit se connecter.",
       "current": "Réseau actuel",
       "joined": "Demande de connexion envoyée. Le chargeur rejoindra le nouveau réseau dans quelques secondes.",
-      "empty": "Aucun réseau trouvé. Appuyez sur Scanner pour réessayer."
+      "empty": "Aucun réseau trouvé. Appuyez sur Scanner pour réessayer.",
+      "handoff_title": "You'll lose this connection",
+      "handoff_body": "When you connect, the charger joins your WiFi and this setup hotspot turns off. Afterward, reconnect this phone or computer to your home WiFi to reach the charger again.",
+      "reach_at": "Then open the charger at"
     },
     "time": {
       "title": "Heure",
@@ -909,6 +931,23 @@
       "address_label": "Adresse",
       "copied": "Copié dans le presse-papiers.",
       "dismiss": "Compris"
+    },
+    "security": {
+      "title": "Password",
+      "intro": "Protect the web interface with a password. Recommended if your network is shared. You can also set this later in Settings.",
+      "username_placeholder": "e.g. admin",
+      "skip_hint": "Leave both blank to skip — the charger stays open on your trusted network."
     }
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter your OpenEVSE credentials",
+    "username": "Username",
+    "password": "Password",
+    "remember": "Remember me",
+    "submit": "Sign in",
+    "invalid": "Incorrect username or password.",
+    "locked": "Too many attempts. Please wait a moment and try again.",
+    "error": "Could not reach the charger. Try again."
   }
 }

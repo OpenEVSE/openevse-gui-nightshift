@@ -6,40 +6,19 @@
   as an informed choice rather than a silent default — is what addresses
   the "open by default" finding. Leaving the fields blank and pressing
   Next is the "skip" path; nothing is written.
+
+  Credentials go through CredentialFields, which writes username + password
+  together in one request and requires a username when a password is set.
 -->
 <script>
   import { _ } from 'svelte-i18n'
-  import { config_store } from '../../../stores/config.js'
-  import { createConfigForm } from '../../../config/configForm.svelte.js'
-  import FormField from '../../config/FormField.svelte'
-  import TextInput from '../../ui/TextInput.svelte'
-  import PasswordInput from '../../ui/PasswordInput.svelte'
-
-  const form = createConfigForm()
-  const ss = form.saveState
+  import CredentialFields from '../../config/CredentialFields.svelte'
 </script>
 
 <div class="space-y-4">
   <p class="text-sm text-text-dim">{$_('wizard.security.intro')}</p>
 
-  <FormField label={$_('config.http.username')} status={$ss.www_username ?? 'idle'}>
-    <TextInput
-      value={$config_store?.www_username ?? ''}
-      maxlength={15}
-      placeholder={$_('wizard.security.username_placeholder')}
-      revert={form.revert}
-      onchange={(v) => form.saveField('www_username', v)}
-    />
-  </FormField>
-
-  <FormField label={$_('config.http.password')} status={$ss.www_password ?? 'idle'}>
-    <PasswordInput
-      value={$config_store?.www_password ?? ''}
-      maxlength={15}
-      revert={form.revert}
-      onchange={(v) => form.saveField('www_password', v)}
-    />
-  </FormField>
+  <CredentialFields />
 
   <p class="text-xs text-text-dim">{$_('wizard.security.skip_hint')}</p>
 </div>

@@ -32,7 +32,6 @@
   const TOTAL = STEPS.length
 
   let step = $state(0)
-  let finishing = $state(false)
   let finishDialog = $state(false)
 
   let titleKey = $derived(`wizard.${STEPS[step]}.title`)
@@ -60,7 +59,6 @@
     if (step > 0) step -= 1
   }
   function goNext() {
-    if (finishing) return
     if (commsBlocked && ++bypassTaps < BYPASS_TAPS) return
     if (step < TOTAL - 1) step += 1
     bypassTaps = 0
@@ -82,28 +80,15 @@
     }
   }
 
-  // The WiFi step has joined (request sent, AP about to drop). Surface the
-  // reconnect address so the user knows where to find the charger next.
+  // The WiFi step has joined (request sent, AP about to drop). markComplete
+  // already wrote wizard_passed before the join. If we're still on the device
+  // AP the user must physically switch networks, so show the reconnect address;
+  // otherwise we're already on the home network, so collapse straight to the
+  // dashboard (App.svelte swaps to AppShell once wizard_passed is true).
   function onWifiJoined() {
-    finishDialog = true
-  }
-
-  async function finish() {
-    if (finishing) return
-    finishing = true
-    // Mark setup as complete — this gate is what App.svelte watches.
-    if (!$config_store?.wizard_passed) {
-      await serialQueue.add(() => config_store.saveParam('wizard_passed', true))
-    }
-    finishing = false
     if (isOnDeviceAp()) {
-      // Can't auto-redirect — user has to switch their WiFi first.
       finishDialog = true
     } else {
-      // Already on the home network — collapse the wizard. App.svelte
-      // switches to AppShell now that wizard_passed is true; force the
-      // hash to '/' so the Router lands on the Dashboard even if the
-      // user arrived here with a stale or hand-typed hash.
       navigate('/')
     }
   }
@@ -117,11 +102,9 @@
   {step}
   total={TOTAL}
   title={$_(titleKey)}
-  canAdvance={!finishing}
   hideAdvance={STEPS[step] === 'wifi'}
   onPrev={goPrev}
   onNext={goNext}
-  onFinish={finish}
 >
   {#if step === 0}
     <Welcome />

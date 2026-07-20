@@ -8,8 +8,7 @@
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
   import FormField from '../../lib/components/config/FormField.svelte'
-  import TextInput from '../../lib/components/ui/TextInput.svelte'
-  import PasswordInput from '../../lib/components/ui/PasswordInput.svelte'
+  import CredentialFields from '../../lib/components/config/CredentialFields.svelte'
   import NumberInput from '../../lib/components/ui/NumberInput.svelte'
   import Select from '../../lib/components/ui/Select.svelte'
   import SegmentedControl from '../../lib/components/ui/SegmentedControl.svelte'
@@ -18,10 +17,13 @@
   const form = createConfigForm()
   const ss = form.saveState
 
-  // Auth has no config flag — it is "on" when both credentials are set.
+  // Auth has no config flag — the firmware treats it as "on" the moment a
+  // password is set (a blank username falls back to a default), so key on the
+  // password alone. Keying on both would show the toggle as "off" on a
+  // password-only device that is actually protected.
   let authOn = $state(false)
   $effect(() => {
-    authOn = !!($config_store?.www_username && $config_store?.www_password)
+    authOn = !!$config_store?.www_password
   })
 
   function toggleAuth(next) {
@@ -67,22 +69,10 @@
       <Toggle checked={authOn} label={$_('config.http.auth')} onchange={toggleAuth} />
     </FormField>
     {#if authOn}
-      <FormField label={$_('config.http.username')} status={$ss.www_username ?? 'idle'}>
-        <TextInput
-          value={$config_store?.www_username ?? ''}
-          maxlength={15}
-          revert={form.revert}
-          onchange={(v) => form.saveField('www_username', v)}
-        />
-      </FormField>
-      <FormField label={$_('config.http.password')} status={$ss.www_password ?? 'idle'}>
-        <PasswordInput
-          value={$config_store?.www_password ?? ''}
-          maxlength={15}
-          revert={form.revert}
-          onchange={(v) => form.saveField('www_password', v)}
-        />
-      </FormField>
+      <!-- Username + password written together in one request (see
+           CredentialFields) — a per-field save would 401 the second write the
+           moment the password turns auth on with no active session. -->
+      <CredentialFields />
     {/if}
   </ConfigSection>
 

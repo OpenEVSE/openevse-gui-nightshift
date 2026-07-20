@@ -101,7 +101,7 @@ describe('Wizard route', () => {
     await fireEvent.click(getByText('wizard.next')) // tap 2 — holds
     expect(getByText('wizard.evse.title')).toBeInTheDocument()
     await fireEvent.click(getByText('wizard.next')) // tap 3 — breaks through
-    expect(getByText('wizard.wifi.title')).toBeInTheDocument()
+    expect(getByText('wizard.time.title')).toBeInTheDocument()
   })
 
   it('resets the bypass tap count when the EVSE step is revisited', async () => {
@@ -126,45 +126,55 @@ describe('Wizard route', () => {
     await fireEvent.click(getByText('wizard.next')) // -> EVSE step
     expect(getByRole('slider')).toBeInTheDocument()
 
-    await fireEvent.click(getByText('wizard.next')) // -> WiFi step
-    expect(getByText('wizard.wifi.title')).toBeInTheDocument()
+    await fireEvent.click(getByText('wizard.next')) // -> Time step (WiFi is now last)
+    expect(getByText('wizard.time.title')).toBeInTheDocument()
   })
 
-  it('saves wizard_passed and stays put when finishing off the device AP', async () => {
+  // WiFi is the final step now: reaching it and connecting is what completes
+  // setup. markComplete writes wizard_passed BEFORE the join (the join drops the
+  // AP), and the reconnect dialog only shows when we're still on the device AP.
+  async function joinFromWifiStep(view, ssid = 'Home', pass = '') {
+    const { getByText, getByLabelText } = view
+    // welcome -> evse -> time -> security -> firmware -> wifi (5 taps)
+    for (let i = 0; i < 5; i++) await fireEvent.click(getByText('wizard.next'))
+    await fireEvent.click(getByText('config.network.manual'))
+    await fireEvent.input(getByLabelText('config.network.ssid'), {
+      target: { value: ssid },
+    })
+    if (pass) {
+      await fireEvent.input(getByLabelText('config.network.wifi_password'), {
+        target: { value: pass },
+      })
+    }
+    await fireEvent.click(getByText('config.network.connect'))
+  }
+
+  it('writes wizard_passed (no reconnect dialog) when joining from the home network', async () => {
     status_store.set({ ipaddress: '10.0.0.5' })
-    const { getByText, queryByText } = render(Wizard)
-    // Click Next four times to land on step 4 (firmware).
-    for (let i = 0; i < 4; i++) await fireEvent.click(getByText('wizard.next'))
-    await fireEvent.click(getByText('wizard.finish'))
+    const view = render(Wizard)
+    await joinFromWifiStep(view)
 
-    expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
-    // No reconnect dialog when we already have a routable IP — App.svelte
-    // swaps to the dashboard once wizard_passed flips.
-    expect(queryByText('wizard.reconnect.title')).toBeNull()
+    await vi.waitFor(() => {
+      expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
+    })
+    // Already routable — App.svelte swaps to the dashboard, no reconnect prompt.
+    expect(view.queryByText('wizard.reconnect.title')).toBeNull()
   })
 
-  it('shows the reconnect dialog when finishing while still on the device AP', async () => {
+  it('shows the reconnect dialog when joining while still on the device AP', async () => {
     status_store.set({ ipaddress: '192.168.4.1' })
-    const { getByText } = render(Wizard)
-    for (let i = 0; i < 4; i++) await fireEvent.click(getByText('wizard.next'))
-    await fireEvent.click(getByText('wizard.finish'))
+    const view = render(Wizard)
+    await joinFromWifiStep(view)
 
-    expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
-    expect(getByText('wizard.reconnect.title')).toBeInTheDocument()
+    await vi.waitFor(() => {
+      expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
+    })
+    expect(view.getByText('wizard.reconnect.title')).toBeInTheDocument()
   })
 
   it('can join a network entered manually when scanning finds nothing', async () => {
-    const { getByText, getByLabelText } = render(Wizard)
-    await fireEvent.click(getByText('wizard.next'))
-    await fireEvent.click(getByText('wizard.next'))
-    await fireEvent.click(getByText('config.network.manual'))
-    await fireEvent.input(getByLabelText('config.network.ssid'), {
-      target: { value: 'Hidden network' },
-    })
-    await fireEvent.input(getByLabelText('config.network.wifi_password'), {
-      target: { value: 'secret' },
-    })
-    await fireEvent.click(getByText('config.network.connect'))
+    const view = render(Wizard)
+    await joinFromWifiStep(view, 'Hidden network', 'secret')
 
     await vi.waitFor(() => {
       expect(upload).toHaveBeenCalledWith({ ssid: 'Hidden network', pass: 'secret' })
