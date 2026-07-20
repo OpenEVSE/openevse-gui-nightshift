@@ -37,7 +37,15 @@
           'Content-Type': 'application/json',
           'X-Requested-With': 'OpenEVSE',
         },
-        body: JSON.stringify({ user, pass, remember }),
+        // `now` (epoch seconds) lets a device with no clock yet — no NTP
+        // reachable, no controller RTC — adopt our time so it can issue a
+        // dated session cookie instead of dead-ending on "clock not set".
+        body: JSON.stringify({
+          user,
+          pass,
+          remember,
+          now: Math.floor(Date.now() / 1000),
+        }),
       })
       if (r.ok) {
         redirect('/')
