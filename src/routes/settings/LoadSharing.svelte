@@ -157,16 +157,15 @@
     }
   })
 
-  // Watch for peer status changes via version number
-  // Extract joined peers and group data directly from status_store websocket response
+  // Watch for peer status changes via version number.
+  // The websocket /status payload only carries loadsharing_joined_peers and the
+  // version counters; the group summary fields (failsafe_active, online_count,
+  // offline_count, allocations) come from GET /loadsharing/status, so fetch it
+  // whenever the version ticks (and on first load).
   $effect(() => {
     const statusVersion = $status_store?.loadsharing_status_version
     if (statusVersion !== undefined && enabled) {
-      // Status data is already present in $status_store:
-      // - loadsharing_joined_peers: array of peer objects with real-time data
-      // - loadsharing_group_current_total: sum of all peer amperages
-      // Just need to trigger reactivity by reading the version
-      // The store will update automatically from websocket data
+      loadsharing_store.downloadStatus()
     }
   })
 </script>
@@ -352,7 +351,7 @@
             <table class="w-full text-sm">
               <thead>
                 <tr class="bg-surface-3 text-text-dim">
-                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_host')}</th>
+                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_name')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_online')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_status')}</th>
                   <th class="px-3 py-2 text-right font-medium">{$_('config.loadsharing.actions')}</th>
@@ -362,10 +361,11 @@
                 {#each peers as peer}
                   {@const host = peer.host ?? peer.ip ?? peer.name ?? ''}
                   {@const isLocal = peer.isLocal ?? false}
+                  {@const displayName = peer.name || host}
                   <tr class="border-t border-border">
                     <td class="px-3 py-2 text-text">
                       <div class="flex items-center gap-2">
-                        <span>{host || '—'}</span>
+                        <span>{displayName || '—'}</span>
                         {#if isLocal}
                           <span class="text-xs text-text-dim">({$_('config.loadsharing.local_device')})</span>
                         {/if}
