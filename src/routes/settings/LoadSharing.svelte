@@ -1,9 +1,9 @@
-<!-- src/routes/settings/LoadSharing.svelte -->
 <script>
   import { _ } from 'svelte-i18n'
   import { config_store } from '../../lib/stores/config.js'
   import { claims_target_store } from '../../lib/stores/claims_target.js'
   import { loadsharing_store } from '../../lib/stores/loadsharing.js'
+  import { status_store } from '../../lib/stores/status.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { EvseClients } from '../../lib/vars.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
@@ -43,6 +43,9 @@
       ? $loadsharing_store.status.peers
       : ($loadsharing_store?.peers ?? []),
   )
+  let allocationVersion = $derived($status_store?.loadsharing_status_version)
+  let joinedPeersFromWs = $derived(Array.isArray($status_store?.loadsharing_joined_peers) ? $status_store.loadsharing_joined_peers : [])
+  let groupCurrentTotal = $derived($status_store?.loadsharing_group_current_total ?? 0)
   let allocations = $derived($loadsharing_store?.status?.allocations ?? [])
   let runtimeStatus = $derived($loadsharing_store?.status ?? {})
   let hasSafetyFactor = $derived($config_store?.loadsharing_safety_factor !== undefined)
@@ -67,7 +70,7 @@
       $_('config.loadsharing.unknown'),
   )
   let controllerUrl = $derived(
-    controllerHost ? `http://${controllerHost}` : '',
+    controllerPeer?.url || (controllerHost ? `http://${controllerHost}` : ''),
   )
   let memberAssignedLimit = $derived(
     $claims_target_store?.claims?.max_current === EvseClients.shaper.id
@@ -110,15 +113,6 @@
     return $_('config.loadsharing.discovered')
   }
 
-  async function refreshPeers() {
-    peersBusy = true
-    try {
-      await loadsharing_store.refresh()
-    } finally {
-      peersBusy = false
-    }
-  }
-
   async function addPeer(host) {
     const targetHost = (typeof host === 'string' ? host : peerHost ?? '').trim()
     if (!targetHost) return
@@ -150,17 +144,30 @@
     peersBusy = true
     try {
       await loadsharing_store.discover()
-      await loadsharing_store.refresh()
     } finally {
       peersBusy = false
     }
   }
 
+  // Watch for peer list changes via version number
   $effect(() => {
-    if (!enabled) return
-    refreshPeers()
-    const id = setInterval(refreshPeers, 10000)
-    return () => clearInterval(id)
+    const version = $status_store?.loadsharing_peers_version
+    if (version !== undefined && enabled) {
+      loadsharing_store.downloadPeers()
+    }
+  })
+
+  // Watch for peer status changes via version number
+  // Extract joined peers and group data directly from status_store websocket response
+  $effect(() => {
+    const statusVersion = $status_store?.loadsharing_status_version
+    if (statusVersion !== undefined && enabled) {
+      // Status data is already present in $status_store:
+      // - loadsharing_joined_peers: array of peer objects with real-time data
+      // - loadsharing_group_current_total: sum of all peer amperages
+      // Just need to trigger reactivity by reading the version
+      // The store will update automatically from websocket data
+    }
   })
 </script>
 
@@ -320,7 +327,7 @@
 
     {#if isController}
       <ConfigSection title={$_('config.loadsharing.peers')}>
-        <div class="mb-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
+        <div class="mb-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
           <TextInput
             value={peerHost}
             placeholder="openevse-2.local"
@@ -338,12 +345,6 @@
             disabled={peersBusy}
             onclick={discoverPeers}
           />
-          <Button
-            label={$_('config.loadsharing.refresh')}
-            variant="ghost"
-            disabled={peersBusy}
-            onclick={refreshPeers}
-          />
         </div>
 
         {#if peers.length > 0}
@@ -360,8 +361,16 @@
               <tbody>
                 {#each peers as peer}
                   {@const host = peer.host ?? peer.ip ?? peer.name ?? ''}
+                  {@const isLocal = peer.isLocal ?? false}
                   <tr class="border-t border-border">
-                    <td class="px-3 py-2 text-text">{host || '—'}</td>
+                    <td class="px-3 py-2 text-text">
+                      <div class="flex items-center gap-2">
+                        <span>{host || '—'}</span>
+                        {#if isLocal}
+                          <span class="text-xs text-text-dim">({$_('config.loadsharing.local_device')})</span>
+                        {/if}
+                      </div>
+                    </td>
                     <td class="px-3 py-2">
                       <span class={peer.online ? 'text-accent' : 'text-text-dim'}>
                         {peer.online
@@ -378,7 +387,7 @@
                           onclick={() => (detailsPeer = peer)}
                         />
                         {#if host}
-                          <a href={`http://${host}`} target="_blank" rel="noopener noreferrer">
+                          <a href={peer.url || `http://${host}`} target="_blank" rel="noopener noreferrer">
                             <IconButton icon="mdi:open-in-new" label={$_('config.loadsharing.test_peer')} />
                           </a>
                         {/if}
@@ -386,10 +395,10 @@
                           <IconButton
                             icon="mdi:trash-can-outline"
                             label={$_('config.loadsharing.remove_peer')}
-                            disabled={peersBusy}
+                            disabled={peersBusy || isLocal}
                             onclick={() => removePeer(host)}
                           />
-                        {:else}
+                        {:else if !isLocal}
                           <IconButton
                             icon="mdi:plus"
                             label={$_('config.loadsharing.add_peer')}
