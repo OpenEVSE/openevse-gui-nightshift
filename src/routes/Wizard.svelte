@@ -20,13 +20,18 @@
   import EvseBasics from '../lib/components/wizard/steps/EvseBasics.svelte'
   import Wifi from '../lib/components/wizard/steps/Wifi.svelte'
   import TimeStep from '../lib/components/wizard/steps/TimeStep.svelte'
+  import Security from '../lib/components/wizard/steps/Security.svelte'
   import FirmwareInfo from '../lib/components/wizard/steps/FirmwareInfo.svelte'
 
-  const STEPS = ['welcome', 'evse', 'wifi', 'time', 'firmware']
+  // WiFi is provisioned LAST on purpose: joining the network makes the ESP32's
+  // softAP hop to the router's channel, which drops a phone/laptop that set the
+  // device up over that AP. Doing every other step first (all reachable on the
+  // AP) and connecting WiFi as the final action means the single network hand-
+  // off happens once, at the end, where it's expected.
+  const STEPS = ['welcome', 'evse', 'time', 'security', 'firmware', 'wifi']
   const TOTAL = STEPS.length
 
   let step = $state(0)
-  let finishing = $state(false)
   let finishDialog = $state(false)
 
   let titleKey = $derived(`wizard.${STEPS[step]}.title`)
@@ -54,7 +59,6 @@
     if (step > 0) step -= 1
   }
   function goNext() {
-    if (finishing) return
     if (commsBlocked && ++bypassTaps < BYPASS_TAPS) return
     if (step < TOTAL - 1) step += 1
     bypassTaps = 0
@@ -67,22 +71,24 @@
     return $status_store?.ipaddress === '192.168.4.1'
   }
 
-  async function finish() {
-    if (finishing) return
-    finishing = true
-    // Mark setup as complete — this gate is what App.svelte watches.
+  // Persist the "setup done" flag. Called by the WiFi step BEFORE it joins the
+  // network — the join drops the softAP, so wizard_passed must be written while
+  // the device is still reachable, or the wizard would reappear next boot.
+  async function markComplete() {
     if (!$config_store?.wizard_passed) {
       await serialQueue.add(() => config_store.saveParam('wizard_passed', true))
     }
-    finishing = false
+  }
+
+  // The WiFi step has joined (request sent, AP about to drop). markComplete
+  // already wrote wizard_passed before the join. If we're still on the device
+  // AP the user must physically switch networks, so show the reconnect address;
+  // otherwise we're already on the home network, so collapse straight to the
+  // dashboard (App.svelte swaps to AppShell once wizard_passed is true).
+  function onWifiJoined() {
     if (isOnDeviceAp()) {
-      // Can't auto-redirect — user has to switch their WiFi first.
       finishDialog = true
     } else {
-      // Already on the home network — collapse the wizard. App.svelte
-      // switches to AppShell now that wizard_passed is true; force the
-      // hash to '/' so the Router lands on the Dashboard even if the
-      // user arrived here with a stale or hand-typed hash.
       navigate('/')
     }
   }
@@ -96,21 +102,22 @@
   {step}
   total={TOTAL}
   title={$_(titleKey)}
-  canAdvance={!finishing}
+  hideAdvance={STEPS[step] === 'wifi'}
   onPrev={goPrev}
   onNext={goNext}
-  onFinish={finish}
 >
   {#if step === 0}
     <Welcome />
   {:else if step === 1}
     <EvseBasics {evseConnected} {bypassRemaining} />
   {:else if step === 2}
-    <Wifi />
-  {:else if step === 3}
     <TimeStep />
+  {:else if step === 3}
+    <Security />
   {:else if step === 4}
     <FirmwareInfo />
+  {:else if step === 5}
+    <Wifi beforeJoin={markComplete} onJoined={onWifiJoined} />
   {/if}
 </WizardShell>
 

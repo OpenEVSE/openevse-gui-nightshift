@@ -51,6 +51,9 @@
       "auth": "Web interface password",
       "username": "Username",
       "password": "Password",
+      "set_credentials": "Save password",
+      "username_required": "Set a username too — a password on its own can't be used to sign in.",
+      "creds_saved": "Saved. You'll be asked to sign in with the new username and password.",
       "lang": "Language",
       "temp_unit": "Temperature unit",
       "temp_celsius": "Celsius",
@@ -520,7 +523,8 @@
       "knowledge_base": "Knowledge base",
       "guides": "Guides",
       "discord": "Community support on Discord"
-    }
+    },
+    "logout": "Sign out"
   },
   "nav": {
     "home": "Home",
@@ -700,14 +704,20 @@
       "temp": "Temp",
       "pilot": "Pilot"
     },
-    "summary": { "today": "Today", "total": "Total" },
+    "summary": {
+      "today": "Today",
+      "total": "Total"
+    },
     "mode": {
       "auto": "Auto",
       "on": "On",
       "off": "Off",
       "aria": "Charge mode"
     },
-    "rate": { "claimed": "Set by {client}", "aria": "Charge rate" },
+    "rate": {
+      "claimed": "Set by {client}",
+      "aria": "Charge rate"
+    },
     "vehicle": {
       "to_full": "{time} to full",
       "vehicle_limit": "vehicle limit {value}",
@@ -749,7 +759,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Data", "energy": "Energy", "safety": "Safety", "manager": "Manager" },
+    "tab": {
+      "data": "Data",
+      "energy": "Energy",
+      "safety": "Safety",
+      "manager": "Manager"
+    },
     "group": {
       "energy": "Energy delivered",
       "sensors": "Sensors",
@@ -776,7 +791,11 @@
       "loading": "Loading…",
       "error": "Failed to load energy data",
       "no_samples": "No samples recorded yet",
-      "axis": { "current": "Current (A)", "temperature": "Temperature (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Current (A)",
+        "temperature": "Temperature (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Pilot",
@@ -892,7 +911,10 @@
       "intro": "Pick the network the charger should join.",
       "current": "Currently joined",
       "joined": "Connection request sent. The charger will rejoin on the new network in a few seconds.",
-      "empty": "No networks found. Tap Scan to try again."
+      "empty": "No networks found. Tap Scan to try again.",
+      "handoff_title": "You'll lose this connection",
+      "handoff_body": "When you connect, the charger joins your WiFi and this setup hotspot turns off. Afterward, reconnect this phone or computer to your home WiFi to reach the charger again.",
+      "reach_at": "Then open the charger at"
     },
     "time": {
       "title": "Time",
@@ -909,6 +931,23 @@
       "address_label": "Address",
       "copied": "Copied to clipboard.",
       "dismiss": "Got it"
+    },
+    "security": {
+      "title": "Password",
+      "intro": "Protect the web interface with a password. Recommended if your network is shared. You can also set this later in Settings.",
+      "username_placeholder": "e.g. admin",
+      "skip_hint": "Leave both blank to skip — the charger stays open on your trusted network."
     }
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter your OpenEVSE credentials",
+    "username": "Username",
+    "password": "Password",
+    "remember": "Remember me",
+    "submit": "Sign in",
+    "invalid": "Incorrect username or password.",
+    "locked": "Too many attempts. Please wait a moment and try again.",
+    "error": "Could not reach the charger. Try again."
   }
 }

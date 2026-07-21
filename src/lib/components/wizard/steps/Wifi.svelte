@@ -21,7 +21,14 @@
   import Icon from '../../../icons/Icon.svelte'
   import Button from '../../ui/Button.svelte'
 
-  let { onJoined = () => {} } = $props()
+  let { onJoined = () => {}, beforeJoin = async () => {} } = $props()
+
+  // Where to reach the charger once it leaves the setup hotspot. The DHCP IP
+  // isn't known ahead of time, so we show the mDNS hostname (same as
+  // FinishDialog). Empty until the config has loaded a hostname.
+  let displayHost = $derived(
+    $config_store?.hostname ? `${$config_store.hostname}.local` : '',
+  )
 
   let networks = $state([])
   let scanning = $state(false)
@@ -64,6 +71,10 @@
     const normalizedSsid = ssid.trim()
     if (joining || !normalizedSsid) return
     joining = true
+    // Mark setup complete BEFORE joining: upload() switches the device to
+    // station mode and the softAP drops, so a write issued after this may never
+    // reach the device. Doing it first means the wizard won't reappear.
+    await beforeJoin()
     const ok = await serialQueue.add(() =>
       config_store.upload({ ssid: normalizedSsid, pass: wifiPass }),
     )
@@ -102,8 +113,25 @@
   {#if joined}
     <div class="rounded-xl border border-border bg-surface-2 p-3 text-sm text-text">
       <p>{$_('wizard.wifi.joined')}</p>
+      {#if displayHost}
+        <p class="mt-3 text-xs uppercase tracking-wider text-text-dim">
+          {$_('wizard.wifi.reach_at')}
+        </p>
+        <p class="break-all text-sm font-semibold text-accent">http://{displayHost}</p>
+      {/if}
     </div>
   {:else}
+    <!-- Heads-up before the AP hand-off: connecting ends this setup session. -->
+    <div class="rounded-xl border border-border bg-surface-2 p-3 text-sm">
+      <p class="font-semibold text-text">{$_('wizard.wifi.handoff_title')}</p>
+      <p class="mt-1 text-text-dim">{$_('wizard.wifi.handoff_body')}</p>
+      {#if displayHost}
+        <p class="mt-2 text-xs uppercase tracking-wider text-text-dim">
+          {$_('wizard.wifi.reach_at')}
+        </p>
+        <p class="break-all text-sm font-semibold text-accent">http://{displayHost}</p>
+      {/if}
+    </div>
     <p class="text-sm text-text-dim">{$_('wizard.wifi.intro')}</p>
 
     <div>

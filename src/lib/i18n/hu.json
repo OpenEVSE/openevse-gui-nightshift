@@ -57,7 +57,10 @@
       "temp_fahrenheit": "Fahrenheit",
       "energy_rate": "Energiaár (kWh-ként)",
       "energy_rate_desc": "A munkamenet becsült költségéhez. 0 elrejti a költség kijelzését.",
-      "currency": "Pénznem szimbólum"
+      "currency": "Pénznem szimbólum",
+      "set_credentials": "Save password",
+      "username_required": "Set a username too — a password on its own can't be used to sign in.",
+      "creds_saved": "Saved. You'll be asked to sign in with the new username and password."
     },
     "mqtt": {
       "enable": "MQTT engedélyezése",
@@ -520,7 +523,8 @@
       "knowledge_base": "Tudásbázis",
       "guides": "Útmutatók",
       "discord": "Közösségi támogatás a Discordon"
-    }
+    },
+    "logout": "Sign out"
   },
   "nav": {
     "home": "Kezdőlap",
@@ -700,14 +704,20 @@
       "temp": "Hőmérséklet",
       "pilot": "Pilot"
     },
-    "summary": { "today": "Ma", "total": "Összes" },
+    "summary": {
+      "today": "Ma",
+      "total": "Összes"
+    },
     "mode": {
       "auto": "Auto",
       "on": "Be",
       "off": "Ki",
       "aria": "Töltési mód"
     },
-    "rate": { "claimed": "{client} állítja", "aria": "Töltési sebesség" },
+    "rate": {
+      "claimed": "{client} állítja",
+      "aria": "Töltési sebesség"
+    },
     "vehicle": {
       "to_full": "{time} a teljes töltésig",
       "vehicle_limit": "jármű korlátja {value}",
@@ -749,7 +759,12 @@
     }
   },
   "monitoring": {
-    "tab": { "data": "Adat", "energy": "Energia", "safety": "Biztonság", "manager": "Kezelő" },
+    "tab": {
+      "data": "Adat",
+      "energy": "Energia",
+      "safety": "Biztonság",
+      "manager": "Kezelő"
+    },
     "group": {
       "energy": "Leadott energia",
       "sensors": "Érzékelők",
@@ -776,7 +791,11 @@
       "loading": "Betöltés…",
       "error": "Nem sikerült betölteni az energia adatokat",
       "no_samples": "Még nincs rögzített minta",
-      "axis": { "current": "Áram (A)", "temperature": "Hőmérséklet (°C)", "soc": "SOC (%)" }
+      "axis": {
+        "current": "Áram (A)",
+        "temperature": "Hőmérséklet (°C)",
+        "soc": "SOC (%)"
+      }
     },
     "sensor": {
       "pilot": "Pilot",
@@ -892,7 +911,10 @@
       "intro": "Válaszd ki a hálózatot, amelyhez a töltő csatlakozzon.",
       "current": "Jelenleg csatlakoztatva",
       "joined": "Csatlakozási kérelem elküldve. A töltő néhány másodperc múlva csatlakozik az új hálózathoz.",
-      "empty": "Nem található hálózat. Érintsd meg a Keresés gombot az ismétléshez."
+      "empty": "Nem található hálózat. Érintsd meg a Keresés gombot az ismétléshez.",
+      "handoff_title": "You'll lose this connection",
+      "handoff_body": "When you connect, the charger joins your WiFi and this setup hotspot turns off. Afterward, reconnect this phone or computer to your home WiFi to reach the charger again.",
+      "reach_at": "Then open the charger at"
     },
     "time": {
       "title": "Idő",
@@ -909,6 +931,23 @@
       "address_label": "Cím",
       "copied": "Vágólapra másolva.",
       "dismiss": "Rendben"
+    },
+    "security": {
+      "title": "Password",
+      "intro": "Protect the web interface with a password. Recommended if your network is shared. You can also set this later in Settings.",
+      "username_placeholder": "e.g. admin",
+      "skip_hint": "Leave both blank to skip — the charger stays open on your trusted network."
     }
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter your OpenEVSE credentials",
+    "username": "Username",
+    "password": "Password",
+    "remember": "Remember me",
+    "submit": "Sign in",
+    "invalid": "Incorrect username or password.",
+    "locked": "Too many attempts. Please wait a moment and try again.",
+    "error": "Could not reach the charger. Try again."
   }
 }
