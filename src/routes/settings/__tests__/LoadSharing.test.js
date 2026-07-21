@@ -19,7 +19,7 @@ beforeEach(() => {
   httpAPI.mockReset()
   httpAPI.mockImplementation((method, url) => {
     if (method === 'GET' && url === '/loadsharing/peers') {
-      return Promise.resolve([{ id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true }])
+      return Promise.resolve([{ id: 'peer-1', name: 'Garage', host: 'garage.local', url: 'http://garage.local', online: true, joined: true }])
     }
     if (method === 'GET' && url === '/loadsharing/status') {
       return Promise.resolve({
@@ -29,7 +29,7 @@ beforeEach(() => {
         failsafe_active: false,
         online_count: 1,
         offline_count: 0,
-        peers: [{ id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true }],
+        peers: [{ id: 'peer-1', name: 'Garage', host: 'garage.local', url: 'http://garage.local', online: true, joined: true }],
         allocations: [{ id: 'peer-1', target_current: 12, reason: 'equal_share' }],
       })
     }
@@ -65,9 +65,9 @@ describe('LoadSharing page', () => {
 
   it('renders peer management for controller role', async () => {
     loadsharing_store.set({
-      peers: [{ id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true }],
+      peers: [{ id: 'peer-1', name: 'Garage', host: 'garage.local', url: 'http://garage.local', online: true, joined: true }],
       status: {
-        peers: [{ id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true }],
+        peers: [{ id: 'peer-1', name: 'Garage', host: 'garage.local', url: 'http://garage.local', online: true, joined: true }],
         allocations: [{ id: 'peer-1', target_current: 12, reason: 'equal_share' }],
       },
     })
@@ -92,7 +92,7 @@ describe('LoadSharing page', () => {
 
   it('renders controlled-by panel for member role', async () => {
     loadsharing_store.set({
-      peers: [{ id: 'peer-controller', name: 'Main Panel', host: 'controller.local', online: true }],
+      peers: [{ id: 'peer-controller', name: 'Main Panel', host: 'controller.local', url: 'http://controller.local', online: true }],
       status: {
         enabled: true,
         group_id: 'main',
@@ -120,7 +120,7 @@ describe('LoadSharing page', () => {
     })
     httpAPI.mockImplementation((method, url) => {
       if (method === 'GET' && url === '/loadsharing/peers') {
-        return Promise.resolve([{ id: 'peer-controller', name: 'Main Panel', host: 'controller.local', online: true }])
+        return Promise.resolve([{ id: 'peer-controller', name: 'Main Panel', host: 'controller.local', url: 'http://controller.local', online: true }])
       }
       if (method === 'GET' && url === '/loadsharing/status') {
         return Promise.resolve({
@@ -143,9 +143,9 @@ describe('LoadSharing page', () => {
 
   it('allows adding discovered peers from the peers list', async () => {
     loadsharing_store.set({
-      peers: [{ id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false }],
+      peers: [{ id: 'peer-2', name: 'Yard', host: 'yard.local', url: 'http://yard.local', online: true, joined: false }],
       status: {
-        peers: [{ id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false }],
+        peers: [{ id: 'peer-2', name: 'Yard', host: 'yard.local', url: 'http://yard.local', online: true, joined: false }],
         allocations: [],
       },
     })
@@ -172,9 +172,9 @@ describe('LoadSharing page', () => {
 
   it('shows peer details in a modal when clicking the details info button', async () => {
     loadsharing_store.set({
-      peers: [{ id: 'peer-details-1', name: 'Secret Garden', host: 'secret.local', online: true, joined: true }],
+      peers: [{ id: 'peer-details-1', name: 'Secret Garden', host: 'secret.local', url: 'http://secret.local', online: true, joined: true }],
       status: {
-        peers: [{ id: 'peer-details-1', name: 'Secret Garden', host: 'secret.local', online: true, joined: true }],
+        peers: [{ id: 'peer-details-1', name: 'Secret Garden', host: 'secret.local', url: 'http://secret.local', online: true, joined: true }],
         allocations: [{ id: 'peer-details-1', target_current: 16, reason: 'high_priority' }],
       },
     })

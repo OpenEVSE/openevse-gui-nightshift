@@ -431,7 +431,8 @@
       "state_sleeping": "Sleeping",
       "peer_details": "Peer Details",
       "close": "Close",
-      "unknown": "Unknown"
+      "unknown": "Unknown",
+      "local_device": "ez az eszköz"
     },
     "emoncms": {
       "enable": "EmonCMS engedélyezése",
