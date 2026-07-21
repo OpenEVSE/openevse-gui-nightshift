@@ -58,9 +58,9 @@
       "energy_rate": "Energiaár (kWh-ként)",
       "energy_rate_desc": "A munkamenet becsült költségéhez. 0 elrejti a költség kijelzését.",
       "currency": "Pénznem szimbólum",
-      "set_credentials": "Save password",
-      "username_required": "Set a username too — a password on its own can't be used to sign in.",
-      "creds_saved": "Saved. You'll be asked to sign in with the new username and password."
+      "set_credentials": "Jelszó mentése",
+      "username_required": "Adjon meg felhasználónevet is – önmagában a jelszóval nem lehet bejelentkezni.",
+      "creds_saved": "Mentve. A rendszer az új felhasználónévvel és jelszóval kéri majd a bejelentkezést."
     },
     "mqtt": {
       "enable": "MQTT engedélyezése",
@@ -524,7 +524,7 @@
       "guides": "Útmutatók",
       "discord": "Közösségi támogatás a Discordon"
     },
-    "logout": "Sign out"
+    "logout": "Kijelentkezés"
   },
   "nav": {
     "home": "Kezdőlap",
@@ -912,9 +912,9 @@
       "current": "Jelenleg csatlakoztatva",
       "joined": "Csatlakozási kérelem elküldve. A töltő néhány másodperc múlva csatlakozik az új hálózathoz.",
       "empty": "Nem található hálózat. Érintsd meg a Keresés gombot az ismétléshez.",
-      "handoff_title": "You'll lose this connection",
-      "handoff_body": "When you connect, the charger joins your WiFi and this setup hotspot turns off. Afterward, reconnect this phone or computer to your home WiFi to reach the charger again.",
-      "reach_at": "Then open the charger at"
+      "handoff_title": "El fogja veszíteni ezt a kapcsolatot",
+      "handoff_body": "Amikor csatlakozik, a töltő csatlakozik a WiFi-hálózatához, és ez a beállítási hotspot kikapcsol. Ezután csatlakoztassa újra ezt a telefont vagy számítógépet az otthoni WiFi-hálózatához, hogy ismét elérje a töltőt.",
+      "reach_at": "Ezután nyissa meg a töltőt itt:"
     },
     "time": {
       "title": "Idő",
@@ -933,21 +933,21 @@
       "dismiss": "Rendben"
     },
     "security": {
-      "title": "Password",
-      "intro": "Protect the web interface with a password. Recommended if your network is shared. You can also set this later in Settings.",
-      "username_placeholder": "e.g. admin",
-      "skip_hint": "Leave both blank to skip — the charger stays open on your trusted network."
+      "title": "Jelszó",
+      "intro": "Védje a webes felületet jelszóval. Megosztott hálózat esetén ajánlott. Ezt később a Beállításokban is megadhatja.",
+      "username_placeholder": "pl. admin",
+      "skip_hint": "Hagyja mindkettőt üresen a kihagyáshoz – a töltő nyitva marad a megbízható hálózatán."
     }
   },
   "login": {
-    "title": "Sign in",
-    "subtitle": "Enter your OpenEVSE credentials",
-    "username": "Username",
-    "password": "Password",
-    "remember": "Remember me",
-    "submit": "Sign in",
-    "invalid": "Incorrect username or password.",
-    "locked": "Too many attempts. Please wait a moment and try again.",
-    "error": "Could not reach the charger. Try again."
+    "title": "Bejelentkezés",
+    "subtitle": "Adja meg az OpenEVSE hitelesítő adatait",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
+    "remember": "Emlékezzen rám",
+    "submit": "Bejelentkezés",
+    "invalid": "Helytelen felhasználónév vagy jelszó.",
+    "locked": "Túl sok próbálkozás. Kérjük, várjon egy pillanatot, és próbálja újra.",
+    "error": "Nem sikerült elérni a töltőt. Próbálja újra."
   }
 }

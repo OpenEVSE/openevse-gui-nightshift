@@ -58,9 +58,9 @@
       "energy_rate": "Tarif d'énergie (par kWh)",
       "energy_rate_desc": "Sert à estimer le coût de la session. 0 masque l'affichage du coût.",
       "currency": "Symbole monétaire",
-      "set_credentials": "Save password",
-      "username_required": "Set a username too — a password on its own can't be used to sign in.",
-      "creds_saved": "Saved. You'll be asked to sign in with the new username and password."
+      "set_credentials": "Enregistrer le mot de passe",
+      "username_required": "Définissez aussi un nom d'utilisateur — un mot de passe seul ne permet pas de se connecter.",
+      "creds_saved": "Enregistré. Vous devrez vous connecter avec le nouveau nom d'utilisateur et mot de passe."
     },
     "mqtt": {
       "enable": "Activer MQTT",
@@ -524,7 +524,7 @@
       "guides": "Guides",
       "discord": "Assistance de la communauté sur Discord"
     },
-    "logout": "Sign out"
+    "logout": "Se déconnecter"
   },
   "nav": {
     "home": "Accueil",
@@ -912,9 +912,9 @@
       "current": "Réseau actuel",
       "joined": "Demande de connexion envoyée. Le chargeur rejoindra le nouveau réseau dans quelques secondes.",
       "empty": "Aucun réseau trouvé. Appuyez sur Scanner pour réessayer.",
-      "handoff_title": "You'll lose this connection",
-      "handoff_body": "When you connect, the charger joins your WiFi and this setup hotspot turns off. Afterward, reconnect this phone or computer to your home WiFi to reach the charger again.",
-      "reach_at": "Then open the charger at"
+      "handoff_title": "Vous allez perdre cette connexion",
+      "handoff_body": "Lorsque vous vous connectez, le chargeur rejoint votre WiFi et ce point d'accès de configuration s'éteint. Reconnectez ensuite ce téléphone ou cet ordinateur à votre WiFi domestique pour accéder de nouveau au chargeur.",
+      "reach_at": "Ouvrez ensuite le chargeur à l'adresse"
     },
     "time": {
       "title": "Heure",
@@ -933,21 +933,21 @@
       "dismiss": "Compris"
     },
     "security": {
-      "title": "Password",
-      "intro": "Protect the web interface with a password. Recommended if your network is shared. You can also set this later in Settings.",
-      "username_placeholder": "e.g. admin",
-      "skip_hint": "Leave both blank to skip — the charger stays open on your trusted network."
+      "title": "Mot de passe",
+      "intro": "Protégez l'interface web avec un mot de passe. Recommandé si votre réseau est partagé. Vous pouvez aussi le configurer plus tard dans les Paramètres.",
+      "username_placeholder": "ex. admin",
+      "skip_hint": "Laissez les deux champs vides pour ignorer — le chargeur reste accessible sans mot de passe sur votre réseau de confiance."
     }
   },
   "login": {
-    "title": "Sign in",
-    "subtitle": "Enter your OpenEVSE credentials",
-    "username": "Username",
-    "password": "Password",
-    "remember": "Remember me",
-    "submit": "Sign in",
-    "invalid": "Incorrect username or password.",
-    "locked": "Too many attempts. Please wait a moment and try again.",
-    "error": "Could not reach the charger. Try again."
+    "title": "Se connecter",
+    "subtitle": "Saisissez vos identifiants OpenEVSE",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "remember": "Se souvenir de moi",
+    "submit": "Se connecter",
+    "invalid": "Nom d'utilisateur ou mot de passe incorrect.",
+    "locked": "Trop de tentatives. Veuillez patienter un instant et réessayer.",
+    "error": "Impossible de joindre le chargeur. Réessayez."
   }
 }
