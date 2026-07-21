@@ -1,7 +1,7 @@
 {
   "name": "openevse-gui-nightshift",
   "private": true,
-  "version": "2026.30.0",
+  "version": "2026.30.1",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {
