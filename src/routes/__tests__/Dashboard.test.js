@@ -327,4 +327,47 @@ describe('Dashboard', () => {
     await new Promise((r) => setTimeout(r, 0)) // flush would-be DELETE microtasks
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
   })
+
+  it('shows load sharing active/limited badges and reduced messaging', async () => {
+    config_store.set({
+      max_current_soft: 48,
+      divert_enabled: false,
+      current_shaper_enabled: false,
+      loadsharing_enabled: true,
+      loadsharing_role: 'controller',
+      loadsharing_group_max_current: 40,
+    })
+    claims_target_store.set({
+      properties: { max_current: 16 },
+      claims: { state: null, max_current: EvseClients.shaper.id },
+    })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
+    const { getByText, getAllByText } = render(Dashboard)
+    await vi.waitFor(() => {
+      expect(getByText('dashboard.loadsharing.badge_active')).toBeInTheDocument()
+      expect(getByText('dashboard.loadsharing.badge_limited')).toBeInTheDocument()
+      expect(getAllByText('dashboard.loadsharing.reduced').length).toBeGreaterThan(0)
+    })
+  })
+
+  it('shows controlled-by messaging for member devices', async () => {
+    config_store.set({
+      max_current_soft: 48,
+      divert_enabled: false,
+      current_shaper_enabled: false,
+      loadsharing_enabled: true,
+      loadsharing_role: 'member',
+      loadsharing_controller_host: 'controller.local',
+    })
+    claims_target_store.set({
+      properties: {},
+      claims: { state: null, charge_current: null },
+    })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 10 })
+    const { getByText } = render(Dashboard)
+    await vi.waitFor(() => {
+      expect(getByText('dashboard.loadsharing.badge_controlled')).toBeInTheDocument()
+      expect(getByText('dashboard.loadsharing.controlled_by')).toBeInTheDocument()
+    })
+  })
 })

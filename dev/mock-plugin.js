@@ -84,6 +84,10 @@ export function mockPlugin() {
   // In-memory state for endpoints that mutate. Seeded once per dev-server
   // run; reset by restarting the server.
   const rfidUsers = JSON.parse(loadFixture('rfid_users.json'))
+  const loadsharingPeers = [
+    { id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true },
+    { id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false }
+  ]
 
   // Dev-only runtime state override. Lets the resting/charging layouts be
   // previewed without a real device: GET /api/_mock/state/<code> flips it
@@ -179,6 +183,72 @@ export function mockPlugin() {
           for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ state: stateOverride, claims_version: claimsVersion }))
+          return
+        }
+
+        if (url === '/api/loadsharing/peers') {
+          if (req.method === 'GET') {
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify(loadsharingPeers))
+            return
+          }
+          if (req.method === 'POST') {
+            let body = ''
+            req.on('data', (chunk) => { body += chunk })
+            req.on('end', () => {
+              try {
+                const { host } = JSON.parse(body)
+                const existing = loadsharingPeers.find(p => p.host === host)
+                if (existing) {
+                  existing.joined = true
+                } else {
+                  loadsharingPeers.push({ id: `peer-${Date.now()}`, name: host, host, online: true, joined: true })
+                }
+              } catch {}
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'done' }))
+            })
+            return
+          }
+        }
+
+        if (url && url.startsWith('/api/loadsharing/peers/')) {
+          if (req.method === 'DELETE') {
+            const host = decodeURIComponent(url.slice('/api/loadsharing/peers/'.length))
+            const idx = loadsharingPeers.findIndex(p => p.host === host)
+            if (idx !== -1) {
+              loadsharingPeers[idx].joined = false
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ msg: 'done' }))
+            return
+          }
+        }
+
+        if (url === '/api/loadsharing/status') {
+          const onlineCount = loadsharingPeers.filter(p => p.online && p.joined).length
+          const offlineCount = loadsharingPeers.filter(p => !p.online && p.joined).length
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({
+            enabled: true,
+            group_id: 'main_circuit',
+            computed_at: Math.floor(nowMs() / 1000),
+            failsafe_active: false,
+            online_count: onlineCount,
+            offline_count: offlineCount,
+            peers: loadsharingPeers,
+            allocations: loadsharingPeers.filter(p => p.joined).map((p, i) => ({
+              id: p.id,
+              target_current: 16,
+              reason: 'equal_share'
+            }))
+          }))
+          return
+        }
+
+        if (url === '/api/loadsharing/discover' && req.method === 'POST') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ msg: 'done' }))
           return
         }
 

@@ -17,6 +17,7 @@ import Time from '../routes/settings/Time.svelte'
 import Rfid from '../routes/settings/Rfid.svelte'
 import Vehicle from '../routes/settings/Vehicle.svelte'
 import Solar from '../routes/settings/Solar.svelte'
+import LoadSharing from '../routes/settings/LoadSharing.svelte'
 import Shaper from '../routes/settings/Shaper.svelte'
 import Emoncms from '../routes/settings/Emoncms.svelte'
 import Ohmconnect from '../routes/settings/Ohmconnect.svelte'
@@ -56,6 +57,7 @@ routes['/settings/vehicle'] = Vehicle
 
 // Energy pages — override the placeholders set above.
 routes['/settings/solar'] = Solar
+routes['/settings/loadsharing'] = LoadSharing
 routes['/settings/shaper'] = Shaper
 routes['/settings/emoncms'] = Emoncms
 routes['/settings/ohmconnect'] = Ohmconnect
@@ -82,7 +84,7 @@ export const LEGACY_ROUTES = {
 }
 for (const page of [
   'safety', 'evse', 'mqtt', 'http', 'ocpp', 'network', 'firmware', 'time',
-  'shaper', 'vehicle', 'emoncms', 'ohmconnect', 'about',
+  'shaper', 'loadsharing', 'vehicle', 'emoncms', 'ohmconnect', 'about',
 ]) {
   LEGACY_ROUTES['/configuration/' + page] = '/settings/' + page
 }

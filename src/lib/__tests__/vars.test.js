@@ -5,7 +5,7 @@ describe('EvseClients', () => {
   it('should have all expected client keys', () => {
     const expectedKeys = [
       'manual', 'divert', 'boost', 'timer', 'limit',
-      'error', 'ohm', 'ocpp', 'rfid', 'mqtt', 'shaper', 'tempThrottle'
+      'error', 'ohm', 'ocpp', 'rfid', 'mqtt', 'shaper', 'loadsharing', 'tempThrottle'
     ]
     expect(Object.keys(EvseClients)).toEqual(expectedKeys)
   })
@@ -28,6 +28,7 @@ describe('EvseClients', () => {
     expect(EvseClients.rfid.id).toBe(65546)
     expect(EvseClients.mqtt.id).toBe(65547)
     expect(EvseClients.shaper.id).toBe(65548)
+    expect(EvseClients.loadsharing.id).toBe(0x0001000E)
     expect(EvseClients.tempThrottle.id).toBe(0x0001000D)
   })
 
@@ -43,6 +44,7 @@ describe('EvseClients', () => {
     expect(EvseClients.rfid.priority).toBe(1030)
     expect(EvseClients.mqtt.priority).toBe(500)
     expect(EvseClients.shaper.priority).toBe(5000)
+    expect(EvseClients.loadsharing.priority).toBe(5000)
     expect(EvseClients.tempThrottle.priority).toBe(10000)
   })
 
