@@ -378,7 +378,15 @@
                           : $_('config.loadsharing.peer_offline_value')}
                       </span>
                     </td>
-                    <td class="px-3 py-2 text-text">{statusFor(peer)}</td>
+                    <td class="px-3 py-2 text-text">
+                      {statusFor(peer)}
+                      {#if peer?.status?.state === 3}
+                        {@const allocated = allocatedFor(peer)}
+                        {#if allocated !== undefined && allocated !== null}
+                          <span class="text-text-dim">({allocated} A)</span>
+                        {/if}
+                      {/if}
+                    </td>
                     <td class="px-3 py-2">
                       <div class="flex justify-end gap-1">
                         <IconButton
