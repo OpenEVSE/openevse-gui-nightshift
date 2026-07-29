@@ -34,6 +34,17 @@ function createLoadSharingStore() {
     return res?.msg === 'done'
   }
 
+  async function setPeerPriority(host, priority) {
+    const res = await serialQueue.add(() =>
+      httpAPI('PUT', `/loadsharing/peers/${encodeURIComponent(host)}`, JSON.stringify({ priority })),
+    )
+    if (res?.msg === 'done') {
+      await refresh()
+      return true
+    }
+    return false
+  }
+
   async function discover() {
     const res = await serialQueue.add(() => httpAPI('POST', '/loadsharing/discover'))
     return res?.msg === 'done'
@@ -53,6 +64,7 @@ function createLoadSharingStore() {
     downloadStatus,
     addPeer,
     removePeer,
+    setPeerPriority,
     discover,
     refresh,
   }

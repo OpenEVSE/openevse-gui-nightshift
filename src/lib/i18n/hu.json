@@ -413,6 +413,7 @@
       "peer_online": "Online",
       "peer_online_value": "Online",
       "peer_offline_value": "Offline",
+      "peer_priority": "Prioritás",
       "peer_allocated": "Allocated",
       "peer_reason": "Reason",
       "peer_status": "Status",

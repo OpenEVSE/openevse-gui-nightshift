@@ -24,6 +24,7 @@
   let peerHost = $state('')
   let peersBusy = $state(false)
   let detailsPeer = $state(null)
+  let priorityRevert = $state(0)
 
   let enabled = $derived(!!$config_store?.loadsharing_enabled)
   let role = $derived($config_store?.loadsharing_role ?? '')
@@ -135,6 +136,19 @@
     try {
       const ok = await loadsharing_store.removePeer(host)
       if (ok) await loadsharing_store.refresh()
+    } finally {
+      peersBusy = false
+    }
+  }
+
+  async function savePriority(host, priority) {
+    if (!host) return
+    peersBusy = true
+    try {
+      const ok = await loadsharing_store.setPeerPriority(host, priority)
+      // On failure, bump the revert counter so the input resyncs to the
+      // confirmed store value.
+      if (!ok) priorityRevert++
     } finally {
       peersBusy = false
     }
@@ -352,6 +366,7 @@
               <thead>
                 <tr class="bg-surface-3 text-text-dim">
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_name')}</th>
+                  <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_priority')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_online')}</th>
                   <th class="px-3 py-2 text-left font-medium">{$_('config.loadsharing.peer_status')}</th>
                   <th class="px-3 py-2 text-right font-medium">{$_('config.loadsharing.actions')}</th>
@@ -370,6 +385,22 @@
                           <span class="text-xs text-text-dim">({$_('config.loadsharing.local_device')})</span>
                         {/if}
                       </div>
+                    </td>
+                    <td class="px-3 py-2">
+                      {#if peer.joined}
+                        <div class="w-20">
+                          <NumberInput
+                            value={peer.priority ?? 0}
+                            min={0}
+                            step={1}
+                            disabled={peersBusy}
+                            revert={priorityRevert}
+                            onchange={(v) => savePriority(host, v)}
+                          />
+                        </div>
+                      {:else}
+                        <span class="text-text-dim">—</span>
+                      {/if}
                     </td>
                     <td class="px-3 py-2">
                       <span class={peer.online ? 'text-accent' : 'text-text-dim'}>
@@ -469,6 +500,9 @@
           <ReadOnlyRow label={$_('config.loadsharing.peer_name')} value={detailsPeer.name} />
           <ReadOnlyRow label={$_('config.loadsharing.peer_host')} value={host} />
           <ReadOnlyRow label={$_('config.loadsharing.peer_id')} value={detailsPeer.id} />
+          {#if detailsPeer.joined}
+            <ReadOnlyRow label={$_('config.loadsharing.peer_priority')} value={detailsPeer.priority ?? 0} />
+          {/if}
           <ReadOnlyRow
             label={$_('config.loadsharing.peer_online')}
             value={detailsPeer.online ? $_('config.connected') : $_('config.not_connected')}
