@@ -84,7 +84,7 @@ describe('LoadSharing page', () => {
     })
     const { getByText, queryByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.peers')).toBeInTheDocument()
-    expect(getByText('garage.local')).toBeInTheDocument()
+    expect(getByText('Garage')).toBeInTheDocument()
     expect(getByText('config.loadsharing.peer_online_value')).toBeInTheDocument()
     expect(queryByText('config.connected')).not.toBeInTheDocument()
     expect(queryByText('config.loadsharing.controlled_by')).not.toBeInTheDocument()
@@ -190,14 +190,15 @@ describe('LoadSharing page', () => {
     const detailsButton = getByLabelText('config.loadsharing.peer_details')
     expect(detailsButton).toBeInTheDocument()
 
-    // Initially modal content should not be present (or closed)
-    expect(queryByText('Secret Garden')).not.toBeInTheDocument()
+    // Initially modal-only fields should not be present (or closed)
+    expect(queryByText('secret.local')).not.toBeInTheDocument()
 
     // Trigger details modal
     await fireEvent.click(detailsButton)
 
     // Now it should be visible showing the detailed fields
-    expect(getByText('Secret Garden')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.close')).toBeInTheDocument()
+    expect(getByText('secret.local')).toBeInTheDocument()
     expect(getByText('peer-details-1')).toBeInTheDocument()
     expect(getByText('16 A')).toBeInTheDocument()
   })
