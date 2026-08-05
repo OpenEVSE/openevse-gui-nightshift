@@ -230,4 +230,34 @@ describe('Firmware page', () => {
     expect(queryByText('config.firmware.up_to_date')).toBeNull()
     expect(getByText('config.firmware.dev_build')).toBeInTheDocument()
   })
+
+  it('sends X-Requested-With when uploading a local firmware file', async () => {
+    // The upload is a raw fetch rather than httpAPI(), so it has to set the
+    // header itself. Without it the firmware's CSRF guard answers 403
+    // {"msg":"csrf"} for anyone authenticated by the session cookie, which
+    // broke local firmware upload on every password-protected device.
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true }))
+    const { getByLabelText, getByText } = render(Firmware)
+
+    const file = new File([new Uint8Array([1, 2, 3])], 'firmware.bin')
+    const input = getByLabelText('config.firmware.choose_file')
+    await fireEvent.change(input, { target: { files: [file] } })
+
+    const install = getByText('config.firmware.install').closest('button')
+    expect(install.disabled).toBe(false)
+    await fireEvent.click(install)
+
+    // The page also fetches the GitHub release list on mount, so pick out the
+    // upload call rather than assuming it is the first one.
+    await vi.waitFor(() => {
+      expect(global.fetch.mock.calls.some(([u]) => u.endsWith('/update'))).toBe(true)
+    })
+    // In dev the mock server sits behind an /api prefix, and vitest runs with
+    // import.meta.env.DEV set, so match on the suffix.
+    const [url, init] = global.fetch.mock.calls.find(([u]) => u.endsWith('/update'))
+    expect(url).toMatch(/\/update$/)
+    expect(init.method).toBe('POST')
+    expect(init.headers['X-Requested-With']).toBe('OpenEVSE')
+    expect(init.body).toBeInstanceOf(FormData)
+  })
 })
