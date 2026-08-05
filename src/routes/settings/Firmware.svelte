@@ -169,7 +169,17 @@
     try {
       const fd = new FormData()
       fd.append('update', firmwareFile)
-      const res = await fetch(updateUrl, { method: 'POST', body: fd })
+      // This is a raw fetch rather than httpAPI() because the body is a
+      // FormData upload, so it has to set X-Requested-With itself: the
+      // firmware's CSRF guard rejects any non-GET request authenticated by the
+      // session cookie that arrives without it. Missing this header made the
+      // upload fail with 403 {"msg":"csrf"} for every logged-in user on a
+      // password-protected device.
+      const res = await fetch(updateUrl, {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'OpenEVSE' },
+      })
       if (!res.ok) showWriteError()
     } catch {
       showWriteError()
