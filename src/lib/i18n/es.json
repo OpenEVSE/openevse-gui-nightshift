@@ -440,6 +440,8 @@
       "debug": "Consola de depuración",
       "evse": "Consola EVSE",
       "connecting": "Conectando…",
+      "waiting": "Conectado — esperando mensajes…",
+      "disconnected": "Transmisión en vivo desconectada — mostrando salida almacenada.",
       "unavailable": "Consola no disponible.",
       "diagnostics": "Diagnóstico",
       "diagnostics_desc": "Descarga una instantánea JSON de todos los almacenes (configuración, estado, programación, reclamaciones…) para un informe de error. Las contraseñas y tokens se redactan.",
