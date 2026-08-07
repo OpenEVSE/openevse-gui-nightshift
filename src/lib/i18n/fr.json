@@ -441,6 +441,7 @@
       "evse": "Console EVSE",
       "connecting": "Connexion…",
       "waiting": "Connecté — en attente de messages…",
+      "disconnected": "Flux en direct déconnecté — affichage du tampon.",
       "unavailable": "Console indisponible.",
       "diagnostics": "Diagnostic",
       "diagnostics_desc": "Téléchargez un instantané JSON de tous les stores (config, état, planning, claims…) pour un rapport de bug. Les mots de passe et tokens sont masqués.",

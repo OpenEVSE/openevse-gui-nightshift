@@ -30,36 +30,53 @@
     text = next
   }
 
-  async function loadHistory() {
-    const history = await httpAPI('GET', `/${mode}`, null, 'text')
+  async function loadHistory(consoleMode) {
+    const history = await httpAPI('GET', `/${consoleMode}`, null, 'text')
     if (history !== 'error' && history) append(history, true)
   }
 
-  function connect() {
+  async function connect(consoleMode, isCancelled) {
     connectionState = 'connecting'
 
-    // StreamSpy exposes its buffered output through /debug and /evse. Start
-    // loading it before the WebSocket handshake so a quiet debug stream still
-    // has useful content as soon as the console opens.
-    loadHistory()
+    // StreamSpy exposes its buffered output through /debug and /evse. Fetch
+    // that snapshot *before* opening the socket. The device keeps writing to
+    // the same buffer, so a snapshot taken while the socket was already live
+    // would repeat lines the socket had delivered in the meantime.
+    await loadHistory(consoleMode)
+    if (isCancelled()) return
 
     try {
       const proto = location.protocol === 'https:' ? 'wss://' : 'ws://'
-      socket = new WebSocket(`${proto}${location.host}/${mode}/console`)
-      socket.addEventListener('open', () => (connectionState = 'connected'))
-      socket.addEventListener('message', (e) => {
-        append(e.data)
+      socket = new WebSocket(`${proto}${location.host}/${consoleMode}/console`)
+      socket.addEventListener('open', () => {
+        if (!isCancelled()) connectionState = 'connected'
       })
-      socket.addEventListener('error', () => (connectionState = 'failed'))
-      socket.addEventListener('close', () => (connectionState = 'failed'))
+      socket.addEventListener('message', (e) => {
+        if (!isCancelled()) append(e.data)
+      })
+      socket.addEventListener('error', () => {
+        if (!isCancelled()) connectionState = 'failed'
+      })
+      // Closing on teardown would otherwise flag the console as failed on the
+      // way out, so honour the cancelled flag here too.
+      socket.addEventListener('close', () => {
+        if (!isCancelled()) connectionState = 'failed'
+      })
     } catch {
       connectionState = 'failed'
     }
   }
 
   $effect(() => {
-    connect()
-    return () => socket?.close()
+    // Read mode synchronously so the effect re-runs when it changes; the read
+    // inside connect() happens after an await, where Svelte no longer tracks.
+    const consoleMode = mode
+    let cancelled = false
+    connect(consoleMode, () => cancelled)
+    return () => {
+      cancelled = true
+      socket?.close()
+    }
   })
 
   $effect(() => {
@@ -75,6 +92,12 @@
   class="h-[70vh] max-h-[700px] min-h-[260px] overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs text-text"
 >
   {#if text.length > 0}
+    <!-- Buffered history means `text` is usually non-empty, so a dead socket
+         would otherwise look like a merely quiet console. Say so explicitly
+         rather than letting stale output stand in for a live stream. -->
+    {#if connectionState === 'failed'}
+      <p class="mb-2 text-text-dim">{$_('config.terminal.disconnected')}</p>
+    {/if}
     <pre class="m-0 whitespace-pre-wrap break-all">{text}</pre>
   {:else if connectionState === 'failed'}
     <p class="text-text-dim">{$_('config.terminal.unavailable')}</p>

@@ -441,6 +441,7 @@
       "evse": "EVSE console",
       "connecting": "Connecting…",
       "waiting": "Connected — waiting for messages…",
+      "disconnected": "Live stream disconnected — showing buffered output.",
       "unavailable": "Console unavailable.",
       "diagnostics": "Diagnostics",
       "diagnostics_desc": "Download a JSON snapshot of every store (config, status, schedule, claims…) for a bug report. Passwords and tokens are redacted.",
