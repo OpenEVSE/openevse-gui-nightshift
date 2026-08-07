@@ -440,6 +440,7 @@
       "debug": "Debug konzol",
       "evse": "EVSE konzol",
       "connecting": "Csatlakozás…",
+      "waiting": "Csatlakoztatva — várakozás az üzenetekre…",
       "unavailable": "Konzol nem elérhető.",
       "diagnostics": "Diagnosztika",
       "diagnostics_desc": "Tölts le egy JSON-pillanatképet az összes store-ról (config, status, ütemezés, claims…) hibajelentéshez. A jelszavak és tokenek szerkesztve vannak.",

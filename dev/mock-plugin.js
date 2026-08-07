@@ -229,6 +229,16 @@ export function mockPlugin() {
           return
         }
 
+        // StreamSpy console history. The live console WebSockets are not
+        // emulated, but opening either console should still load useful text.
+        if (url === '/api/debug' || url === '/api/evse') {
+          res.writeHead(200, { 'Content-Type': 'text/plain' })
+          res.end(url === '/api/debug'
+            ? 'OpenEVSE WiFi mock console\nFirmware ready\n'
+            : '$GV\r\n$OK 8.2.0\r\n')
+          return
+        }
+
         // RFID user-name map (Labs feature — firmware support pending)
         if (url === '/api/rfid/users') {
           if (req.method === 'GET') {
