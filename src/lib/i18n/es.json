@@ -142,7 +142,6 @@
       "solar": "Producción propia",
       "shaper": "Limitador de carga",
       "emoncms": "EmonCMS",
-      "ohmconnect": "OhmConnect",
       "firmware": "Firmware",
       "security": "Seguridad",
       "certificates": "Certificados",
@@ -385,12 +384,6 @@
       "server_desc": "p. ej. emoncms.org",
       "node": "Nodo",
       "apikey": "Clave API de escritura"
-    },
-    "ohmconnect": {
-      "enable": "Activar OhmConnect",
-      "hour": "Ohm hour",
-      "key": "Clave Ohm",
-      "key_desc": "Tu clave de cuenta de OhmConnect."
     },
     "about": {
       "versions": "Versiones",
@@ -866,7 +859,6 @@
     "timer": "Temporizador",
     "limit": "Límite",
     "error": "Error",
-    "ohm": "OhmConnect",
     "ocpp": "OCPP",
     "rfid": "RFID",
     "mqtt": "MQTT",
