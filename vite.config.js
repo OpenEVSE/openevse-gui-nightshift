@@ -39,8 +39,8 @@ export default defineConfig(({ mode }) => {
           name: 'OpenEVSE UI',
           short_name: 'OpenEVSE',
           description: 'OpenEVSE User Interface',
-          theme_color: '#0c0e13',
-          background_color: '#0c0e13',
+          theme_color: '#222835',
+          background_color: '#222835',
           display: 'standalone',
           icons: [
             { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
