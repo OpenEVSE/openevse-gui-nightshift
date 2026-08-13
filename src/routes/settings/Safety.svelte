@@ -93,6 +93,7 @@
       panic={$config_store?.over_temp_shutdown ?? 72}
       min={40}
       max={82}
+      unit={$config_store?.temp_unit ?? 'c'}
       onThrottleChange={(v) => form.saveField('temp_throttle_setpoint', v)}
       onPanicChange={(v) => form.saveField('over_temp_shutdown', v)}
     />
