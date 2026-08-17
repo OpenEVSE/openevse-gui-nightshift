@@ -44,9 +44,6 @@
       ? $loadsharing_store.status.peers
       : ($loadsharing_store?.peers ?? []),
   )
-  let allocationVersion = $derived($status_store?.loadsharing_status_version)
-  let joinedPeersFromWs = $derived(Array.isArray($status_store?.loadsharing_joined_peers) ? $status_store.loadsharing_joined_peers : [])
-  let groupCurrentTotal = $derived($status_store?.loadsharing_group_current_total ?? 0)
   let allocations = $derived($loadsharing_store?.status?.allocations ?? [])
   let runtimeStatus = $derived($loadsharing_store?.status ?? {})
   let hasSafetyFactor = $derived($config_store?.loadsharing_safety_factor !== undefined)
@@ -74,7 +71,9 @@
     controllerPeer?.url || (controllerHost ? `http://${controllerHost}` : ''),
   )
   let memberAssignedLimit = $derived(
-    $claims_target_store?.claims?.max_current === EvseClients.shaper.id
+    [EvseClients.shaper.id, EvseClients.loadsharing.id].includes(
+      $claims_target_store?.claims?.max_current,
+    )
       ? $claims_target_store?.properties?.max_current ?? null
       : null,
   )
@@ -158,6 +157,15 @@
     peersBusy = true
     try {
       await loadsharing_store.discover()
+    } finally {
+      peersBusy = false
+    }
+  }
+
+  async function refreshPeers() {
+    peersBusy = true
+    try {
+      await loadsharing_store.refresh()
     } finally {
       peersBusy = false
     }
@@ -340,7 +348,7 @@
 
     {#if isController}
       <ConfigSection title={$_('config.loadsharing.peers')}>
-        <div class="mb-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+        <div class="mb-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
           <TextInput
             value={peerHost}
             placeholder="openevse-2.local"
@@ -357,6 +365,12 @@
             variant="ghost"
             disabled={peersBusy}
             onclick={discoverPeers}
+          />
+          <Button
+            label={$_('config.loadsharing.refresh')}
+            variant="ghost"
+            disabled={peersBusy}
+            onclick={refreshPeers}
           />
         </div>
 

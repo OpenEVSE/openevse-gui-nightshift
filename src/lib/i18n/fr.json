@@ -385,7 +385,6 @@
       "role_controller": "Controller",
       "role_member": "Member",
       "site_max_current": "Site max current (A)",
-      "min_per_evse_current": "Minimum per-EVSE current (A)",
       "safety_factor": "Safety factor",
       "heartbeat_timeout": "Heartbeat timeout (s)",
       "failsafe_mode": "Failsafe mode",

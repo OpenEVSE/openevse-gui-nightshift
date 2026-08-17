@@ -116,7 +116,9 @@
   let loadSharingControlled = $derived(loadSharingEnabled && loadSharingRole === 'member')
   let loadSharingController = $derived($config_store?.loadsharing_controller_host ?? '')
   let loadSharingClaimed = $derived(
-    $claims_target_store?.claims?.max_current === EvseClients.shaper.id,
+    [EvseClients.shaper.id, EvseClients.loadsharing.id].includes(
+      $claims_target_store?.claims?.max_current,
+    ),
   )
   let loadSharingBadges = $derived({
     active: loadSharingEnabled,

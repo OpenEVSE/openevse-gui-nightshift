@@ -104,7 +104,7 @@ describe('LoadSharing page', () => {
     })
     claims_target_store.set({
       properties: { max_current: 10 },
-      claims: { state: null, max_current: EvseClients.shaper.id },
+      claims: { state: null, max_current: EvseClients.loadsharing.id },
     })
     config_store.set({
       loadsharing_enabled: true,
@@ -167,6 +167,23 @@ describe('LoadSharing page', () => {
     await fireEvent.click(addButton)
 
     expect(addPeerSpy).toHaveBeenCalledWith('yard.local')
+    expect(refreshSpy).toHaveBeenCalled()
+  })
+
+  it('allows refreshing peers from the controller toolbar', async () => {
+    config_store.set({
+      loadsharing_enabled: true,
+      loadsharing_role: 'controller',
+      loadsharing_group_id: 'main',
+      loadsharing_group_max_current: 50,
+      loadsharing_safety_factor: 0.9,
+    })
+
+    const refreshSpy = vi.spyOn(loadsharing_store, 'refresh').mockResolvedValue(true)
+
+    const { getByText } = render(LoadSharing)
+    await fireEvent.click(getByText('config.loadsharing.refresh'))
+
     expect(refreshSpy).toHaveBeenCalled()
   })
 

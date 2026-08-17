@@ -339,7 +339,7 @@ describe('Dashboard', () => {
     })
     claims_target_store.set({
       properties: { max_current: 16 },
-      claims: { state: null, max_current: EvseClients.shaper.id },
+      claims: { state: null, max_current: EvseClients.loadsharing.id },
     })
     status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
     const { getByText, getAllByText } = render(Dashboard)

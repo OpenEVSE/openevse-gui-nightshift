@@ -85,8 +85,8 @@ export function mockPlugin() {
   // run; reset by restarting the server.
   const rfidUsers = JSON.parse(loadFixture('rfid_users.json'))
   const loadsharingPeers = [
-    { id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true },
-    { id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false }
+    { id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true, priority: 0 },
+    { id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false, priority: 0 }
   ]
 
   // Dev-only runtime state override. Lets the resting/charging layouts be
@@ -202,7 +202,7 @@ export function mockPlugin() {
                 if (existing) {
                   existing.joined = true
                 } else {
-                  loadsharingPeers.push({ id: `peer-${Date.now()}`, name: host, host, online: true, joined: true })
+                  loadsharingPeers.push({ id: `peer-${Date.now()}`, name: host, host, online: true, joined: true, priority: 0 })
                 }
               } catch {}
               res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -213,6 +213,23 @@ export function mockPlugin() {
         }
 
         if (url && url.startsWith('/api/loadsharing/peers/')) {
+          if (req.method === 'PUT') {
+            const host = decodeURIComponent(url.slice('/api/loadsharing/peers/'.length))
+            let body = ''
+            req.on('data', (chunk) => { body += chunk })
+            req.on('end', () => {
+              try {
+                const { priority } = JSON.parse(body)
+                const peer = loadsharingPeers.find(p => p.host === host)
+                if (peer) {
+                  peer.priority = priority
+                }
+              } catch {}
+              res.writeHead(200, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'done' }))
+            })
+            return
+          }
           if (req.method === 'DELETE') {
             const host = decodeURIComponent(url.slice('/api/loadsharing/peers/'.length))
             const idx = loadsharingPeers.findIndex(p => p.host === host)
