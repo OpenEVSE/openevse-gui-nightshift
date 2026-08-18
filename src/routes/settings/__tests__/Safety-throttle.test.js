@@ -61,4 +61,21 @@ describe('Safety — temp throttle', () => {
     await fireEvent.change(panic, { target: { value: '80' } })
     expect(saveField).toHaveBeenCalledWith('over_temp_shutdown', 80)
   })
+  // The same card on the Charge Manager page honours temp_unit; this page used
+  // to omit the prop entirely, so the identical slider read °C here and °F
+  // there for the same setpoint. Assert the composed label, which covers the
+  // conversion as well as the unit suffix (65 °C = 149 °F).
+  it('labels the slider in the configured unit', async () => {
+    config.update((c) => ({ ...c, temp_throttle_enabled: true, temp_unit: 'f' }))
+    const { container } = render(Safety)
+    expect(container.textContent).toContain('149units.fahrenheit')
+    expect(container.textContent).not.toContain('units.celsius')
+  })
+
+  it('falls back to Celsius when no unit is configured', async () => {
+    config.update((c) => ({ ...c, temp_throttle_enabled: true }))
+    const { container } = render(Safety)
+    expect(container.textContent).toContain('65units.celsius')
+    expect(container.textContent).not.toContain('units.fahrenheit')
+  })
 })

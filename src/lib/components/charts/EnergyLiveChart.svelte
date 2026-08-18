@@ -4,9 +4,15 @@
   import UplotChart from './UplotChart.svelte'
   import { readChartTheme } from './chartTheme.js'
   import { socOrNull } from '../../dashboard/sessionChart.js'
+  import { cToF } from '../../temperature.js'
 
   /** @type {{ samples: Array<{ts:number,a:number,t:number,e:number,s:number}> }} */
   let { samples = [] } = $props()
+
+  // Samples always arrive in °C; the plotted series, its scale bounds and its
+  // legend label all have to move together when the user prefers Fahrenheit.
+  // Converting only the data would leave a °C axis range and a "°C" legend.
+  let isF = $derived(($config_store?.temp_unit ?? 'c') === 'f')
 
   // Only draw the SOC axis/line when a vehicle source actually reported it,
   // so devices without vehicle integration don't get an empty green axis.
@@ -33,7 +39,9 @@
   let data = $derived.by(() => {
     const x = samples.map((s) => s.ts)
     const a = samples.map((s) => s.a)
-    const t = samples.map((s) => (s.t > 0 ? s.t : null))
+    // `> 0` is the no-reading sentinel and is tested against the raw °C value,
+    // before any conversion -- in °F the same reading is a positive number.
+    const t = samples.map((s) => (s.t > 0 ? (isF ? cToF(s.t) : s.t) : null))
     const base = [x, a, t]
     return hasSoc ? [...base, samples.map(socOrNull)] : base
   })
@@ -52,7 +60,7 @@
       scales: {
         x: { time: true },
         a: { range: [0, ampMax] },
-        t: { range: [-20, 80] },
+        t: { range: isF ? [cToF(-20), cToF(80)] : [-20, 80] },
         ...(hasSoc ? { soc: { range: [0, 100] } } : {}),
       },
       axes: [
@@ -66,7 +74,7 @@
       series: [
         {},
         { label: 'A', scale: 'a', stroke: theme.charging, width: 2, fill: theme.charging + '22' },
-        { label: '°C', scale: 't', stroke: theme.warning, width: 2 },
+        { label: $_(isF ? 'units.fahrenheit' : 'units.celsius'), scale: 't', stroke: theme.warning, width: 2 },
         ...(hasSoc ? [{ label: 'SOC %', scale: 'soc', stroke: theme.success, width: 2 }] : []),
       ],
     }
