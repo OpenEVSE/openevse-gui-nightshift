@@ -13,6 +13,7 @@
   import { showWriteError } from '../lib/alerts.js'
   import { DAYS } from '../lib/schedule/timers.js'
   import { timersToRules, rulesToTimers, ruleDeleteIds, actionToFeatureKey } from '../lib/charge_manager/rules.js'
+  import { vehicleLimitAvailability } from '../lib/charge_manager/vehicle.js'
   import { allRequiredSafetyChecksOn } from '../lib/config/safety.js'
   import GlobalSection from '../lib/components/charge_manager/GlobalSection.svelte'
   import ConditionalSection from '../lib/components/charge_manager/ConditionalSection.svelte'
@@ -41,9 +42,11 @@
   let shapingEnabled = $derived(!!$config_store?.current_shaper_enabled)
   let rfidEnabled    = $derived(!!$config_store?.rfid_enabled)
   let ocppEnabled    = $derived(!!$config_store?.ocpp_enabled)
-  // Vehicle telemetry limits need their MQTT topics configured (Settings → Vehicle).
-  let socAvailable    = $derived(!!$config_store?.mqtt_vehicle_soc)
-  let rangeAvailable  = $derived(!!$config_store?.mqtt_vehicle_range)
+  // Offered when a vehicle data source exists at all, not only while a reading
+  // is arriving -- see vehicleLimitAvailability for why.
+  let vehicleLimits   = $derived(vehicleLimitAvailability($config_store, $status_store))
+  let socAvailable    = $derived(vehicleLimits.soc)
+  let rangeAvailable  = $derived(vehicleLimits.range)
   let rangeMiles      = $derived(!!$config_store?.mqtt_vehicle_range_miles)
   // default_state: true = Active on power-up, false = Disabled
   let defaultActive   = $derived($config_store?.default_state !== false)
