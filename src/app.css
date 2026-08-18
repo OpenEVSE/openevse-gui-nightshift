@@ -37,13 +37,13 @@
 /* Light theme — also the fallback when no data-theme is set */
 :root,
 [data-theme="light"] {
-  --surface: #ffffff;
-  --surface-2: #eef4f3;
-  --surface-3: #dde7e6;
+  --surface: #f0f4f3;
+  --surface-2: #e1ebe9;
+  --surface-3: #cddbd9;
   --text: #13202b;
-  --text-dim: #5b6b72;
+  --text-dim: #566670;
   --accent: #0f9b98;
-  --border: #e4eae9;
+  --border: #d1dcda;
   --charging: #0f9b98;
   --error: #d6453d;
   --warning: #d98a2b;
@@ -54,13 +54,13 @@
 }
 
 [data-theme="dark"] {
-  --surface: #0c0e13;
-  --surface-2: #10141c;
-  --surface-3: #161b26;
+  --surface: #222835;
+  --surface-2: #2b3241;
+  --surface-3: #353d4e;
   --text: #e8ecf2;
-  --text-dim: #6b7585;
+  --text-dim: #949eae;
   --accent: #3cc6bd;
-  --border: #1c2230;
+  --border: #404a5d;
   --charging: #3cc6bd;
   --error: #f06e66;
   --warning: #e7a948;

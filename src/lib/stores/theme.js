@@ -4,7 +4,7 @@ const STORAGE_KEY = 'oevse-theme'
 
 // Kept in sync with --surface in src/app.css. The system chrome (iOS status
 // bar tint, Android task switcher) reads this from <meta name="theme-color">.
-const THEME_COLORS = { light: '#ffffff', dark: '#0c0e13' }
+const THEME_COLORS = { light: '#f0f4f3', dark: '#222835' }
 
 function syncThemeColorMeta(resolved) {
   if (typeof document === 'undefined') return
