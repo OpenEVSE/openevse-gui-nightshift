@@ -244,6 +244,13 @@
     </ConfigSection>
   {:else if src === 3}
     <ConfigSection title={$_('config.vehicle.src_http')}>
+      <FormField label={$_('config.vehicle.range_unit')} status={$ss.mqtt_vehicle_range_miles ?? 'idle'}>
+        <Select
+          options={unitOptions}
+          value={String(!!$config_store?.mqtt_vehicle_range_miles)}
+          onchange={(v) => form.saveField('mqtt_vehicle_range_miles', v === 'true')}
+        />
+      </FormField>
       <p class="text-sm text-text-dim">{$_('config.vehicle.http_info')}</p>
       <pre class="mt-2 rounded-xl bg-surface-2 p-3 text-xs text-text-dim">POST http://&lt;charger-ip&gt;/status
 &#123; "battery_level": int, "battery_range": int, "time_to_full_charge": int &#125;</pre>

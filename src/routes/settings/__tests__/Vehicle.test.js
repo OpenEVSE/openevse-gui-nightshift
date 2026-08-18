@@ -44,6 +44,20 @@ describe('Vehicle page', () => {
     expect(getByText('config.vehicle.http_info')).toBeInTheDocument()
   })
 
+  it('shows the range unit selector when the source is HTTP', () => {
+    config_store.set({ vehicle_data_src: 3 })
+    const { getByText } = render(Vehicle)
+    expect(getByText('config.vehicle.range_unit')).toBeInTheDocument()
+  })
+
+  it('saves the range unit when the source is HTTP', async () => {
+    config_store.set({ vehicle_data_src: 3, mqtt_vehicle_range_miles: false })
+    const { getAllByRole } = render(Vehicle)
+    // comboboxes: [0] data source, [1] range unit
+    await fireEvent.change(getAllByRole('combobox')[1], { target: { value: 'true' } })
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_vehicle_range_miles: true }))
+  })
+
   it('shows no integration fields when the source is None', () => {
     config_store.set({ vehicle_data_src: 0 })
     const { queryByText } = render(Vehicle)
