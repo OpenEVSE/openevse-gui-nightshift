@@ -13,6 +13,10 @@
   width, where there was ~20 units of slack. The second cord and its plug end
   up costing 3% instead.
 
+  The pins run 3 units deeper than they look: they have to pass the body's
+  2.6 corner radius, or they meet a curved edge and leave a notch at the join.
+  The overlap is invisible because both are currentColor.
+
   The plug's two pins only resolve above ~32px. Below that it collapses to a
   solid block, which is intentional — the silhouette holds, it just loses
   detail rather than turning to mush.
@@ -51,6 +55,6 @@
   <path d="M34.6 77C34.6 84 31.6 86 26.6 86"
     fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" />
   <rect x="21.2" y="79.5" width="5.4" height="13" rx="2.6" fill="currentColor" />
-  <rect x="17.1" y="81.1" width="4.1" height="3" rx="1.5" fill="currentColor" />
-  <rect x="17.1" y="87.9" width="4.1" height="3" rx="1.5" fill="currentColor" />
+  <rect x="17.1" y="81.1" width="7.1" height="3" rx="1.5" fill="currentColor" />
+  <rect x="17.1" y="87.9" width="7.1" height="3" rx="1.5" fill="currentColor" />
 </svg>
