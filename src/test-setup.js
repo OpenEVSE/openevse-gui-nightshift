@@ -36,3 +36,25 @@ if (typeof globalThis.MutationObserver !== 'function') {
     takeRecords() { return [] }
   }
 }
+
+// Node 26 defines `localStorage` as a global accessor that returns undefined
+// unless the process was started with --localstorage-file. Because the binding
+// exists it shadows the one jsdom installs — window === globalThis here, so
+// `window.localStorage` is undefined too — and anything touching storage sees
+// undefined rather than jsdom's implementation. The accessor is configurable,
+// so defineProperty replaces it with a minimal in-memory Storage.
+if (!globalThis.localStorage) {
+  const store = new Map()
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    writable: true,
+    value: {
+      getItem: (key) => (store.has(String(key)) ? store.get(String(key)) : null),
+      setItem: (key, value) => { store.set(String(key), String(value)) },
+      removeItem: (key) => { store.delete(String(key)) },
+      clear: () => { store.clear() },
+      key: (index) => [...store.keys()][index] ?? null,
+      get length() { return store.size },
+    },
+  })
+}
