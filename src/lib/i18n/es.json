@@ -542,7 +542,13 @@
     "evse_missing": "EVSE no conectado",
     "evse_missing_body": "El módulo WiFi no puede comunicarse con el controlador EVSE.",
     "error": "Error del cargador",
-    "reconnect": "Recargar"
+    "reconnect": "Recargar",
+    "offline_title": "Charger disconnected",
+    "offline_reason": "The charger dropped off WiFi. This page is still trying to reach it and will reconnect automatically once it's back — the readings behind this dialog are from before the drop.",
+    "offline_last_seen": "Last seen",
+    "offline_address": "Reconnecting to",
+    "offline_retry": "Retry now",
+    "offline_reload": "Reload page"
   },
   "screen": {
     "dashboard": "Panel principal",

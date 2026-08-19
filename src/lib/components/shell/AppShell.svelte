@@ -7,6 +7,7 @@
   import Header from './Header.svelte'
   import BottomNav from './BottomNav.svelte'
   import ConnectionBanners from './ConnectionBanners.svelte'
+  import DisconnectOverlay from './DisconnectOverlay.svelte'
 
   let deviceName = $derived($status_store?.name || 'OpenEVSE')
   let evseConnected = $derived($status_store?.evse_connected ?? true)
@@ -38,3 +39,7 @@
   </div>
   <BottomNav path={$currentPath} {deviceName} />
 </div>
+
+<!-- Full-screen blocking scrim (z-40) that escalates after a grace period when
+     the WS stays down, so users don't mistake stale readings for live data. -->
+<DisconnectOverlay />

@@ -18,6 +18,18 @@
   let reconnectDelay = RECONNECT_MIN
   let reconnectTimer
 
+  // The disconnect overlay bumps ws_retry_request to demand an immediate
+  // reconnect (skipping the up-to-30s backoff). Watch the nonce and force a
+  // fresh socket; the initial value never triggers (we're already connecting).
+  let lastRetryReq = $uistates_store.ws_retry_request ?? 0
+  $effect(() => {
+    const req = $uistates_store.ws_retry_request ?? 0
+    if (req !== lastRetryReq) {
+      lastRetryReq = req
+      teardownAndReconnect()
+    }
+  })
+
   onMount(() => {
     connect2socket()
     if (typeof window !== 'undefined') {
@@ -47,12 +59,14 @@
     s.addEventListener('open', () => {
       if (s !== socket) return
       $uistates_store.ws_connected = true
+      $uistates_store.ws_last_seen = DateTime.now().toUnixInteger()
       reconnectDelay = RECONNECT_MIN
       keepAlive(s)
     })
     s.addEventListener('message', (e) => {
       if (s !== socket) return
       lastmsg = DateTime.now().toUnixInteger()
+      $uistates_store.ws_last_seen = lastmsg
       if (parseMessage(e.data.toString())) ping_cnt = 0
     })
     s.addEventListener('error', () => {

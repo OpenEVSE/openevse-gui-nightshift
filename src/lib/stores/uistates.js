@@ -25,6 +25,8 @@ const model = {
 		// local states
 		data_loaded: false,
 		ws_connected: true,
+		ws_last_seen: 0, // unix secs of last successful WS contact; 0 = never
+		ws_retry_request: 0, // nonce; bump to force an immediate WS reconnect
 		status_expanded: false,
 		breakpoint: undefined,
 		has_fetched: false,
