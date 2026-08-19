@@ -130,7 +130,7 @@
   }
 </script>
 
-<Modal visible={escalated} closable={false}>
+<Modal visible={escalated} closable={false} size="md">
   <h2 class="text-base font-semibold text-text">{$_('connection.offline_title')}</h2>
   <p class="mt-2 text-sm text-text-dim">{$_('connection.offline_reason')}</p>
 
