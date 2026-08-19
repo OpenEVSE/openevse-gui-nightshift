@@ -21,13 +21,20 @@
 
   Unlike the gear this replaces, nothing here needs a <mask>, so there are no
   document-unique ids to collide.
+
+  Decorative by default: every placement so far sits beside text that already
+  names the product, so labelling the mark too made screen readers announce it
+  twice. Pass `label` for a standalone use where nothing else names it.
 -->
 <script>
-  let { size = 32, class: klass = '' } = $props()
+  let { size = 32, class: klass = '', label = '' } = $props()
 </script>
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"
-  width={size} height={size} class={klass} role="img" aria-label="OpenEVSE">
+  width={size} height={size} class={klass}
+  role={label ? 'img' : undefined}
+  aria-label={label || undefined}
+  aria-hidden={label ? undefined : 'true'}>
   <rect x="20.6" y="10" width="46" height="66" rx="11"
     fill="none" stroke="currentColor" stroke-width="7" />
   <path d="M52.67 19L28.13 47.8L42 47.8L37.2 67L59.07 37.13L45.73 37.13Z"
