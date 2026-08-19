@@ -2,13 +2,14 @@
   let {
     visible = false,
     closable = true,
-    size = 'sm', // 'sm' (default, dialogs) | 'lg' (live consoles, big content)
+    size = 'sm', // 'sm' (default, dialogs) | 'md' (roomier dialogs) | 'lg' (live consoles, big content)
     onclose = () => {},
     children,
   } = $props()
 
   const widths = {
     sm: 'max-w-sm',
+    md: 'max-w-lg',
     lg: 'max-w-4xl',
   }
 </script>

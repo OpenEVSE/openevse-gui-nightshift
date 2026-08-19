@@ -18,6 +18,35 @@
   let reconnectDelay = RECONNECT_MIN
   let reconnectTimer
 
+  // Diagnostics surfaced in the disconnect overlay's details panel. The browser
+  // WS API hides why a connect failed (close code is almost always 1006), so
+  // the useful signal is whether we ever reached OPEN and how many attempts
+  // we've burned — tracked here and mirrored into the store.
+  let attempts = 0
+  let everConnected = false
+  function publishDebug(extra = {}) {
+    $uistates_store.ws_debug = {
+      attempts,
+      ever_connected: everConnected,
+      close_code: $uistates_store.ws_debug?.close_code ?? null,
+      close_reason: $uistates_store.ws_debug?.close_reason ?? '',
+      retry_delay_ms: reconnectDelay,
+      ...extra,
+    }
+  }
+
+  // The disconnect overlay bumps ws_retry_request to demand an immediate
+  // reconnect (skipping the up-to-30s backoff). Watch the nonce and force a
+  // fresh socket; the initial value never triggers (we're already connecting).
+  let lastRetryReq = $uistates_store.ws_retry_request ?? 0
+  $effect(() => {
+    const req = $uistates_store.ws_retry_request ?? 0
+    if (req !== lastRetryReq) {
+      lastRetryReq = req
+      teardownAndReconnect()
+    }
+  })
+
   onMount(() => {
     connect2socket()
     if (typeof window !== 'undefined') {
@@ -47,12 +76,17 @@
     s.addEventListener('open', () => {
       if (s !== socket) return
       $uistates_store.ws_connected = true
+      $uistates_store.ws_last_seen = DateTime.now().toUnixInteger()
       reconnectDelay = RECONNECT_MIN
+      attempts = 0
+      everConnected = true
+      publishDebug()
       keepAlive(s)
     })
     s.addEventListener('message', (e) => {
       if (s !== socket) return
       lastmsg = DateTime.now().toUnixInteger()
+      $uistates_store.ws_last_seen = lastmsg
       if (parseMessage(e.data.toString())) ping_cnt = 0
     })
     s.addEventListener('error', () => {
@@ -61,17 +95,20 @@
       $uistates_store.ws_connected = false
       cancelKeepAlive()
     })
-    s.addEventListener('close', () => {
+    s.addEventListener('close', (e) => {
       if (s !== socket) return
       lastmsg = DateTime.now().toUnixInteger()
       cancelKeepAlive()
       $uistates_store.ws_connected = false
+      publishDebug({ close_code: e?.code ?? null, close_reason: e?.reason ?? '' })
       scheduleReconnect()
     })
   }
 
   function scheduleReconnect() {
     cancelReconnect()
+    attempts += 1
+    publishDebug() // retry_delay_ms reflects the delay before this pending try
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null
       connect2socket()

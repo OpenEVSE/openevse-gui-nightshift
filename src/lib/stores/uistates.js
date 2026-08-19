@@ -25,6 +25,16 @@ const model = {
 		// local states
 		data_loaded: false,
 		ws_connected: true,
+		ws_last_seen: 0, // unix secs of last successful WS contact; 0 = never
+		ws_retry_request: 0, // nonce; bump to force an immediate WS reconnect
+		ws_debug: {
+			// diagnostics surfaced in the disconnect overlay's details panel
+			attempts: 0, // reconnect attempts since the last successful open
+			ever_connected: false, // did the socket ever reach OPEN this session
+			close_code: null, // last CloseEvent.code (1006 = abnormal, no frame)
+			close_reason: '', // last CloseEvent.reason (usually empty)
+			retry_delay_ms: 0, // backoff before the pending retry
+		},
 		status_expanded: false,
 		breakpoint: undefined,
 		has_fetched: false,
