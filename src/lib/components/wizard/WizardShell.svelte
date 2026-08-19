@@ -11,7 +11,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n'
-  import GearMark from '../../../assets/GearMark.svelte'
+  import ChargePointMark from '../../../assets/ChargePointMark.svelte'
   import Button from '../ui/Button.svelte'
   import Icon from '../../icons/Icon.svelte'
 
@@ -40,7 +40,7 @@
     class="flex items-center justify-between gap-3 border-b border-border px-4 py-3"
   >
     <div class="flex items-center gap-2">
-      <GearMark class="h-6 w-6 text-accent" />
+      <ChargePointMark class="h-6 w-6 text-accent" />
       <span class="text-sm font-semibold tracking-wide">OpenEVSE</span>
     </div>
     <span class="text-xs text-text-dim" data-testid="wizard-progress">

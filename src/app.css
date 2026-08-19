@@ -32,6 +32,7 @@
   --color-warning: var(--warning);
   --color-sleep: var(--sleep);
   --color-success: var(--success);
+  --color-mark-bolt: var(--mark-bolt);
 }
 
 /* Light theme — also the fallback when no data-theme is set */
@@ -49,6 +50,12 @@
   --warning: #d98a2b;
   --sleep: #6792b3;
   --success: #2ea052;
+  /* The bolt in the app mark. Deliberately outside the semantic set: red,
+     amber, green and blue are all spoken for by error/warning/success/sleep,
+     and teal is the accent the mark's enclosure already inherits. Violet is
+     the one hue left that can't be mistaken for a status. Same value in both
+     themes — it clears 3:1 on each surface, so it needs no light/dark split. */
+  --mark-bolt: #8b5cf6;
   --accent-glow: 0 0 0 transparent;
   color-scheme: light;
 }
@@ -66,6 +73,7 @@
   --warning: #e7a948;
   --sleep: #7da7c8;
   --success: #5dc975;
+  --mark-bolt: #8b5cf6;
   --accent-glow: 0 0 8px rgba(60, 198, 189, 0.55);
   color-scheme: dark;
 }

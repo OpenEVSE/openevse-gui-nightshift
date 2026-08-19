@@ -1,19 +1,22 @@
 import sharp from 'sharp'
 import { readFileSync, writeFileSync } from 'node:fs'
 
-const svg = readFileSync(new URL('../src/assets/gear.svg', import.meta.url))
+const svg = readFileSync(new URL('../src/assets/mark.svg', import.meta.url))
 const teal = '#3cc6bd'
 const bg = '#0c0e13'
 
-// Recolor currentColor to the brand teal for raster output.
+// Recolor currentColor to the brand teal for raster output. Only the enclosure
+// and cord are currentColor — the bolt carries its own literal in mark.svg, so
+// it survives untouched (and must: these icons render outside any stylesheet,
+// where a CSS variable would resolve to nothing).
 const colored = Buffer.from(svg.toString().replace(/currentColor/g, teal))
 
 async function icon(size, pad, file) {
   const inner = Math.round(size * (1 - pad))
-  const gear = await sharp(colored, { density: 384 }).resize(inner, inner).png().toBuffer()
+  const mark = await sharp(colored, { density: 384 }).resize(inner, inner).png().toBuffer()
   const off = Math.round((size - inner) / 2)
   await sharp({ create: { width: size, height: size, channels: 4, background: bg } })
-    .composite([{ input: gear, top: off, left: off }])
+    .composite([{ input: mark, top: off, left: off }])
     .png()
     .toFile(new URL(`../public/${file}`, import.meta.url).pathname)
 }
