@@ -18,6 +18,9 @@ export const SETTINGS_PAGES = [
   { key: 'vehicle', route: '/settings/vehicle', icon: 'mdi:car', labelKey: 'config.pages.vehicle', section: 'charger' },
   // Energy
   { key: 'solar', route: '/settings/solar', icon: 'mdi:solar-power', labelKey: 'config.pages.solar', section: 'energy' },
+  // Labs-gated: in-development, depends on matching firmware. Hidden from the
+  // nav (and its route redirects) until the OpenEVSE Labs switch is on.
+  { key: 'loadsharing', route: '/settings/loadsharing', icon: 'mdi:connection', labelKey: 'config.pages.loadsharing', section: 'energy', labs: true },
   { key: 'shaper', route: '/settings/shaper', icon: 'mdi:chart-bell-curve', labelKey: 'config.pages.shaper', section: 'energy' },
   { key: 'emoncms', route: '/settings/emoncms', icon: 'mdi:chart-box-outline', labelKey: 'config.pages.emoncms', section: 'energy' },
   // System
@@ -30,11 +33,17 @@ export const SETTINGS_PAGES = [
   { key: 'about', route: '/settings/about', icon: 'mdi:information-outline', labelKey: 'config.pages.about', section: 'system' },
 ]
 
-export function pagesBySection(config) {
+// `requires` gates on a device-config capability key; `labs` gates on the
+// client-side OpenEVSE Labs switch (uisettings.dev_features), passed in via
+// opts so this stays a pure function of its inputs.
+export function pagesBySection(config, { dev_features = false } = {}) {
   return SECTIONS.map((section) => ({
     section,
     pages: SETTINGS_PAGES.filter(
-      (p) => p.section === section && (!p.requires || (config && config[p.requires])),
+      (p) =>
+        p.section === section &&
+        (!p.requires || (config && config[p.requires])) &&
+        (!p.labs || dev_features),
     ),
   })).filter((g) => g.pages.length > 0)
 }
