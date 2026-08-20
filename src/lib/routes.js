@@ -19,7 +19,6 @@ import Vehicle from '../routes/settings/Vehicle.svelte'
 import Solar from '../routes/settings/Solar.svelte'
 import Shaper from '../routes/settings/Shaper.svelte'
 import Emoncms from '../routes/settings/Emoncms.svelte'
-import Ohmconnect from '../routes/settings/Ohmconnect.svelte'
 import Firmware from '../routes/settings/Firmware.svelte'
 import Certificates from '../routes/settings/Certificates.svelte'
 import Terminal from '../routes/settings/Terminal.svelte'
@@ -58,7 +57,6 @@ routes['/settings/vehicle'] = Vehicle
 routes['/settings/solar'] = Solar
 routes['/settings/shaper'] = Shaper
 routes['/settings/emoncms'] = Emoncms
-routes['/settings/ohmconnect'] = Ohmconnect
 
 // System pages — override the placeholders set above.
 routes['/settings/firmware'] = Firmware
@@ -79,10 +77,14 @@ export const LEGACY_ROUTES = {
   // The short-lived combined "Security" page was reverted to Certificates;
   // boot lock + heartbeat moved to the Safety page.
   '/settings/security': '/settings/certificates',
+  // OhmConnect shut down and the integration was removed; send its
+  // bookmarks to the settings index rather than a 404.
+  '/settings/ohmconnect': '/settings',
+  '/configuration/ohmconnect': '/settings',
 }
 for (const page of [
   'safety', 'evse', 'mqtt', 'http', 'ocpp', 'network', 'firmware', 'time',
-  'shaper', 'vehicle', 'emoncms', 'ohmconnect', 'about',
+  'shaper', 'vehicle', 'emoncms', 'about',
 ]) {
   LEGACY_ROUTES['/configuration/' + page] = '/settings/' + page
 }

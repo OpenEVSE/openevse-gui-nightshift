@@ -388,7 +388,6 @@ describe('clientid2name', () => {
     expect(clientid2name(65540)).toBe('timer')
     expect(clientid2name(65542)).toBe('limit')
     expect(clientid2name(65543)).toBe('error')
-    expect(clientid2name(65544)).toBe('ohm')
     expect(clientid2name(65545)).toBe('ocpp')
     expect(clientid2name(65546)).toBe('rfid')
     expect(clientid2name(65547)).toBe('mqtt')

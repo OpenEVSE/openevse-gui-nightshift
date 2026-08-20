@@ -5,7 +5,7 @@ describe('EvseClients', () => {
   it('should have all expected client keys', () => {
     const expectedKeys = [
       'manual', 'divert', 'boost', 'timer', 'limit',
-      'error', 'ohm', 'ocpp', 'rfid', 'mqtt', 'shaper', 'tempThrottle'
+      'error', 'ocpp', 'rfid', 'mqtt', 'shaper', 'tempThrottle'
     ]
     expect(Object.keys(EvseClients)).toEqual(expectedKeys)
   })
@@ -23,7 +23,6 @@ describe('EvseClients', () => {
     expect(EvseClients.timer.id).toBe(65540)
     expect(EvseClients.limit.id).toBe(65542)
     expect(EvseClients.error.id).toBe(65543)
-    expect(EvseClients.ohm.id).toBe(65544)
     expect(EvseClients.ocpp.id).toBe(65545)
     expect(EvseClients.rfid.id).toBe(65546)
     expect(EvseClients.mqtt.id).toBe(65547)
@@ -38,7 +37,6 @@ describe('EvseClients', () => {
     expect(EvseClients.timer.priority).toBe(100)
     expect(EvseClients.limit.priority).toBe(1100)
     expect(EvseClients.error.priority).toBe(10000)
-    expect(EvseClients.ohm.priority).toBe(500)
     expect(EvseClients.ocpp.priority).toBe(1050)
     expect(EvseClients.rfid.priority).toBe(1030)
     expect(EvseClients.mqtt.priority).toBe(500)

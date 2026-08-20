@@ -17,7 +17,6 @@
   "mqtt_error": "",
   "mqtt_error_detail": "",
   "ocpp_connected": 0,
-  "ohm_hour": "NotConnected",
   "free_heap": 185388,
   "comm_sent": 1023,
   "comm_success": 226,

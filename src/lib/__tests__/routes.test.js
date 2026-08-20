@@ -25,7 +25,12 @@ describe('legacy route aliases', () => {
     // The short-lived combined Security page reverted to Certificates
     expect(LEGACY_ROUTES['/settings/security']).toBe('/settings/certificates')
     expect(LEGACY_ROUTES['/configuration/certificates']).toBe('/settings/certificates')
-    // 14 straight moves + 2 renames + the index + the security->certificates revert
-    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(18)
+    // OhmConnect shut down; its page is gone, so both spellings fall back to
+    // the settings index instead of 404ing.
+    expect(LEGACY_ROUTES['/settings/ohmconnect']).toBe('/settings')
+    expect(LEGACY_ROUTES['/configuration/ohmconnect']).toBe('/settings')
+    // 12 straight moves + 2 renames + the index + the security->certificates
+    // revert + the 2 retired OhmConnect paths
+    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(19)
   })
 })

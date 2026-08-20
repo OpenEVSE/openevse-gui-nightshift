@@ -142,7 +142,6 @@
       "solar": "Saját termelés",
       "shaper": "Terheléscsökkentő",
       "emoncms": "EmonCMS",
-      "ohmconnect": "OhmConnect",
       "firmware": "Firmware",
       "security": "Biztonság",
       "certificates": "Tanúsítványok",
@@ -385,12 +384,6 @@
       "server_desc": "pl. emoncms.org",
       "node": "Node",
       "apikey": "Írási API kulcs"
-    },
-    "ohmconnect": {
-      "enable": "OhmConnect engedélyezése",
-      "hour": "Ohm hour",
-      "key": "Ohm kulcs",
-      "key_desc": "Az OhmConnect fiók kulcsa."
     },
     "about": {
       "versions": "Verziók",
@@ -884,7 +877,6 @@
     "timer": "Időzítő",
     "limit": "Korlátozás",
     "error": "Hiba",
-    "ohm": "OhmConnect",
     "ocpp": "OCPP",
     "rfid": "RFID",
     "mqtt": "MQTT",
