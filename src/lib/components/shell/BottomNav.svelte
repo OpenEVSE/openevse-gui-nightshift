@@ -1,7 +1,7 @@
 <script>
   import { _ } from 'svelte-i18n'
   import Icon from '../../icons/Icon.svelte'
-  import GearMark from '../../../assets/GearMark.svelte'
+  import ChargePointMark from '../../../assets/ChargePointMark.svelte'
 
   let { path = '/', deviceName = 'OpenEVSE' } = $props()
 
@@ -40,7 +40,7 @@
   <!-- Desktop rail brand: lives in the sidebar at lg (the header hides its
        copy there); a rule + breathing room separates it from the nav items. -->
   <div class="mb-2 hidden items-center gap-2 border-b border-border px-5 pt-5 pb-4 lg:flex">
-    <GearMark size={26} class="text-accent" />
+    <ChargePointMark size={26} class="text-accent" />
     <span class="text-sm font-semibold text-text">{deviceName}</span>
   </div>
   {#each items as item}

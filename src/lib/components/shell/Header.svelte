@@ -1,6 +1,6 @@
 <script>
   import { _ } from 'svelte-i18n'
-  import GearMark from '../../../assets/GearMark.svelte'
+  import ChargePointMark from '../../../assets/ChargePointMark.svelte'
   import IconButton from '../ui/IconButton.svelte'
   import { theme } from '../../stores/theme.js'
   let { deviceName = 'OpenEVSE', wsConnected = true, evseConnected = true } = $props()
@@ -25,7 +25,7 @@
 >
   <!-- At lg the brand moves into the nav rail (BottomNav). -->
   <div class="flex items-center gap-2 lg:hidden">
-    <GearMark size={26} class="text-accent" />
+    <ChargePointMark size={26} class="text-accent" />
     <span class="text-sm font-semibold text-text">{deviceName}</span>
   </div>
   <div class="flex items-center gap-2">

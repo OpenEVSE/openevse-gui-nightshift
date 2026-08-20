@@ -7,7 +7,7 @@
 -->
 <script>
   import { _ } from 'svelte-i18n'
-  import GearMark from '../../../../assets/GearMark.svelte'
+  import ChargePointMark from '../../../../assets/ChargePointMark.svelte'
 
   function openInBrowser() {
     const host = window.location.host
@@ -27,7 +27,7 @@
 </script>
 
 <div class="space-y-4 text-center">
-  <GearMark class="mx-auto h-14 w-14 text-accent" />
+  <ChargePointMark class="mx-auto h-14 w-14 text-accent" />
   <div>
     <p class="text-xs uppercase tracking-wider text-text-dim">
       {$_('wizard.welcome.kicker')}
