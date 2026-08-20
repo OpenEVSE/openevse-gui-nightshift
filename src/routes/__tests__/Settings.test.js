@@ -11,6 +11,7 @@ vi.mock('svelte-i18n', () => {
 import Settings from '../Settings.svelte'
 import { SETTINGS_PAGES } from '../../lib/config/pages.js'
 import { config_store } from '../../lib/stores/config.js'
+import { uisettings_store } from '../../lib/stores/uisettings.js'
 
 const SUPPORT_LINKS = [
   { labelKey: 'config.support.knowledge_base', url: 'https://openev.freshdesk.com/support/solutions' },
@@ -26,14 +27,24 @@ describe('Settings hub', () => {
     }
   })
   it('renders a link for every config page plus the support links', () => {
-    // tft_theme present so the capability-gated Display page renders too.
+    // tft_theme present so the capability-gated Display page renders too;
+    // dev_features on so the Labs-gated Load Sharing page renders too.
     config_store.set({ tft_theme: 'dark' })
+    uisettings_store.update((s) => ({ ...s, dev_features: true }))
     const { getAllByRole } = render(Settings)
     const links = getAllByRole('link')
     expect(links).toHaveLength(SETTINGS_PAGES.length + SUPPORT_LINKS.length)
     for (const p of SETTINGS_PAGES) {
       expect(links.some((l) => l.getAttribute('href') === '#' + p.route)).toBe(true)
     }
+  })
+
+  it('hides the Labs-gated Load Sharing link until dev_features is on', () => {
+    config_store.set({ tft_theme: 'dark' })
+    uisettings_store.update((s) => ({ ...s, dev_features: false }))
+    const { getAllByRole } = render(Settings)
+    const hrefs = getAllByRole('link').map((l) => l.getAttribute('href'))
+    expect(hrefs).not.toContain('#/settings/loadsharing')
   })
 
   it('renders a Support section with external links opening in a new tab', () => {

@@ -33,8 +33,9 @@ describe('SECTIONS', () => {
 
 describe('pagesBySection', () => {
   it('groups every page under its section, no section empty', () => {
-    // tft_theme present so the capability-gated Display page is included.
-    const grouped = pagesBySection({ tft_theme: 'dark' })
+    // tft_theme present so the capability-gated Display page is included;
+    // dev_features on so the Labs-gated Load Sharing page is included too.
+    const grouped = pagesBySection({ tft_theme: 'dark' }, { dev_features: true })
     expect(grouped).toHaveLength(4)
     let total = 0
     for (const g of grouped) {
@@ -46,9 +47,16 @@ describe('pagesBySection', () => {
   })
   it('gates the Display page on tft_theme presence', () => {
     const keysFor = (config) =>
-      pagesBySection(config).flatMap((g) => g.pages.map((p) => p.key))
+      pagesBySection(config, { dev_features: true }).flatMap((g) => g.pages.map((p) => p.key))
     expect(keysFor({})).not.toContain('display')
     expect(keysFor({ tft_theme: 'dark' })).toContain('display')
+  })
+  it('gates the Load Sharing page on the dev_features (Labs) flag', () => {
+    const keysFor = (opts) =>
+      pagesBySection({ tft_theme: 'dark' }, opts).flatMap((g) => g.pages.map((p) => p.key))
+    expect(keysFor({ dev_features: false })).not.toContain('loadsharing')
+    expect(keysFor(undefined)).not.toContain('loadsharing')
+    expect(keysFor({ dev_features: true })).toContain('loadsharing')
   })
   it('preserves section order', () => {
     expect(pagesBySection({}).map((g) => g.section)).toEqual(SECTIONS)

@@ -12,6 +12,7 @@ import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
 import { claims_target_store } from '../../../lib/stores/claims_target.js'
 import { loadsharing_store } from '../../../lib/stores/loadsharing.js'
+import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import { EvseClients } from '../../../lib/vars.js'
 import LoadSharing from '../LoadSharing.svelte'
 
@@ -37,9 +38,19 @@ beforeEach(() => {
   })
   loadsharing_store.set({ peers: [], status: null })
   claims_target_store.set({ properties: {}, claims: { state: null, charge_current: null } })
+  // Page is Labs-gated; default it on so the existing cases render it.
+  uisettings_store.update((s) => ({ ...s, dev_features: true }))
+  window.location.hash = '#/settings/loadsharing'
 })
 
 describe('LoadSharing page', () => {
+  it('redirects to the settings index when Labs (dev features) is off', () => {
+    uisettings_store.update((s) => ({ ...s, dev_features: false }))
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: 'controller' })
+    render(LoadSharing)
+    expect(window.location.hash).toBe('#/settings')
+  })
+
   it('shows grouped load sharing settings when enabled', () => {
     config_store.set({
       loadsharing_enabled: true,

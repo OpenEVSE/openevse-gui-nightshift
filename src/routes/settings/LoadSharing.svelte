@@ -4,6 +4,8 @@
   import { claims_target_store } from '../../lib/stores/claims_target.js'
   import { loadsharing_store } from '../../lib/stores/loadsharing.js'
   import { status_store } from '../../lib/stores/status.js'
+  import { uisettings_store } from '../../lib/stores/uisettings.js'
+  import { redirect } from '../../lib/router.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { EvseClients } from '../../lib/vars.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
@@ -20,6 +22,12 @@
 
   const form = createConfigForm()
   const ss = form.saveState
+
+  // Labs-gated page: if the OpenEVSE Labs switch is off, a deep link here
+  // bounces back to the settings index rather than exposing the surface.
+  $effect(() => {
+    if (!$uisettings_store?.dev_features) redirect('/settings')
+  })
 
   let peerHost = $state('')
   let peersBusy = $state(false)

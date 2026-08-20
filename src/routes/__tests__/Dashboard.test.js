@@ -15,6 +15,7 @@ import { config_store } from '../../lib/stores/config.js'
 import { claims_target_store } from '../../lib/stores/claims_target.js'
 import { override_store } from '../../lib/stores/override.js'
 import { uistates_store } from '../../lib/stores/uistates.js'
+import { uisettings_store } from '../../lib/stores/uisettings.js'
 import { limit_store } from '../../lib/stores/limit.js'
 import { EvseClients } from '../../lib/vars.js'
 import Dashboard from '../Dashboard.svelte'
@@ -28,6 +29,9 @@ describe('Dashboard', () => {
     httpAPI.mockReset()
     httpAPI.mockResolvedValue({})
     limit_store.set({ type: 'none', value: 0, auto_release: true })
+    // Load sharing is Labs-gated; default it off so unrelated tests are
+    // deterministic. The load-sharing cases opt in explicitly.
+    uisettings_store.update((s) => ({ ...s, dev_features: false }))
   })
 
   it('renders the charging composition when state is 3', () => {
@@ -328,7 +332,27 @@ describe('Dashboard', () => {
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
   })
 
+  it('hides the load sharing block when Labs (dev features) is off', () => {
+    uisettings_store.update((s) => ({ ...s, dev_features: false }))
+    config_store.set({
+      max_current_soft: 48,
+      divert_enabled: false,
+      current_shaper_enabled: false,
+      loadsharing_enabled: true,
+      loadsharing_role: 'controller',
+      loadsharing_group_max_current: 40,
+    })
+    claims_target_store.set({
+      properties: { max_current: 16 },
+      claims: { state: null, max_current: EvseClients.loadsharing.id },
+    })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
+    const { queryByText } = render(Dashboard)
+    expect(queryByText('dashboard.loadsharing.badge_active')).not.toBeInTheDocument()
+  })
+
   it('shows load sharing active/limited badges and reduced messaging', async () => {
+    uisettings_store.update((s) => ({ ...s, dev_features: true }))
     config_store.set({
       max_current_soft: 48,
       divert_enabled: false,
@@ -351,6 +375,7 @@ describe('Dashboard', () => {
   })
 
   it('shows controlled-by messaging for member devices', async () => {
+    uisettings_store.update((s) => ({ ...s, dev_features: true }))
     config_store.set({
       max_current_soft: 48,
       divert_enabled: false,

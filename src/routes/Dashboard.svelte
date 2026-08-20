@@ -112,6 +112,10 @@
       : '',
   )
   let loadSharingEnabled = $derived(!!$config_store?.loadsharing_enabled)
+  // Load sharing is Labs-gated (see the OpenEVSE Labs switch on Settings →
+  // Terminal). Even when the device reports it enabled, the dashboard block
+  // stays hidden until the user opts into Labs features.
+  let loadSharingVisible = $derived(loadSharingEnabled && !!$uisettings_store?.dev_features)
   let loadSharingRole = $derived($config_store?.loadsharing_role ?? '')
   let loadSharingControlled = $derived(loadSharingEnabled && loadSharingRole === 'member')
   let loadSharingController = $derived($config_store?.loadsharing_controller_host ?? '')
@@ -531,7 +535,7 @@
     <div class="max-lg:order-4">
       <StatChips {charging} {live} {summary} {sessionCost} />
       <ShaperDivertRow />
-      {#if loadSharingEnabled}
+      {#if loadSharingVisible}
         <div class="mt-2 rounded-xl border border-border bg-surface-2 px-3 py-2">
           <div class="mb-2 flex flex-wrap gap-1.5">
             {#if loadSharingBadges.active}
