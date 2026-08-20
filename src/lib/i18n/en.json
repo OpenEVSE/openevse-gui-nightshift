@@ -397,7 +397,6 @@
       "inactive": "Inactive",
       "online_count": "Online peers",
       "offline_count": "Offline peers",
-      "priority": "Priority (lower charges first)",
       "rotation_interval": "Scarcity rotation interval (s)",
       "peers": "Peer management",
       "add_peer": "Add peer",

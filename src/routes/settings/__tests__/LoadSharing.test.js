@@ -62,16 +62,17 @@ describe('LoadSharing page', () => {
       loadsharing_failsafe_mode: 'safe_current',
       loadsharing_failsafe_safe_current: 6,
       loadsharing_failsafe_peer_assumed_current: 6,
-      loadsharing_priority: 0,
       loadsharing_rotation_interval: 1800,
     })
-    const { getByText } = render(LoadSharing)
+    const { getByText, queryByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.group_id')).toBeInTheDocument()
     expect(getByText('config.loadsharing.role')).toBeInTheDocument()
     expect(getByText('config.loadsharing.site_max_current')).toBeInTheDocument()
     expect(getByText('config.loadsharing.failsafe_peer_assumed_current')).toBeInTheDocument()
-    expect(getByText('config.loadsharing.priority')).toBeInTheDocument()
     expect(getByText('config.loadsharing.rotation_interval')).toBeInTheDocument()
+    // No top-level Priority field: firmware has no loadsharing_priority key;
+    // priority is per-peer only (peer_priority in the peer table/details).
+    expect(queryByText('config.loadsharing.priority')).not.toBeInTheDocument()
   })
 
   it('renders peer management for controller role', async () => {

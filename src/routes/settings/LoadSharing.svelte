@@ -311,18 +311,6 @@
         </FormField>
       {/if}
       <FormField
-        label={$_('config.loadsharing.priority')}
-        status={$ss.loadsharing_priority ?? 'idle'}
-      >
-        <NumberInput
-          value={$config_store?.loadsharing_priority ?? 0}
-          min={0}
-          step={1}
-          revert={form.revert}
-          onchange={(v) => form.saveField('loadsharing_priority', v)}
-        />
-      </FormField>
-      <FormField
         label={$_('config.loadsharing.rotation_interval')}
         status={$ss.loadsharing_rotation_interval ?? 'idle'}
       >
