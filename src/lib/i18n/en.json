@@ -753,7 +753,7 @@
       "label": "Boost",
       "title": "Boost charge",
       "body": "Force charging now for the selected duration. Charging stops automatically when the time is up.",
-      "note": "The countdown runs in this browser tab — if you close or reload it mid-boost, charging stays on until you change the mode yourself.",
+      "note": "The charger ends the boost itself when the time is up. It won't return to any mode you had running before — it simply stops forcing charge.",
       "minutes": "{n} min",
       "hour": "1 hr",
       "cancel": "Cancel",
@@ -885,7 +885,9 @@
   },
   "alert": {
     "write_failed_title": "Change not saved",
-    "write_failed_body": "The charger didn't accept the change. Please try again."
+    "write_failed_body": "The charger didn't accept the change. Please try again.",
+    "boost_unsupported_title": "Boost needs updated firmware",
+    "boost_unsupported_body": "This charger's firmware doesn't support timed Boost yet. Update the firmware, or use On and switch modes yourself when you're done."
   },
   "history": {
     "loading": "Loading history…",

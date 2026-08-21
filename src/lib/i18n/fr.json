@@ -753,7 +753,7 @@
       "label": "Boost",
       "title": "Charge boost",
       "body": "Force la charge pendant la durée choisie. La charge s'arrête automatiquement à la fin.",
-      "note": "Le compte à rebours s'exécute dans cet onglet du navigateur — si vous le fermez ou le rechargez pendant le boost, la charge reste active jusqu'à ce que vous changiez de mode.",
+      "note": "Le chargeur met fin au boost de lui-même une fois le temps écoulé. Il ne revient pas au mode précédent : il arrête simplement de forcer la charge.",
       "minutes": "{n} min",
       "hour": "1 h",
       "cancel": "Annuler",
@@ -885,7 +885,9 @@
   },
   "alert": {
     "write_failed_title": "Modification non sauvegardée",
-    "write_failed_body": "Le chargeur n'a pas accepté la modification. Veuillez réessayer."
+    "write_failed_body": "Le chargeur n'a pas accepté la modification. Veuillez réessayer.",
+    "boost_unsupported_title": "Le boost nécessite un firmware à jour",
+    "boost_unsupported_body": "Le firmware de ce chargeur ne prend pas encore en charge le boost minuté. Mettez à jour le firmware, ou utilisez Marche et changez de mode vous-même une fois terminé."
   },
   "history": {
     "loading": "Chargement de l'historique…",

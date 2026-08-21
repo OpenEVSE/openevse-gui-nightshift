@@ -16,7 +16,7 @@
   import { sec2time, temp_round, round, clientid2name, getStateDesc } from '../lib/utils.js'
   import { formatTemp } from '../lib/temperature.js'
   import { formatCost } from '../lib/cost.js'
-  import { showWriteError } from '../lib/alerts.js'
+  import { showWriteError, showBoostUnsupported } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason, maxPowerW } from '../lib/dashboard/state.js'
   import { socCeiling, estMaxRange, hmsShort } from '../lib/dashboard/soc.js'
 
@@ -226,12 +226,21 @@
     busy = true
     try {
       if (val === defaultAmps) {
+        // removeProp() itself preserves a live boost timer (it routes the
+        // re-upload through override_store.preserveBoostDuration()) — see
+        // the store for the shared invariant this and the else branch below
+        // both rely on: a re-POST while a boost is active always carries the
+        // remaining duration and never `remaining`.
         await serialQueue.add(() => override_store.removeProp('charge_current'))
       } else {
         const current = $override_store ?? {}
         // auto_release: false to keep the override sticky — see setSegment.
+        // preserveBoostDuration() is a no-op when no boost is active, so
+        // this is identical to the old plain-spread upload outside a boost.
         const ok = await serialQueue.add(() =>
-          override_store.upload({ ...current, charge_current: val, auto_release: false }),
+          override_store.upload(
+            override_store.preserveBoostDuration({ ...current, charge_current: val, auto_release: false }),
+          ),
         )
         if (!ok) {
           showWriteError()
@@ -310,35 +319,54 @@
     }
   }
 
-  // Boost: force-active override for the chosen duration, then restore the
-  // override the user had before. We *don't* touch the /limit endpoint —
-  // limits there only enforce stop conditions, and setting a time limit
-  // with no session running causes the limit claim (priority 1100) to
-  // immediately fire "expired", taking state ownership away from our
-  // override and dropping mode back to Auto / Sleeping.
+  // Boost: force-active override for the chosen duration. We *don't* touch
+  // the /limit endpoint — limits there only enforce stop conditions, and
+  // setting a time limit with no session running causes the limit claim
+  // (priority 1100) to immediately fire "expired", taking state ownership
+  // away from our override and dropping mode back to Auto / Sleeping.
   //
-  // The countdown lives in a local setTimeout. If the page is refreshed
-  // mid-boost the timer is lost and the user is left in "On" until they
-  // flip mode manually — v1 tradeoff documented on the button.
-  let boostTimerId = null
-  let prevOverride = null
+  // The device owns the timer (POST /override `duration`, seconds). When it
+  // expires the firmware releases the Manual override itself — there is no
+  // prior override to restore on expiry (the boost claim replaced it), so
+  // there is no browser-side timer to keep in sync with a refresh.
+  // boostEndsAt is instead re-anchored below from whatever `remaining` the
+  // override store last reported. Note this is one-way: arming or ending a
+  // boost bumps override_version and reaches a refreshed page or a second
+  // tab on its next natural refetch, but re-POSTing a still-active boost
+  // (e.g. from a rate change, see setChargeAmps) does NOT bump the version
+  // — that update stays local to this tab until something else refetches.
+  // There's no re-boost-while-active control in this UI, so in practice
+  // that gap is mostly moot.
+  //
   // ms-epoch when the active boost ends, or null. Drives the inline
-  // "Boosting · MM:SS" indicator inside ChargeControls; cleared by the timer or
-  // by cancelBoost().
+  // "Boosting · MM:SS" indicator inside ChargeControls.
   let boostEndsAt = $state(null)
 
-  async function restoreFromBoost() {
-    if (!prevOverride || !prevOverride.state) {
-      await serialQueue.add(() => override_store.clear())
-    } else {
-      // Force auto_release: false here too — re-uploading the snapshot
-      // as-is would inherit the device's auto_release: true default and
-      // hit the same release path.
-      await serialQueue.add(() =>
-        override_store.upload({ ...prevOverride, auto_release: false }),
-      )
-    }
-  }
+  // Single source of truth for the countdown: re-derive it from the
+  // override store every time it updates — our own POST+GET below, a
+  // `DataManager` refetch after the firmware bumps override_version
+  // (including auto-release on expiry), a page load, or our own mid-boost
+  // rate change (setChargeAmps). Prefer a GET's `remaining`; fall back to a
+  // just-uploaded `duration` when no GET has happened yet — upload() stores
+  // exactly what it POSTed, so a rate change while boosting lands here with
+  // `duration` set and no `remaining` until the next refetch. Without this
+  // fallback the effect would null boostEndsAt on our own optimistic write
+  // (flipping the UI back to the idle Boost button and opening a window for
+  // a double-boost) until that refetch caught up. Neither field present —
+  // {}, undefined, or a plain active override with no timer at all — means
+  // no active boost.
+  $effect(() => {
+    const o = $override_store
+    const remaining = o?.remaining
+    const duration = o?.duration
+    const secs =
+      typeof remaining === 'number' && remaining > 0
+        ? remaining
+        : typeof duration === 'number' && duration > 0
+          ? duration
+          : null
+    boostEndsAt = secs != null ? Date.now() + secs * 1000 : null
+  })
 
   async function boost(minutes) {
     if (busy) return
@@ -356,45 +384,81 @@
       // behavior as pressing On).
       if (!systemLimit) await serialQueue.add(() => limit_store.remove())
 
-      // Snapshot the current override so we can restore it. Empty object
-      // means "Auto" (no override set).
-      prevOverride = { ...($override_store || {}) }
+      // Snapshot whatever override the user had before we touch it — the
+      // old-firmware undo path below restores this rather than dropping to
+      // Auto. Strip `remaining`: it's a read-only GET field and must never
+      // be re-POSTed (upload() also strips it, but there's nothing to
+      // "restore" about a stale countdown snapshot either way).
+      const prevOverride = { ...($override_store || {}) }
+      delete prevOverride.remaining
+
       // auto_release: false is intentional. The device defaults overrides
       // to auto_release: true when the field is omitted, which (verified on
       // live hardware) causes the manual override claim to be released soon
       // after acceptance — a residual limit claim then re-emerges and pins
-      // state=disabled. Setting it false keeps the override sticky for the
-      // boost duration.
+      // state=disabled. Setting it false keeps the override sticky.
+      // duration (seconds) is the device-side timer; a re-boost always
+      // restarts it from now.
       const ok = await serialQueue.add(() =>
         override_store.upload({
           state: 'active',
           charge_current: $config_store?.max_current_soft,
           auto_release: false,
+          duration: minutes * 60,
         }),
       )
       if (!ok) {
         showWriteError()
         return
       }
-      if (boostTimerId) clearTimeout(boostTimerId)
-      boostEndsAt = Date.now() + minutes * 60 * 1000
-      boostTimerId = setTimeout(async () => {
-        boostTimerId = null
-        boostEndsAt = null
-        await restoreFromBoost()
-      }, minutes * 60 * 1000)
+      // The POST response never carries `remaining` — override_store.upload
+      // stores exactly what we sent. Re-fetch to learn whether the firmware
+      // actually armed a device-side timer.
+      const downloaded = await serialQueue.add(() => override_store.download())
+      const after = $override_store
+      if (!downloaded || after === 'error' || after === null || typeof after !== 'object') {
+        // The GET failed — either a network/timeout error (download() can't
+        // tell that apart from success and stores httpAPI's literal string
+        // "error" as-is, caught by the after === 'error' check) or a JSON
+        // error body distinct from "No manual override" (download() itself
+        // returns false for that). Either way, the POST likely still landed
+        // (it bumped override_version), so don't second-guess a possibly-
+        // live boost by deleting it or claiming the firmware is too old:
+        // surface a normal write error and let DataManager's next refetch
+        // (triggered by that version bump) anchor the countdown.
+        showWriteError()
+        return
+      }
+      const remaining = after?.remaining
+      if (!(typeof remaining === 'number' && remaining > 0)) {
+        // Genuinely old firmware: the GET succeeded but never reports a
+        // timer, so it accepts and silently ignores `duration` — it will
+        // never release this override on its own. Restore whatever the
+        // user had running before (Off must stay Off, not fall back to
+        // Auto) rather than leaving the charger forced on forever.
+        const restored = prevOverride.state
+          ? await serialQueue.add(() => override_store.upload(prevOverride))
+          : await serialQueue.add(() => override_store.clear())
+        if (!restored) {
+          // The undo itself failed — the charger may still be sitting on
+          // the just-armed (but timer-less) override. Telling the user
+          // "boost isn't supported, we've undone it" would be a lie in that
+          // case, so surface a plain write error instead: it's the honest
+          // "something didn't go through, try again" signal, and doesn't
+          // imply a resolved state that isn't real.
+          showWriteError()
+        } else {
+          showBoostUnsupported()
+        }
+      }
     } finally {
       busy = false
     }
   }
 
   async function cancelBoost() {
-    if (boostTimerId) {
-      clearTimeout(boostTimerId)
-      boostTimerId = null
-    }
-    boostEndsAt = null
-    await restoreFromBoost()
+    const ok = await serialQueue.add(() => override_store.clear())
+    if (!ok) showWriteError()
   }
 
   // While charging, refresh the raw energy log every 10 s so the session chart

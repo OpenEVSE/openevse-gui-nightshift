@@ -753,7 +753,7 @@
       "label": "Impulso",
       "title": "Carga rápida",
       "body": "Carga forzada durante el tiempo elegido. Se detiene automáticamente cuando termina.",
-      "note": "La cuenta atrás se ejecuta en esta pestaña del navegador: si la cierras o recargas durante el impulso, la carga seguirá activa hasta que cambies el modo manualmente.",
+      "note": "El cargador finaliza el impulso por sí mismo cuando termina el tiempo. No volverá al modo que tenías antes: simplemente deja de forzar la carga.",
       "minutes": "{n} min",
       "hour": "1 h",
       "cancel": "Cancelar",
@@ -885,7 +885,9 @@
   },
   "alert": {
     "write_failed_title": "Cambio no guardado",
-    "write_failed_body": "El cargador no aceptó el cambio. Inténtalo de nuevo."
+    "write_failed_body": "El cargador no aceptó el cambio. Inténtalo de nuevo.",
+    "boost_unsupported_title": "El impulso necesita firmware actualizado",
+    "boost_unsupported_body": "El firmware de este cargador aún no admite el impulso temporizado. Actualiza el firmware, o usa Activado y cambia de modo tú mismo cuando termines."
   },
   "history": {
     "loading": "Cargando historial…",

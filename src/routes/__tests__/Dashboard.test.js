@@ -298,6 +298,15 @@ describe('Dashboard', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     // A system (default) limit: auto_release: false.
     limit_store.set({ type: 'energy', value: 10000, auto_release: false })
+    // GET-after-POST must report `remaining` or boost() treats this as
+    // unsupported firmware and DELETEs the override — keep this test focused
+    // on the /limit assertion by returning a normal timed response.
+    httpAPI.mockImplementation((method, path) => {
+      if (method === 'GET' && path === '/override') {
+        return Promise.resolve({ state: 'active', charge_current: 48, auto_release: false, remaining: 3600 })
+      }
+      return Promise.resolve({})
+    })
     const { getByText } = render(Dashboard)
     // Open the boost preset modal then pick a duration — triggers boost(minutes).
     // Use the 1-hour preset (unique key) to avoid multiple-element ambiguity with
@@ -310,6 +319,279 @@ describe('Dashboard', () => {
     // Flush so a (buggy) defensive DELETE would have landed.
     await new Promise((r) => setTimeout(r, 0))
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
+  })
+
+  it('boost POSTs a device-side duration and arms the countdown from the GET remaining', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    httpAPI.mockImplementation((method, path) => {
+      if (method === 'GET' && path === '/override') {
+        return Promise.resolve({ state: 'active', charge_current: 48, auto_release: false, remaining: 3600 })
+      }
+      return Promise.resolve({})
+    })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.label'))
+    await fireEvent.click(getByText('dashboard.boost.hour'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST',
+        '/override',
+        JSON.stringify({ state: 'active', charge_current: 48, auto_release: false, duration: 3600 }),
+      )
+    })
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('GET', '/override')
+    })
+    // The countdown indicator (from BoostButton) should now be showing.
+    await vi.waitFor(() => {
+      expect(getByText('dashboard.boost.active')).toBeInTheDocument()
+    })
+  })
+
+  it('undoes the override and warns when the firmware ignores duration (no remaining on GET)', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    httpAPI.mockImplementation((method, path) => {
+      if (method === 'GET' && path === '/override') {
+        // Old firmware: accepted the POST, but never armed a timer.
+        return Promise.resolve({ state: 'active', charge_current: 48, auto_release: false })
+      }
+      return Promise.resolve({})
+    })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.label'))
+    await fireEvent.click(getByText('dashboard.boost.hour'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('DELETE', '/override')
+    })
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('alert.boost_unsupported_title')
+    })
+    // No countdown was armed.
+    expect(() => getByText('dashboard.boost.active')).toThrow()
+  })
+
+  it('restores the prior override (e.g. Off) instead of dropping to Auto when firmware is old', async () => {
+    // A user had forced Off before pressing Boost.
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'disabled', charge_current: 32, auto_release: false })
+    httpAPI.mockImplementation((method, path) => {
+      if (method === 'GET' && path === '/override') {
+        // Old firmware: accepted the POST, but never armed a timer.
+        return Promise.resolve({ state: 'active', charge_current: 48, auto_release: false })
+      }
+      return Promise.resolve({})
+    })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.label'))
+    await fireEvent.click(getByText('dashboard.boost.hour'))
+    // The undo must re-upload the pre-boost snapshot, not DELETE it away.
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST',
+        '/override',
+        JSON.stringify({ state: 'disabled', charge_current: 32, auto_release: false }),
+      )
+    })
+    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/override')
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('alert.boost_unsupported_title')
+    })
+  })
+
+  it('does not misclassify a failed post-boost GET as old firmware', async () => {
+    // The POST succeeds (and likely armed a real device timer, bumping
+    // override_version) but the follow-up GET fails at the network level —
+    // httpAPI collapses that to the string "error", which download() stores
+    // as-is. boost() must recognize this isn't a valid override object and
+    // must not delete a possibly-live boost or claim the firmware is old.
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    httpAPI.mockImplementation((method, path) => {
+      if (method === 'POST' && path === '/override') return Promise.resolve({ msg: 'done' })
+      if (method === 'GET' && path === '/override') return Promise.resolve('error')
+      return Promise.resolve({})
+    })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.label'))
+    await fireEvent.click(getByText('dashboard.boost.hour'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('alert.write_failed_title')
+    })
+    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/override')
+  })
+
+  it('preserves the device timer (duration, no remaining) when the charge rate changes mid-boost', async () => {
+    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 32000, session_energy: 0, session_elapsed: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false, remaining: 900 })
+    const { getByRole } = render(Dashboard)
+    // Let the mount effect anchor boostEndsAt from the seeded `remaining`.
+    await new Promise((r) => setTimeout(r, 0))
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    const slider = getByRole('slider', { name: 'dashboard.rate.aria' })
+    slider.value = '20'
+    await fireEvent.change(slider)
+    await vi.waitFor(() => {
+      const call = httpAPI.mock.calls.find(
+        (c) => c[0] === 'POST' && c[1] === '/override' && JSON.parse(c[2]).charge_current === 20,
+      )
+      expect(call).toBeTruthy()
+      const body = JSON.parse(call[2])
+      expect(body.state).toBe('active')
+      expect(body.duration).toBeGreaterThan(0)
+      expect(body).not.toHaveProperty('remaining')
+    })
+  })
+
+  it('keeps the boost countdown visible across a mid-boost rate change (no flicker to idle, no reset) — FIX B', async () => {
+    status_store.set({ state: 3, power: 7000, voltage: 240, amp: 32000, session_energy: 0, session_elapsed: 0, temp: 0, pilot: 0, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false, remaining: 900 })
+    const { getByRole, getByText, queryByText } = render(Dashboard)
+    await vi.waitFor(() => {
+      expect(getByText('dashboard.boost.active')).toBeInTheDocument()
+    })
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    const slider = getByRole('slider', { name: 'dashboard.rate.aria' })
+    slider.value = '20'
+    await fireEvent.change(slider)
+    await vi.waitFor(() => {
+      const call = httpAPI.mock.calls.find(
+        (c) => c[0] === 'POST' && c[1] === '/override' && JSON.parse(c[2]).charge_current === 20,
+      )
+      expect(call).toBeTruthy()
+    })
+    // The countdown must still be showing — no flicker back to the idle
+    // Boost button while waiting for a refetch, and no window for a
+    // duplicate boost.
+    expect(getByText('dashboard.boost.active')).toBeInTheDocument()
+    expect(queryByText('dashboard.boost.label')).not.toBeInTheDocument()
+    // The re-POSTed duration must track the ~900s that was actually left,
+    // not reset to a fresh full preset (there is no preset involved in a
+    // rate change at all — a jump back up near a round number would signal
+    // exactly that bug).
+    const call = httpAPI.mock.calls.find(
+      (c) => c[0] === 'POST' && c[1] === '/override' && JSON.parse(c[2]).charge_current === 20,
+    )
+    const body = JSON.parse(call[2])
+    expect(body.duration).toBeGreaterThan(890)
+    expect(body.duration).toBeLessThanOrEqual(900)
+    expect(body).not.toHaveProperty('remaining')
+  })
+
+  it('treats a failed post-boost download() as a write error, not old firmware — FIX D', async () => {
+    // A JSON error body (distinct from "No manual override") makes
+    // override_store.download() itself return false, while leaving the
+    // store holding whatever it had before the GET — here, our own
+    // just-POSTed payload (has `duration`, no `remaining`). Without checking
+    // download()'s return value, that valid-looking object with no
+    // `remaining` would fall straight into the "old firmware" branch.
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    httpAPI.mockImplementation((method, path) => {
+      if (method === 'POST' && path === '/override') return Promise.resolve({ msg: 'done' })
+      if (method === 'GET' && path === '/override') return Promise.resolve({ msg: 'error' })
+      return Promise.resolve({})
+    })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.label'))
+    await fireEvent.click(getByText('dashboard.boost.hour'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('alert.write_failed_title')
+    })
+    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/override')
+  })
+
+  it('surfaces a write error, not the unsupported alert, when the old-firmware undo itself fails — FIX E', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    // A prior Off override to restore, so the undo path is upload() (not clear()).
+    override_store.set({ state: 'disabled', charge_current: 32, auto_release: false })
+    httpAPI.mockImplementation((method, path, body) => {
+      if (method === 'POST' && path === '/override') {
+        const parsed = JSON.parse(body)
+        // The initial boost POST (carries `duration`) succeeds; the restore
+        // POST (the snapshot re-upload, no `duration`) fails.
+        return Promise.resolve(parsed.duration ? { msg: 'done' } : 'error')
+      }
+      if (method === 'GET' && path === '/override') {
+        // Old firmware: accepted the POST, but never armed a timer.
+        return Promise.resolve({ state: 'active', charge_current: 48, auto_release: false })
+      }
+      return Promise.resolve({})
+    })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.label'))
+    await fireEvent.click(getByText('dashboard.boost.hour'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('alert.write_failed_title')
+    })
+    expect(get(uistates_store).alertbox.title).not.toBe('alert.boost_unsupported_title')
+  })
+
+  it('restores the boost countdown from the override store on mount (refresh mid-boost)', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false, remaining: 120 })
+    const { getByText } = render(Dashboard)
+    await vi.waitFor(() => {
+      expect(getByText('dashboard.boost.active')).toBeInTheDocument()
+    })
+  })
+
+  it('does not show a countdown for a plain active override with no remaining', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false })
+    const { getByText, queryByText } = render(Dashboard)
+    await new Promise((r) => setTimeout(r, 0))
+    expect(queryByText('dashboard.boost.active')).not.toBeInTheDocument()
+    expect(getByText('dashboard.boost.label')).toBeInTheDocument()
+  })
+
+  it('clears the countdown when the override store loses its timer (device auto-release)', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false, remaining: 5 })
+    const { getByText, queryByText } = render(Dashboard)
+    expect(getByText('dashboard.boost.active')).toBeInTheDocument()
+    // Simulate DataManager refetching /override after the firmware released it.
+    override_store.set({})
+    await vi.waitFor(() => {
+      expect(queryByText('dashboard.boost.active')).not.toBeInTheDocument()
+    })
+    expect(getByText('dashboard.boost.label')).toBeInTheDocument()
+  })
+
+  it('cancelBoost DELETEs the override', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false, remaining: 120 })
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.cancel_active'))
+    await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('DELETE', '/override')
+    })
+  })
+
+  it('surfaces a write error when cancelBoost fails to DELETE', async () => {
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false, remaining: 120 })
+    // A falsy httpAPI response makes override_store.clear() return false.
+    httpAPI.mockResolvedValue(null)
+    const { getByText } = render(Dashboard)
+    await fireEvent.click(getByText('dashboard.boost.cancel_active'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('alert.write_failed_title')
+    })
+  })
+
+  it('disables the boost Cancel button during a fault, matching the idle Boost button', async () => {
+    // state 4 falls in the error range (4-11) — ChargeControls stays visible
+    // but disabled during a fault.
+    status_store.set({ state: 4, total_day: 0, total_energy: 0 })
+    override_store.set({ state: 'active', charge_current: 48, auto_release: false, remaining: 120 })
+    const { getByText } = render(Dashboard)
+    await vi.waitFor(() => {
+      expect(getByText('dashboard.boost.cancel_active')).toBeDisabled()
+    })
   })
 
   it('never DELETEs a system limit from the inline editor, even if events reach it', async () => {
