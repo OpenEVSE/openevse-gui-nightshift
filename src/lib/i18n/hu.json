@@ -753,7 +753,7 @@
       "label": "Boost",
       "title": "Gyors töltés",
       "body": "Erőltetett töltés a kiválasztott időtartamra. A töltés automatikusan leáll, amikor lejár az idő.",
-      "note": "A visszaszámlálás ebben a böngészőlapban fut — ha boost közben bezárja vagy újratölti, a töltés bekapcsolva marad, amíg át nem váltja a módot.",
+      "note": "A töltő magától fejezi be a boostot, amikor lejár az idő. Nem tér vissza a korábbi módra — egyszerűen leállítja az erőltetett töltést.",
       "minutes": "{n} perc",
       "hour": "1 óra",
       "cancel": "Mégse",
@@ -885,7 +885,9 @@
   },
   "alert": {
     "write_failed_title": "A változtatás nem lett elmentve",
-    "write_failed_body": "A töltő nem fogadta el a változtatást. Kérjük, próbálja újra."
+    "write_failed_body": "A töltő nem fogadta el a változtatást. Kérjük, próbálja újra.",
+    "boost_unsupported_title": "A boosthoz frissített firmware szükséges",
+    "boost_unsupported_body": "Ennek a töltőnek a firmware-je még nem támogatja az időzített boostot. Frissítse a firmware-t, vagy használja a Be módot, és váltson módot saját maga, ha végzett."
   },
   "history": {
     "loading": "Történet betöltése…",

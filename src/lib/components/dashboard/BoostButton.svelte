@@ -60,6 +60,7 @@
           <Button
             label={$_('dashboard.boost.cancel_active')}
             variant="ghost"
+            {disabled}
             onclick={oncancel}
           />
         </div>

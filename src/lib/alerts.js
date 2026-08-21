@@ -18,3 +18,22 @@ export function showWriteError() {
     action: () => uistates_store.resetAlertBox(),
   })
 }
+
+/**
+ * Surface the global AlertBox when Boost was requested but the device
+ * firmware doesn't support timed overrides (it accepted the POST but never
+ * armed a timer). Distinct from showWriteError — the request wasn't
+ * rejected, it just can't do what we asked.
+ */
+export function showBoostUnsupported() {
+  const t = get(_)
+  uistates_store.setObject('alertbox', {
+    title: t('alert.boost_unsupported_title'),
+    body: t('alert.boost_unsupported_body'),
+    visible: true,
+    button: true,
+    closable: true,
+    component: undefined,
+    action: () => uistates_store.resetAlertBox(),
+  })
+}
