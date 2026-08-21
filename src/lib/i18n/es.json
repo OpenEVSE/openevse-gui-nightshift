@@ -670,6 +670,10 @@
     "error_body": "El cargador no aceptó el cambio. Inténtalo de nuevo."
   },
   "dashboard": {
+    "plug": {
+      "connected": "Vehículo conectado",
+      "disconnected": "Sin vehículo"
+    },
     "status": {
       "starting": "Iniciando",
       "charging": "Cargando",

@@ -670,6 +670,10 @@
     "error_body": "Le chargeur n'a pas accepté la modification. Veuillez réessayer."
   },
   "dashboard": {
+    "plug": {
+      "connected": "Véhicule connecté",
+      "disconnected": "Aucun véhicule"
+    },
     "status": {
       "starting": "Démarrage",
       "charging": "Charge en cours",
