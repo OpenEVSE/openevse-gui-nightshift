@@ -86,6 +86,24 @@ export function ringFill(status, config, limit) {
 // Plan events carry HH:MM:SS but schedules only resolve to the minute.
 const hhmm = (t) => (typeof t === 'string' ? t.slice(0, 5) : t)
 
+/**
+ * Is a vehicle physically plugged in?
+ *
+ * The firmware publishes an authoritative `vehicle` flag (1/0) that stays
+ * trustworthy through Sleeping and a manual Off — the pilot is held there, so
+ * the controller keeps detecting. Only a cold-boot Disabled state can't sense a
+ * plug, and there the flag correctly reports 0. Prefer that flag; fall back to
+ * the EVSE state code (2 = connected, 3 = charging) when it's absent (older
+ * firmware, or before the first status load).
+ */
+export function vehicleConnected(status) {
+  const v = status?.vehicle
+  if (v === 1) return true
+  if (v === 0) return false
+  const s = status?.state
+  return s === 2 || s === 3
+}
+
 export function connectedReason(mode, plan, owner = '') {
   const cur = plan?.current_event
   const next = plan?.next_event

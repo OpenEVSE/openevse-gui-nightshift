@@ -670,6 +670,10 @@
     "error_body": "The charger didn't accept the change. Please try again."
   },
   "dashboard": {
+    "plug": {
+      "connected": "Car connected",
+      "disconnected": "Not connected"
+    },
     "status": {
       "starting": "Starting",
       "charging": "Charging",

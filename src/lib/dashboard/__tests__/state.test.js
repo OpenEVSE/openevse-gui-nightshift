@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { displayState, ringFill, limitProgress, connectedReason, maxPowerW, clampEnergyMax, ENERGY_LIMIT_MAX_KWH } from '../state.js'
+import { displayState, ringFill, limitProgress, connectedReason, maxPowerW, vehicleConnected, clampEnergyMax, ENERGY_LIMIT_MAX_KWH } from '../state.js'
 
 describe('clampEnergyMax', () => {
   it('keeps a sensible value untouched', () => {
@@ -46,6 +46,27 @@ describe('displayState', () => {
     expect(displayState({ state: 4 })).toBe('error')
     expect(displayState({ state: 9 })).toBe('error')
     expect(displayState({ state: 11 })).toBe('error')
+  })
+})
+
+describe('vehicleConnected', () => {
+  it('trusts the firmware vehicle flag over the state code', () => {
+    // The flag stays accurate through Sleeping/Off where the state code can't
+    // tell — a plugged-in car paused on a schedule (254) still reads connected.
+    expect(vehicleConnected({ vehicle: 1, state: 254 })).toBe(true)
+    expect(vehicleConnected({ vehicle: 1, state: 255 })).toBe(true)
+    // ...and an unplugged car reads disconnected even mid-fault.
+    expect(vehicleConnected({ vehicle: 0, state: 3 })).toBe(false)
+  })
+  it('falls back to the state code when the flag is absent', () => {
+    expect(vehicleConnected({ state: 2 })).toBe(true) // connected
+    expect(vehicleConnected({ state: 3 })).toBe(true) // charging
+    expect(vehicleConnected({ state: 1 })).toBe(false) // no car
+    expect(vehicleConnected({ state: 254 })).toBe(false) // sleeping, unknown → assume not
+  })
+  it('is false for missing status', () => {
+    expect(vehicleConnected(undefined)).toBe(false)
+    expect(vehicleConnected({})).toBe(false)
   })
 })
 

@@ -670,6 +670,10 @@
     "error_body": "A töltő nem fogadta el a változtatást. Kérjük, próbálja újra."
   },
   "dashboard": {
+    "plug": {
+      "connected": "Autó csatlakoztatva",
+      "disconnected": "Nincs autó"
+    },
     "status": {
       "starting": "Indulás",
       "charging": "Töltés",
