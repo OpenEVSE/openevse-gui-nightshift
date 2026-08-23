@@ -454,21 +454,26 @@
 
   {#if !showChart}
     <!-- Ring hero: occupies the same top-center spanning slot as the chart,
-         so the hero area matches between the two states. The plug pill and rate
-         pill mirror each other across the ring's top corners. -->
+         so the hero area matches between the two states. On mobile the pills
+         flow in a row above the ring (a narrow ring would otherwise collide
+         with them); on desktop the hero is wide, so the wrapper dissolves
+         (lg:contents) and the pills mirror each other across the ring's top
+         corners. -->
     <div class="relative max-lg:order-1 lg:col-span-2" in:fade={{ duration: 150 }}>
-      <div class="absolute left-3 top-1 z-10"><PlugPill {connected} /></div>
-      <div class="absolute right-3 top-1 z-10">
-        {#key rateNonce}
-          <RatePill
-            amps={chargeAmps}
-            min={minAmps}
-            max={maxAmps}
-            claimedBy={rateClaimedBy}
-            disabled={busy || ecoOn || display === 'error'}
-            onchange={setChargeAmps}
-          />
-        {/key}
+      <div class="flex items-start justify-between gap-2 px-1 pb-2 lg:contents">
+        <div class="lg:absolute lg:left-3 lg:top-1 lg:z-10"><PlugPill {connected} /></div>
+        <div class="lg:absolute lg:right-3 lg:top-1 lg:z-10">
+          {#key rateNonce}
+            <RatePill
+              amps={chargeAmps}
+              min={minAmps}
+              max={maxAmps}
+              claimedBy={rateClaimedBy}
+              disabled={busy || ecoOn || display === 'error'}
+              onchange={setChargeAmps}
+            />
+          {/key}
+        </div>
       </div>
       <PowerRing
         {display}
