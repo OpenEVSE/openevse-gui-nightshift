@@ -5,6 +5,7 @@
   import { config_store } from '../lib/stores/config.js'
   import { override_store } from '../lib/stores/override.js'
   import { limit_store } from '../lib/stores/limit.js'
+  import { boost_store } from '../lib/stores/boost.js'
   import { claims_target_store } from '../lib/stores/claims_target.js'
   import { plan_store } from '../lib/stores/plan.js'
   import { energy_store } from '../lib/stores/energy.js'
@@ -16,7 +17,7 @@
   import { sec2time, temp_round, round, clientid2name, getStateDesc } from '../lib/utils.js'
   import { formatTemp } from '../lib/temperature.js'
   import { formatCost } from '../lib/cost.js'
-  import { showWriteError } from '../lib/alerts.js'
+  import { showWriteError, showBoostError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason, maxPowerW, vehicleConnected } from '../lib/dashboard/state.js'
   import { socCeiling, estMaxRange, hmsShort } from '../lib/dashboard/soc.js'
 
@@ -28,6 +29,7 @@
   import ThrottleBadge from '../lib/components/dashboard/ThrottleBadge.svelte'
   import { selectedSegment } from '../lib/dashboard/controls.js'
   import ChargeControls from '../lib/components/dashboard/ChargeControls.svelte'
+  import BoostCard from '../lib/components/dashboard/BoostCard.svelte'
   import RatePill from '../lib/components/dashboard/RatePill.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
 
@@ -313,91 +315,55 @@
     }
   }
 
-  // Boost: force-active override for the chosen duration, then restore the
-  // override the user had before. We *don't* touch the /limit endpoint —
-  // limits there only enforce stop conditions, and setting a time limit
-  // with no session running causes the limit claim (priority 1100) to
-  // immediately fire "expired", taking state ownership away from our
-  // override and dropping mode back to Auto / Sleeping.
+  // Boost: a device-side claim (priority 200) that charges NOW until a chosen
+  // target — time / energy / soc / range — is reached, then releases so the
+  // scheduler or solar-divert resume. The firmware owns the claim and the
+  // countdown; the UI only arms (POST /boost), cancels (DELETE /boost) and
+  // mirrors GET /boost. This replaces the old client-timer/override hack, so
+  // the boost path no longer touches /override or /limit at all.
   //
-  // The countdown lives in a local setTimeout. If the page is refreshed
-  // mid-boost the timer is lost and the user is left in "On" until they
-  // flip mode manually — v1 tradeoff documented on the button.
-  let boostTimerId = null
-  let prevOverride = null
-  // ms-epoch when the active boost ends, or null. Drives the inline
-  // "Boosting · MM:SS" indicator inside ChargeControls; cleared by the timer or
-  // by cancelBoost().
-  let boostEndsAt = $state(null)
+  // Capability gate: supporting firmware ships boost_version in /status; older
+  // firmware omits it, and the whole Boost surface stays hidden.
+  let boostSupported = $derived(
+    $status_store?.boost_version !== undefined && $status_store?.boost_version !== null,
+  )
+  // Normalised idle sentinel is type 'none'; anything else is a live boost.
+  let activeBoost = $derived(
+    $boost_store?.type && $boost_store.type !== 'none' ? $boost_store : null,
+  )
+  // soc/range dimensions need a vehicle data source — same gates the limit card
+  // uses. Hidden (not just disabled) when absent; the 422 backstop still runs.
+  let canRange = $derived(hasSoc && Number.isFinite(maxRange))
 
-  async function restoreFromBoost() {
-    if (!prevOverride || !prevOverride.state) {
-      await serialQueue.add(() => override_store.clear())
-    } else {
-      // Force auto_release: false here too — re-uploading the snapshot
-      // as-is would inherit the device's auto_release: true default and
-      // hit the same release path.
-      await serialQueue.add(() =>
-        override_store.upload({ ...prevOverride, auto_release: false }),
-      )
-    }
-  }
-
-  async function boost(minutes) {
+  async function armBoost({ type, value }) {
     if (busy) return
     busy = true
     try {
-      // Defensively clear any existing /limit before we touch the override.
-      // A residual limit claim (priority 1100) silently holds state ownership
-      // even when /limit returns {}, which would mask our override and keep
-      // the device sleeping. The endpoint returns "done" even if nothing was
-      // set, so it's a safe no-op when there's nothing to clear.
-      // Never DELETE a system (default) limit though — the firmware only
-      // re-applies it at boot or on a config write, so the delete would
-      // silently discard the configured limit. Boosting past a *tripped*
-      // system limit therefore won't resume charging (same accepted
-      // behavior as pressing On).
-      if (!systemLimit) await serialQueue.add(() => limit_store.remove())
-
-      // Snapshot the current override so we can restore it. Empty object
-      // means "Auto" (no override set).
-      prevOverride = { ...($override_store || {}) }
-      // auto_release: false is intentional. The device defaults overrides
-      // to auto_release: true when the field is omitted, which (verified on
-      // live hardware) causes the manual override claim to be released soon
-      // after acceptance — a residual limit claim then re-emerges and pins
-      // state=disabled. Setting it false keeps the override sticky for the
-      // boost duration.
-      const ok = await serialQueue.add(() =>
-        override_store.upload({
-          state: 'active',
-          charge_current: $config_store?.max_current_soft,
-          auto_release: false,
-        }),
-      )
-      if (!ok) {
-        showWriteError()
-        return
+      const res = await serialQueue.add(() => boost_store.upload({ type, value }))
+      if (res && res.msg === 'done') {
+        // Reconcile from the device rather than trusting the 201: an
+        // already-met soc/range target also returns 201 but leaves nothing
+        // running, so flipping to "active" here would show a ghost boost.
+        await serialQueue.add(boost_store.download)
+      } else if (res && res.msg) {
+        showBoostError(res.msg) // 422 (no vehicle source) / 400 (bad value)
+      } else {
+        showWriteError() // network / parse failure
       }
-      if (boostTimerId) clearTimeout(boostTimerId)
-      boostEndsAt = Date.now() + minutes * 60 * 1000
-      boostTimerId = setTimeout(async () => {
-        boostTimerId = null
-        boostEndsAt = null
-        await restoreFromBoost()
-      }, minutes * 60 * 1000)
     } finally {
       busy = false
     }
   }
 
   async function cancelBoost() {
-    if (boostTimerId) {
-      clearTimeout(boostTimerId)
-      boostTimerId = null
+    if (busy) return
+    busy = true
+    try {
+      await serialQueue.add(() => boost_store.remove())
+      await serialQueue.add(boost_store.download)
+    } finally {
+      busy = false
     }
-    boostEndsAt = null
-    await restoreFromBoost()
   }
 
   // While charging, refresh the raw energy log every 10 s so the session chart
@@ -494,8 +460,8 @@
   <div class="max-lg:contents lg:flex lg:flex-col">
     <div class="max-lg:order-3"><ThrottleBadge /></div>
 
-    <!-- Unified charge controls: segmented mode + the Boost modifier.
-         Stays visible (disabled) during a fault so the layout doesn't reflow. -->
+    <!-- Segmented mode control. Stays visible (disabled) during a fault so the
+         layout doesn't reflow. -->
     <div class="max-lg:order-5">
       <ChargeControls
         segment={chargeSegment}
@@ -503,11 +469,25 @@
         locked={modeLocked}
         lockLabel={modeLockLabel}
         disabled={busy || display === 'error'}
-        {boostEndsAt}
         onsegment={setSegment}
-        onboost={boost}
-        oncancelboost={cancelBoost}
       />
+
+      <!-- Boost: a device-side charge-until-target action. Hidden entirely on
+           firmware that doesn't advertise the capability (no boost_version). -->
+      {#if boostSupported}
+        <BoostCard
+          active={activeBoost}
+          {hasSoc}
+          {canRange}
+          soc={$status_store?.battery_level ?? 0}
+          estMaxRange={maxRange}
+          rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
+          maxEnergyKwh={$uisettings_store?.max_energy_kwh ?? 100}
+          disabled={busy || modeLocked || display === 'error'}
+          onarm={armBoost}
+          oncancel={cancelBoost}
+        />
+      {/if}
     </div>
   </div>
 

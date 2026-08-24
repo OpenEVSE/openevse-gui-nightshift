@@ -1,6 +1,7 @@
 <script>
   import { derived } from 'svelte/store'
   import { limit_store } from '../stores/limit.js'
+  import { boost_store } from '../stores/boost.js'
   import { uisettings_store } from '../stores/uisettings.js'
   import { EvseClients } from '../vars.js'
   import { uistates_store } from '../stores/uistates.js'
@@ -32,6 +33,7 @@
   const claims_version = derived(status_store, ($s) => $s?.claims_version)
   const override_version = derived(status_store, ($s) => $s?.override_version)
   const limit_version = derived(status_store, ($s) => $s?.limit_version)
+  const boost_version = derived(status_store, ($s) => $s?.boost_version)
   const evse_state = derived(status_store, ($s) => $s?.state)
   const charging = derived(evse_state, ($s) => $s == 3 ? true : false)
   const rfid_waiting = derived(status_store, ($s) => $s?.rfid_waiting)
@@ -45,6 +47,7 @@
   let refresh_override = false
   let refresh_plan = false
   let refresh_limit = false
+  let refresh_boost = false
   let prev_ip
   let ip_changed = false
 
@@ -168,6 +171,31 @@
     else return true
   }
 
+  export async function refreshBoostStore(version) {
+    if (refresh_boost)
+      return
+    // No boost_version in /status → firmware predates Boost; leave the store
+    // idle and keep the whole surface hidden (capability gate). This mirrors
+    // how refreshLimitStore gates on $status_store?.limit presence.
+    if (version === undefined || version === null)
+      return
+    if ($uistates_store.boost_version != version) {
+      refresh_boost = true
+      // download() normalises {} (idle) → reset and {type,…} (active) → set,
+      // so this one path covers arm / reached / cancelled / replaced / reboot.
+      const res = await serialQueue.add(boost_store.download)
+      refresh_boost = false
+      if (res) {
+        $uistates_store.boost_version = version
+        return res
+      }
+      else {
+        return false
+      }
+    }
+    else return true
+  }
+
   export function refreshChargingState(val) {
     $uistates_store.charging = val
   }
@@ -272,6 +300,7 @@
   $effect(() => { refreshClaimsTargetStore($claims_version) })
   $effect(() => { refreshOverrideStore($override_version) })
   $effect(() => { refreshLimitStore($limit_version) })
+  $effect(() => { refreshBoostStore($boost_version) })
   $effect(() => { refreshDateTime($time, $config_store?.time_zone) })
   $effect(() => { refreshChargingState($charging) })
   $effect(() => { refreshLocale($config_store?.lang) })

@@ -755,14 +755,20 @@
     "eco": "Eco",
     "boost": {
       "label": "Boost",
-      "title": "Boost charge",
-      "body": "Force charging now for the selected duration. Charging stops automatically when the time is up.",
-      "note": "The countdown runs in this browser tab — if you close or reload it mid-boost, charging stays on until you change the mode yourself.",
-      "minutes": "{n} min",
-      "hour": "1 hr",
-      "cancel": "Cancel",
-      "active": "Boosting · {time}",
-      "cancel_active": "Cancel boost"
+      "arm": "Start boost",
+      "replace": "Replace boost",
+      "cancel_active": "Cancel boost",
+      "active_prefix": "Boosting",
+      "type_time": "Time",
+      "type_energy": "Energy",
+      "type_soc": "SOC",
+      "type_range": "Range",
+      "pills_aria": "Boost target",
+      "for": "for {value}",
+      "add": "add {value}",
+      "until": "until {value}",
+      "close": "Close",
+      "no_vehicle_source": "This boost needs vehicle data (state of charge or range), and no source is configured."
     },
     "controls": {
       "locked_by": "Controlled by {owner}"

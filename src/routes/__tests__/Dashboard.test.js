@@ -308,23 +308,32 @@ describe('Dashboard', () => {
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
   })
 
-  it('does not DELETE a system limit from the boost path', async () => {
-    // Normal idle state — same as other boost-path tests.
+  it('hides the Boost surface on firmware that does not advertise it', () => {
+    // No boost_version in /status ⇒ unsupported ⇒ nothing rendered.
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
-    // A system (default) limit: auto_release: false.
+    const { queryByText } = render(Dashboard)
+    expect(queryByText('dashboard.boost.label')).not.toBeInTheDocument()
+  })
+
+  it('arms a boost via POST /boost and never touches /override or /limit', async () => {
+    // boost_version present ⇒ the collapsed Boost button renders.
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, boost_version: 1 })
+    // A system (default) limit — the old boost path used to defensively clear
+    // limits and rewrite the override; the device-side boost must not.
     limit_store.set({ type: 'energy', value: 10000, auto_release: false })
+    httpAPI.mockResolvedValue({ msg: 'done' })
     const { getByText } = render(Dashboard)
-    // Open the boost preset modal then pick a duration — triggers boost(minutes).
-    // Use the 1-hour preset (unique key) to avoid multiple-element ambiguity with
-    // dashboard.boost.minutes (which appears twice for the 15 and 30 min presets).
+    // Tap "Boost" to expand the picker, then arm. Default dimension is time
+    // (30 min) → POST {type:'time', value:1800}.
     await fireEvent.click(getByText('dashboard.boost.label'))
-    await fireEvent.click(getByText('dashboard.boost.hour'))
+    await fireEvent.click(getByText('dashboard.boost.arm'))
     await vi.waitFor(() => {
-      expect(httpAPI).toHaveBeenCalled() // the override write happened
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/boost', JSON.stringify({ type: 'time', value: 1800 }))
     })
-    // Flush so a (buggy) defensive DELETE would have landed.
+    // Flush so any (buggy) follow-up limit/override write would have landed.
     await new Promise((r) => setTimeout(r, 0))
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/limit')
+    expect(httpAPI).not.toHaveBeenCalledWith('POST', '/override', expect.anything())
   })
 
   it('never DELETEs a system limit from the inline editor, even if events reach it', async () => {

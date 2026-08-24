@@ -755,14 +755,20 @@
     "eco": "Eco",
     "boost": {
       "label": "Boost",
-      "title": "Gyors töltés",
-      "body": "Erőltetett töltés a kiválasztott időtartamra. A töltés automatikusan leáll, amikor lejár az idő.",
-      "note": "A visszaszámlálás ebben a böngészőlapban fut — ha boost közben bezárja vagy újratölti, a töltés bekapcsolva marad, amíg át nem váltja a módot.",
-      "minutes": "{n} perc",
-      "hour": "1 óra",
-      "cancel": "Mégse",
-      "active": "Boost · {time}",
-      "cancel_active": "Boost megszakítása"
+      "arm": "Boost indítása",
+      "replace": "Boost cseréje",
+      "cancel_active": "Boost megszakítása",
+      "active_prefix": "Boost folyamatban",
+      "type_time": "Idő",
+      "type_energy": "Energia",
+      "type_soc": "Töltöttség",
+      "type_range": "Hatótáv",
+      "pills_aria": "Boost célja",
+      "for": "{value} ideig",
+      "add": "+{value}",
+      "until": "eddig: {value}",
+      "close": "Bezárás",
+      "no_vehicle_source": "Ehhez a boosthoz járműadatok (töltöttség vagy hatótáv) kellenek, de nincs forrás beállítva."
     },
     "controls": {
       "locked_by": "Vezérli: {owner}"
