@@ -10,6 +10,8 @@ vi.mock('svelte-i18n', () => {
 vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn() }))
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
+import { status_store } from '../../../lib/stores/status.js'
+import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import Terminal from '../Terminal.svelte'
 
 beforeEach(() => {
@@ -78,5 +80,88 @@ describe('Terminal page', () => {
     await vi.waitFor(() =>
       expect(queryByText('config.terminal.expand16mb_button')).not.toBeInTheDocument(),
     )
+  })
+})
+
+describe('Terminal — Memory & health', () => {
+  // A healthy fork-firmware /status snapshot; individual tests override fields.
+  const MEM = {
+    heap_largest: 45000, heap_largest_min: 30000, free_heap: 77000, heap_min: 60000,
+    stack_loop_min: 2048, stack_events_min: 3000,
+    ws_conns: 2, ws_send_max: 4096, ws_reaped: 0,
+    reset_reason_name: 'sw', reset_reason: 3,
+  }
+
+  beforeEach(() => {
+    status_store.set({})
+    uisettings_store.update((s) => ({ ...s, dev_features: false }))
+  })
+
+  it('renders the section when heap_largest is present', () => {
+    status_store.set({ ...MEM })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.memory')).toBeInTheDocument()
+    expect(getByText('config.terminal.reset_reason')).toBeInTheDocument()
+    expect(getByText('config.terminal.ws_conns')).toBeInTheDocument()
+  })
+
+  it('omits the whole section when heap_largest is absent', () => {
+    status_store.set({ free_heap: 77000 }) // upstream ships free_heap but not heap_largest
+    const { queryByText } = render(Terminal)
+    expect(queryByText('config.terminal.memory')).not.toBeInTheDocument()
+  })
+
+  it('gates the LVGL rows on lv_used_max, independent of the heap gate', () => {
+    status_store.set({ ...MEM }) // heap present, no lv_used_max
+    const { queryByText, rerender } = render(Terminal)
+    expect(queryByText('config.terminal.lvgl_pool')).not.toBeInTheDocument()
+
+    status_store.set({ ...MEM, lv_used_max: 30, lv_frag_max: 5 })
+    rerender({})
+    expect(queryByText('config.terminal.lvgl_pool')).toBeInTheDocument()
+    // Percent, not run through formatBytes.
+    expect(queryByText('30%')).toBeInTheDocument()
+    expect(queryByText('30 B')).not.toBeInTheDocument()
+  })
+
+  it('hides the probe block with Labs off and shows it with Labs on', async () => {
+    status_store.set({ ...MEM, probe0_max: 8000, probe0_n: 120 })
+    const { queryByText, rerender } = render(Terminal)
+    expect(queryByText('config.terminal.probes')).not.toBeInTheDocument()
+
+    uisettings_store.update((s) => ({ ...s, dev_features: true }))
+    rerender({})
+    expect(queryByText('config.terminal.probes')).toBeInTheDocument()
+    expect(queryByText('config.terminal.probe_buildstatus')).toBeInTheDocument()
+  })
+
+  it('tones the largest free block error below 12 KB and updates live', async () => {
+    status_store.set({ ...MEM }) // 45000 → healthy
+    const { findByText, queryByText } = render(Terminal)
+    expect(queryByText('10.7 KB')).not.toBeInTheDocument()
+
+    // A websocket push drops it into the danger zone — no refetch involved.
+    status_store.set({ ...MEM, heap_largest: 11000 })
+    const cell = await findByText('10.7 KB')
+    expect(cell.className).toContain('text-error')
+  })
+
+  it('warns on reaped connections but never on the historical low-water mark', () => {
+    status_store.set({ ...MEM, ws_reaped: 7 })
+    const { getByText } = render(Terminal)
+    expect(getByText('7').className).toContain('text-warning')
+  })
+
+  it('humanises a known reset reason and falls back to the raw token otherwise', () => {
+    status_store.set({ ...MEM, reset_reason_name: 'panic' })
+    const { getByText, queryByText, rerender } = render(Terminal)
+    // The i18n mock echoes keys, so a mapped token routes through reset_reasons.*
+    expect(getByText('config.terminal.reset_reasons.panic')).toBeInTheDocument()
+
+    // An unmapped token from a newer IDF shows verbatim, not a missing key.
+    status_store.set({ ...MEM, reset_reason_name: 'brand_new_token' })
+    rerender({})
+    expect(getByText('brand_new_token')).toBeInTheDocument()
+    expect(queryByText('config.terminal.reset_reasons.brand_new_token')).not.toBeInTheDocument()
   })
 })
