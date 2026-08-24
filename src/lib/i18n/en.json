@@ -452,7 +452,7 @@
       "reset_reasons": {
         "poweron": "Power-on",
         "sw": "Software",
-        "ext": "External pin",
+        "external": "External pin",
         "panic": "Panic / exception",
         "int_wdt": "Interrupt watchdog",
         "task_wdt": "Task watchdog",
@@ -460,11 +460,6 @@
         "deepsleep": "Deep-sleep wake",
         "brownout": "Brownout",
         "sdio": "SDIO",
-        "usb": "USB",
-        "jtag": "JTAG",
-        "efuse": "eFuse error",
-        "pwr_glitch": "Power glitch",
-        "cpu_lockup": "CPU lockup",
         "unknown": "Unknown"
       },
       "now": "Now",

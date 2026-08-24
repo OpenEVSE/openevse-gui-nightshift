@@ -452,7 +452,7 @@
       "reset_reasons": {
         "poweron": "Bekapcsolás",
         "sw": "Szoftver",
-        "ext": "Külső láb",
+        "external": "Külső láb",
         "panic": "Pánik / kivétel",
         "int_wdt": "Megszakítás-figyelő",
         "task_wdt": "Feladatfigyelő",
@@ -460,11 +460,6 @@
         "deepsleep": "Ébredés mélyalvásból",
         "brownout": "Feszültségesés",
         "sdio": "SDIO",
-        "usb": "USB",
-        "jtag": "JTAG",
-        "efuse": "eFuse hiba",
-        "pwr_glitch": "Tápfeszültség-zavar",
-        "cpu_lockup": "CPU lefagyás",
         "unknown": "Ismeretlen"
       },
       "now": "Most",

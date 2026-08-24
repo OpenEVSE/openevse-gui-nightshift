@@ -111,19 +111,26 @@
     return 'default'
   }
   function stackTone(bytes) {
-    return bytes != null && bytes < 1024 ? 'warn' : 'default'
+    // 0 is the firmware's "never sampled yet" sentinel (UINT32_MAX mapped to 0
+    // before the first diagnostics_loop() sample), not an exhausted stack — so
+    // it must not warn. A genuine free-stack reading under 1 KB is the alarm.
+    return bytes > 0 && bytes < 1024 ? 'warn' : 'default'
   }
+  // Render the 0 sentinel (and missing fields) as "no reading yet", not "0 B".
+  let stackValue = (bytes) => (bytes ? formatBytes(bytes) : '—')
   // A historical low-water mark should never be coloured — a device that has
   // since recovered would otherwise flag red forever. Only live values tone.
   const SOFT_RESET = new Set(['sw', 'poweron'])
   let resetTone = $derived(
     mem.reset_reason_name && !SOFT_RESET.has(mem.reset_reason_name) ? 'warn' : 'default',
   )
-  // Humanise the IDF reset token (sw → Software, panic → Panic…). Unknown
-  // tokens from a newer IDF fall through to the raw string rather than a blank.
+  // Humanise the reset token the firmware actually emits (sw → Software,
+  // external → External pin, …). This mirrors the tokens diagnostics.cpp maps;
+  // anything else — a future IDF cause the firmware doesn't name — falls through
+  // to the raw string rather than a blank.
   const KNOWN_RESETS = new Set([
-    'poweron', 'sw', 'ext', 'panic', 'int_wdt', 'task_wdt', 'wdt', 'deepsleep',
-    'brownout', 'sdio', 'usb', 'jtag', 'efuse', 'pwr_glitch', 'cpu_lockup', 'unknown',
+    'poweron', 'sw', 'external', 'panic', 'int_wdt', 'task_wdt', 'wdt',
+    'deepsleep', 'brownout', 'sdio', 'unknown',
   ])
   let resetLabel = $derived.by(() => {
     const name = mem.reset_reason_name
@@ -319,8 +326,8 @@
       </div>
 
       <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.stacks')}</h3>
-      <ReadOnlyRow label={$_('config.terminal.stack_loop')} value={formatBytes(mem.stack_loop_min)} tone={stackTone(mem.stack_loop_min)} />
-      <ReadOnlyRow label={$_('config.terminal.stack_events')} value={formatBytes(mem.stack_events_min)} tone={stackTone(mem.stack_events_min)} />
+      <ReadOnlyRow label={$_('config.terminal.stack_loop')} value={stackValue(mem.stack_loop_min)} tone={stackTone(mem.stack_loop_min)} />
+      <ReadOnlyRow label={$_('config.terminal.stack_events')} value={stackValue(mem.stack_events_min)} tone={stackTone(mem.stack_events_min)} />
 
       <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.websockets')}</h3>
       <ReadOnlyRow label={$_('config.terminal.ws_conns')} value={mem.ws_conns} />

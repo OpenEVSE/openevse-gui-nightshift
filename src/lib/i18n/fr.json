@@ -452,7 +452,7 @@
       "reset_reasons": {
         "poweron": "Mise sous tension",
         "sw": "Logiciel",
-        "ext": "Broche externe",
+        "external": "Broche externe",
         "panic": "Panique / exception",
         "int_wdt": "Chien de garde d'interruption",
         "task_wdt": "Chien de garde de tâche",
@@ -460,11 +460,6 @@
         "deepsleep": "Réveil de veille profonde",
         "brownout": "Baisse de tension",
         "sdio": "SDIO",
-        "usb": "USB",
-        "jtag": "JTAG",
-        "efuse": "Erreur eFuse",
-        "pwr_glitch": "Micro-coupure d'alimentation",
-        "cpu_lockup": "Blocage du CPU",
         "unknown": "Inconnu"
       },
       "now": "Actuel",

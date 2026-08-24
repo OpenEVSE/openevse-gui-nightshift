@@ -452,7 +452,7 @@
       "reset_reasons": {
         "poweron": "Encendido",
         "sw": "Software",
-        "ext": "Pin externo",
+        "external": "Pin externo",
         "panic": "Pánico / excepción",
         "int_wdt": "Watchdog de interrupción",
         "task_wdt": "Watchdog de tarea",
@@ -460,11 +460,6 @@
         "deepsleep": "Despertar de sueño profundo",
         "brownout": "Caída de tensión",
         "sdio": "SDIO",
-        "usb": "USB",
-        "jtag": "JTAG",
-        "efuse": "Error de eFuse",
-        "pwr_glitch": "Fallo de alimentación",
-        "cpu_lockup": "Bloqueo de CPU",
         "unknown": "Desconocido"
       },
       "now": "Ahora",

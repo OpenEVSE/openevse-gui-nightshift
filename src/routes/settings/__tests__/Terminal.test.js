@@ -164,4 +164,30 @@ describe('Terminal — Memory & health', () => {
     expect(getByText('brand_new_token')).toBeInTheDocument()
     expect(queryByText('config.terminal.reset_reasons.brand_new_token')).not.toBeInTheDocument()
   })
+
+  it('maps the external-pin token the firmware actually emits', () => {
+    // Firmware returns "external" (not "ext") for ESP_RST_EXT — must route
+    // through reset_reasons.external, not fall through to the raw token.
+    status_store.set({ ...MEM, reset_reason_name: 'external' })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.reset_reasons.external')).toBeInTheDocument()
+  })
+
+  it('treats an unsampled stack (0 sentinel) as no reading, not a warning', () => {
+    // Fresh boot: diagnostics maps its UINT32_MAX "never sampled" to 0.
+    status_store.set({ ...MEM, stack_loop_min: 0, stack_events_min: 0 })
+    const { container, getByText } = render(Terminal)
+    // Nothing on the page warns — the healthy heap/ws figures don't, and the
+    // 0-stacks must not either.
+    expect(container.querySelector('.text-warning')).toBeNull()
+    // The rows read "no reading" (—), not "0 B".
+    const loop = getByText('config.terminal.stack_loop').parentElement
+    expect(loop.querySelector('span:last-child').textContent.trim()).toBe('—')
+  })
+
+  it('warns on a genuine sub-1KB stack reading', () => {
+    status_store.set({ ...MEM, stack_loop_min: 512 })
+    const { getByText } = render(Terminal)
+    expect(getByText('512 B').className).toContain('text-warning')
+  })
 })
