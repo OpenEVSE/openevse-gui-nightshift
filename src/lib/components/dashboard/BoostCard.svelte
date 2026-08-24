@@ -13,6 +13,7 @@
     hasSoc = false,
     canRange = false,
     soc = 0,                // current battery %, to floor the soc target
+    range = null,           // current range, to floor the range target
     estMaxRange = null,     // range estimate, ceilings the range slider
     rangeMiles = false,
     maxEnergyKwh = 100,
@@ -54,6 +55,17 @@
   let rangeMax = $derived(
     Number.isFinite(estMaxRange) && estMaxRange > 0 ? Math.ceil(estMaxRange / 10) * 10 : 400,
   )
+  // Floor the range target just above the current range (10-unit steps), the
+  // same guard socMin gives soc — otherwise an already-met range target arms,
+  // returns 201, and silently reconciles to nothing with no user explanation.
+  // Kept a step below the ceiling so the slider always has a usable span.
+  let rangeMin = $derived.by(() => {
+    const floor = Number.isFinite(range) && range > 0 ? Math.ceil((range + 1) / 10) * 10 : 10
+    return Math.max(10, Math.min(floor, rangeMax - 10))
+  })
+  $effect(() => {
+    if (rangeVal < rangeMin) rangeVal = rangeMin
+  })
 
   // Active slider config for the selected dimension.
   let cfg = $derived.by(() => {
@@ -63,7 +75,7 @@
       case 'soc':
         return { min: socMin, max: 100, step: 5, get: () => socTarget, set: (v) => (socTarget = v) }
       case 'range':
-        return { min: 10, max: rangeMax, step: 10, get: () => rangeVal, set: (v) => (rangeVal = v) }
+        return { min: rangeMin, max: rangeMax, step: 10, get: () => rangeVal, set: (v) => (rangeVal = v) }
       default: // time
         return { min: 15, max: 480, step: 15, get: () => timeMin, set: (v) => (timeMin = v) }
     }

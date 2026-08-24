@@ -480,6 +480,7 @@
           {hasSoc}
           {canRange}
           soc={$status_store?.battery_level ?? 0}
+          range={$status_store?.battery_range ?? null}
           estMaxRange={maxRange}
           rangeMiles={!!$config_store?.mqtt_vehicle_range_miles}
           maxEnergyKwh={$uisettings_store?.max_energy_kwh ?? 100}

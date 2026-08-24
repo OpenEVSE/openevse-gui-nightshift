@@ -26,10 +26,14 @@ function createBoostStore() {
             return true
         }
         else if (res && typeof res === "object") {
-            // {} = idle. (Unsupported firmware 404s and httpAPI returns the
-            // string 'error', which falls through to the failure branch — but
-            // DataManager gates the download on boost_version presence, so an
-            // unsupported device never reaches here.)
+            // {} = idle. On firmware without Boost, GET /boost 404s with a
+            // non-JSON body, so httpAPI's response.json() throws and the catch
+            // returns the string 'error' → the failure branch below. (httpAPI
+            // does NOT translate the 404 itself; it only special-cases 401.
+            // It never exposes the status code either, which is why the
+            // capability check is a boost_version gate in DataManager, not a
+            // 200-vs-404 probe here — and that gate means an unsupported device
+            // never reaches this download at all.)
             P.update(() => model)
             return true
         }
@@ -51,7 +55,12 @@ function createBoostStore() {
     async function remove() {
         let res = await httpAPI("DELETE", "/boost")
         // "no boost" = nothing to cancel — success for an idempotent remove,
-        // mirroring how the limit store treats "no limit".
+        // mirroring how the limit store treats "no limit". Note this reply
+        // arrives with a 404 status: it works because httpAPI passes every
+        // non-401 response straight to response.json(), so the {"msg":"no
+        // boost"} body parses normally. If httpAPI were ever changed to
+        // collapse 404s to 'error', idempotent cancel would silently break —
+        // this path depends on the 404 body being parsed, not swallowed.
         if (res && (res.msg === "done" || res.msg === "no boost")) {
             P.update(() => model)
             return true
