@@ -1,6 +1,6 @@
 <script>
   import { _ } from 'svelte-i18n'
-  import StatusLine from './StatusLine.svelte'
+  import PlugPill from './PlugPill.svelte'
   import RatePill from './RatePill.svelte'
   import SessionChart from './SessionChart.svelte'
 
@@ -20,14 +20,15 @@
     sessionElapsed = 0,
     chartError = false,
     rateDisabled = false,
+    connected = false,
     onrate = () => {},
   } = $props()
 </script>
 
 <div>
-  <!-- status row: "Charging" · rate pill -->
+  <!-- status row: plug pill · rate pill -->
   <div class="flex items-center justify-between gap-2 px-1">
-    <StatusLine display="charging" />
+    <PlugPill {connected} />
     {#key rateNonce}
       <RatePill {amps} min={minAmps} max={maxAmps} claimedBy={rateClaimedBy} disabled={rateDisabled} onchange={onrate} />
     {/key}

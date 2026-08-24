@@ -92,6 +92,62 @@
     return { size: c.littlefs_size, used: c.littlefs_used, free }
   })
 
+  // ── Memory & health (fork-only diagnostics; every field from /status) ────
+  // Live, websocket-pushed — no refresh button or poll timer (status already
+  // updates itself). Whole section gates on heap_largest presence; the LVGL
+  // rows gate separately on lv_used_max (TFT builds only).
+  let mem = $derived($status_store ?? {})
+  let memSupported = $derived(mem.heap_largest !== undefined)
+  let lvglSupported = $derived(mem.lv_used_max !== undefined)
+
+  const TONE_CLASS = { default: 'text-text', ok: 'text-accent', warn: 'text-warning', error: 'text-error' }
+
+  // Thresholds measured on real hardware — a first cut, not settled science.
+  // Below ~13 KB largest-block, OTA updates start failing partway through.
+  function heapTone(bytes) {
+    if (bytes == null) return 'default'
+    if (bytes < 12 * 1024) return 'error'
+    if (bytes < 20 * 1024) return 'warn'
+    return 'default'
+  }
+  function stackTone(bytes) {
+    // 0 is the firmware's "never sampled yet" sentinel (UINT32_MAX mapped to 0
+    // before the first diagnostics_loop() sample), not an exhausted stack — so
+    // it must not warn. A genuine free-stack reading under 1 KB is the alarm.
+    return bytes > 0 && bytes < 1024 ? 'warn' : 'default'
+  }
+  // Render the 0 sentinel (and missing fields) as "no reading yet", not "0 B".
+  let stackValue = (bytes) => (bytes ? formatBytes(bytes) : '—')
+  // A historical low-water mark should never be coloured — a device that has
+  // since recovered would otherwise flag red forever. Only live values tone.
+  const SOFT_RESET = new Set(['sw', 'poweron'])
+  let resetTone = $derived(
+    mem.reset_reason_name && !SOFT_RESET.has(mem.reset_reason_name) ? 'warn' : 'default',
+  )
+  // Humanise the reset token the firmware actually emits (sw → Software,
+  // external → External pin, …). This mirrors the tokens diagnostics.cpp maps;
+  // anything else — a future IDF cause the firmware doesn't name — falls through
+  // to the raw string rather than a blank.
+  const KNOWN_RESETS = new Set([
+    'poweron', 'sw', 'external', 'panic', 'int_wdt', 'task_wdt', 'wdt',
+    'deepsleep', 'brownout', 'sdio', 'unknown',
+  ])
+  let resetLabel = $derived.by(() => {
+    const name = mem.reset_reason_name
+    if (!name) return undefined
+    return KNOWN_RESETS.has(name) ? $_(`config.terminal.reset_reasons.${name}`) : name
+  })
+  let pct = (v) => (v == null ? '—' : `${v}%`)
+
+  // Only probe0 (status JSON build) and probe1 (serialize + write) are wired in
+  // firmware; the spare slots report 0 and are skipped until a build uses them.
+  const PROBE_LABELS = { 0: 'config.terminal.probe_buildstatus', 1: 'config.terminal.probe_serialize' }
+  let probes = $derived(
+    [0, 1, 2, 3]
+      .map((i) => ({ i, max: mem[`probe${i}_max`], n: mem[`probe${i}_n`] }))
+      .filter((p) => p.n > 0),
+  )
+
   // Config is loaded globally, but refresh so the figures are current on visit.
   onMount(() => {
     config_store.download()
@@ -232,6 +288,71 @@
       </div>
     {/if}
   </ConfigSection>
+
+  {#if memSupported}
+    <ConfigSection title={$_('config.terminal.memory')}>
+      <!-- Last restart first: the first question anyone asks about a reboot. -->
+      <ReadOnlyRow
+        label={$_('config.terminal.reset_reason')}
+        value={resetLabel}
+        tone={resetTone}
+      />
+
+      <!-- Heap: now / min table, mirroring the storage table above. The
+           largest allocatable block is the number that predicts failure —
+           free_heap can look healthy while it collapses into unusable fragments. -->
+      <div class="mt-2 overflow-hidden rounded-xl border border-border">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-surface-3 text-text-dim">
+              <th class="px-3 py-2 text-left font-medium"></th>
+              <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.now')}</th>
+              <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.min')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-border">
+              <td class="px-3 py-2 text-text-dim">{$_('config.terminal.heap_largest')}</td>
+              <td class="px-3 py-2 text-right font-medium {TONE_CLASS[heapTone(mem.heap_largest)]}">{formatBytes(mem.heap_largest)}</td>
+              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.heap_largest_min)}</td>
+            </tr>
+            <tr class="border-t border-border">
+              <td class="px-3 py-2 text-text-dim">{$_('config.terminal.heap_free')}</td>
+              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.free_heap)}</td>
+              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.heap_min)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.stacks')}</h3>
+      <ReadOnlyRow label={$_('config.terminal.stack_loop')} value={stackValue(mem.stack_loop_min)} tone={stackTone(mem.stack_loop_min)} />
+      <ReadOnlyRow label={$_('config.terminal.stack_events')} value={stackValue(mem.stack_events_min)} tone={stackTone(mem.stack_events_min)} />
+
+      <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.websockets')}</h3>
+      <ReadOnlyRow label={$_('config.terminal.ws_conns')} value={mem.ws_conns} />
+      <ReadOnlyRow label={$_('config.terminal.ws_send_max')} value={formatBytes(mem.ws_send_max)} />
+      <ReadOnlyRow label={$_('config.terminal.ws_reaped')} value={mem.ws_reaped} tone={mem.ws_reaped > 0 ? 'warn' : 'default'} />
+
+      {#if lvglSupported}
+        <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.lvgl_pool')}</h3>
+        <ReadOnlyRow label={$_('config.terminal.lv_used')} value={pct(mem.lv_used_max)} />
+        <ReadOnlyRow label={$_('config.terminal.lv_frag')} value={pct(mem.lv_frag_max)} />
+      {/if}
+
+      {#if $uisettings_store?.dev_features && probes.length}
+        <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.probes')}</h3>
+        <p class="mb-1 text-xs text-text-dim">{$_('config.terminal.probes_desc')}</p>
+        {#each probes as p (p.i)}
+          <ReadOnlyRow
+            label={$_(PROBE_LABELS[p.i] ?? 'config.terminal.probe_generic', { values: { n: p.i } })}
+            value={formatBytes(p.max)}
+            detail={$_('config.terminal.probe_calls', { values: { n: p.n } })}
+          />
+        {/each}
+      {/if}
+    </ConfigSection>
+  {/if}
 
   <ConfigSection title={$_('config.terminal.labs')}>
     <FormField

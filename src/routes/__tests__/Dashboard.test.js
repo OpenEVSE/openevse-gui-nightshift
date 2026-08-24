@@ -37,7 +37,8 @@ describe('Dashboard', () => {
   it('renders the charging composition when state is 3', () => {
     status_store.set({ state: 3, power: 7000, voltage: 240, amp: 32000, session_energy: 12300, session_elapsed: 6129, temp: 427, pilot: 32, max_current: 48 })
     const { getByText } = render(Dashboard)
-    expect(getByText('dashboard.status.charging')).toBeInTheDocument()
+    // The charging hero shows the plug pill (state 3 ⇒ a car is connected).
+    expect(getByText('dashboard.plug.connected')).toBeInTheDocument()
   })
 
   it('shows the session chart hero while charging with dev features off (ungated)', () => {
@@ -53,6 +54,20 @@ describe('Dashboard', () => {
     status_store.set({ state: 1, total_day: 3.2, total_energy: 7523 })
     const { getByText } = render(Dashboard)
     expect(getByText('dashboard.ring.ready')).toBeInTheDocument()
+  })
+
+  it('shows the plug pill as connected in the ring view when a car is plugged in', () => {
+    // The payoff case: a car plugged in but paused on a schedule reads state
+    // 254 (Sleeping). The state code alone can't tell — the vehicle flag can.
+    status_store.set({ state: 254, vehicle: 1, total_day: 0, total_energy: 0 })
+    const { getByText } = render(Dashboard)
+    expect(getByText('dashboard.plug.connected')).toBeInTheDocument()
+  })
+
+  it('shows the plug pill as disconnected when no car is plugged in', () => {
+    status_store.set({ state: 1, vehicle: 0, total_day: 0, total_energy: 0 })
+    const { getByText } = render(Dashboard)
+    expect(getByText('dashboard.plug.disconnected')).toBeInTheDocument()
   })
 
   it('caps the rate slider at the configured soft max, not the hardware max', async () => {

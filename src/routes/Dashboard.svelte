@@ -17,10 +17,10 @@
   import { formatTemp } from '../lib/temperature.js'
   import { formatCost } from '../lib/cost.js'
   import { showWriteError } from '../lib/alerts.js'
-  import { displayState, ringFill, connectedReason, maxPowerW } from '../lib/dashboard/state.js'
+  import { displayState, ringFill, connectedReason, maxPowerW, vehicleConnected } from '../lib/dashboard/state.js'
   import { socCeiling, estMaxRange, hmsShort } from '../lib/dashboard/soc.js'
 
-  import StatusLine from '../lib/components/dashboard/StatusLine.svelte'
+  import PlugPill from '../lib/components/dashboard/PlugPill.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
   import ChargingHero from '../lib/components/dashboard/ChargingHero.svelte'
   import StatChips from '../lib/components/dashboard/StatChips.svelte'
@@ -38,6 +38,9 @@
   let mode = $derived($uistates_store?.mode ?? 0)
   let display = $derived(displayState($status_store, mode))
   let charging = $derived(display === 'charging')
+  // Is a car physically plugged in? Prefers the firmware `vehicle` flag, which
+  // stays accurate through Sleeping/Off where the state code alone can't tell.
+  let connected = $derived(vehicleConnected($status_store))
   // While charging, show the session chart hero (it polls /energy/raw); every
   // other state keeps the PowerRing.
   let showChart = $derived(charging)
@@ -472,6 +475,7 @@
         sessionElapsed={$status_store?.session_elapsed ?? 0}
         chartError={$energy_store.error.raw}
         rateDisabled={busy || ecoOn || display === 'error'}
+        {connected}
         onrate={setChargeAmps}
       />
     </div>
@@ -479,20 +483,26 @@
 
   {#if !showChart}
     <!-- Ring hero: occupies the same top-center spanning slot as the chart,
-         so the hero area matches between the two states. -->
-    <div class="max-lg:order-1 lg:col-span-2"><StatusLine {display} /></div>
-    <div class="relative max-lg:order-2 lg:col-span-2" in:fade={{ duration: 150 }}>
-      <div class="absolute right-3 top-1 z-10">
-        {#key rateNonce}
-          <RatePill
-            amps={chargeAmps}
-            min={minAmps}
-            max={maxAmps}
-            claimedBy={rateClaimedBy}
-            disabled={busy || ecoOn || display === 'error'}
-            onchange={setChargeAmps}
-          />
-        {/key}
+         so the hero area matches between the two states. On mobile the pills
+         flow in a row above the ring (a narrow ring would otherwise collide
+         with them); on desktop the hero is wide, so the wrapper dissolves
+         (lg:contents) and the pills mirror each other across the ring's top
+         corners. -->
+    <div class="relative max-lg:order-1 lg:col-span-2" in:fade={{ duration: 150 }}>
+      <div class="flex items-start justify-between gap-2 px-1 pb-2 lg:contents">
+        <div class="lg:absolute lg:left-3 lg:top-1 lg:z-10"><PlugPill {connected} /></div>
+        <div class="lg:absolute lg:right-3 lg:top-1 lg:z-10">
+          {#key rateNonce}
+            <RatePill
+              amps={chargeAmps}
+              min={minAmps}
+              max={maxAmps}
+              claimedBy={rateClaimedBy}
+              disabled={busy || ecoOn || display === 'error'}
+              onchange={setChargeAmps}
+            />
+          {/key}
+        </div>
       </div>
       <PowerRing
         {display}
