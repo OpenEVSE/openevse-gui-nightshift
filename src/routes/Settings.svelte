@@ -5,9 +5,12 @@
   import Icon from '../lib/icons/Icon.svelte'
   import { pagesBySection } from '../lib/config/pages.js'
   import { config_store } from '../lib/stores/config.js'
+  import { uisettings_store } from '../lib/stores/uisettings.js'
   import { redirect } from '../lib/router.js'
 
-  let groups = $derived(pagesBySection($config_store))
+  let groups = $derived(
+    pagesBySection($config_store, { dev_features: $uisettings_store?.dev_features }),
+  )
 
   // Auth is "on" when a password is set (same test as the firmware and the HTTP
   // page — a blank username falls back to a default). Only then is there a

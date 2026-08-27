@@ -29,8 +29,8 @@ describe('legacy route aliases', () => {
     // the settings index instead of 404ing.
     expect(LEGACY_ROUTES['/settings/ohmconnect']).toBe('/settings')
     expect(LEGACY_ROUTES['/configuration/ohmconnect']).toBe('/settings')
-    // 12 straight moves + 2 renames + the index + the security->certificates
+    // 13 straight moves + 2 renames + the index + the security->certificates
     // revert + the 2 retired OhmConnect paths
-    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(19)
+    expect(Object.keys(LEGACY_ROUTES)).toHaveLength(20)
   })
 })
