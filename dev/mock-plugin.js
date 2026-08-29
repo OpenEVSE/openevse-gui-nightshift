@@ -106,6 +106,13 @@ export function mockPlugin() {
   let claimsState = claimsOff
   let claimsVersion = baseFixtures['/api/status'].claims_version ?? 1
 
+  // Dev-only in-memory Boost (device-side charge-until-target claim). Present
+  // here so buildStatusMessage always advertises boost_version — that presence
+  // is the GUI's capability gate. boost_version bumps on every transition so
+  // DataManager re-reads GET /api/boost live over the WebSocket.
+  let boost = null // active boost {type, value, remaining, started} or null
+  let boostVersion = baseFixtures['/api/status'].boost_version ?? 1
+
   function buildStatusMessage(tickCount) {
     // Mirror the device's real status shape; nudge only genuine live fields
     // so the connection looks alive without inventing nonexistent keys.
@@ -116,6 +123,8 @@ export function mockPlugin() {
       ...baseStatus,
       state,
       claims_version: claimsVersion,
+      boost: !!boost,
+      boost_version: boostVersion,
       uptime: (baseStatus.uptime ?? 0) + tickCount * 2,
       session_elapsed: charging
         ? (baseStatus.session_elapsed ?? 0) + tickCount * 2
@@ -300,6 +309,61 @@ export function mockPlugin() {
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(buildStatusMessage(tickCount))
           return
+        }
+
+        // Boost: device-side charge-until-target claim. GET returns the active
+        // boost or {} (idle, a 200 not a 404); POST arms/replaces (201); DELETE
+        // cancels (200) or 404s "no boost". Each transition bumps boost_version
+        // and pushes a fresh status frame so the dashboard reconciles live.
+        if (url === '/api/boost') {
+          if (req.method === 'GET') {
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify(boost ?? {}))
+            return
+          }
+          if (req.method === 'POST') {
+            let body = ''
+            req.on('data', (c) => { body += c })
+            req.on('end', () => {
+              let data
+              try { data = JSON.parse(body) } catch { data = null }
+              const types = ['time', 'energy', 'soc', 'range']
+              if (!data || !types.includes(data.type) ||
+                  !Number.isInteger(data.value) || data.value <= 0) {
+                res.writeHead(400, { 'Content-Type': 'application/json' })
+                res.end(JSON.stringify({ msg: 'failed to parse JSON' }))
+                return
+              }
+              // time clamps to 7 days; the GUI re-reads rather than echoing.
+              const clamped = data.type === 'time' ? Math.min(data.value, 604800) : data.value
+              boost = {
+                type: data.type,
+                value: clamped,
+                remaining: clamped,
+                started: new Date(nowMs()).toISOString(),
+              }
+              boostVersion++
+              const msg = buildStatusMessage(tickCount)
+              for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
+              res.writeHead(201, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'done' }))
+            })
+            return
+          }
+          if (req.method === 'DELETE') {
+            if (!boost) {
+              res.writeHead(404, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'no boost' }))
+              return
+            }
+            boost = null
+            boostVersion++
+            const msg = buildStatusMessage(tickCount)
+            for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ msg: 'done' }))
+            return
+          }
         }
 
         // Claims/target reflects the switcher so the derived mode is coherent.

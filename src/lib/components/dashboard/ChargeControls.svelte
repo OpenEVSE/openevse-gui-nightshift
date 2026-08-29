@@ -1,6 +1,5 @@
 <script>
   import { _ } from 'svelte-i18n'
-  import BoostButton from './BoostButton.svelte'
   import { controlSegments } from '../../dashboard/controls.js'
 
   let {
@@ -9,10 +8,7 @@
     locked = false,
     lockLabel = '',
     disabled = false,
-    boostEndsAt = null,
     onsegment = () => {},
-    onboost = () => {},
-    oncancelboost = () => {},
   } = $props()
 
   const SEG_LABELS = {
@@ -52,7 +48,4 @@
       {/each}
     </div>
   {/if}
-
-  <!-- Modifier row: Boost. (The Shaper toggle lives in Settings, not here.) -->
-  <BoostButton disabled={disabled || locked} endsAt={boostEndsAt} onboost={onboost} oncancel={oncancelboost} />
 </div>

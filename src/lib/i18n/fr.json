@@ -849,14 +849,20 @@
     "eco": "Éco",
     "boost": {
       "label": "Boost",
-      "title": "Charge boost",
-      "body": "Force la charge pendant la durée choisie. La charge s'arrête automatiquement à la fin.",
-      "note": "Le compte à rebours s'exécute dans cet onglet du navigateur — si vous le fermez ou le rechargez pendant le boost, la charge reste active jusqu'à ce que vous changiez de mode.",
-      "minutes": "{n} min",
-      "hour": "1 h",
-      "cancel": "Annuler",
-      "active": "Boost · {time}",
-      "cancel_active": "Annuler le boost"
+      "arm": "Démarrer le boost",
+      "replace": "Remplacer le boost",
+      "cancel_active": "Annuler le boost",
+      "active_prefix": "Boost en cours",
+      "type_time": "Durée",
+      "type_energy": "Énergie",
+      "type_soc": "Charge",
+      "type_range": "Autonomie",
+      "pills_aria": "Cible du boost",
+      "for": "pendant {value}",
+      "add": "ajouter {value}",
+      "until": "jusqu'à {value}",
+      "close": "Fermer",
+      "no_vehicle_source": "Ce boost nécessite des données du véhicule (état de charge ou autonomie), et aucune source n'est configurée."
     },
     "controls": {
       "locked_by": "Contrôlé par {owner}"
