@@ -890,7 +890,7 @@
     "tab": {
       "data": "Data",
       "energy": "Energy",
-      "safety": "Safety",
+      "health": "Health",
       "manager": "Manager"
     },
     "group": {
@@ -965,6 +965,29 @@
       "stuck": "Stuck relay",
       "switches": "Relay switch count"
     },
+    "health": {
+      "relay": {
+        "title": "Relay Health",
+        "life_pct": "Life Remaining",
+        "cold_open_count": "Cold Opens",
+        "elec_damage": "Electrical Damage",
+        "transit_drift": "Contact Transit Drift",
+        "transit_baseline": "Open Transit Baseline",
+        "thermal_warning": "Thermal Warning",
+        "thermal_index": "Thermal Index",
+        "thermal_baseline": "Thermal Baseline",
+        "stuck_recovery_count": "Stuck-Relay Recoveries",
+        "not_available": "Not available",
+        "ok": "OK",
+        "warning": "Warning",
+        "level_0": "OK",
+        "level_1": "Watch",
+        "level_2": "Warning",
+        "reset_button": "Relay Replaced - Reset Health Values",
+        "resetting": "Resetting…",
+        "reset_done": "Reset done"
+      }
+    },
     "manager": {
       "empty": "No active claims",
       "active": "Active",
@@ -974,6 +997,7 @@
   },
   "units": {
     "dbm": "dBm",
+    "ms": "ms",
     "kwh": "kWh",
     "amp": "A",
     "volt": "V",

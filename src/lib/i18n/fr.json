@@ -890,7 +890,7 @@
     "tab": {
       "data": "Données",
       "energy": "Énergie",
-      "safety": "Sécurité",
+      "health": "Santé",
       "manager": "Commandes"
     },
     "group": {
@@ -965,6 +965,29 @@
       "stuck": "Relais collé",
       "switches": "Nombre de commutations relais"
     },
+    "health": {
+      "relay": {
+        "title": "Santé du relais",
+        "life_pct": "Durée de vie restante",
+        "cold_open_count": "Ouvertures à froid",
+        "elec_damage": "Dommage électrique",
+        "transit_drift": "Dérive du temps de transit du contact",
+        "transit_baseline": "Référence de transit à l'ouverture",
+        "thermal_warning": "Alerte thermique",
+        "thermal_index": "Indice thermique",
+        "thermal_baseline": "Référence thermique",
+        "stuck_recovery_count": "Récupérations de relais bloqué",
+        "not_available": "Non disponible",
+        "ok": "OK",
+        "warning": "Alerte",
+        "level_0": "OK",
+        "level_1": "À surveiller",
+        "level_2": "Alerte",
+        "reset_button": "Relais remplacé : réinitialiser les valeurs de santé",
+        "resetting": "Réinitialisation…",
+        "reset_done": "Réinitialisé"
+      }
+    },
     "manager": {
       "empty": "Aucune commande active",
       "active": "Actif",
@@ -974,6 +997,7 @@
   },
   "units": {
     "dbm": "dBm",
+    "ms": "ms",
     "kwh": "kWh",
     "amp": "A",
     "volt": "V",

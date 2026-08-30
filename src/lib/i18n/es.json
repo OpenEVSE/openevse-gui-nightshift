@@ -890,7 +890,7 @@
     "tab": {
       "data": "Datos",
       "energy": "Energía",
-      "safety": "Seguridad",
+      "health": "Salud",
       "manager": "Gestor"
     },
     "group": {
@@ -965,6 +965,29 @@
       "stuck": "Relé atascado",
       "switches": "Número de conmutaciones del relé"
     },
+    "health": {
+      "relay": {
+        "title": "Salud del relé",
+        "life_pct": "Vida restante",
+        "cold_open_count": "Aperturas en frío",
+        "elec_damage": "Daño eléctrico",
+        "transit_drift": "Desviación de tránsito del contacto",
+        "transit_baseline": "Línea base de tránsito de apertura",
+        "thermal_warning": "Aviso térmico",
+        "thermal_index": "Índice térmico",
+        "thermal_baseline": "Línea base térmica",
+        "stuck_recovery_count": "Recuperaciones de relé atascado",
+        "not_available": "No disponible",
+        "ok": "OK",
+        "warning": "Aviso",
+        "level_0": "OK",
+        "level_1": "Vigilar",
+        "level_2": "Aviso",
+        "reset_button": "Relé reemplazado: restablecer valores de salud",
+        "resetting": "Restableciendo…",
+        "reset_done": "Restablecido"
+      }
+    },
     "manager": {
       "empty": "Sin reclamaciones activas",
       "active": "Activo",
@@ -974,6 +997,7 @@
   },
   "units": {
     "dbm": "dBm",
+    "ms": "ms",
     "kwh": "kWh",
     "amp": "A",
     "volt": "V",

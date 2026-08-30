@@ -6,21 +6,21 @@
   import { uistates_store } from '../lib/stores/uistates.js'
   import {
     energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
-    showVehicle, homeBatteryMetrics, showHomeBattery, safetyData,
+    showVehicle, homeBatteryMetrics, showHomeBattery, safetyData, relayHealthData,
   } from '../lib/monitoring/metrics.js'
   import Tabs from '../lib/components/ui/Tabs.svelte'
   import MetricsTab from '../lib/components/monitoring/MetricsTab.svelte'
-  import SafetyTab from '../lib/components/monitoring/SafetyTab.svelte'
+  import HealthTab from '../lib/components/monitoring/HealthTab.svelte'
   import EnergyTab from '../lib/components/monitoring/EnergyTab.svelte'
 
   let hasError = $derived(!!$uistates_store?.error)
 
-  // Track the selected tab by id, not index, so the alert-driven Safety jump
+  // Track the selected tab by id, not index, so the alert-driven Health jump
   // (and any future change to the tab set) doesn't shuffle the selection.
-  let activeId = $state('data')
+  let activeId = $state('energy')
 
   onMount(() => {
-    if ($uistates_store?.error) activeId = 'safety'
+    if ($uistates_store?.error) activeId = 'health'
   })
 
   // Desktop has room for everything at once, so the Data groups start
@@ -45,17 +45,18 @@
     { group: serviceMetrics($status_store, $config_store), expanded: desktop },
   ])
   let safety = $derived(safetyData($status_store, hasError))
+  let relayHealth = $derived(relayHealthData($config_store))
 
   let tabs = $derived([
-    { id: 'data',    label: $_('monitoring.tab.data'),    alert: false },
     { id: 'energy',  label: $_('monitoring.tab.energy'),  alert: false },
-    { id: 'safety',  label: $_('monitoring.tab.safety'),  alert: hasError },
+    { id: 'data',    label: $_('monitoring.tab.data'),    alert: false },
+    { id: 'health',  label: $_('monitoring.tab.health'),  alert: hasError },
   ])
 
-  // If the user disables dev features while sitting on the Energy tab,
-  // fall back to Data so we don't render a removed tab.
+  // If the user disables dev features while sitting on a removed tab,
+  // fall back to Energy (the default landing tab).
   $effect(() => {
-    if (!tabs.some((t) => t.id === activeId)) activeId = tabs[0]?.id ?? 'data'
+    if (!tabs.some((t) => t.id === activeId)) activeId = tabs[0]?.id ?? 'energy'
   })
 
   let activeIndex = $derived(Math.max(0, tabs.findIndex((t) => t.id === activeId)))
@@ -73,7 +74,7 @@
       <MetricsTab {groups} />
     {:else}
       <div class="lg:mx-auto lg:w-full lg:max-w-3xl">
-        <SafetyTab data={safety} />
+        <HealthTab data={safety} relay={relayHealth} />
       </div>
     {/if}
   </div>
