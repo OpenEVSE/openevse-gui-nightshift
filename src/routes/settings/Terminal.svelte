@@ -148,9 +148,60 @@
       .filter((p) => p.n > 0),
   )
 
+  // ── Crash core dump (fork firmware, PR #1210) ───────────────────────────
+  // /debug/crash returns a decoded summary of the last captured dump; the block
+  // renders only when one is present. The raw ELF is pulled straight from flash
+  // via a plain link (esp_partition_mmap on the device — never buffered in the
+  // browser), while the decoded summary can be saved as JSON for quick sharing.
+  let crash = $state(null)
+  let pendingClear = $state(false) // confirmation dialog open
+  let clearing = $state(false)
+
+  async function loadCrash() {
+    const res = await serialQueue.add(() => httpAPI('GET', '/debug/crash'))
+    crash = res && res !== 'error' && res.present ? res : null
+  }
+
+  // In dev httpAPI rewrites device paths onto the /api proxy; the raw-dump link
+  // is a plain anchor, so mirror that rewrite rather than hard-coding the path.
+  let rawHref = $derived(import.meta.env.DEV ? '/api/debug/crash/raw' : '/debug/crash/raw')
+
+  // Addresses arrive as numbers (or already-hex strings on older IDF); render
+  // both as 0x-prefixed hex so the backtrace pastes cleanly into esp-coredump.
+  let hex = (v) => (v == null ? '—' : typeof v === 'number' ? '0x' + v.toString(16) : String(v))
+
+  function downloadCrashSummary() {
+    if (!crash) return
+    const blob = new Blob([JSON.stringify(crash, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'coredump-summary.json'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 1000) // let Safari start the download
+  }
+
+  async function clearCrash() {
+    pendingClear = false
+    if (clearing) return
+    clearing = true
+    try {
+      const res = await serialQueue.add(() => httpAPI('DELETE', '/debug/crash'))
+      if (res && res !== 'error') crash = null
+      else showWriteError()
+    } catch {
+      showWriteError()
+    } finally {
+      clearing = false
+    }
+  }
+
   // Config is loaded globally, but refresh so the figures are current on visit.
   onMount(() => {
     config_store.download()
+    loadCrash()
   })
 
   let command = $state('$')
@@ -354,6 +405,47 @@
     </ConfigSection>
   {/if}
 
+  {#if crash?.present}
+    <ConfigSection title={$_('config.terminal.crash.title')}>
+      <p class="mb-2 text-sm text-text-dim">{$_('config.terminal.crash.desc')}</p>
+
+      <!-- A present dump always means the last boot crashed, so the summary
+           rows tone error. panic_reason is absent on IDF 4.4 builds — fall
+           back to a generic "crash detected" so the row is never blank. -->
+      <ReadOnlyRow
+        label={$_('config.terminal.crash.reason')}
+        value={crash.panic_reason || $_('config.terminal.crash.reason_unknown')}
+        tone="error"
+      />
+      <ReadOnlyRow label={$_('config.terminal.crash.task')} value={crash.task} />
+      <ReadOnlyRow label={$_('config.terminal.crash.pc')} value={hex(crash.pc)} />
+      <ReadOnlyRow label={$_('config.terminal.crash.size')} value={formatBytes(crash.size)} />
+
+      {#if crash.bt?.length}
+        <h3 class="mt-3 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.crash.backtrace')}</h3>
+        <div class="overflow-x-auto rounded-xl bg-surface-3 p-3 font-mono text-xs text-text">{crash.bt.map(hex).join(' ')}</div>
+      {/if}
+
+      {#if crash.elf_sha256}
+        <h3 class="mt-3 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.crash.elf')}</h3>
+        <p class="mb-1 text-xs text-text-dim">{$_('config.terminal.crash.elf_detail')}</p>
+        <div class="overflow-x-auto rounded-xl bg-surface-3 p-2 font-mono text-xs text-text-dim break-all">{crash.elf_sha256}</div>
+      {/if}
+
+      <div class="mt-4 flex flex-col gap-2">
+        <a
+          href={rawHref}
+          download="coredump.elf"
+          class="w-full rounded-2xl bg-accent px-4 py-3 text-center text-sm font-semibold text-surface transition"
+        >{$_('config.terminal.crash.download')}</a>
+        <div class="flex gap-2">
+          <Button label={$_('config.terminal.crash.download_summary')} variant="ghost" onclick={downloadCrashSummary} />
+          <Button label={$_('config.terminal.crash.clear')} variant="ghost" onclick={() => (pendingClear = true)} />
+        </div>
+      </div>
+    </ConfigSection>
+  {/if}
+
   <ConfigSection title={$_('config.terminal.labs')}>
     <FormField
       label={$_('config.terminal.labs_enable')}
@@ -428,4 +520,14 @@
       />
     </div>
   {/if}
+</Modal>
+
+<!-- Clear core dump confirmation -->
+<Modal visible={pendingClear} onclose={() => (pendingClear = false)}>
+  <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.crash.clear_confirm_title')}</h2>
+  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.crash.clear_confirm_body')}</p>
+  <div class="flex gap-2">
+    <Button label={$_('config.terminal.crash.clear_confirm_yes')} disabled={clearing} onclick={clearCrash} />
+    <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingClear = false)} />
+  </div>
 </Modal>
