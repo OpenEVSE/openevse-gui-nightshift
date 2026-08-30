@@ -24,22 +24,21 @@ describe('Monitoring', () => {
     uisettings_store.update((s) => ({ ...s, dev_features: false }))
   })
 
-  it('shows the Energy tab even with dev features off (ungated)', () => {
+  it('lands on the Energy tab by default', () => {
     const { getByText } = render(Monitoring)
     expect(getByText('monitoring.tab.energy')).toBeInTheDocument()
-    // Data remains the default landing — its energy metric group is shown.
-    expect(getByText('monitoring.group.energy')).toBeInTheDocument()
-  })
-
-  it('shows the live energy view when the Energy tab is selected', async () => {
-    const { getByText } = render(Monitoring)
-    await fireEvent.click(getByText('monitoring.tab.energy'))
     expect(getByText('monitoring.energy.live')).toBeInTheDocument()
   })
 
-  it('switches to the Safety tab when its segment is clicked', async () => {
+  it('shows the Data tab metrics when its segment is clicked', async () => {
     const { getByText } = render(Monitoring)
-    await fireEvent.click(getByText('monitoring.tab.safety'))
+    await fireEvent.click(getByText('monitoring.tab.data'))
+    expect(getByText('monitoring.group.energy')).toBeInTheDocument()
+  })
+
+  it('switches to the Health tab when its segment is clicked', async () => {
+    const { getByText } = render(Monitoring)
+    await fireEvent.click(getByText('monitoring.tab.health'))
     expect(getByText('monitoring.safety.gfci')).toBeInTheDocument()
   })
 
@@ -48,21 +47,41 @@ describe('Monitoring', () => {
     expect(queryByText('monitoring.tab.manager')).not.toBeInTheDocument()
   })
 
-  it('opens on the Safety tab when the device is in a fault state', () => {
+  it('opens on the Health tab when the device is in a fault state', () => {
     uistates_store.setObject('error', true)
     const { getByText } = render(Monitoring)
     expect(getByText('monitoring.safety.gfci')).toBeInTheDocument()
   })
 
-  it('inserts the Vehicle group only when the device reports vehicle data', () => {
+  it('inserts the Vehicle group only when the device reports vehicle data', async () => {
     // default fixture (no battery data) — no Vehicle group on the Data tab
     const plain = render(Monitoring)
+    await fireEvent.click(plain.getByText('monitoring.tab.data'))
     expect(plain.queryByText('monitoring.group.vehicle')).not.toBeInTheDocument()
     plain.unmount()
 
     // with battery data — the Vehicle group appears
     status_store.set({ total_energy: 7523, battery_level: 80, gfcicount: 0, nogndcount: 0, stuckcount: 0 })
     const withVehicle = render(Monitoring)
+    await fireEvent.click(withVehicle.getByText('monitoring.tab.data'))
     expect(withVehicle.getByText('monitoring.group.vehicle')).toBeInTheDocument()
+  })
+
+  it('does not render the Relay Health section when the controller lacks RELAY_HEALTH', async () => {
+    const { getByText, queryByText } = render(Monitoring)
+    await fireEvent.click(getByText('monitoring.tab.health'))
+    expect(queryByText('monitoring.health.relay.title')).not.toBeInTheDocument()
+  })
+
+  it('renders the Relay Health section when the config reports it', async () => {
+    config_store.set({
+      scale: 454, offset: 283, max_current_soft: 48,
+      relay_life_pct: 72, relay_cold_open_count: 5, relay_elec_damage_x1e6: 0,
+      relay_transit_drift_warning: false, relay_thermal_warning_level: 0,
+      relay_stuck_recovery_count: 0,
+    })
+    const { getByText } = render(Monitoring)
+    await fireEvent.click(getByText('monitoring.tab.health'))
+    expect(getByText('monitoring.health.relay.title')).toBeInTheDocument()
   })
 })

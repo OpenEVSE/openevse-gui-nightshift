@@ -6,9 +6,10 @@
   import { serialQueue } from '../../queue.js'
   import { httpAPI } from '../../api/httpAPI.js'
   import { status_store } from '../../stores/status.js'
+  import { config_store } from '../../stores/config.js'
   import { showWriteError } from '../../alerts.js'
 
-  let { data = { errors: [], infos: [] } } = $props()
+  let { data = { errors: [], infos: [] }, relay = null } = $props()
 
   const sevClass = {
     ok: 'bg-accent/15 text-accent',
@@ -44,6 +45,49 @@
       resetting = false
     }
   }
+
+  function relayRowLabel(row) {
+    return $_('monitoring.health.relay.' + row.key)
+  }
+  function relayRowValue(row) {
+    if (row.value === null || row.value === undefined) {
+      return $_('monitoring.health.relay.not_available')
+    }
+    switch (row.key) {
+      case 'life_pct':
+      case 'elec_damage':
+        return `${row.value}${$_('units.percent')}`
+      case 'transit_drift':
+        return row.value ? $_('monitoring.health.relay.warning') : $_('monitoring.health.relay.ok')
+      case 'transit_baseline':
+        return `${row.value} ${$_('units.ms')}`
+      case 'thermal_warning':
+        return $_(`monitoring.health.relay.level_${row.value}`)
+      default:
+        return row.value
+    }
+  }
+
+  let resettingRelay = $state(false)
+  let resetRelayDone = $state(false)
+
+  async function resetRelayHealth() {
+    if (resettingRelay) return
+    resettingRelay = true
+    resetRelayDone = false
+    try {
+      const res = await serialQueue.add(() => httpAPI('GET', '/r?json=1&rapi=$FH'))
+      if (res && res !== 'error' && !res.error) {
+        resetRelayDone = true
+        await config_store.download()
+        setTimeout(() => (resetRelayDone = false), 3000)
+      } else {
+        showWriteError()
+      }
+    } finally {
+      resettingRelay = false
+    }
+  }
 </script>
 
 <Card class="mb-2 p-3">
@@ -70,7 +114,7 @@
   {/each}
 </Card>
 
-<Card class="p-3">
+<Card class="mb-2 p-3">
   <Button
     label={resetting
       ? $_('config.safety.resetting')
@@ -82,3 +126,30 @@
     onclick={resetFaultCounters}
   />
 </Card>
+
+{#if relay}
+  <Card class="mb-2 p-3">
+    <h2 class="mb-1 text-sm font-semibold text-text">{$_('monitoring.health.relay.title')}</h2>
+    {#each relay as row}
+      <div class="flex items-center justify-between py-2 text-sm">
+        <span class="text-text-dim">{relayRowLabel(row)}</span>
+        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {sevClass[row.severity]}">
+          {relayRowValue(row)}
+        </span>
+      </div>
+    {/each}
+  </Card>
+
+  <Card class="p-3">
+    <Button
+      label={resettingRelay
+        ? $_('monitoring.health.relay.resetting')
+        : resetRelayDone
+          ? $_('monitoring.health.relay.reset_done')
+          : $_('monitoring.health.relay.reset_button')}
+      variant={resetRelayDone ? 'ghost' : 'primary'}
+      disabled={resettingRelay}
+      onclick={resetRelayHealth}
+    />
+  </Card>
+{/if}

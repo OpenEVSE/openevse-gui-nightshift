@@ -890,7 +890,7 @@
     "tab": {
       "data": "Adat",
       "energy": "Energia",
-      "safety": "Biztonság",
+      "health": "Egészség",
       "manager": "Kezelő"
     },
     "group": {
@@ -965,6 +965,29 @@
       "stuck": "Beragadt relé",
       "switches": "Relé kapcsolások száma"
     },
+    "health": {
+      "relay": {
+        "title": "Relé egészség",
+        "life_pct": "Hátralévő élettartam",
+        "cold_open_count": "Hideg nyitások",
+        "elec_damage": "Elektromos károsodás",
+        "transit_drift": "Érintkező mozgási idő eltérés",
+        "transit_baseline": "Nyitási mozgási idő alapérték",
+        "thermal_warning": "Hőmérsékleti figyelmeztetés",
+        "thermal_index": "Hőindex",
+        "thermal_baseline": "Hő alapérték",
+        "stuck_recovery_count": "Beragadt relé helyreállítások",
+        "not_available": "Nem elérhető",
+        "ok": "OK",
+        "warning": "Figyelmeztetés",
+        "level_0": "OK",
+        "level_1": "Figyelendő",
+        "level_2": "Figyelmeztetés",
+        "reset_button": "Relé kicserélve – egészségértékek visszaállítása",
+        "resetting": "Visszaállítás…",
+        "reset_done": "Visszaállítva"
+      }
+    },
     "manager": {
       "empty": "Nincs aktív igény",
       "active": "Aktív",
@@ -974,6 +997,7 @@
   },
   "units": {
     "dbm": "dBm",
+    "ms": "ms",
     "kwh": "kWh",
     "amp": "A",
     "volt": "V",

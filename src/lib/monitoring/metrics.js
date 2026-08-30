@@ -169,6 +169,38 @@ export function safetyData(status, hasError) {
 }
 
 /**
+ * Relay contact-life health rows for the Health tab, from $GL (surfaced via
+ * /config's config_serialize()). Returns null when the controller doesn't
+ * support RELAY_HEALTH (relay_life_pct absent), so the whole section can be
+ * hidden rather than showing a wall of dashes. Values needing translation
+ * (severity → OK/Watch/Warning, ms/% suffixes, "not available") are resolved
+ * in the component, not here — this module stays store/DOM/i18n-free.
+ */
+export function relayHealthData(config) {
+  const c = config ?? {}
+  if (c.relay_life_pct === undefined) return null
+
+  const lifePct = round(c.relay_life_pct, 0) ?? 0
+  const lifeSeverity = lifePct <= 20 ? 'error' : lifePct <= 50 ? 'warning' : 'ok'
+  const thermalLevel = c.relay_thermal_warning_level ?? 0
+  const thermalSeverity = thermalLevel >= 2 ? 'error' : thermalLevel >= 1 ? 'warning' : 'ok'
+  const transitDrift = !!c.relay_transit_drift_warning
+  const stuckRecoveryCount = c.relay_stuck_recovery_count ?? 0
+
+  return [
+    { key: 'life_pct', value: lifePct, severity: lifeSeverity },
+    { key: 'cold_open_count', value: c.relay_cold_open_count ?? 0, severity: 'ok' },
+    { key: 'elec_damage', value: round((c.relay_elec_damage_x1e6 ?? 0) / 10000, 2), severity: 'ok' },
+    { key: 'transit_drift', value: transitDrift, severity: transitDrift ? 'warning' : 'ok' },
+    { key: 'transit_baseline', value: c.relay_transit_baseline_ms !== undefined ? c.relay_transit_baseline_ms : null, severity: 'ok' },
+    { key: 'thermal_warning', value: thermalLevel, severity: thermalSeverity },
+    { key: 'thermal_index', value: c.relay_thermal_index_x100 !== undefined ? round(c.relay_thermal_index_x100 / 100, 2) : null, severity: 'ok' },
+    { key: 'thermal_baseline', value: c.relay_thermal_baseline_x100 !== undefined ? round(c.relay_thermal_baseline_x100 / 100, 2) : null, severity: 'ok' },
+    { key: 'stuck_recovery_count', value: stuckRecoveryCount, severity: stuckRecoveryCount > 0 ? 'warning' : 'ok' },
+  ]
+}
+
+/**
  * One row per entry in `claims_target.claims`, sorted highest priority first.
  * `priorityByClient` (client id → actual runtime priority, from /claims) is
  * preferred when available; otherwise the client's default priority is used.
