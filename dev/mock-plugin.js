@@ -220,7 +220,7 @@ export function mockPlugin() {
                 }
               } catch {}
               res.writeHead(200, { 'Content-Type': 'application/json' })
-              res.end(JSON.stringify({ msg: 'done' }))
+              res.end(JSON.stringify({ msg: 'erased' }))
             })
             return
           }
@@ -240,7 +240,7 @@ export function mockPlugin() {
                 }
               } catch {}
               res.writeHead(200, { 'Content-Type': 'application/json' })
-              res.end(JSON.stringify({ msg: 'done' }))
+              res.end(JSON.stringify({ msg: 'erased' }))
             })
             return
           }
@@ -251,7 +251,7 @@ export function mockPlugin() {
               loadsharingPeers[idx].joined = false
             }
             res.writeHead(200, { 'Content-Type': 'application/json' })
-            res.end(JSON.stringify({ msg: 'done' }))
+            res.end(JSON.stringify({ msg: 'erased' }))
             return
           }
         }
@@ -291,16 +291,19 @@ export function mockPlugin() {
           if (req.method === 'DELETE') {
             crashPresent = false
             res.writeHead(200, { 'Content-Type': 'application/json' })
-            res.end(JSON.stringify({ msg: 'done' }))
+            res.end(JSON.stringify({ msg: 'erased' }))
             return
           }
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify(crashPresent
             ? {
+                // Addresses match the device: the firmware formats them as
+                // hex strings, it never sends raw numbers.
                 present: true, valid: true, size: 65536,
                 panic_reason: 'Task watchdog got triggered on CPU0 (loopTask)',
-                task: 'loopTask', pc: 1074452664,
-                bt: [1074452664, 1074398210, 1074123008, 1074119920],
+                task: 'loopTask', pc: '0x400d4b38',
+                bt: ['0x400d4b38', '0x400d1a42', '0x400f1c00', '0x400f0df0'],
+                bt_corrupted: false,
                 elf_sha256: '3f2a9c7b6d1e4058ab77c093e5124da6f8b0c31e9a24d7615c08bb44f9e21730',
               }
             : { present: false }))
@@ -381,7 +384,7 @@ export function mockPlugin() {
               const msg = buildStatusMessage(tickCount)
               for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
               res.writeHead(201, { 'Content-Type': 'application/json' })
-              res.end(JSON.stringify({ msg: 'done' }))
+              res.end(JSON.stringify({ msg: 'erased' }))
             })
             return
           }
@@ -396,7 +399,7 @@ export function mockPlugin() {
             const msg = buildStatusMessage(tickCount)
             for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
             res.writeHead(200, { 'Content-Type': 'application/json' })
-            res.end(JSON.stringify({ msg: 'done' }))
+            res.end(JSON.stringify({ msg: 'erased' }))
             return
           }
         }
@@ -441,7 +444,7 @@ export function mockPlugin() {
                 if (rfid && typeof name === 'string') rfidUsers[rfid] = name
               } catch { /* ignore malformed body */ }
               res.writeHead(200, { 'Content-Type': 'application/json' })
-              res.end(JSON.stringify({ msg: 'done' }))
+              res.end(JSON.stringify({ msg: 'erased' }))
             })
             return
           }
@@ -449,7 +452,7 @@ export function mockPlugin() {
             const m = req.url?.match(/[?&]rfid=([^&]*)/)
             if (m) delete rfidUsers[decodeURIComponent(m[1])]
             res.writeHead(200, { 'Content-Type': 'application/json' })
-            res.end(JSON.stringify({ msg: 'done' }))
+            res.end(JSON.stringify({ msg: 'erased' }))
             return
           }
         }

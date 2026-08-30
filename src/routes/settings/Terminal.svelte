@@ -150,9 +150,10 @@
 
   // ── Crash core dump (fork firmware, PR #1210) ───────────────────────────
   // /debug/crash returns a decoded summary of the last captured dump; the block
-  // renders only when one is present. The raw ELF is pulled straight from flash
-  // via a plain link (esp_partition_mmap on the device — never buffered in the
-  // browser), while the decoded summary can be saved as JSON for quick sharing.
+  // renders only when one is present. The raw image is pulled straight from
+  // flash via a plain link (esp_partition_mmap on the device — never buffered
+  // in the browser), while the decoded summary can be saved as JSON for quick
+  // sharing. It is a raw partition image, not an ELF: esp-coredump needs -t raw.
   let crash = $state(null)
   let pendingClear = $state(false) // confirmation dialog open
   let clearing = $state(false)
@@ -166,9 +167,17 @@
   // is a plain anchor, so mirror that rewrite rather than hard-coding the path.
   let rawHref = $derived(import.meta.env.DEV ? '/api/debug/crash/raw' : '/debug/crash/raw')
 
-  // Addresses arrive as numbers (or already-hex strings on older IDF); render
-  // both as 0x-prefixed hex so the backtrace pastes cleanly into esp-coredump.
+  // The device sends addresses as pre-formatted hex strings; accept raw numbers
+  // too so anything hand-rolled renders as 0x-prefixed hex and the backtrace
+  // pastes cleanly into esp-coredump.
   let hex = (v) => (v == null ? '—' : typeof v === 'number' ? '0x' + v.toString(16) : String(v))
+
+  // `bt` is an array only on Xtensa. RISC-V parts (C3, and the C6
+  // co-processor) cannot unwind on device without parsing DWARF, so the
+  // firmware sends the string "riscv-no-unwind" there and leaves the stack
+  // walk to the host, working from the raw image.
+  let backtrace = $derived(Array.isArray(crash?.bt) && crash.bt.length ? crash.bt.map(hex).join(' ') : '')
+  let noUnwind = $derived(typeof crash?.bt === 'string' ? crash.bt : '')
 
   function downloadCrashSummary() {
     if (!crash) return
@@ -188,8 +197,11 @@
     if (clearing) return
     clearing = true
     try {
+      // Only {"msg":"erased"} means the flash erase succeeded. A failure
+      // answers 500 {"msg":"error"}, which still parses as JSON — accepting
+      // any object here would hide the dump while it is still on the device.
       const res = await serialQueue.add(() => httpAPI('DELETE', '/debug/crash'))
-      if (res && res !== 'error') crash = null
+      if (res?.msg === 'erased') crash = null
       else showWriteError()
     } catch {
       showWriteError()
@@ -421,9 +433,23 @@
       <ReadOnlyRow label={$_('config.terminal.crash.pc')} value={hex(crash.pc)} />
       <ReadOnlyRow label={$_('config.terminal.crash.size')} value={formatBytes(crash.size)} />
 
-      {#if crash.bt?.length}
+      <!-- A stored dump carries its own checksum. When it fails the decode is
+           still returned, but the PC and backtrace are plausible nonsense —
+           say so rather than letting them be trusted. -->
+      {#if crash.valid === false}
+        <ReadOnlyRow
+          label={$_('config.terminal.crash.integrity')}
+          value={$_('config.terminal.crash.integrity_bad')}
+          tone="warn"
+          detail={$_('config.terminal.crash.integrity_detail')}
+        />
+      {/if}
+
+      {#if backtrace}
         <h3 class="mt-3 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.crash.backtrace')}</h3>
-        <div class="overflow-x-auto rounded-xl bg-surface-3 p-3 font-mono text-xs text-text">{crash.bt.map(hex).join(' ')}</div>
+        <div class="overflow-x-auto rounded-xl bg-surface-3 p-3 font-mono text-xs text-text">{backtrace}</div>
+      {:else if noUnwind}
+        <p class="mt-3 text-xs text-text-dim">{$_('config.terminal.crash.no_unwind')}</p>
       {/if}
 
       {#if crash.elf_sha256}
@@ -435,7 +461,7 @@
       <div class="mt-4 flex flex-col gap-2">
         <a
           href={rawHref}
-          download="coredump.elf"
+          download="coredump.bin"
           class="w-full rounded-2xl bg-accent px-4 py-3 text-center text-sm font-semibold text-surface transition"
         >{$_('config.terminal.crash.download')}</a>
         <div class="flex gap-2">

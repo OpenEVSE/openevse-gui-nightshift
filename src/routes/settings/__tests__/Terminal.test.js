@@ -8,8 +8,14 @@ vi.mock('svelte-i18n', () => {
   return { _: t }
 })
 vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn() }))
+// Only the error toast is stubbed; the rest of the alert helpers stay real.
+vi.mock('../../../lib/alerts.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  showWriteError: vi.fn(),
+}))
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
+import { showWriteError } from '../../../lib/alerts.js'
 import { status_store } from '../../../lib/stores/status.js'
 import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import Terminal from '../Terminal.svelte'
@@ -17,6 +23,7 @@ import Terminal from '../Terminal.svelte'
 beforeEach(() => {
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ cmd: '$GE', ret: '$OK 0 0^20' })
+  showWriteError.mockClear()
 })
 
 describe('Terminal page', () => {
@@ -193,17 +200,20 @@ describe('Terminal — Memory & health', () => {
 })
 
 describe('Terminal — Crash core dump', () => {
+  // Mirrors the device: addresses arrive as pre-formatted hex strings.
   const CRASH = {
     present: true, valid: true, size: 65536,
     panic_reason: 'Task watchdog got triggered', task: 'loopTask',
-    pc: 1074000000, bt: [1074000000, 1074000100], elf_sha256: 'abc123def456',
+    pc: '0x400d4b38', bt: ['0x400d4b38', '0x400d1a42'], elf_sha256: 'abc123def456',
   }
 
-  // Route /debug/crash to the given summary; everything else is a benign stub.
-  function mockCrash(summary) {
-    httpAPI.mockImplementation((method, url) =>
-      Promise.resolve(url === '/debug/crash' ? summary : { cmd: '', ret: '' }),
-    )
+  // Route /debug/crash to the given summary; DELETE answers `del` (the
+  // firmware's success body by default); everything else is a benign stub.
+  function mockCrash(summary, del = { msg: 'erased' }) {
+    httpAPI.mockImplementation((method, url) => {
+      if (url !== '/debug/crash') return Promise.resolve({ cmd: '', ret: '' })
+      return Promise.resolve(method === 'DELETE' ? del : summary)
+    })
   }
 
   beforeEach(() => {
@@ -216,11 +226,12 @@ describe('Terminal — Crash core dump', () => {
     expect(await findByText('config.terminal.crash.title')).toBeInTheDocument()
     expect(getByText('Task watchdog got triggered')).toBeInTheDocument()
     expect(getByText('loopTask')).toBeInTheDocument()
+    expect(getByText('0x400d4b38 0x400d1a42')).toBeInTheDocument()
 
     const link = getByText('config.terminal.crash.download')
     expect(link.tagName).toBe('A')
     expect(link.getAttribute('href')).toContain('/debug/crash/raw')
-    expect(link.getAttribute('download')).toBe('coredump.elf')
+    expect(link.getAttribute('download')).toBe('coredump.bin')
   })
 
   it('omits the section when no dump is present', async () => {
@@ -232,9 +243,24 @@ describe('Terminal — Crash core dump', () => {
   })
 
   it('falls back to a generic reason when panic_reason is absent (IDF 4.4)', async () => {
-    mockCrash({ present: true, task: 'loopTask', pc: 0, bt: [] })
+    mockCrash({ present: true, task: 'loopTask', pc: '0x00000000', bt: [] })
     const { findByText } = render(Terminal)
     expect(await findByText('config.terminal.crash.reason_unknown')).toBeInTheDocument()
+  })
+
+  it('renders the no-unwind note instead of a backtrace on RISC-V', async () => {
+    // RISC-V parts send `bt` as a string, not an array — mapping over it would
+    // throw and take the whole page down.
+    mockCrash({ ...CRASH, bt: 'riscv-no-unwind', mcause: '0x0000000b' })
+    const { findByText, queryByText } = render(Terminal)
+    expect(await findByText('config.terminal.crash.no_unwind')).toBeInTheDocument()
+    expect(queryByText('config.terminal.crash.backtrace')).not.toBeInTheDocument()
+  })
+
+  it('warns when the stored dump fails its checksum', async () => {
+    mockCrash({ ...CRASH, valid: false, check_err: -1 })
+    const { findByText } = render(Terminal)
+    expect(await findByText('config.terminal.crash.integrity_bad')).toBeInTheDocument()
   })
 
   it('clears the dump after confirmation and hides the section', async () => {
@@ -249,5 +275,18 @@ describe('Terminal — Crash core dump', () => {
     await vi.waitFor(() =>
       expect(queryByText('config.terminal.crash.title')).not.toBeInTheDocument(),
     )
+  })
+
+  it('keeps the section and reports an error when the erase fails', async () => {
+    // A failed erase answers 500 {"msg":"error"}, which still parses as JSON —
+    // accepting any object would hide a dump that is still on the device.
+    mockCrash(CRASH, { msg: 'error' })
+    const { findByText, getByText } = render(Terminal)
+    await findByText('config.terminal.crash.title')
+
+    await fireEvent.click(getByText('config.terminal.crash.clear'))
+    await fireEvent.click(getByText('config.terminal.crash.clear_confirm_yes'))
+    await vi.waitFor(() => expect(showWriteError).toHaveBeenCalled())
+    expect(getByText('config.terminal.crash.title')).toBeInTheDocument()
   })
 })
