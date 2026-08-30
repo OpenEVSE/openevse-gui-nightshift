@@ -113,6 +113,11 @@ export function mockPlugin() {
   let boost = null // active boost {type, value, remaining, started} or null
   let boostVersion = baseFixtures['/api/status'].boost_version ?? 1
 
+  // A captured crash dump for the Memory & health preview (fork firmware PR
+  // #1210). Starts present so the section is visible; DELETE flips it off so
+  // the "Clear dump" flow can be exercised without hardware.
+  let crashPresent = true
+
   function buildStatusMessage(tickCount) {
     // Mirror the device's real status shape; nudge only genuine live fields
     // so the connection looks alive without inventing nonexistent keys.
@@ -275,6 +280,36 @@ export function mockPlugin() {
         if (url === '/api/loadsharing/discover' && req.method === 'POST') {
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ msg: 'done' }))
+          return
+        }
+
+        // ── Crash core dump (fork firmware PR #1210) ──────────────────────────
+        // GET returns the decoded summary; DELETE clears it so the section
+        // vanishes after "Clear"; /raw serves a stand-in ELF so the download
+        // button produces a file in preview (real firmware mmaps it from flash).
+        if (url === '/api/debug/crash') {
+          if (req.method === 'DELETE') {
+            crashPresent = false
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ msg: 'done' }))
+            return
+          }
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify(crashPresent
+            ? {
+                present: true, valid: true, size: 65536,
+                panic_reason: 'Task watchdog got triggered on CPU0 (loopTask)',
+                task: 'loopTask', pc: 1074452664,
+                bt: [1074452664, 1074398210, 1074123008, 1074119920],
+                elf_sha256: '3f2a9c7b6d1e4058ab77c093e5124da6f8b0c31e9a24d7615c08bb44f9e21730',
+              }
+            : { present: false }))
+          return
+        }
+        if (url === '/api/debug/crash/raw') {
+          if (!crashPresent) { res.writeHead(404); res.end(); return }
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream' })
+          res.end(Buffer.from('\x7fELF mock openevse core dump'))
           return
         }
 

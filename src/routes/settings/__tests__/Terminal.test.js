@@ -191,3 +191,63 @@ describe('Terminal — Memory & health', () => {
     expect(getByText('512 B').className).toContain('text-warning')
   })
 })
+
+describe('Terminal — Crash core dump', () => {
+  const CRASH = {
+    present: true, valid: true, size: 65536,
+    panic_reason: 'Task watchdog got triggered', task: 'loopTask',
+    pc: 1074000000, bt: [1074000000, 1074000100], elf_sha256: 'abc123def456',
+  }
+
+  // Route /debug/crash to the given summary; everything else is a benign stub.
+  function mockCrash(summary) {
+    httpAPI.mockImplementation((method, url) =>
+      Promise.resolve(url === '/debug/crash' ? summary : { cmd: '', ret: '' }),
+    )
+  }
+
+  beforeEach(() => {
+    status_store.set({})
+  })
+
+  it('renders the section with a raw-dump download link when a dump is present', async () => {
+    mockCrash(CRASH)
+    const { findByText, getByText } = render(Terminal)
+    expect(await findByText('config.terminal.crash.title')).toBeInTheDocument()
+    expect(getByText('Task watchdog got triggered')).toBeInTheDocument()
+    expect(getByText('loopTask')).toBeInTheDocument()
+
+    const link = getByText('config.terminal.crash.download')
+    expect(link.tagName).toBe('A')
+    expect(link.getAttribute('href')).toContain('/debug/crash/raw')
+    expect(link.getAttribute('download')).toBe('coredump.elf')
+  })
+
+  it('omits the section when no dump is present', async () => {
+    mockCrash({ present: false })
+    const { queryByText } = render(Terminal)
+    // Let the on-mount fetch resolve before asserting absence.
+    await vi.waitFor(() => expect(httpAPI).toHaveBeenCalledWith('GET', '/debug/crash'))
+    expect(queryByText('config.terminal.crash.title')).not.toBeInTheDocument()
+  })
+
+  it('falls back to a generic reason when panic_reason is absent (IDF 4.4)', async () => {
+    mockCrash({ present: true, task: 'loopTask', pc: 0, bt: [] })
+    const { findByText } = render(Terminal)
+    expect(await findByText('config.terminal.crash.reason_unknown')).toBeInTheDocument()
+  })
+
+  it('clears the dump after confirmation and hides the section', async () => {
+    mockCrash(CRASH)
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await findByText('config.terminal.crash.title')
+
+    // Open the confirm dialog, then confirm — DELETE goes to /debug/crash.
+    await fireEvent.click(getByText('config.terminal.crash.clear'))
+    await fireEvent.click(getByText('config.terminal.crash.clear_confirm_yes'))
+    expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash')
+    await vi.waitFor(() =>
+      expect(queryByText('config.terminal.crash.title')).not.toBeInTheDocument(),
+    )
+  })
+})

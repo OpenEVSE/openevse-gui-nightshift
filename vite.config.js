@@ -71,6 +71,9 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: '0.0.0.0',
+      // Don't watch coverage/ — vitest's output there can end up unreadable and
+      // crash chokidar's scan (EIO), taking the whole dev server down on start.
+      watch: { ignored: ['**/coverage/**'] },
       ...(isMock
         ? {} // In mock mode the plugin handles /api and /ws — no proxy needed
         : {
