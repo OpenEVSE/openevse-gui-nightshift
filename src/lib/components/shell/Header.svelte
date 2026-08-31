@@ -21,14 +21,14 @@
   class="flex items-center justify-between py-3
          pt-[max(env(safe-area-inset-top),0.75rem)]
          pl-[max(env(safe-area-inset-left),1rem)]
-         pr-[max(env(safe-area-inset-right),1rem)]
-         lg:justify-end"
+         pr-[max(env(safe-area-inset-right),1rem)]"
 >
-  <!-- At lg the brand moves into the nav rail (BottomNav). -->
-  <div class="flex items-center gap-2 lg:hidden">
-    <ChargePointMark size={26} class="text-accent" />
-    <span class="text-sm font-semibold text-text">{deviceName}</span>
-  </div>
+  <!-- Left slot. The app-menu (phone-app only) sits at the far left, before
+       the brand. At lg the brand moves into the nav rail, leaving the
+       hamburger as the sole child here — gap only spaces *between* children,
+       so a lone hamburger still sits flush left with nothing to collapse.
+       justify-between on the header keeps this group left and the controls
+       right at every width, so no lg:justify-end is needed. -->
   <div class="flex items-center gap-2">
     <!-- Phone-app affordance: opens the app's native drawer. Only rendered
          inside the app's WebView (host.hasDrawer); a plain browser never
@@ -36,6 +36,13 @@
     {#if $host.hasDrawer}
       <IconButton icon="mdi:menu" label={$_('header.app_menu')} onclick={openDrawer} />
     {/if}
+    <!-- At lg the brand moves into the nav rail (BottomNav). -->
+    <div class="flex items-center gap-2 lg:hidden">
+      <ChargePointMark size={26} class="text-accent" />
+      <span class="text-sm font-semibold text-text">{deviceName}</span>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
     <IconButton
       icon={$theme.resolved === 'dark' ? 'mdi:weather-sunny' : 'mdi:weather-night'}
       label="Toggle theme"
