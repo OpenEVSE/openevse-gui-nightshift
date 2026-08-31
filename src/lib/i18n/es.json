@@ -643,8 +643,10 @@
     "charge_manager": "Gestor de carga",
     "monitoring": "Monitorización",
     "history": "Historial",
-    "settings": "Ajustes",
-    "app": "App"
+    "settings": "Ajustes"
+  },
+  "header": {
+    "app_menu": "Menú de la app"
   },
   "connection": {
     "connected": "Conectado",

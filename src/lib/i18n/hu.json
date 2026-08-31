@@ -643,8 +643,10 @@
     "charge_manager": "Töltéskezelő",
     "monitoring": "Megfigyelés",
     "history": "Történet",
-    "settings": "Beállítások",
-    "app": "App"
+    "settings": "Beállítások"
+  },
+  "header": {
+    "app_menu": "App menü"
   },
   "connection": {
     "connected": "Csatlakoztatva",

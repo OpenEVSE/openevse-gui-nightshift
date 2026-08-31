@@ -2,7 +2,6 @@
   import { _ } from 'svelte-i18n'
   import Icon from '../../icons/Icon.svelte'
   import ChargePointMark from '../../../assets/ChargePointMark.svelte'
-  import { host, openDrawer } from '../../nativeHost.js'
 
   let { path = '/', deviceName = 'OpenEVSE' } = $props()
 
@@ -68,24 +67,4 @@
       >
     </a>
   {/each}
-  <!-- Phone-app affordance: opens the app's native drawer. Only rendered inside
-       the app's WebView (host.hasDrawer); a plain browser never sees it. It's a
-       button, not a route — it must never change the active tab or the hash. -->
-  {#if $host.hasDrawer}
-    <button
-      type="button"
-      aria-label={$_('nav.app')}
-      onclick={openDrawer}
-      class="flex flex-1 flex-col items-center justify-center gap-1 text-[10px] text-text-dim
-             sm:flex-none sm:py-4
-             lg:flex-row lg:justify-start lg:gap-3 lg:px-5 lg:py-3 lg:text-sm"
-    >
-      <Icon icon="mdi:menu" size={22} />
-      <span
-        class="sm:max-lg:flex sm:max-lg:h-[26px] sm:max-lg:items-start sm:max-lg:justify-center
-               sm:max-lg:overflow-hidden sm:max-lg:text-center sm:max-lg:leading-tight"
-        >{$_('nav.app')}</span
-      >
-    </button>
-  {/if}
 </nav>

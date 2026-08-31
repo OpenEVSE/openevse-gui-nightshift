@@ -3,6 +3,7 @@
   import ChargePointMark from '../../../assets/ChargePointMark.svelte'
   import IconButton from '../ui/IconButton.svelte'
   import { theme } from '../../stores/theme.js'
+  import { host, openDrawer } from '../../nativeHost.js'
   let { deviceName = 'OpenEVSE', wsConnected = true, evseConnected = true } = $props()
   let connected = $derived(wsConnected && evseConnected)
   let statusKey = $derived(
@@ -29,6 +30,12 @@
     <span class="text-sm font-semibold text-text">{deviceName}</span>
   </div>
   <div class="flex items-center gap-2">
+    <!-- Phone-app affordance: opens the app's native drawer. Only rendered
+         inside the app's WebView (host.hasDrawer); a plain browser never
+         sees it. Icon-only, so it carries an aria-label rather than text. -->
+    {#if $host.hasDrawer}
+      <IconButton icon="mdi:menu" label={$_('header.app_menu')} onclick={openDrawer} />
+    {/if}
     <IconButton
       icon={$theme.resolved === 'dark' ? 'mdi:weather-sunny' : 'mdi:weather-night'}
       label="Toggle theme"
