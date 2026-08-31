@@ -643,7 +643,8 @@
     "charge_manager": "Gestion",
     "monitoring": "Supervision",
     "history": "Historique",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "app": "Appli"
   },
   "connection": {
     "connected": "Connecté",

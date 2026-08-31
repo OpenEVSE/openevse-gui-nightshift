@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render } from '@testing-library/svelte'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
@@ -7,7 +7,20 @@ vi.mock('svelte-i18n', () => {
   return { _: t }
 })
 
+// Drive the native-host bridge from the test: a writable stands in for the
+// readable store so we can flip hasDrawer, and openDrawer is a spy.
+vi.mock('../../../nativeHost.js', async () => {
+  const { writable } = await import('svelte/store')
+  return { host: writable({ embedded: false, hasDrawer: false }), openDrawer: vi.fn() }
+})
+
+import { host as mockHost, openDrawer } from '../../../nativeHost.js'
 import BottomNav from '../BottomNav.svelte'
+
+beforeEach(() => {
+  mockHost.set({ embedded: false, hasDrawer: false })
+  openDrawer.mockClear()
+})
 
 describe('BottomNav', () => {
   it('renders a link for each of the five primary routes', () => {
@@ -47,5 +60,29 @@ describe('BottomNav', () => {
     expect(brand.className).toContain('hidden')   // mobile: not shown
     expect(brand.className).toContain('lg:flex')  // desktop rail: shown
     expect(brand.className).toContain('border-b') // rule below the brand
+  })
+
+  it('hides the app-drawer button outside the phone app', () => {
+    // Default bridge state: not embedded — plain browser sees only the 5 routes.
+    const { getAllByRole, queryByRole } = render(BottomNav, { props: { path: '/' } })
+    expect(getAllByRole('link')).toHaveLength(5)
+    expect(queryByRole('button', { name: 'nav.app' })).toBeNull()
+  })
+
+  it('shows a drawer button inside the app that opens the drawer without touching the route', async () => {
+    mockHost.set({ embedded: true, hasDrawer: true })
+    window.location.hash = '#/schedule'
+
+    const { getByRole, getAllByRole } = render(BottomNav, { props: { path: '/schedule' } })
+
+    // It is a button, not a sixth link — the route/tab must be untouched.
+    expect(getAllByRole('link')).toHaveLength(5)
+    const btn = getByRole('button', { name: 'nav.app' })
+    expect(btn.tagName).toBe('BUTTON')
+    expect(btn).not.toHaveAttribute('href')
+
+    await fireEvent.click(btn)
+    expect(openDrawer).toHaveBeenCalledTimes(1)
+    expect(window.location.hash).toBe('#/schedule') // hash unchanged
   })
 })

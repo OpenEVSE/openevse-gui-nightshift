@@ -643,7 +643,8 @@
     "charge_manager": "Charge Manager",
     "monitoring": "Monitoring",
     "history": "History",
-    "settings": "Settings"
+    "settings": "Settings",
+    "app": "App"
   },
   "connection": {
     "connected": "Connected",
