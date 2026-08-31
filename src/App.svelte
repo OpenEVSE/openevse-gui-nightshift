@@ -13,6 +13,7 @@
   import DataManager from './lib/data/DataManager.svelte'
   import { config_store } from './lib/stores/config.js'
   import { uistates_store } from './lib/stores/uistates.js'
+  import { announce } from './lib/nativeHost.js'
   import { _, isLoading } from 'svelte-i18n'
 
   setupI18n()
@@ -21,7 +22,13 @@
   let progress = $state(0)
   let failed = $state(false)
 
-  onMount(() => theme.init())
+  // Tell the phone app (if we're inside its WebView) that this GUI owns the
+  // drawer button, so it hides its fallback. Idempotent — the store's late
+  // `openevsehost` listener may call it again, but the once-flag guards it.
+  onMount(() => {
+    announce()
+    return theme.init()
+  })
 </script>
 
 {#if $isLoading}

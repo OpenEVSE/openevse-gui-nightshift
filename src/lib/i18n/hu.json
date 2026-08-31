@@ -645,6 +645,9 @@
     "history": "Történet",
     "settings": "Beállítások"
   },
+  "header": {
+    "app_menu": "App menü"
+  },
   "connection": {
     "connected": "Csatlakoztatva",
     "lost": "Kapcsolat megszakadt",

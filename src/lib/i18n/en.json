@@ -645,6 +645,9 @@
     "history": "History",
     "settings": "Settings"
   },
+  "header": {
+    "app_menu": "App menu"
+  },
   "connection": {
     "connected": "Connected",
     "lost": "Connection lost",
