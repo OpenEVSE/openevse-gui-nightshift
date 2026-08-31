@@ -7,7 +7,7 @@
 // first. The app therefore also sets the global at document end and fires a
 // `openevsehost` event — hence the store + listener below, and an idempotent
 // `announce()` guarded by a once-only flag.
-import { readable } from 'svelte/store'
+import { writable } from 'svelte/store'
 
 const w = window
 
@@ -41,14 +41,18 @@ export const announce = () => {
 
 // Live { embedded, hasDrawer }. Re-reads and re-announces when the app's late
 // `openevsehost` event fires (the Android bundle-first race).
-export const host = readable(current, (set) => {
-  const onLate = () => {
-    current = read()
-    set(current)
-    announce()
-  }
-  w.addEventListener('openevsehost', onLate)
-  return () => w.removeEventListener('openevsehost', onLate)
+//
+// The listener MUST live at module scope, not inside a readable's start fn:
+// the store's only subscriber (BottomNav) doesn't mount until the i18n catalog
+// loads, so a start/stop listener would be absent during that window and would
+// miss a document-end event that lands there — leaving the button hidden for
+// that whole page load. At module scope it's always listening.
+const store = writable(current)
+w.addEventListener('openevsehost', () => {
+  current = read()
+  store.set(current)
+  announce()
 })
+export const host = { subscribe: store.subscribe }
 
 export const openDrawer = () => post({ type: 'openDrawer' })

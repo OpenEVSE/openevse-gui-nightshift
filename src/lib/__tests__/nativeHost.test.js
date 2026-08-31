@@ -11,11 +11,28 @@ function setBridge({ host, rn } = {}) {
   else window.ReactNativeWebView = rn
 }
 
+// The module attaches its `openevsehost` listener at module scope, so every
+// vi.resetModules() re-import adds another one to the shared jsdom window.
+// Track them and detach after each test, or a stale module's listener would
+// fire on the late-arrival dispatch and break the "announced exactly once"
+// assertion.
+let hostListeners = []
+const realAdd = window.addEventListener.bind(window)
+
 beforeEach(() => {
   vi.resetModules()
   setBridge()
+  hostListeners = []
+  vi.spyOn(window, 'addEventListener').mockImplementation((type, fn, opts) => {
+    if (type === 'openevsehost') hostListeners.push(fn)
+    return realAdd(type, fn, opts)
+  })
 })
-afterEach(() => setBridge())
+afterEach(() => {
+  hostListeners.forEach((fn) => window.removeEventListener('openevsehost', fn))
+  vi.restoreAllMocks()
+  setBridge()
+})
 
 describe('nativeHost', () => {
   it('reports not-embedded and stays silent in a plain browser', async () => {
