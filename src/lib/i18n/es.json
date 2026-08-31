@@ -985,7 +985,12 @@
         "level_2": "Aviso",
         "reset_button": "Relé reemplazado: restablecer valores de salud",
         "resetting": "Restableciendo…",
-        "reset_done": "Restablecido"
+        "reset_done": "Restablecido",
+        "recovery_button": "Ejecutar recuperación de relé atascado",
+        "recovering": "Ejecutando recuperación…",
+        "recovery_done": "Recuperación completada",
+        "recovery_failed_title": "Recuperación no ejecutada",
+        "recovery_failed_body": "Desconecta el vehículo antes de ejecutar la recuperación del relé y vuelve a intentarlo."
       }
     },
     "manager": {

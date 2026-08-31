@@ -985,7 +985,12 @@
         "level_2": "Alerte",
         "reset_button": "Relais remplacé : réinitialiser les valeurs de santé",
         "resetting": "Réinitialisation…",
-        "reset_done": "Réinitialisé"
+        "reset_done": "Réinitialisé",
+        "recovery_button": "Lancer la récupération du relais bloqué",
+        "recovering": "Récupération en cours…",
+        "recovery_done": "Récupération terminée",
+        "recovery_failed_title": "Récupération non lancée",
+        "recovery_failed_body": "Débranchez le véhicule avant de lancer la récupération du relais, puis réessayez."
       }
     },
     "manager": {

@@ -20,6 +20,26 @@ export function showWriteError() {
 }
 
 /**
+ * Surface the AlertBox for a refused/failed stuck-relay recovery run. The
+ * controller NAKs $FK outright if an EV is connected (unsafe to cycle the
+ * relay under load) - call that out specifically since it's the expected,
+ * fixable case; the body is generic enough to also cover the rarer failures
+ * (feature not supported, controller not connected).
+ */
+export function showRelayRecoveryError() {
+  const t = get(_)
+  uistates_store.setObject('alertbox', {
+    title: t('monitoring.health.relay.recovery_failed_title'),
+    body: t('monitoring.health.relay.recovery_failed_body'),
+    visible: true,
+    button: true,
+    closable: true,
+    component: undefined,
+    action: () => uistates_store.resetAlertBox(),
+  })
+}
+
+/**
  * Surface the AlertBox for a rejected Boost arm. The device speaks English in
  * its `msg`; we translate the one case the UI can provoke (soc/range with no
  * vehicle data source — a 422) and fall back to the generic write-failure body

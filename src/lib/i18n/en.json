@@ -985,7 +985,12 @@
         "level_2": "Warning",
         "reset_button": "Relay Replaced - Reset Health Values",
         "resetting": "Resetting…",
-        "reset_done": "Reset done"
+        "reset_done": "Reset done",
+        "recovery_button": "Run Stuck Relay Recovery",
+        "recovering": "Running Recovery…",
+        "recovery_done": "Recovery Complete",
+        "recovery_failed_title": "Recovery not run",
+        "recovery_failed_body": "Unplug the vehicle before running relay recovery, then try again."
       }
     },
     "manager": {

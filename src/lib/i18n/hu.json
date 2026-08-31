@@ -985,7 +985,12 @@
         "level_2": "Figyelmeztetés",
         "reset_button": "Relé kicserélve – egészségértékek visszaállítása",
         "resetting": "Visszaállítás…",
-        "reset_done": "Visszaállítva"
+        "reset_done": "Visszaállítva",
+        "recovery_button": "Beragadt relé helyreállítás futtatása",
+        "recovering": "Helyreállítás folyamatban…",
+        "recovery_done": "Helyreállítás kész",
+        "recovery_failed_title": "A helyreállítás nem futott le",
+        "recovery_failed_body": "Húzza ki a járművet a relé helyreállításának futtatása előtt, majd próbálja újra."
       }
     },
     "manager": {

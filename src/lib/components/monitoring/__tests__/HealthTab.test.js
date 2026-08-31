@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { get } from 'svelte/store'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -9,9 +10,14 @@ vi.mock('svelte-i18n', () => {
 vi.mock('../../../api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.resolve({ msg: 'done' })) }))
 
 import { httpAPI } from '../../../api/httpAPI.js'
+import { uistates_store } from '../../../stores/uistates.js'
 import HealthTab from '../HealthTab.svelte'
 
 describe('HealthTab', () => {
+  beforeEach(() => {
+    uistates_store.resetAlertBox()
+  })
+
   it('renders the error count rows and the info row', () => {
     const data = {
       errors: [
@@ -78,16 +84,46 @@ describe('HealthTab', () => {
     expect(getByText('monitoring.health.relay.not_available')).toBeInTheDocument()
   })
 
-  it('resets relay health via $FH when the reset button is clicked', async () => {
+  it('resets relay health via the typed /relay/reset endpoint when the reset button is clicked', async () => {
     httpAPI.mockClear()
     const relay = [{ key: 'life_pct', value: 100, severity: 'ok' }]
     const { getByText } = render(HealthTab, { props: { data: { errors: [], infos: [] }, relay } })
     await fireEvent.click(getByText('monitoring.health.relay.reset_button'))
     await vi.waitFor(() => {
       const call = httpAPI.mock.calls.find(
-        ([m, u]) => m === 'GET' && String(u).includes('$FH'),
+        ([m, u]) => m === 'GET' && String(u).includes('/relay/reset'),
       )
       expect(call).toBeTruthy()
+    })
+  })
+
+  it('renders the recovery button alongside the reset button when relay data is present', () => {
+    const relay = [{ key: 'life_pct', value: 100, severity: 'ok' }]
+    const { getByText } = render(HealthTab, { props: { data: { errors: [], infos: [] }, relay } })
+    expect(getByText('monitoring.health.relay.recovery_button')).toBeInTheDocument()
+  })
+
+  it('runs stuck-relay recovery via the typed /relay/recovery endpoint when its button is clicked', async () => {
+    httpAPI.mockClear()
+    const relay = [{ key: 'life_pct', value: 100, severity: 'ok' }]
+    const { getByText } = render(HealthTab, { props: { data: { errors: [], infos: [] }, relay } })
+    await fireEvent.click(getByText('monitoring.health.relay.recovery_button'))
+    await vi.waitFor(() => {
+      const call = httpAPI.mock.calls.find(
+        ([m, u]) => m === 'GET' && String(u).includes('/relay/recovery'),
+      )
+      expect(call).toBeTruthy()
+    })
+  })
+
+  it('shows the recovery-specific error alert when the recovery request is refused', async () => {
+    httpAPI.mockImplementationOnce(() => Promise.resolve({ msg: 'error' }))
+    const relay = [{ key: 'life_pct', value: 100, severity: 'ok' }]
+    const { getByText } = render(HealthTab, { props: { data: { errors: [], infos: [] }, relay } })
+    await fireEvent.click(getByText('monitoring.health.relay.recovery_button'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('monitoring.health.relay.recovery_failed_title')
     })
   })
 })

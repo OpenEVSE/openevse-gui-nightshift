@@ -7,7 +7,7 @@
   import { httpAPI } from '../../api/httpAPI.js'
   import { status_store } from '../../stores/status.js'
   import { config_store } from '../../stores/config.js'
-  import { showWriteError } from '../../alerts.js'
+  import { showWriteError, showRelayRecoveryError } from '../../alerts.js'
 
   let { data = { errors: [], infos: [] }, relay = null } = $props()
 
@@ -76,8 +76,10 @@
     resettingRelay = true
     resetRelayDone = false
     try {
-      const res = await serialQueue.add(() => httpAPI('GET', '/r?json=1&rapi=$FH'))
-      if (res && res !== 'error' && !res.error) {
+      // Single-threaded device server — serialize like every other request.
+      // Fast op (no controller-side wait to speak of), unlike recovery below.
+      const res = await serialQueue.add(() => httpAPI('GET', '/relay/reset'))
+      if (res && res.msg === 'done') {
         resetRelayDone = true
         await config_store.download()
         setTimeout(() => (resetRelayDone = false), 3000)
@@ -86,6 +88,36 @@
       }
     } finally {
       resettingRelay = false
+    }
+  }
+
+  let recovering = $state(false)
+  let recoveryDone = $state(false)
+
+  async function runStuckRelayRecovery() {
+    if (recovering) return
+    recovering = true
+    recoveryDone = false
+    try {
+      // Deliberately NOT queued through serialQueue: the controller can take
+      // up to ~30s to run the recovery cycle before this resolves, and every
+      // other request this tab makes (status/config polling included) shares
+      // that one queue — queuing this would stall the whole page for the
+      // duration. The device serializes RAPI bus access on its own regardless
+      // of how many HTTP requests arrive concurrently.
+      const res = await httpAPI('GET', '/relay/recovery')
+      if (res && res.msg === 'done') {
+        recoveryDone = true
+        // Refresh both — the fault state (stuck relay, in data.errors, from
+        // status) and the relay-health counters (from config) can both have
+        // changed.
+        await Promise.all([config_store.download(), status_store.download()])
+        setTimeout(() => (recoveryDone = false), 3000)
+      } else {
+        showRelayRecoveryError()
+      }
+    } finally {
+      recovering = false
     }
   }
 </script>
@@ -140,6 +172,19 @@
     {/each}
   </Card>
 
+  <Card class="mb-2 p-3">
+    <Button
+      label={recovering
+        ? $_('monitoring.health.relay.recovering')
+        : recoveryDone
+          ? $_('monitoring.health.relay.recovery_done')
+          : $_('monitoring.health.relay.recovery_button')}
+      variant={recoveryDone ? 'ghost' : 'primary'}
+      disabled={recovering || resettingRelay}
+      onclick={runStuckRelayRecovery}
+    />
+  </Card>
+
   <Card class="p-3">
     <Button
       label={resettingRelay
@@ -148,7 +193,7 @@
           ? $_('monitoring.health.relay.reset_done')
           : $_('monitoring.health.relay.reset_button')}
       variant={resetRelayDone ? 'ghost' : 'primary'}
-      disabled={resettingRelay}
+      disabled={resettingRelay || recovering}
       onclick={resetRelayHealth}
     />
   </Card>
