@@ -82,9 +82,10 @@ describe('nativeHost', () => {
 
   it('picks up a late Android injection via the openevsehost event and announces exactly once', async () => {
     // Bundle ran before the app set its globals (Android onPageStarted race).
+    // Deliberately NO subscriber here: the listener must be wired at module
+    // scope, not inside a store's start fn. If someone regresses it back into
+    // a readable's start, the dispatch below is unheard and this test fails.
     const mod = await import('../nativeHost.js')
-    // A live subscription starts the readable, wiring up the event listener.
-    const unsub = mod.host.subscribe(() => {})
     expect(get(mod.host)).toEqual({ embedded: false, hasDrawer: false })
 
     // App arrives: sets globals at document end and fires the event.
@@ -99,7 +100,5 @@ describe('nativeHost', () => {
     // A second late event must not re-announce.
     window.dispatchEvent(new Event('openevsehost'))
     expect(postMessage).toHaveBeenCalledTimes(1)
-
-    unsub()
   })
 })
