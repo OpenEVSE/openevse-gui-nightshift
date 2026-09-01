@@ -10,6 +10,7 @@
   import { formatDate, getStateDesc } from '../lib/utils.js'
   import {
     pageRange, logTypeIcon, logTypeTone, logStateInfo, logEnergyKwh, logTempC,
+    logPilotAmps, logReason,
   } from '../lib/history/logs.js'
   import { formatTemp } from '../lib/temperature.js'
   import { formatCost } from '../lib/cost.js'
@@ -28,11 +29,19 @@
     return $rfid_users_store.users[uid] ?? uid
   }
 
+  // Translate a logReason() descriptor into display text. null → no reason line.
+  function reasonTextFor(reason) {
+    if (!reason || reason.code === 'periodic') return null
+    return $_('history.reason.' + reason.code, { values: reason.params ?? {} })
+  }
+
   let rows = $derived(
-    (Array.isArray($history_store) ? $history_store : []).map((e) => {
+    (Array.isArray($history_store) ? $history_store : []).map((e, i, arr) => {
       const state = logStateInfo(e.evseState)
       const t = formatTemp(logTempC(e), $config_store?.temp_unit ?? 'c')
       const kWh = logEnergyKwh(e)
+      // Store is newest-first, so the earlier-in-time entry is the next index.
+      const reason = logReason(e, arr[i + 1])
       return {
         stateIcon: state.icon,
         stateTone: state.tone,
@@ -50,6 +59,10 @@
         temp: t.value,
         tempUnit: t.unitKey,
         userText: userTextFor(e),
+        pilotAmps: logPilotAmps(e),
+        reasonText: reasonTextFor(reason),
+        periodic: reason?.code === 'periodic',
+        periodicLabel: $_('history.reason.periodic'),
       }
     }),
   )

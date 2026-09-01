@@ -1060,6 +1060,20 @@
       "information": "Információ",
       "notification": "Értesítés",
       "warning": "Figyelmeztetés"
+    },
+    "reason": {
+      "pilot": "Pilot {from} → {to} A",
+      "pilot_now": "Pilot {to} A",
+      "flags_relay_closed": "Relé zárva",
+      "flags_relay_opened": "Relé nyitva",
+      "flags_vehicle_connected": "Jármű csatlakoztatva",
+      "flags_vehicle_disconnected": "Jármű leválasztva",
+      "divert": "Napenergia-eltérítés {from} → {to}",
+      "divert_now": "Napenergia-eltérítés {to}",
+      "shaper": "Terheléskorlátozó {from} → {to}",
+      "shaper_now": "Terheléskorlátozó {to}",
+      "boot": "Újraindítva",
+      "periodic": "Időszakos minta"
     }
   },
   "wizard": {

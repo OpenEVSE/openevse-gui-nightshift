@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   pageRange, logTypeIcon, logTypeTone, logStateInfo, logEnergyKwh, logTempC,
+  logPilotAmps, logReason,
 } from '../logs.js'
 
 describe('pageRange', () => {
@@ -63,5 +64,88 @@ describe('logTempC', () => {
   })
   it('is 0 when temperature is absent', () => {
     expect(logTempC({})).toBe(0)
+  })
+})
+
+describe('logPilotAmps', () => {
+  it('returns the pilot current as whole amps', () => {
+    expect(logPilotAmps({ pilot: 47 })).toBe(47)
+    expect(logPilotAmps({ pilot: 41.6 })).toBe(42)
+  })
+  it('is null when the pilot field is absent or non-finite', () => {
+    expect(logPilotAmps({})).toBeNull()
+    expect(logPilotAmps(undefined)).toBeNull()
+    expect(logPilotAmps({ pilot: 'x' })).toBeNull()
+  })
+})
+
+describe('logReason', () => {
+  it('is null for a legacy entry with empty or missing changed', () => {
+    expect(logReason({ changed: [], pilot: 47 }, { pilot: 40 })).toBeNull()
+    expect(logReason({ pilot: 47 }, { pilot: 40 })).toBeNull()
+  })
+
+  it('reports periodic first and skips the delta path entirely', () => {
+    // Invariant: the firmware sends ["periodic"] alone, but even if another
+    // field looks changed the periodic branch must win with no params.
+    expect(logReason({ changed: ['periodic'], pilot: 47 }, { pilot: 40 })).toEqual({
+      code: 'periodic',
+    })
+  })
+
+  it('renders the pilot transition, and wins over a co-changed state', () => {
+    expect(logReason({ changed: ['state', 'pilot'], pilot: 42 }, { pilot: 47 })).toEqual({
+      code: 'pilot',
+      params: { from: 47, to: 42 },
+    })
+  })
+
+  it('falls back to the current pilot when there is no predecessor', () => {
+    expect(logReason({ changed: ['pilot'], pilot: 42 }, null)).toEqual({
+      code: 'pilot_now',
+      params: { to: 42 },
+    })
+  })
+
+  it('names the charging-relay flag transition, not the raw bitmask', () => {
+    // 1344 (0x540) → 1280 (0x500): the 0x40 relay bit clears.
+    expect(logReason({ changed: ['flags'], evseFlags: 1280 }, { evseFlags: 1344 })).toEqual({
+      code: 'flags_relay_opened',
+    })
+    expect(logReason({ changed: ['flags'], evseFlags: 1344 }, { evseFlags: 1280 })).toEqual({
+      code: 'flags_relay_closed',
+    })
+  })
+
+  it('names the vehicle-connected flag transition', () => {
+    expect(logReason({ changed: ['flags'], evseFlags: 0x100 }, { evseFlags: 0 })).toEqual({
+      code: 'flags_vehicle_connected',
+    })
+    expect(logReason({ changed: ['flags'], evseFlags: 0 }, { evseFlags: 0x100 })).toEqual({
+      code: 'flags_vehicle_disconnected',
+    })
+  })
+
+  it('is null for an unnamed flag bit or a missing predecessor', () => {
+    expect(logReason({ changed: ['flags'], evseFlags: 0x1 }, { evseFlags: 0x0 })).toBeNull()
+    expect(logReason({ changed: ['flags'], evseFlags: 0x100 }, null)).toBeNull()
+  })
+
+  it('suppresses reasons that merely restate the visible state label', () => {
+    expect(logReason({ changed: ['state'] }, {})).toBeNull()
+    expect(logReason({ changed: ['manager'] }, {})).toBeNull()
+    expect(logReason({ changed: ['state', 'manager'] }, {})).toBeNull()
+  })
+
+  it('names divert and shaper transitions and reports a reboot', () => {
+    expect(logReason({ changed: ['divert'], divertMode: 1 }, { divertMode: 0 })).toEqual({
+      code: 'divert',
+      params: { from: 0, to: 1 },
+    })
+    expect(logReason({ changed: ['shaper'], shaper: 2 }, { shaper: 0 })).toEqual({
+      code: 'shaper',
+      params: { from: 0, to: 2 },
+    })
+    expect(logReason({ changed: ['boot'] }, null)).toEqual({ code: 'boot' })
   })
 })

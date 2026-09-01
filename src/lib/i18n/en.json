@@ -1060,6 +1060,20 @@
       "information": "Information",
       "notification": "Notification",
       "warning": "Warning"
+    },
+    "reason": {
+      "pilot": "Pilot {from} → {to} A",
+      "pilot_now": "Pilot {to} A",
+      "flags_relay_closed": "Relay closed",
+      "flags_relay_opened": "Relay opened",
+      "flags_vehicle_connected": "Vehicle connected",
+      "flags_vehicle_disconnected": "Vehicle disconnected",
+      "divert": "Solar divert {from} → {to}",
+      "divert_now": "Solar divert {to}",
+      "shaper": "Load shaper {from} → {to}",
+      "shaper_now": "Load shaper {to}",
+      "boot": "Restarted",
+      "periodic": "Periodic sample"
     }
   },
   "wizard": {

@@ -1060,6 +1060,20 @@
       "information": "Information",
       "notification": "Notification",
       "warning": "Avertissement"
+    },
+    "reason": {
+      "pilot": "Pilote {from} → {to} A",
+      "pilot_now": "Pilote {to} A",
+      "flags_relay_closed": "Relais fermé",
+      "flags_relay_opened": "Relais ouvert",
+      "flags_vehicle_connected": "Véhicule connecté",
+      "flags_vehicle_disconnected": "Véhicule déconnecté",
+      "divert": "Surplus solaire {from} → {to}",
+      "divert_now": "Surplus solaire {to}",
+      "shaper": "Limiteur de charge {from} → {to}",
+      "shaper_now": "Limiteur de charge {to}",
+      "boot": "Redémarré",
+      "periodic": "Échantillon périodique"
     }
   },
   "wizard": {
