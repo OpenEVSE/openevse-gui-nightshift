@@ -100,6 +100,21 @@ describe('logReason', () => {
     })
   })
 
+  it('lets a flag transition win over a co-changed pilot', () => {
+    // At charge start the relay closing is more informative than the pilot,
+    // which is often unchanged from the entry before.
+    const entry = { changed: ['flags', 'pilot'], evseFlags: 0x40, pilot: 47 }
+    expect(logReason(entry, { evseFlags: 0, pilot: 47 })).toEqual({ code: 'flags_relay_closed' })
+  })
+
+  it('collapses a no-op numeric delta to the single-value form', () => {
+    // "Pilot 47 → 47 A" would claim a change that did not happen.
+    expect(logReason({ changed: ['pilot'], pilot: 47 }, { pilot: 47 })).toEqual({
+      code: 'pilot_now',
+      params: { to: 47 },
+    })
+  })
+
   it('falls back to the current pilot when there is no predecessor', () => {
     expect(logReason({ changed: ['pilot'], pilot: 42 }, null)).toEqual({
       code: 'pilot_now',
@@ -126,15 +141,39 @@ describe('logReason', () => {
     })
   })
 
-  it('is null for an unnamed flag bit or a missing predecessor', () => {
-    expect(logReason({ changed: ['flags'], evseFlags: 0x1 }, { evseFlags: 0x0 })).toBeNull()
-    expect(logReason({ changed: ['flags'], evseFlags: 0x100 }, null)).toBeNull()
+  it('names a latching fault ahead of a co-moved relay bit', () => {
+    // GFI (0x80) and relay (0x40) both change; the fault deserves the row.
+    expect(logReason({ changed: ['flags'], evseFlags: 0x80 }, { evseFlags: 0x40 })).toEqual({
+      code: 'flags_gfi_tripped',
+    })
+    expect(logReason({ changed: ['flags'], evseFlags: 0x40 }, { evseFlags: 0x80 })).toEqual({
+      code: 'flags_gfi_cleared',
+    })
   })
 
-  it('suppresses reasons that merely restate the visible state label', () => {
+  it('gives a generic reason — never a blank row — for an unnamed bit or missing predecessor', () => {
+    // 0x800 (onboard UI menu) is intentionally unnamed.
+    expect(logReason({ changed: ['flags'], evseFlags: 0x800 }, { evseFlags: 0x0 })).toEqual({
+      code: 'flags_changed',
+    })
+    expect(logReason({ changed: ['flags'], evseFlags: 0x100 }, null)).toEqual({
+      code: 'flags_changed',
+    })
+  })
+
+  it('surfaces a manager transition, which the state label never shows', () => {
+    // getStateDesc() reads evseState only, so managerState is invisible without this.
+    expect(logReason({ changed: ['manager'], managerState: 'active' }, {})).toEqual({
+      code: 'manager_active',
+    })
+    expect(logReason({ changed: ['manager'], managerState: 'disabled' }, {})).toEqual({
+      code: 'manager_disabled',
+    })
+  })
+
+  it('suppresses a state-only change, which the visible state label already shows', () => {
     expect(logReason({ changed: ['state'] }, {})).toBeNull()
-    expect(logReason({ changed: ['manager'] }, {})).toBeNull()
-    expect(logReason({ changed: ['state', 'manager'] }, {})).toBeNull()
+    expect(logReason({ changed: ['state', 'unknownfuturekey'] }, {})).toBeNull()
   })
 
   it('names divert and shaper transitions and reports a reboot', () => {

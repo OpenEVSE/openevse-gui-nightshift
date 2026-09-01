@@ -50,7 +50,7 @@ describe('LogRow', () => {
   })
   it('omits the pilot metric when null', () => {
     const { queryByText } = render(LogRow, { props: { ...props, pilotAmps: null } })
-    expect(queryByText(/A$/)).not.toBeInTheDocument()
+    expect(queryByText(/\d+\s*A\b/)).not.toBeInTheDocument()
   })
   it('renders the reason line when reasonText is passed', () => {
     const { getByText } = render(LogRow, { props: { ...props, reasonText: 'Pilot 47 → 42 A' } })
