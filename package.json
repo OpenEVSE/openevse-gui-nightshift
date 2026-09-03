@@ -39,5 +39,9 @@
     "svelte-i18n": "^4.0.1",
     "svelte-local-storage-store": "^0.6.4",
     "uplot": "^1.6.32"
+  },
+  "overrides": {
+    "esbuild": "^0.25.0",
+    "@babel/core": "^7.29.6"
   }
 }
