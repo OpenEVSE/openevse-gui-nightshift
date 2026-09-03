@@ -44,4 +44,23 @@ describe('LogRow', () => {
     const { getByText } = render(LogRow, { props: { ...props, userText: 'Alice' } })
     expect(getByText('Alice')).toBeInTheDocument()
   })
+  it('shows the pilot current when passed', () => {
+    const { getByText } = render(LogRow, { props: { ...props, pilotAmps: 47 } })
+    expect(getByText('47 A')).toBeInTheDocument()
+  })
+  it('omits the pilot metric when null', () => {
+    const { queryByText } = render(LogRow, { props: { ...props, pilotAmps: null } })
+    expect(queryByText(/\d+\s*A\b/)).not.toBeInTheDocument()
+  })
+  it('renders the reason line when reasonText is passed', () => {
+    const { getByText } = render(LogRow, { props: { ...props, reasonText: 'Pilot 47 → 42 A' } })
+    expect(getByText('Pilot 47 → 42 A')).toBeInTheDocument()
+  })
+  it('shows a labelled glyph for a periodic sample and no reason text', () => {
+    const { getByTitle, queryByText } = render(LogRow, {
+      props: { ...props, periodic: true, periodicLabel: 'Periodic sample', reasonText: 'unused' },
+    })
+    expect(getByTitle('Periodic sample')).toBeInTheDocument()
+    expect(queryByText('unused')).not.toBeInTheDocument()
+  })
 })
