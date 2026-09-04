@@ -114,19 +114,6 @@
   {/each}
 </Card>
 
-<Card class="mb-2 p-3">
-  <Button
-    label={resetting
-      ? $_('config.safety.resetting')
-      : resetDone
-        ? $_('config.safety.reset_done')
-        : $_('config.safety.reset_faults')}
-    variant={resetDone ? 'ghost' : 'default'}
-    disabled={resetting}
-    onclick={resetFaultCounters}
-  />
-</Card>
-
 {#if relay}
   <Card class="mb-2 p-3">
     <h2 class="mb-1 text-sm font-semibold text-text">{$_('monitoring.health.relay.title')}</h2>
@@ -139,17 +126,32 @@
       </div>
     {/each}
   </Card>
-
-  <Card class="p-3">
-    <Button
-      label={resettingRelay
-        ? $_('monitoring.health.relay.resetting')
-        : resetRelayDone
-          ? $_('monitoring.health.relay.reset_done')
-          : $_('monitoring.health.relay.reset_button')}
-      variant={resetRelayDone ? 'ghost' : 'primary'}
-      disabled={resettingRelay}
-      onclick={resetRelayHealth}
-    />
-  </Card>
 {/if}
+
+<Card class="p-3">
+  <h2 class="mb-1 text-sm font-semibold text-text">{$_('monitoring.health.maintenance.title')}</h2>
+  <div class="flex flex-wrap gap-2 pt-2">
+    <Button
+      label={resetting
+        ? $_('config.safety.resetting')
+        : resetDone
+          ? $_('config.safety.reset_done')
+          : $_('config.safety.reset_faults')}
+      variant={resetDone ? 'ghost' : 'default'}
+      disabled={resetting}
+      onclick={resetFaultCounters}
+    />
+    {#if relay}
+      <Button
+        label={resettingRelay
+          ? $_('monitoring.health.relay.resetting')
+          : resetRelayDone
+            ? $_('monitoring.health.relay.reset_done')
+            : $_('monitoring.health.relay.reset_button')}
+        variant={resetRelayDone ? 'ghost' : 'primary'}
+        disabled={resettingRelay}
+        onclick={resetRelayHealth}
+      />
+    {/if}
+  </div>
+</Card>

@@ -1012,6 +1012,9 @@
         "reset_button": "Relé kicserélve – egészségértékek visszaállítása",
         "resetting": "Visszaállítás…",
         "reset_done": "Visszaállítva"
+      },
+      "maintenance": {
+        "title": "Karbantartás"
       }
     },
     "manager": {
