@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/svelte'
 
-const { loadRaw, loadDaily, loadMonthly, loadAnnual } = vi.hoisted(() => ({
+const { loadRaw, loadNewer, loadDaily, loadMonthly, loadAnnual } = vi.hoisted(() => ({
   loadRaw: vi.fn(async () => true),
+  loadNewer: vi.fn(async () => true),
   loadDaily: vi.fn(async () => true),
   loadMonthly: vi.fn(async () => true),
   loadAnnual: vi.fn(async () => true),
@@ -17,13 +18,14 @@ vi.mock('svelte-i18n', () => {
 vi.mock('../../../stores/energy.js', async () => {
   const { writable } = await import('svelte/store')
   const store = writable({
-    raw: { samples: [], historical: false, noOlder: false },
+    raw: { samples: [], historical: false, noOlder: false, before: 0 },
     daily: [], monthly: [], annual: [],
     loading: { raw: false, daily: false, monthly: false, annual: false },
     error:   { raw: false, daily: false, monthly: false, annual: false },
   })
   return {
-    energy_store: { ...store, loadRaw, loadDaily, loadMonthly, loadAnnual },
+    energy_store: { ...store, loadRaw, loadNewer, loadDaily, loadMonthly, loadAnnual },
+    __store: store,
   }
 })
 
@@ -55,5 +57,21 @@ describe('EnergyTab', () => {
     expect(loadMonthly).toHaveBeenCalled()
     await fireEvent.click(screen.getByRole('tab', { name: /annual/i }))
     expect(loadAnnual).toHaveBeenCalled()
+  })
+  it('disables Newer and Current in the live view', () => {
+    render(EnergyTab)
+    expect(screen.getByText('monitoring.energy.newer')).toBeDisabled()
+    expect(screen.getByText('monitoring.energy.current')).toBeDisabled()
+  })
+
+  it('Newer pages forward and Current returns to live when viewing history', async () => {
+    const { __store } = await import('../../../stores/energy.js')
+    __store.update((s) => ({ ...s, raw: { samples: [{ ts: 1 }], historical: true, noOlder: false, before: 100 } }))
+    render(EnergyTab)
+    loadRaw.mockClear()
+    await fireEvent.click(screen.getByText('monitoring.energy.newer'))
+    expect(loadNewer).toHaveBeenCalledTimes(1)
+    await fireEvent.click(screen.getByText('monitoring.energy.current'))
+    expect(loadRaw).toHaveBeenCalledWith()
   })
 })
