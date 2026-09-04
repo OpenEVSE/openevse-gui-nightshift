@@ -23,7 +23,7 @@
     "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^30.0.1",
     "playwright": "^1.62.1",
-    "sharp": "^0.35.3",
+    "sharp": "^0.35.4",
     "svelte": "^5.57.0",
     "tailwindcss": "^4.3.2",
     "vite": "^8.2.2",
