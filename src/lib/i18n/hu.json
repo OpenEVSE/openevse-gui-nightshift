@@ -496,6 +496,8 @@
       "waiting": "Csatlakoztatva — várakozás az üzenetekre…",
       "disconnected": "Az élő adatfolyam megszakadt — a puffer tartalma látható.",
       "unavailable": "Konzol nem elérhető.",
+      "copy": "Másolás",
+      "copied": "Másolva",
       "diagnostics": "Diagnosztika",
       "diagnostics_desc": "Tölts le egy JSON-pillanatképet az összes store-ról (config, status, ütemezés, claims…) hibajelentéshez. A jelszavak és tokenek szerkesztve vannak.",
       "diagnostics_export": "Diagnosztika letöltése",

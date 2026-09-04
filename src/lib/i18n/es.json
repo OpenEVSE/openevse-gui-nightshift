@@ -496,6 +496,8 @@
       "waiting": "Conectado — esperando mensajes…",
       "disconnected": "Transmisión en vivo desconectada — mostrando salida almacenada.",
       "unavailable": "Consola no disponible.",
+      "copy": "Copiar",
+      "copied": "Copiado",
       "diagnostics": "Diagnóstico",
       "diagnostics_desc": "Descarga una instantánea JSON de todos los almacenes (configuración, estado, programación, reclamaciones…) para un informe de error. Las contraseñas y tokens se redactan.",
       "diagnostics_export": "Descargar diagnóstico",

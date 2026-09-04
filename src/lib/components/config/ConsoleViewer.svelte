@@ -3,6 +3,7 @@
   import { _ } from 'svelte-i18n'
   import { tick } from 'svelte'
   import { httpAPI } from '../../api/httpAPI.js'
+  import { copyText } from '../../clipboard.js'
 
   let { mode = 'debug' } = $props()
 
@@ -79,6 +80,15 @@
     }
   })
 
+  let copied = $state(false)
+  async function copy() {
+    if (!text) return
+    if (await copyText(text)) {
+      copied = true
+      setTimeout(() => (copied = false), 1500)
+    }
+  }
+
   $effect(() => {
     text // re-run on new data
     tick().then(() => {
@@ -86,6 +96,19 @@
     })
   })
 </script>
+
+<div class="mb-2 flex justify-end">
+  <button
+    type="button"
+    class="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-text transition
+           disabled:cursor-not-allowed disabled:opacity-40
+           hover:not-disabled:bg-surface-2"
+    disabled={text.length === 0}
+    onclick={copy}
+  >
+    {copied ? $_('config.terminal.copied') : $_('config.terminal.copy')}
+  </button>
+</div>
 
 <div
   bind:this={containerEl}
