@@ -448,6 +448,7 @@
       "versions": "Verziók",
       "firmware": "OpenEVSE firmware",
       "gateway": "WiFi átjáró firmware",
+      "gui": "Webes felület",
       "chip_id": "EVSE chip azonosító",
       "links": "Hivatkozások",
       "docs": "Dokumentáció",

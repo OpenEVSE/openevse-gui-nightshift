@@ -448,6 +448,7 @@
       "versions": "Versiones",
       "firmware": "Firmware OpenEVSE",
       "gateway": "Firmware del gateway WiFi",
+      "gui": "Interfaz web",
       "chip_id": "ID del chip EVSE",
       "links": "Enlaces",
       "docs": "Documentación",
