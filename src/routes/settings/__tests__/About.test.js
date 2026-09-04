@@ -21,6 +21,11 @@ describe('About page', () => {
     expect(getByText('7.1.3')).toBeInTheDocument()
     expect(getByText('5.1.2')).toBeInTheDocument()
   })
+  it('shows the web UI version', () => {
+    const { getByText } = render(About)
+    expect(getByText('config.about.gui')).toBeInTheDocument()
+    expect(getByText(__APP_VERSION__)).toBeInTheDocument()
+  })
   it('links to the documentation', () => {
     const { getAllByRole } = render(About)
     const hrefs = getAllByRole('link').map((a) => a.getAttribute('href'))

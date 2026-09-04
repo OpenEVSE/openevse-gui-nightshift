@@ -448,6 +448,7 @@
       "versions": "Versions",
       "firmware": "Micrologiciel OpenEVSE",
       "gateway": "Micrologiciel passerelle WiFi",
+      "gui": "Interface web",
       "chip_id": "ID de puce EVSE",
       "links": "Liens",
       "docs": "Documentation",

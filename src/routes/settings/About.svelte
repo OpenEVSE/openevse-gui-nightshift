@@ -18,6 +18,7 @@
   <ConfigSection title={$_('config.about.versions')}>
     <ReadOnlyRow label={$_('config.about.firmware')} value={$config_store?.firmware} />
     <ReadOnlyRow label={$_('config.about.gateway')} value={$config_store?.version} />
+    <ReadOnlyRow label={$_('config.about.gui')} value={__APP_VERSION__} />
     {#if $config_store?.chip_id}
       <ReadOnlyRow label={$_('config.about.chip_id')} value={$config_store.chip_id} />
     {/if}
