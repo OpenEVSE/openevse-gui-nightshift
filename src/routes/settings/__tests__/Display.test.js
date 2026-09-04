@@ -103,4 +103,11 @@ describe('Display page', () => {
     await fireEvent.click(getByLabelText('config.display.never'))
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_backlight_timeout: 900 }))
   })
+  it('shows 24-hour selected by default and writes tft_12h_clock when 12-hour is picked', async () => {
+    config_store.set({ tft_theme: 'dark', tft_12h_clock: false })
+    const { getByText } = render(Display)
+    expect(getByText('config.display.clock_24')).toHaveAttribute('aria-pressed', 'true')
+    await fireEvent.click(getByText('config.display.clock_12'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ tft_12h_clock: true }))
+  })
 })
