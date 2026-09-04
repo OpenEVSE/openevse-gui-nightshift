@@ -265,6 +265,13 @@
           onchange={(v) => form.saveField('mqtt_pass', v)}
         />
       </FormField>
+      <FormField label={$_('config.mqtt.sys_query')} description={$_('config.mqtt.sys_query_desc')}>
+        <Toggle
+          checked={!!$config_store?.mqtt_sys_query}
+          label={$_('config.mqtt.sys_query')}
+          onchange={(v) => form.saveField('mqtt_sys_query', v)}
+        />
+      </FormField>
     </ConfigSection>
 
     {#if isTls}

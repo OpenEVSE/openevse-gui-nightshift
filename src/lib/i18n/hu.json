@@ -70,6 +70,8 @@
       "port": "Port",
       "user": "Felhasználónév",
       "password": "Jelszó",
+      "sys_query": "Broker verzió lekérdezése",
+      "sys_query_desc": "Feliratkozás a $SYS/broker/version témára a broker verziójának megjelenítéséhez. Kapcsold ki felügyelt brokereknél, például AWS IoT Core esetén, amelyek elutasítják a $SYS feliratkozásokat.",
       "tls": "TLS",
       "reject_unauthorized": "Saját aláírású tanúsítványok elutasítása",
       "certificate": "Ügyfél tanúsítvány",

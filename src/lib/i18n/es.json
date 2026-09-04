@@ -70,6 +70,8 @@
       "port": "Puerto",
       "user": "Usuario",
       "password": "Contraseña",
+      "sys_query": "Consultar versión del broker",
+      "sys_query_desc": "Suscribirse a $SYS/broker/version para mostrar la versión del broker. Desactívalo con brokers gestionados como AWS IoT Core, que rechazan las suscripciones $SYS.",
       "tls": "TLS",
       "reject_unauthorized": "Rechazar certificados autofirmados",
       "certificate": "Certificado de cliente",

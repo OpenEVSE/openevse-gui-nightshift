@@ -68,4 +68,10 @@ describe('MQTT page', () => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
   })
+  it('saves the $SYS broker query toggle', async () => {
+    config_store.set({ mqtt_enabled: true, mqtt_protocol: 'mqtt', mqtt_sys_query: true, mqtt_supported_protocols: ['mqtt'] })
+    const { getByLabelText } = render(Mqtt)
+    await fireEvent.click(getByLabelText('config.mqtt.sys_query'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_sys_query: false }))
+  })
 })

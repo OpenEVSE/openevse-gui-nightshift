@@ -70,6 +70,8 @@
       "port": "Port",
       "user": "Username",
       "password": "Password",
+      "sys_query": "Query broker version",
+      "sys_query_desc": "Subscribe to $SYS/broker/version to show the broker version. Turn off for managed brokers such as AWS IoT Core, which reject $SYS subscriptions.",
       "tls": "TLS",
       "reject_unauthorized": "Reject self-signed certificates",
       "certificate": "Client certificate",
