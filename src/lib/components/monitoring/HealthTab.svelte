@@ -130,14 +130,14 @@
 
 <Card class="p-3">
   <h2 class="mb-1 text-sm font-semibold text-text">{$_('monitoring.health.maintenance.title')}</h2>
-  <div class="flex flex-wrap gap-2 pt-2">
+  <div class="flex flex-col gap-2 pt-2">
     <Button
       label={resetting
         ? $_('config.safety.resetting')
         : resetDone
           ? $_('config.safety.reset_done')
           : $_('config.safety.reset_faults')}
-      variant={resetDone ? 'ghost' : 'default'}
+      variant={resetDone ? 'ghost' : 'primary'}
       disabled={resetting}
       onclick={resetFaultCounters}
     />
