@@ -1012,6 +1012,9 @@
         "reset_button": "Relé reemplazado: restablecer valores de salud",
         "resetting": "Restableciendo…",
         "reset_done": "Restablecido"
+      },
+      "maintenance": {
+        "title": "Mantenimiento"
       }
     },
     "manager": {

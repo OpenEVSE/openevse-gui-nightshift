@@ -1012,6 +1012,9 @@
         "reset_button": "Relais remplacé : réinitialiser les valeurs de santé",
         "resetting": "Réinitialisation…",
         "reset_done": "Réinitialisé"
+      },
+      "maintenance": {
+        "title": "Maintenance"
       }
     },
     "manager": {
