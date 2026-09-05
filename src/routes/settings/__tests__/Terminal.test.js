@@ -113,12 +113,22 @@ describe('Terminal — Memory & health', () => {
     expect(getByText('config.terminal.ws_conns')).toBeInTheDocument()
   })
 
-  it('shows the chip row from config espinfo above the reset reason', () => {
+  it('falls back to espinfo for the chip row on older firmware', () => {
     config_store.set({ espinfo: 'ESP32-S3r2 2 core WiFi BLE' })
     status_store.set({ ...MEM })
     const { getByText } = render(Terminal)
     expect(getByText('config.terminal.chip')).toBeInTheDocument()
     expect(getByText('ESP32-S3r2 2 core WiFi BLE')).toBeInTheDocument()
+    config_store.set({})
+  })
+
+  it('composes the chip row from the structured fields when present', () => {
+    config_store.set({ espinfo: 'ESP32-S3r2 2 core WiFi BLE', chip_model: 'ESP32-S3', chip_rev: 2,
+      chip_cores: 2, espflash: 16777216, psram_size: 8388608 })
+    status_store.set({ ...MEM })
+    const { getByText, queryByText } = render(Terminal)
+    expect(getByText(/ESP32-S3 v0\.2 · 2 cores · .*flash · .*PSRAM/)).toBeInTheDocument()
+    expect(queryByText('ESP32-S3r2 2 core WiFi BLE')).not.toBeInTheDocument()
     config_store.set({})
   })
 

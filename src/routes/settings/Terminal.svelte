@@ -81,6 +81,18 @@
   // derived: the app partition's free headroom is what a larger OTA image can
   // grow into, the filesystem's free is what's left for logs/certificates.
   let flash = $derived($config_store?.espflash)
+  // Chip line. Newer firmware sends structured fields (chip_model, chip_rev as
+  // major*100+minor, chip_cores, psram_size); older firmware only espinfo.
+  let chipLabel = $derived.by(() => {
+    const c = $config_store ?? {}
+    if (!c.chip_model) return c.espinfo || ''
+    const rev = c.chip_rev != null ? ` v${Math.floor(c.chip_rev / 100)}.${c.chip_rev % 100}` : ''
+    const parts = [`${c.chip_model}${rev}`]
+    if (c.chip_cores) parts.push(`${c.chip_cores} core${c.chip_cores > 1 ? 's' : ''}`)
+    if (c.espflash) parts.push(`${formatBytes(c.espflash)} flash`)
+    if (c.psram_size) parts.push(`${formatBytes(c.psram_size)} PSRAM`)
+    return parts.join(' · ')
+  })
   let app = $derived.by(() => {
     const c = $config_store ?? {}
     const free = c.app0_size != null && c.sketch_size != null ? c.app0_size - c.sketch_size : undefined
@@ -356,8 +368,8 @@
     <ConfigSection title={$_('config.terminal.memory')}>
       <!-- Which silicon this is (firmware's espinfo, e.g. "ESP32-S3r2 2 core WiFi BLE"),
            then last restart: the first question anyone asks about a reboot. -->
-      {#if $config_store?.espinfo}
-        <ReadOnlyRow label={$_('config.terminal.chip')} value={$config_store.espinfo} />
+      {#if chipLabel}
+        <ReadOnlyRow label={$_('config.terminal.chip')} value={chipLabel} />
       {/if}
       <ReadOnlyRow
         label={$_('config.terminal.reset_reason')}
