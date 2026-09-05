@@ -81,6 +81,18 @@
   // derived: the app partition's free headroom is what a larger OTA image can
   // grow into, the filesystem's free is what's left for logs/certificates.
   let flash = $derived($config_store?.espflash)
+  // Chip line. Newer firmware sends structured fields (chip_model, chip_rev as
+  // major*100+minor, chip_cores, psram_size); older firmware only espinfo.
+  let chipLabel = $derived.by(() => {
+    const c = $config_store ?? {}
+    if (!c.chip_model) return c.espinfo || ''
+    const rev = c.chip_rev != null ? ` v${Math.floor(c.chip_rev / 100)}.${c.chip_rev % 100}` : ''
+    const parts = [`${c.chip_model}${rev}`]
+    if (c.chip_cores) parts.push(`${c.chip_cores} core${c.chip_cores > 1 ? 's' : ''}`)
+    if (c.espflash) parts.push(`${formatBytes(c.espflash)} flash`)
+    if (c.psram_size) parts.push(`${formatBytes(c.psram_size)} PSRAM`)
+    return parts.join(' · ')
+  })
   let app = $derived.by(() => {
     const c = $config_store ?? {}
     const free = c.app0_size != null && c.sketch_size != null ? c.app0_size - c.sketch_size : undefined
@@ -91,6 +103,43 @@
     const free = c.littlefs_size != null && c.littlefs_used != null ? c.littlefs_size - c.littlefs_used : undefined
     return { size: c.littlefs_size, used: c.littlefs_used, free }
   })
+  // microSD (boards with a slot, e.g. the ESP32-S3 LCD board): the firmware
+  // only sends sd_size while a card is mounted. sd_log_size is the fixed-size
+  // energy-log ring that lives on it.
+  let sd = $derived.by(() => {
+    const c = $config_store ?? {}
+    if (c.sd_size == null) return null
+    const free = c.sd_used != null ? c.sd_size - c.sd_used : undefined
+    return { size: c.sd_size, used: c.sd_used, free, log: c.sd_log_size }
+  })
+  // Format runs on the device in the background; sd_status walks
+  // "formatting" -> "creating log" -> "mounted" and the card is unmounted (no
+  // sd_size in /config) for the duration, so the panel keys off status too.
+  let sdStatus = $derived($status_store?.sd_status)
+  let sdBusy = $derived(sdStatus === 'formatting' || sdStatus === 'creating log')
+  let pendingFormat = $state(false) // confirmation dialog open
+  let formatting = $state(false) // local gate from POST until status catches up
+  $effect(() => {
+    if (sdBusy) formatting = false
+  })
+
+  async function startFormat() {
+    pendingFormat = false
+    if (formatting || sdBusy) return
+    formatting = true
+    try {
+      const res = await serialQueue.add(() =>
+        httpAPI('POST', '/sdcard/format', JSON.stringify({})),
+      )
+      if (!res || res === 'error' || res.msg !== 'started') {
+        showWriteError()
+        formatting = false
+      }
+    } catch {
+      showWriteError()
+      formatting = false
+    }
+  }
 
   // ── Memory & health (fork-only diagnostics; every field from /status) ────
   // Live, websocket-pushed — no refresh button or poll timer (status already
@@ -120,7 +169,7 @@
   let stackValue = (bytes) => (bytes ? formatBytes(bytes) : '—')
   // A historical low-water mark should never be coloured — a device that has
   // since recovered would otherwise flag red forever. Only live values tone.
-  const SOFT_RESET = new Set(['sw', 'poweron'])
+  const SOFT_RESET = new Set(['sw', 'poweron', 'usb', 'jtag'])
   let resetTone = $derived(
     mem.reset_reason_name && !SOFT_RESET.has(mem.reset_reason_name) ? 'warn' : 'default',
   )
@@ -130,7 +179,7 @@
   // to the raw string rather than a blank.
   const KNOWN_RESETS = new Set([
     'poweron', 'sw', 'external', 'panic', 'int_wdt', 'task_wdt', 'wdt',
-    'deepsleep', 'brownout', 'sdio', 'unknown',
+    'deepsleep', 'brownout', 'sdio', 'usb', 'jtag', 'efuse', 'pwr_glitch', 'cpu_lockup', 'unknown',
   ])
   let resetLabel = $derived.by(() => {
     const name = mem.reset_reason_name
@@ -321,27 +370,59 @@
         <thead>
           <tr class="bg-surface-3 text-text-dim">
             <th class="px-3 py-2 text-left font-medium"></th>
-            <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.size')}</th>
-            <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.used')}</th>
-            <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.free')}</th>
+            <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.size')}</th>
+            <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.used')}</th>
+            <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.free')}</th>
           </tr>
         </thead>
         <tbody>
           <tr class="border-t border-border">
             <td class="px-3 py-2 text-text-dim">{$_('config.terminal.app_partition')}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(app.size)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(app.used)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(app.free)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(app.size)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(app.used)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(app.free)}</td>
           </tr>
           <tr class="border-t border-border">
             <td class="px-3 py-2 text-text-dim">{$_('config.terminal.filesystem')}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.size)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.used)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.free)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(fs.size)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(fs.used)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(fs.free)}</td>
           </tr>
+          {#if sd}
+            <tr class="border-t border-border">
+              <td class="px-3 py-2 text-text-dim">{$_('config.terminal.sd_card')}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.size)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.used)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.free)}</td>
+            </tr>
+            {#if sd.log}
+              <tr class="border-t border-border">
+                <td class="px-3 py-2 text-text-dim"><span class="mr-1 text-text-dim/60" aria-hidden="true">↳</span>{$_('config.terminal.sd_log')}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.log)}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
+              </tr>
+            {/if}
+          {/if}
         </tbody>
       </table>
     </div>
+
+    {#if sd || sdBusy || formatting}
+      <div class="mt-4 rounded-xl border border-border p-3">
+        <p class="mb-1 text-sm font-medium text-text">{$_('config.terminal.sd_format_title')}</p>
+        {#if sdBusy || formatting}
+          <p class="text-sm text-text-dim" role="status">
+            {sdStatus === 'creating log'
+              ? $_('config.terminal.sd_format_phase_creating')
+              : $_('config.terminal.sd_format_phase_formatting')}
+          </p>
+        {:else}
+          <p class="mb-3 text-sm text-text-dim">{$_('config.terminal.sd_format_desc')}</p>
+          <Button label={$_('config.terminal.sd_format_button')} variant="secondary" onclick={() => (pendingFormat = true)} />
+        {/if}
+      </div>
+    {/if}
 
     {#if canExpand}
       <div class="mt-4 rounded-xl border border-warning/40 bg-warning/5 p-3">
@@ -354,7 +435,11 @@
 
   {#if memSupported}
     <ConfigSection title={$_('config.terminal.memory')}>
-      <!-- Last restart first: the first question anyone asks about a reboot. -->
+      <!-- Which silicon this is (firmware's espinfo, e.g. "ESP32-S3r2 2 core WiFi BLE"),
+           then last restart: the first question anyone asks about a reboot. -->
+      {#if chipLabel}
+        <ReadOnlyRow label={$_('config.terminal.chip')} value={chipLabel} />
+      {/if}
       <ReadOnlyRow
         label={$_('config.terminal.reset_reason')}
         value={resetLabel}
@@ -369,21 +454,35 @@
           <thead>
             <tr class="bg-surface-3 text-text-dim">
               <th class="px-3 py-2 text-left font-medium"></th>
-              <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.now')}</th>
-              <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.min')}</th>
+              <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.now')}</th>
+              <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.min')}</th>
             </tr>
           </thead>
           <tbody>
             <tr class="border-t border-border">
               <td class="px-3 py-2 text-text-dim">{$_('config.terminal.heap_largest')}</td>
-              <td class="px-3 py-2 text-right font-medium {TONE_CLASS[heapTone(mem.heap_largest)]}">{formatBytes(mem.heap_largest)}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.heap_largest_min)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap {TONE_CLASS[heapTone(mem.heap_largest)]}">{formatBytes(mem.heap_largest)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.heap_largest_min)}</td>
             </tr>
             <tr class="border-t border-border">
               <td class="px-3 py-2 text-text-dim">{$_('config.terminal.heap_free')}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.free_heap)}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.heap_min)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.free_heap)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.heap_min)}</td>
             </tr>
+            {#if mem.psram_free !== undefined}
+              <!-- Boards with PSRAM (ESP32-S3 LCD). The rows above are internal DRAM only;
+                   these show the external pool the network stack and TLS live in. -->
+              <tr class="border-t border-border">
+                <td class="px-3 py-2 text-text-dim">{$_('config.terminal.psram_free')}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.psram_free)}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
+              </tr>
+              <tr class="border-t border-border">
+                <td class="px-3 py-2 text-text-dim">{$_('config.terminal.psram_largest')}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.psram_largest)}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
+              </tr>
+            {/if}
           </tbody>
         </table>
       </div>
@@ -496,6 +595,16 @@
         <ConsoleViewer mode={consoleMode} />
       {/key}
     {/if}
+  </div>
+</Modal>
+
+<!-- microSD format confirmation -->
+<Modal visible={pendingFormat} onclose={() => (pendingFormat = false)}>
+  <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.sd_format_confirm_title')}</h2>
+  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.sd_format_confirm_body')}</p>
+  <div class="flex gap-2">
+    <Button label={$_('config.terminal.sd_format_confirm_yes')} onclick={startFormat} />
+    <Button label={$_('config.terminal.sd_format_confirm_no')} variant="secondary" onclick={() => (pendingFormat = false)} />
   </div>
 </Modal>
 
