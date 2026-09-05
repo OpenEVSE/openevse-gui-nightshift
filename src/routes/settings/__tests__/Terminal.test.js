@@ -121,6 +121,27 @@ describe('Terminal — Memory & health', () => {
     config_store.set({ espflash: 16777216 })
   })
 
+  it('offers to format a mounted card and POSTs after confirmation', async () => {
+    config_store.set({ espflash: 16777216, sd_size: 31914983424, sd_used: 33554432, sd_log_size: 33554432 })
+    status_store.set({ sd_status: 'mounted' })
+    httpAPI.mockResolvedValue({ msg: 'started' })
+    const { getByText } = render(Terminal)
+    await fireEvent.click(getByText('config.terminal.sd_format_button'))
+    await fireEvent.click(getByText('config.terminal.sd_format_confirm_yes'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/sdcard/format', '{}')
+    config_store.set({ espflash: 16777216 })
+    status_store.set({})
+  })
+
+  it('shows the format phase from sd_status while the card is unmounted', () => {
+    config_store.set({ espflash: 16777216 })
+    status_store.set({ sd_status: 'creating log' })
+    const { getByText, queryByText } = render(Terminal)
+    expect(getByText('config.terminal.sd_format_phase_creating')).toBeInTheDocument()
+    expect(queryByText('config.terminal.sd_format_button')).not.toBeInTheDocument()
+    status_store.set({})
+  })
+
   it('omits the microSD rows without sd_size', () => {
     config_store.set({ espflash: 16777216 })
     const { queryByText } = render(Terminal)

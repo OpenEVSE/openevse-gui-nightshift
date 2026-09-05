@@ -112,6 +112,34 @@
     const free = c.sd_used != null ? c.sd_size - c.sd_used : undefined
     return { size: c.sd_size, used: c.sd_used, free, log: c.sd_log_size }
   })
+  // Format runs on the device in the background; sd_status walks
+  // "formatting" -> "creating log" -> "mounted" and the card is unmounted (no
+  // sd_size in /config) for the duration, so the panel keys off status too.
+  let sdStatus = $derived($status_store?.sd_status)
+  let sdBusy = $derived(sdStatus === 'formatting' || sdStatus === 'creating log')
+  let pendingFormat = $state(false) // confirmation dialog open
+  let formatting = $state(false) // local gate from POST until status catches up
+  $effect(() => {
+    if (sdBusy) formatting = false
+  })
+
+  async function startFormat() {
+    pendingFormat = false
+    if (formatting || sdBusy) return
+    formatting = true
+    try {
+      const res = await serialQueue.add(() =>
+        httpAPI('POST', '/sdcard/format', JSON.stringify({})),
+      )
+      if (!res || res === 'error' || res.msg !== 'started') {
+        showWriteError()
+        formatting = false
+      }
+    } catch {
+      showWriteError()
+      formatting = false
+    }
+  }
 
   // ── Memory & health (fork-only diagnostics; every field from /status) ────
   // Live, websocket-pushed — no refresh button or poll timer (status already
@@ -380,6 +408,22 @@
       </table>
     </div>
 
+    {#if sd || sdBusy || formatting}
+      <div class="mt-4 rounded-xl border border-border p-3">
+        <p class="mb-1 text-sm font-medium text-text">{$_('config.terminal.sd_format_title')}</p>
+        {#if sdBusy || formatting}
+          <p class="text-sm text-text-dim" role="status">
+            {sdStatus === 'creating log'
+              ? $_('config.terminal.sd_format_phase_creating')
+              : $_('config.terminal.sd_format_phase_formatting')}
+          </p>
+        {:else}
+          <p class="mb-3 text-sm text-text-dim">{$_('config.terminal.sd_format_desc')}</p>
+          <Button label={$_('config.terminal.sd_format_button')} variant="secondary" onclick={() => (pendingFormat = true)} />
+        {/if}
+      </div>
+    {/if}
+
     {#if canExpand}
       <div class="mt-4 rounded-xl border border-warning/40 bg-warning/5 p-3">
         <p class="mb-1 text-sm font-medium text-text">{$_('config.terminal.expand16mb_title')}</p>
@@ -551,6 +595,16 @@
         <ConsoleViewer mode={consoleMode} />
       {/key}
     {/if}
+  </div>
+</Modal>
+
+<!-- microSD format confirmation -->
+<Modal visible={pendingFormat} onclose={() => (pendingFormat = false)}>
+  <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.sd_format_confirm_title')}</h2>
+  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.sd_format_confirm_body')}</p>
+  <div class="flex gap-2">
+    <Button label={$_('config.terminal.sd_format_confirm_yes')} onclick={startFormat} />
+    <Button label={$_('config.terminal.sd_format_confirm_no')} variant="secondary" onclick={() => (pendingFormat = false)} />
   </div>
 </Modal>
 
