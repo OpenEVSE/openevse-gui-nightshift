@@ -516,6 +516,7 @@
       "used": "Használt",
       "free": "Szabad",
       "memory": "Memória és állapot",
+      "chip": "Chip",
       "reset_reason": "Utolsó újraindulás",
       "reset_reasons": {
         "poweron": "Bekapcsolás",

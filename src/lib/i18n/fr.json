@@ -516,6 +516,7 @@
       "used": "Utilisé",
       "free": "Libre",
       "memory": "Mémoire et santé",
+      "chip": "Puce",
       "reset_reason": "Dernier redémarrage",
       "reset_reasons": {
         "poweron": "Mise sous tension",

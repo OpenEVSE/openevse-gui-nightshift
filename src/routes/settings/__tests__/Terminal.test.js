@@ -16,6 +16,7 @@ vi.mock('../../../lib/alerts.js', async (importOriginal) => ({
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { showWriteError } from '../../../lib/alerts.js'
+import { config_store } from '../../../lib/stores/config.js'
 import { status_store } from '../../../lib/stores/status.js'
 import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import Terminal from '../Terminal.svelte'
@@ -110,6 +111,15 @@ describe('Terminal — Memory & health', () => {
     expect(getByText('config.terminal.memory')).toBeInTheDocument()
     expect(getByText('config.terminal.reset_reason')).toBeInTheDocument()
     expect(getByText('config.terminal.ws_conns')).toBeInTheDocument()
+  })
+
+  it('shows the chip row from config espinfo above the reset reason', () => {
+    config_store.set({ espinfo: 'ESP32-S3r2 2 core WiFi BLE' })
+    status_store.set({ ...MEM })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.chip')).toBeInTheDocument()
+    expect(getByText('ESP32-S3r2 2 core WiFi BLE')).toBeInTheDocument()
+    config_store.set({})
   })
 
   it('shows PSRAM rows only when the firmware reports psram_free', () => {

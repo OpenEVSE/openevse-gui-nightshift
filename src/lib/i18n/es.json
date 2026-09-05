@@ -516,6 +516,7 @@
       "used": "Usado",
       "free": "Libre",
       "memory": "Memoria y estado",
+      "chip": "Chip",
       "reset_reason": "Último reinicio",
       "reset_reasons": {
         "poweron": "Encendido",

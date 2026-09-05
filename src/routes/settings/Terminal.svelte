@@ -354,7 +354,11 @@
 
   {#if memSupported}
     <ConfigSection title={$_('config.terminal.memory')}>
-      <!-- Last restart first: the first question anyone asks about a reboot. -->
+      <!-- Which silicon this is (firmware's espinfo, e.g. "ESP32-S3r2 2 core WiFi BLE"),
+           then last restart: the first question anyone asks about a reboot. -->
+      {#if $config_store?.espinfo}
+        <ReadOnlyRow label={$_('config.terminal.chip')} value={$config_store.espinfo} />
+      {/if}
       <ReadOnlyRow
         label={$_('config.terminal.reset_reason')}
         value={resetLabel}
