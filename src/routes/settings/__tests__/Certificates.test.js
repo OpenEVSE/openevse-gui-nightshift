@@ -40,6 +40,32 @@ describe('Certificates page', () => {
     expect(getByRole('dialog')).toBeInTheDocument()
   })
 
+  it('generates a self-signed certificate and refreshes the list', async () => {
+    httpAPI
+      .mockResolvedValueOnce({ msg: 'done', id: 'abc123' })
+      .mockResolvedValueOnce([{ id: 'abc123', type: 'client', name: 'Self-signed (openevse)' }])
+
+    const { getByText } = render(Certificates)
+    await fireEvent.click(getByText('config.certificates.self_signed'))
+
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/certificates/self-signed')
+    await vi.waitFor(() => {
+      expect(get(certificate_store)).toHaveLength(1)
+    })
+  })
+
+  it('surfaces the firmware reason when self-signing is refused', async () => {
+    httpAPI.mockResolvedValue({ msg: 'Self-signed certificate generation is not available.' })
+
+    const { getByText } = render(Certificates)
+    await fireEvent.click(getByText('config.certificates.self_signed'))
+
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
+    expect(get(uistates_store).alertbox.body).toContain('not available')
+  })
+
   it('deletes a certificate via the store', async () => {
     httpAPI.mockResolvedValue({ msg: 'done' })
     certificate_store.set([{ id: '7', type: 'client', name: 'Client A' }])

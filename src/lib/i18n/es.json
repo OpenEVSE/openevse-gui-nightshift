@@ -60,7 +60,17 @@
       "currency": "Símbolo de moneda",
       "set_credentials": "Guardar contraseña",
       "username_required": "Establece también un nombre de usuario: una contraseña por sí sola no permite iniciar sesión.",
-      "creds_saved": "Guardado. Se te pedirá que inicies sesión con el nuevo nombre de usuario y contraseña."
+      "creds_saved": "Guardado. Se te pedirá que inicies sesión con el nuevo nombre de usuario y contraseña.",
+      "server": "Servidor web",
+      "http_enabled": "HTTP",
+      "http_enabled_desc": "Servir la interfaz web por HTTP sin cifrar. Se mantiene activo automáticamente siempre que HTTPS no esté funcionando, para que la interfaz sea siempre accesible.",
+      "https_enabled": "HTTPS",
+      "https_enabled_desc": "Servir la interfaz web por TLS. Necesita un certificado con clave privada.",
+      "https_cert": "Certificado",
+      "https_cert_desc": "Qué certificado almacenado presentar. Solo se pueden usar certificados que incluyan una clave privada.",
+      "https_cert_none": "Ninguno",
+      "https_port": "Puerto HTTPS",
+      "https_no_cert": "No hay certificado seleccionado, por lo que HTTPS no se iniciará y la interfaz seguirá en HTTP."
     },
     "mqtt": {
       "enable": "Activar MQTT",
@@ -478,7 +488,9 @@
       "certificate": "Certificado",
       "private_key": "Clave privada",
       "save": "Guardar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "self_signed": "Generar autofirmado",
+      "self_signed_desc": "Crea un certificado y una clave privada en el dispositivo para HTTPS. Los navegadores advertirán que no es de confianza, porque solo lo ha firmado el propio dispositivo."
     },
     "terminal": {
       "labs": "OpenEVSE Labs",

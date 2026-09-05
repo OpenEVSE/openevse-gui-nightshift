@@ -2,6 +2,7 @@
 <script>
   import { _, locales } from 'svelte-i18n'
   import { config_store } from '../../lib/stores/config.js'
+  import { certificate_store } from '../../lib/stores/certificates.js'
   import { uisettings_store } from '../../lib/stores/uisettings.js'
   import { LOCALE_NAMES } from '../../lib/i18n/locales.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
@@ -32,6 +33,25 @@
     // the fields — the user then fills and saves them per-field.
     if (!next) form.saveFields({ www_username: '', www_password: '' })
   }
+
+  // Only a certificate that came with a private key can terminate TLS; the
+  // firmware refuses to start the HTTPS listener without one and silently falls
+  // back to HTTP, so do not offer root certificates here.
+  let certOptions = $derived([
+    { value: '', label: $_('config.http.https_cert_none') },
+    ...(Array.isArray($certificate_store) ? $certificate_store : [])
+      .filter((c) => c.type === 'client')
+      .map((c) => ({ value: c.id, label: c.name || c.id })),
+  ])
+
+  let httpsOn = $derived(!!$config_store?.www_https_enabled)
+  let httpOn = $derived($config_store?.www_http_enabled !== false)
+  let certId = $derived($config_store?.www_certificate_id ?? '')
+
+  // The listener only comes up with both the flag and a usable certificate, and
+  // a half-configured HTTPS silently serves plain HTTP instead. Say so rather
+  // than letting the user believe they have TLS.
+  let httpsIncomplete = $derived(httpsOn && certId === '')
 
   let langOptions = $derived(
     ($locales ?? ['en']).map((l) => ({ value: l, label: LOCALE_NAMES[l] ?? l })),
@@ -74,6 +94,59 @@
            moment the password turns auth on with no active session. -->
       <CredentialFields />
     {/if}
+  </ConfigSection>
+
+  <ConfigSection title={$_('config.http.server')}>
+    <FormField
+      label={$_('config.http.https_enabled')}
+      description={$_('config.http.https_enabled_desc')}
+      status={$ss.www_https_enabled ?? 'idle'}
+    >
+      <Toggle
+        checked={httpsOn}
+        label={$_('config.http.https_enabled')}
+        onchange={(v) => form.saveField('www_https_enabled', v)}
+      />
+    </FormField>
+    {#if httpsOn}
+      <FormField
+        label={$_('config.http.https_cert')}
+        description={$_('config.http.https_cert_desc')}
+        status={$ss.www_certificate_id ?? 'idle'}
+      >
+        <Select
+          options={certOptions}
+          value={certId}
+          onchange={(v) => form.saveField('www_certificate_id', v)}
+        />
+      </FormField>
+      <FormField label={$_('config.http.https_port')} status={$ss.www_https_port ?? 'idle'}>
+        <NumberInput
+          value={$config_store?.www_https_port ?? 443}
+          min={1}
+          max={65535}
+          step={1}
+          onchange={(v) => form.saveField('www_https_port', v)}
+        />
+      </FormField>
+      {#if httpsIncomplete}
+        <p class="py-1 text-sm text-warning">{$_('config.http.https_no_cert')}</p>
+      {/if}
+    {/if}
+    <!-- Turning HTTP off only takes effect once HTTPS is actually serving: the
+         firmware keeps port 80 open otherwise so the UI is never stranded, and
+         redirects it to HTTPS once there is somewhere to redirect to. -->
+    <FormField
+      label={$_('config.http.http_enabled')}
+      description={$_('config.http.http_enabled_desc')}
+      status={$ss.www_http_enabled ?? 'idle'}
+    >
+      <Toggle
+        checked={httpOn}
+        label={$_('config.http.http_enabled')}
+        onchange={(v) => form.saveField('www_http_enabled', v)}
+      />
+    </FormField>
   </ConfigSection>
 
   <ConfigSection>
