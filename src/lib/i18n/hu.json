@@ -513,7 +513,7 @@
       "app_partition": "Alkalmazás",
       "filesystem": "Fájlrendszer",
       "sd_card": "microSD kártya",
-      "sd_log": "Energianapló a kártyán",
+      "sd_log": "Energianapló",
       "size": "Méret",
       "used": "Használt",
       "free": "Szabad",

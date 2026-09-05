@@ -342,37 +342,37 @@
         <thead>
           <tr class="bg-surface-3 text-text-dim">
             <th class="px-3 py-2 text-left font-medium"></th>
-            <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.size')}</th>
-            <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.used')}</th>
-            <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.free')}</th>
+            <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.size')}</th>
+            <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.used')}</th>
+            <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.free')}</th>
           </tr>
         </thead>
         <tbody>
           <tr class="border-t border-border">
             <td class="px-3 py-2 text-text-dim">{$_('config.terminal.app_partition')}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(app.size)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(app.used)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(app.free)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(app.size)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(app.used)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(app.free)}</td>
           </tr>
           <tr class="border-t border-border">
             <td class="px-3 py-2 text-text-dim">{$_('config.terminal.filesystem')}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.size)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.used)}</td>
-            <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.free)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(fs.size)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(fs.used)}</td>
+            <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(fs.free)}</td>
           </tr>
           {#if sd}
             <tr class="border-t border-border">
               <td class="px-3 py-2 text-text-dim">{$_('config.terminal.sd_card')}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.size)}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.used)}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.free)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.size)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.used)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.free)}</td>
             </tr>
             {#if sd.log}
               <tr class="border-t border-border">
                 <td class="px-3 py-2 pl-6 text-text-dim">{$_('config.terminal.sd_log')}</td>
-                <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.log)}</td>
-                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
-                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.log)}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
               </tr>
             {/if}
           {/if}
@@ -410,33 +410,33 @@
           <thead>
             <tr class="bg-surface-3 text-text-dim">
               <th class="px-3 py-2 text-left font-medium"></th>
-              <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.now')}</th>
-              <th class="px-3 py-2 text-right font-medium">{$_('config.terminal.min')}</th>
+              <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.now')}</th>
+              <th class="px-3 py-2 text-right font-medium whitespace-nowrap">{$_('config.terminal.min')}</th>
             </tr>
           </thead>
           <tbody>
             <tr class="border-t border-border">
               <td class="px-3 py-2 text-text-dim">{$_('config.terminal.heap_largest')}</td>
-              <td class="px-3 py-2 text-right font-medium {TONE_CLASS[heapTone(mem.heap_largest)]}">{formatBytes(mem.heap_largest)}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.heap_largest_min)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap {TONE_CLASS[heapTone(mem.heap_largest)]}">{formatBytes(mem.heap_largest)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.heap_largest_min)}</td>
             </tr>
             <tr class="border-t border-border">
               <td class="px-3 py-2 text-text-dim">{$_('config.terminal.heap_free')}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.free_heap)}</td>
-              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.heap_min)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.free_heap)}</td>
+              <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.heap_min)}</td>
             </tr>
             {#if mem.psram_free !== undefined}
               <!-- Boards with PSRAM (ESP32-S3 LCD). The rows above are internal DRAM only;
                    these show the external pool the network stack and TLS live in. -->
               <tr class="border-t border-border">
                 <td class="px-3 py-2 text-text-dim">{$_('config.terminal.psram_free')}</td>
-                <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.psram_free)}</td>
-                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.psram_free)}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
               </tr>
               <tr class="border-t border-border">
                 <td class="px-3 py-2 text-text-dim">{$_('config.terminal.psram_largest')}</td>
-                <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.psram_largest)}</td>
-                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(mem.psram_largest)}</td>
+                <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
               </tr>
             {/if}
           </tbody>

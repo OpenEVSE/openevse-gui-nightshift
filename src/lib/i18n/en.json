@@ -513,7 +513,7 @@
       "app_partition": "Application",
       "filesystem": "Filesystem",
       "sd_card": "microSD card",
-      "sd_log": "Energy log on card",
+      "sd_log": "Energy log",
       "size": "Size",
       "used": "Used",
       "free": "Free",

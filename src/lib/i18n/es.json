@@ -513,7 +513,7 @@
       "app_partition": "Aplicación",
       "filesystem": "Sistema de archivos",
       "sd_card": "Tarjeta microSD",
-      "sd_log": "Registro de energía en la tarjeta",
+      "sd_log": "Registro de energía",
       "size": "Tamaño",
       "used": "Usado",
       "free": "Libre",
