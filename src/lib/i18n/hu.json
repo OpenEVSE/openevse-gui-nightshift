@@ -60,7 +60,17 @@
       "currency": "Pénznem szimbólum",
       "set_credentials": "Jelszó mentése",
       "username_required": "Adjon meg felhasználónevet is – önmagában a jelszóval nem lehet bejelentkezni.",
-      "creds_saved": "Mentve. A rendszer az új felhasználónévvel és jelszóval kéri majd a bejelentkezést."
+      "creds_saved": "Mentve. A rendszer az új felhasználónévvel és jelszóval kéri majd a bejelentkezést.",
+      "server": "Webkiszolgáló",
+      "http_enabled": "HTTP",
+      "http_enabled_desc": "A webes felület kiszolgálása titkosítatlan HTTP-n. Automatikusan bekapcsolva marad, amíg a HTTPS nem fut, így a felület mindig elérhető.",
+      "https_enabled": "HTTPS",
+      "https_enabled_desc": "A webes felület kiszolgálása TLS-en. Privát kulcsot tartalmazó tanúsítvány szükséges.",
+      "https_cert": "Tanúsítvány",
+      "https_cert_desc": "Melyik tárolt tanúsítványt mutassa be. Csak privát kulcsot tartalmazó tanúsítvány használható.",
+      "https_cert_none": "Nincs",
+      "https_port": "HTTPS port",
+      "https_no_cert": "Nincs kiválasztott tanúsítvány, ezért a HTTPS nem indul el, és a felület HTTP-n marad."
     },
     "mqtt": {
       "enable": "MQTT engedélyezése",
@@ -485,7 +495,9 @@
       "certificate": "Tanúsítvány",
       "private_key": "Privát kulcs",
       "save": "Mentés",
-      "cancel": "Mégse"
+      "cancel": "Mégse",
+      "self_signed": "Önaláírt létrehozása",
+      "self_signed_desc": "Tanúsítványt és privát kulcsot hoz létre az eszközön a HTTPS-hez. A böngészők jelezni fogják, hogy nem megbízható, mivel csak maga az eszköz írta alá."
     },
     "terminal": {
       "labs": "OpenEVSE Labs",

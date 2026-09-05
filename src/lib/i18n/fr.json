@@ -60,7 +60,17 @@
       "currency": "Symbole monétaire",
       "set_credentials": "Enregistrer le mot de passe",
       "username_required": "Définissez aussi un nom d'utilisateur — un mot de passe seul ne permet pas de se connecter.",
-      "creds_saved": "Enregistré. Vous devrez vous connecter avec le nouveau nom d'utilisateur et mot de passe."
+      "creds_saved": "Enregistré. Vous devrez vous connecter avec le nouveau nom d'utilisateur et mot de passe.",
+      "server": "Serveur web",
+      "http_enabled": "HTTP",
+      "http_enabled_desc": "Servir l'interface web en HTTP non chiffré. Reste activé automatiquement tant que HTTPS ne fonctionne pas, afin que l'interface reste toujours accessible.",
+      "https_enabled": "HTTPS",
+      "https_enabled_desc": "Servir l'interface web en TLS. Nécessite un certificat avec une clé privée.",
+      "https_cert": "Certificat",
+      "https_cert_desc": "Quel certificat stocké présenter. Seuls les certificats comportant une clé privée peuvent être utilisés.",
+      "https_cert_none": "Aucun",
+      "https_port": "Port HTTPS",
+      "https_no_cert": "Aucun certificat sélectionné : HTTPS ne démarrera pas et l'interface restera en HTTP."
     },
     "mqtt": {
       "enable": "Activer MQTT",
@@ -485,7 +495,9 @@
       "certificate": "Certificat",
       "private_key": "Clef privée",
       "save": "Sauvegarder",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "self_signed": "Générer auto-signé",
+      "self_signed_desc": "Crée un certificat et une clé privée sur l'appareil pour HTTPS. Les navigateurs signaleront qu'il n'est pas approuvé, car seul l'appareil l'a signé."
     },
     "terminal": {
       "labs": "OpenEVSE Labs",

@@ -60,7 +60,17 @@
       "temp_fahrenheit": "Fahrenheit",
       "energy_rate": "Energy rate (per kWh)",
       "energy_rate_desc": "Used to estimate session cost. 0 hides the cost display.",
-      "currency": "Currency symbol"
+      "currency": "Currency symbol",
+      "server": "Web server",
+      "http_enabled": "HTTP",
+      "http_enabled_desc": "Serve the web interface over plain HTTP. Kept on automatically whenever HTTPS is not running, so the interface can always be reached.",
+      "https_enabled": "HTTPS",
+      "https_enabled_desc": "Serve the web interface over TLS. Needs a certificate with a private key.",
+      "https_cert": "Certificate",
+      "https_cert_desc": "Which stored certificate to present. Only certificates that include a private key can be used.",
+      "https_cert_none": "None",
+      "https_port": "HTTPS port",
+      "https_no_cert": "No certificate selected, so HTTPS will not start and the interface stays on HTTP."
     },
     "mqtt": {
       "enable": "Enable MQTT",
@@ -485,7 +495,9 @@
       "certificate": "Certificate",
       "private_key": "Private key",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "self_signed": "Generate self-signed",
+      "self_signed_desc": "Creates a certificate and private key on the device for HTTPS. Browsers will warn that it is not trusted, because nothing has signed it but the device itself."
     },
     "terminal": {
       "labs": "OpenEVSE Labs",
