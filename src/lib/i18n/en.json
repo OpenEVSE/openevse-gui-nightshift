@@ -512,6 +512,8 @@
       "flash_size": "Flash size",
       "app_partition": "Application",
       "filesystem": "Filesystem",
+      "sd_card": "microSD card",
+      "sd_log": "Energy log on card",
       "size": "Size",
       "used": "Used",
       "free": "Free",

@@ -113,6 +113,21 @@ describe('Terminal — Memory & health', () => {
     expect(getByText('config.terminal.ws_conns')).toBeInTheDocument()
   })
 
+  it('adds microSD rows to the storage table only when a card is mounted', () => {
+    config_store.set({ espflash: 16777216, sd_size: 31914983424, sd_used: 33554432, sd_log_size: 33554432 })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.sd_card')).toBeInTheDocument()
+    expect(getByText('config.terminal.sd_log')).toBeInTheDocument()
+    config_store.set({ espflash: 16777216 })
+  })
+
+  it('omits the microSD rows without sd_size', () => {
+    config_store.set({ espflash: 16777216 })
+    const { queryByText } = render(Terminal)
+    expect(queryByText('config.terminal.sd_card')).not.toBeInTheDocument()
+    config_store.set({})
+  })
+
   it('falls back to espinfo for the chip row on older firmware', () => {
     config_store.set({ espinfo: 'ESP32-S3r2 2 core WiFi BLE' })
     status_store.set({ ...MEM })

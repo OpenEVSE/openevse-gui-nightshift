@@ -512,6 +512,8 @@
       "flash_size": "Taille de la flash",
       "app_partition": "Application",
       "filesystem": "Système de fichiers",
+      "sd_card": "Carte microSD",
+      "sd_log": "Journal d’énergie sur la carte",
       "size": "Taille",
       "used": "Utilisé",
       "free": "Libre",

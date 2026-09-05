@@ -512,6 +512,8 @@
       "flash_size": "Flash mérete",
       "app_partition": "Alkalmazás",
       "filesystem": "Fájlrendszer",
+      "sd_card": "microSD kártya",
+      "sd_log": "Energianapló a kártyán",
       "size": "Méret",
       "used": "Használt",
       "free": "Szabad",

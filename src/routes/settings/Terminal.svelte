@@ -103,6 +103,15 @@
     const free = c.littlefs_size != null && c.littlefs_used != null ? c.littlefs_size - c.littlefs_used : undefined
     return { size: c.littlefs_size, used: c.littlefs_used, free }
   })
+  // microSD (boards with a slot, e.g. the ESP32-S3 LCD board): the firmware
+  // only sends sd_size while a card is mounted. sd_log_size is the fixed-size
+  // energy-log ring that lives on it.
+  let sd = $derived.by(() => {
+    const c = $config_store ?? {}
+    if (c.sd_size == null) return null
+    const free = c.sd_used != null ? c.sd_size - c.sd_used : undefined
+    return { size: c.sd_size, used: c.sd_used, free, log: c.sd_log_size }
+  })
 
   // ── Memory & health (fork-only diagnostics; every field from /status) ────
   // Live, websocket-pushed — no refresh button or poll timer (status already
@@ -351,6 +360,22 @@
             <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.used)}</td>
             <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(fs.free)}</td>
           </tr>
+          {#if sd}
+            <tr class="border-t border-border">
+              <td class="px-3 py-2 text-text-dim">{$_('config.terminal.sd_card')}</td>
+              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.size)}</td>
+              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.used)}</td>
+              <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.free)}</td>
+            </tr>
+            {#if sd.log}
+              <tr class="border-t border-border">
+                <td class="px-3 py-2 pl-6 text-text-dim">{$_('config.terminal.sd_log')}</td>
+                <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(sd.log)}</td>
+                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
+                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
+              </tr>
+            {/if}
+          {/if}
         </tbody>
       </table>
     </div>
