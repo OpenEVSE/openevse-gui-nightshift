@@ -528,6 +528,11 @@
         "deepsleep": "Ébredés mélyalvásból",
         "brownout": "Feszültségesés",
         "sdio": "SDIO",
+        "usb": "USB visszaállítás",
+        "jtag": "JTAG visszaállítás",
+        "efuse": "eFuse hiba",
+        "pwr_glitch": "Tápfeszültség-zavar",
+        "cpu_lockup": "CPU lefagyás",
         "unknown": "Ismeretlen"
       },
       "crash": {
@@ -557,6 +562,8 @@
       "min": "Min",
       "heap_largest": "Legnagyobb szabad blokk",
       "heap_free": "Szabad heap",
+      "psram_free": "Szabad PSRAM",
+      "psram_largest": "Legnagyobb szabad PSRAM blokk",
       "stacks": "Feladat-veremek",
       "stack_loop": "Fő ciklus szabad verem",
       "stack_events": "Eseményfeladat szabad verem",

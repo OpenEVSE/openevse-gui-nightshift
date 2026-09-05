@@ -528,6 +528,11 @@
         "deepsleep": "Deep-sleep wake",
         "brownout": "Brownout",
         "sdio": "SDIO",
+        "usb": "USB reset",
+        "jtag": "JTAG reset",
+        "efuse": "eFuse error",
+        "pwr_glitch": "Power glitch",
+        "cpu_lockup": "CPU lockup",
         "unknown": "Unknown"
       },
       "crash": {
@@ -557,6 +562,8 @@
       "min": "Min",
       "heap_largest": "Largest free block",
       "heap_free": "Free heap",
+      "psram_free": "PSRAM free",
+      "psram_largest": "PSRAM largest free block",
       "stacks": "Task stacks",
       "stack_loop": "Main loop stack free",
       "stack_events": "Event task stack free",

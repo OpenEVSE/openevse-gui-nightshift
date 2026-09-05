@@ -120,7 +120,7 @@
   let stackValue = (bytes) => (bytes ? formatBytes(bytes) : '—')
   // A historical low-water mark should never be coloured — a device that has
   // since recovered would otherwise flag red forever. Only live values tone.
-  const SOFT_RESET = new Set(['sw', 'poweron'])
+  const SOFT_RESET = new Set(['sw', 'poweron', 'usb', 'jtag'])
   let resetTone = $derived(
     mem.reset_reason_name && !SOFT_RESET.has(mem.reset_reason_name) ? 'warn' : 'default',
   )
@@ -130,7 +130,7 @@
   // to the raw string rather than a blank.
   const KNOWN_RESETS = new Set([
     'poweron', 'sw', 'external', 'panic', 'int_wdt', 'task_wdt', 'wdt',
-    'deepsleep', 'brownout', 'sdio', 'unknown',
+    'deepsleep', 'brownout', 'sdio', 'usb', 'jtag', 'efuse', 'pwr_glitch', 'cpu_lockup', 'unknown',
   ])
   let resetLabel = $derived.by(() => {
     const name = mem.reset_reason_name
@@ -384,6 +384,20 @@
               <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.free_heap)}</td>
               <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.heap_min)}</td>
             </tr>
+            {#if mem.psram_free !== undefined}
+              <!-- Boards with PSRAM (ESP32-S3 LCD). The rows above are internal DRAM only;
+                   these show the external pool the network stack and TLS live in. -->
+              <tr class="border-t border-border">
+                <td class="px-3 py-2 text-text-dim">{$_('config.terminal.psram_free')}</td>
+                <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.psram_free)}</td>
+                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
+              </tr>
+              <tr class="border-t border-border">
+                <td class="px-3 py-2 text-text-dim">{$_('config.terminal.psram_largest')}</td>
+                <td class="px-3 py-2 text-right font-medium text-text">{formatBytes(mem.psram_largest)}</td>
+                <td class="px-3 py-2 text-right font-medium text-text-dim">—</td>
+              </tr>
+            {/if}
           </tbody>
         </table>
       </div>

@@ -112,6 +112,25 @@ describe('Terminal — Memory & health', () => {
     expect(getByText('config.terminal.ws_conns')).toBeInTheDocument()
   })
 
+  it('shows PSRAM rows only when the firmware reports psram_free', () => {
+    status_store.set({ ...MEM, psram_free: 8294468, psram_largest: 8257524 })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.psram_free')).toBeInTheDocument()
+    expect(getByText('config.terminal.psram_largest')).toBeInTheDocument()
+  })
+
+  it('omits the PSRAM rows on boards without PSRAM', () => {
+    status_store.set({ ...MEM })
+    const { queryByText } = render(Terminal)
+    expect(queryByText('config.terminal.psram_free')).not.toBeInTheDocument()
+  })
+
+  it('names the IDF 5 USB reset without a warning tone', () => {
+    status_store.set({ ...MEM, reset_reason_name: 'usb', reset_reason: 11 })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.reset_reasons.usb')).toBeInTheDocument()
+  })
+
   it('omits the whole section when heap_largest is absent', () => {
     status_store.set({ free_heap: 77000 }) // upstream ships free_heap but not heap_largest
     const { queryByText } = render(Terminal)

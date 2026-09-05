@@ -528,6 +528,11 @@
         "deepsleep": "Réveil de veille profonde",
         "brownout": "Baisse de tension",
         "sdio": "SDIO",
+        "usb": "Réinitialisation USB",
+        "jtag": "Réinitialisation JTAG",
+        "efuse": "Erreur eFuse",
+        "pwr_glitch": "Creux d'alimentation",
+        "cpu_lockup": "Blocage du CPU",
         "unknown": "Inconnu"
       },
       "crash": {
@@ -557,6 +562,8 @@
       "min": "Min",
       "heap_largest": "Plus grand bloc libre",
       "heap_free": "Tas libre",
+      "psram_free": "PSRAM libre",
+      "psram_largest": "Plus grand bloc libre de PSRAM",
       "stacks": "Piles des tâches",
       "stack_loop": "Pile libre boucle principale",
       "stack_events": "Pile libre tâche d'événements",
