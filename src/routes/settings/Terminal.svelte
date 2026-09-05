@@ -369,7 +369,7 @@
             </tr>
             {#if sd.log}
               <tr class="border-t border-border">
-                <td class="px-3 py-2 pl-6 text-text-dim">{$_('config.terminal.sd_log')}</td>
+                <td class="px-3 py-2 text-text-dim">{$_('config.terminal.sd_log')}</td>
                 <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text">{formatBytes(sd.log)}</td>
                 <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
                 <td class="px-3 py-2 text-right font-medium whitespace-nowrap text-text-dim">—</td>
