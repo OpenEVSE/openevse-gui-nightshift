@@ -13,7 +13,13 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "icons": "node scripts/gen-icons.mjs",
-    "screenshots": "node scripts/screenshots.mjs"
+    "screenshots": "node scripts/screenshots.mjs",
+    "prebuild": "node scripts/build-locale-values.mjs",
+    "predev": "node scripts/build-locale-values.mjs",
+    "pretest": "node scripts/build-locale-values.mjs",
+    "predev:mock": "node scripts/build-locale-values.mjs",
+    "pretest:watch": "node scripts/build-locale-values.mjs",
+    "pretest:coverage": "node scripts/build-locale-values.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.0",

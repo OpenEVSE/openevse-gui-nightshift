@@ -26,8 +26,13 @@ npm run screenshots   # regenerate docs/screenshots/*.png (deterministic)
   catalogued in `src/lib/config/pages.js` (single source of truth for hub,
   nav, and placeholder routes).
 - i18n: all user-visible strings go through `svelte-i18n`; add new keys to
-  **all** catalogs in `src/lib/i18n/` (en, es, fr, hu — English text is an
-  acceptable placeholder in the others).
+  **all** catalogs (English text is an acceptable placeholder in the
+  others). `en.json` lives directly in `src/lib/i18n/`; es/fr/hu are edited
+  under `src/lib/i18n/source/` -- the checked-in `es.json`/`fr.json`/
+  `hu.json` are generated (position-encoded against en's keys to avoid
+  shipping ~1,000 repeated key names four times) by
+  `scripts/build-locale-values.mjs`, which runs automatically before
+  `dev`/`build`/`test`.
 - Mock mode (`dev/mock-plugin.js` + `dev/fixtures/`) must keep covering every
   endpoint the app calls — extend the fixtures when adding an API call.
 
