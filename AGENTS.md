@@ -28,11 +28,15 @@ npm run screenshots   # regenerate docs/screenshots/*.png (deterministic)
 - i18n: all user-visible strings go through `svelte-i18n`; add new keys to
   **all** catalogs (English text is an acceptable placeholder in the
   others). `en.json` lives directly in `src/lib/i18n/`; es/fr/hu are edited
-  under `src/lib/i18n/source/` -- the checked-in `es.json`/`fr.json`/
+  under `src/lib/i18n/source/` -- the gitignored `es.json`/`fr.json`/
   `hu.json` are generated (position-encoded against en's keys to avoid
   shipping ~1,000 repeated key names four times) by
-  `scripts/build-locale-values.mjs`, which runs automatically before
-  `dev`/`build`/`test`.
+  `scripts/build-locale-values.mjs`. Generation is wired into the build
+  pipeline -- `dev/i18n-plugin.js` for Vite (dev/build/mock/screenshots, and
+  it regenerates live when a `source/` catalog or `en.json` changes) and a
+  Vitest `globalSetup` (`dev/i18n-global-setup.js`) -- so a plain clone builds
+  and tests with no separate step; run the script directly to regenerate on
+  demand.
 - Mock mode (`dev/mock-plugin.js` + `dev/fixtures/`) must keep covering every
   endpoint the app calls — extend the fixtures when adding an API call.
 
