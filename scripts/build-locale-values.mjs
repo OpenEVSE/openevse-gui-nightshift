@@ -31,14 +31,24 @@ function loadJson(path) {
 }
 
 /**
- * Regenerate src/lib/i18n/{es,fr,hu}.json from source/. Returns the filenames
- * written. Throws if a source catalog's keys are out of sync with en.json.
+ * Regenerate src/lib/i18n/{es,fr,hu}.json from source/. Returns
+ * `{ written, problems }` — the filenames written and any out-of-sync messages.
+ *
+ * With `strict` (the default), the first catalog whose keys don't match en.json
+ * throws: build and dev must not proceed on broken locale data. With
+ * `strict: false` (the Vitest globalSetup) every catalog is written best-effort
+ * instead — a missing key just lands `null` at its position, which does not
+ * shift the rest since values are placed by key path, not index — and the
+ * mismatches come back in `problems`. That lets the suite still run so the
+ * locale-parity and round-trip tests report exactly what drifted, rather than
+ * a thrown globalSetup aborting the whole run before any test is collected.
  */
-export function generateLocaleValues() {
+export function generateLocaleValues({ strict = true } = {}) {
   const en = loadJson(i18nDir + 'en.json')
   const order = keyPaths(en)
   const orderSet = new Set(order)
   const written = []
+  const problems = []
 
   for (const locale of locales) {
     const source = loadJson(i18nDir + `source/${locale}.json`)
@@ -53,17 +63,18 @@ export function generateLocaleValues() {
       ]
         .filter(Boolean)
         .join('; ')
-      throw new Error(
+      const message =
         `src/lib/i18n/source/${locale}.json is out of sync with en.json (${detail}). ` +
-          `Every key added to en.json must be added to every other catalog under source/.`,
-      )
+        `Every key added to en.json must be added to every other catalog under source/.`
+      if (strict) throw new Error(message)
+      problems.push(message)
     }
 
     const values = order.map((path) => leaves[path])
     writeFileSync(i18nDir + `${locale}.json`, JSON.stringify(values))
     written.push(`${locale}.json`)
   }
-  return written
+  return { written, problems }
 }
 
 // Run as a CLI (`node scripts/build-locale-values.mjs`) — but stay silent when
