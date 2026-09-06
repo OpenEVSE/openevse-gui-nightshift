@@ -19,7 +19,8 @@
     "pretest": "node scripts/build-locale-values.mjs",
     "predev:mock": "node scripts/build-locale-values.mjs",
     "pretest:watch": "node scripts/build-locale-values.mjs",
-    "pretest:coverage": "node scripts/build-locale-values.mjs"
+    "pretest:coverage": "node scripts/build-locale-values.mjs",
+    "prescreenshots": "node scripts/build-locale-values.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
