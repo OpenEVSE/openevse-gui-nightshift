@@ -6,8 +6,6 @@ register('es', () => import('./es.json'))
 register('fr', () => import('./fr.json'))
 register('hu', () => import('./hu.json'))
 
-export { LOCALE_NAMES }
-
 // The browser's language narrowed to its base tag, if we ship it — else English.
 // The device's configured language (config.lang) overrides this once loaded.
 function initialLocale() {
@@ -22,5 +20,3 @@ export function setupI18n() {
     initialLocale: initialLocale(),
   })
 }
-
-export { getLocaleFromNavigator }

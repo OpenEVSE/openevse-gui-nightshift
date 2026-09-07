@@ -1,8 +1,6 @@
 /** Pure helpers for the Charge Manager. No store or DOM access — fully unit-tested. */
 
-import { DAYS, nextTimerId, daysToFlags, flagsToDays } from '../schedule/timers.js'
-
-export { DAYS, daysToFlags, flagsToDays }
+import { nextTimerId } from '../schedule/timers.js'
 
 /** All supported global feature keys, in display order. */
 export const GLOBAL_FEATURE_KEYS = [
@@ -31,7 +29,7 @@ export function actionToTimerState(action) {
  * @param {string} action
  * @returns {string|null}
  */
-export function actionToTimerFeature(action) {
+function actionToTimerFeature(action) {
   /** @type {Record<string,string>} */
   const map = { eco: 'divert', eco_divert: 'divert', shaper: 'shaper', rfid: 'rfid', ocpp: 'ocpp' }
   return map[action] ?? null
