@@ -2,7 +2,7 @@
 // GitHub firmware-release helpers for the Firmware page.
 import { compareVersion } from '../utils.js'
 
-export const RELEASES_URL =
+const RELEASES_URL =
   'https://api.github.com/repos/OpenEVSE/ESP32_WiFi_V4.x/releases'
 
 /** Fetch the GitHub releases. Returns [] on any failure (never throws). */
