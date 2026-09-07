@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { compression } from 'vite-plugin-compression2'
 import { mockPlugin } from './dev/mock-plugin.js'
+import { i18nPlugin } from './dev/i18n-plugin.js'
 import { readFileSync } from 'node:fs'
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
@@ -21,6 +22,7 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
     plugins: [
+      i18nPlugin(),
       svelte(),
       tailwindcss(),
       ...(isMock ? [mockPlugin()] : []),

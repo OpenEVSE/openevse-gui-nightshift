@@ -1,8 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import en from '../en.json'
-import es from '../es.json'
-import fr from '../fr.json'
-import hu from '../hu.json'
+// The human-maintained catalogs, before scripts/build-locale-values.mjs
+// projects them onto en's key order and strips the keys back out. This is
+// the layer where a translator could actually introduce drift, so parity is
+// checked here rather than against the generated (and gitignored) arrays --
+// the build/hydrate round trip itself is covered below.
+import es from '../source/es.json'
+import fr from '../source/fr.json'
+import hu from '../source/hu.json'
 
 /** Every leaf key path in a (possibly nested) translation object. */
 function paths(obj, prefix = '') {
