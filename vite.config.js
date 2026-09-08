@@ -2,7 +2,8 @@ import { defineConfig, loadEnv } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import { compression } from 'vite-plugin-compression2'
+import { compression, defineAlgorithm } from 'vite-plugin-compression2'
+import { gzipAsync } from '@gfx/zopfli'
 import { mockPlugin } from './dev/mock-plugin.js'
 import { i18nPlugin } from './dev/i18n-plugin.js'
 import { readFileSync } from 'node:fs'
@@ -52,7 +53,13 @@ export default defineConfig(({ mode }) => {
         },
       }),
       compression({
-        algorithms: ['gzip'],
+        // Zopfli emits an ordinary gzip stream — the firmware serves these
+        // bytes verbatim with Content-Encoding: gzip, so nothing on the
+        // client or on the device changes, it is just better-packed
+        // deflate (~10 kB less flash on the 4 MB boards).
+        algorithms: [
+          defineAlgorithm(async (buf) => Buffer.from(await gzipAsync(Buffer.from(buf), { numiterations: 15 }))),
+        ],
         deleteOriginalAssets: true,
         include: /\.(js|mjs|json|css|html|svg)$/i,
         exclude: /sw\.js$/i,
