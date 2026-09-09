@@ -68,10 +68,88 @@ describe('MQTT page', () => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
   })
+  it('saves the client id, which names the local connection only', async () => {
+    config_store.set({
+      mqtt_enabled: true,
+      mqtt_protocol: 'mqtt',
+      mqtt_client_id: 'openevse-9cc0',
+      mqtt_supported_protocols: ['mqtt'],
+    })
+    const { getByDisplayValue } = render(Mqtt)
+    const input = getByDisplayValue('openevse-9cc0')
+    await fireEvent.input(input, { target: { value: 'garage' } })
+    await fireEvent.blur(input)
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_client_id: 'garage' }))
+  })
+
   it('saves the $SYS broker query toggle', async () => {
     config_store.set({ mqtt_enabled: true, mqtt_protocol: 'mqtt', mqtt_sys_query: true, mqtt_supported_protocols: ['mqtt'] })
     const { getByLabelText } = render(Mqtt)
     await fireEvent.click(getByLabelText('config.mqtt.sys_query'))
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_sys_query: false }))
+  })
+})
+
+describe('MQTT page — local publisher held down', () => {
+  const ENABLED = { mqtt_enabled: true, mqtt_protocol: 'mqtt', mqtt_supported_protocols: ['mqtt'] }
+
+  it('explains a one-connection board instead of showing a connection status', () => {
+    config_store.set({ ...ENABLED, cloud_enabled: true })
+    status_store.set({ mqtt_connected: false, local_mqtt_disabled_reason: 'one_connection' })
+    const { getByText, queryByText } = render(Mqtt)
+    expect(getByText('config.mqtt.held_one_connection')).toBeInTheDocument()
+    expect(queryByText('config.mqtt.status_label')).not.toBeInTheDocument()
+    // No wait loop, and nothing to reset.
+    expect(queryByText('config.mqtt.status_connecting')).not.toBeInTheDocument()
+    expect(queryByText('config.mqtt.reset')).not.toBeInTheDocument()
+  })
+
+  it('explains the low-heap stop with its own wording', () => {
+    config_store.set({ ...ENABLED, cloud_enabled: true })
+    status_store.set({ mqtt_connected: false, local_mqtt_disabled_reason: 'low_heap' })
+    const { getByText, queryByText } = render(Mqtt)
+    expect(getByText('config.mqtt.held_low_heap')).toBeInTheDocument()
+    expect(queryByText('config.mqtt.held_one_connection')).not.toBeInTheDocument()
+  })
+
+  it('does not poll GET /mqtt for a connection that will not come up', async () => {
+    config_store.set({ ...ENABLED, cloud_enabled: true })
+    status_store.set({ mqtt_connected: false, local_mqtt_disabled_reason: 'one_connection' })
+    render(Mqtt)
+    await Promise.resolve()
+    expect(httpAPI).not.toHaveBeenCalledWith('GET', '/mqtt')
+  })
+
+  it('keeps the enable toggle and the broker settings usable', async () => {
+    config_store.set({ ...ENABLED, mqtt_server: 'old', cloud_enabled: true })
+    status_store.set({ mqtt_connected: false, local_mqtt_disabled_reason: 'one_connection' })
+    const { getByLabelText, getByDisplayValue } = render(Mqtt)
+    expect(getByDisplayValue('old')).toBeInTheDocument()
+    await fireEvent.click(getByLabelText('config.mqtt.enable'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ mqtt_enabled: false }))
+  })
+
+  it('offers the cloud page only on a build that has the cloud client', () => {
+    status_store.set({ mqtt_connected: false, local_mqtt_disabled_reason: 'one_connection' })
+
+    config_store.set({ ...ENABLED, cloud_enabled: true })
+    const withClient = render(Mqtt)
+    expect(withClient.queryByText('config.mqtt.held_cloud_link')).toBeInTheDocument()
+    withClient.unmount()
+
+    config_store.set({ ...ENABLED })
+    const withoutClient = render(Mqtt)
+    expect(withoutClient.queryByText('config.mqtt.held_cloud_link')).not.toBeInTheDocument()
+  })
+
+  it('behaves exactly as before for the reasons that are not a hold-down', () => {
+    config_store.set(ENABLED)
+    for (const reason of ['', 'not_configured']) {
+      status_store.set({ mqtt_connected: false, local_mqtt_disabled_reason: reason })
+      const { getByText, queryByText, unmount } = render(Mqtt)
+      expect(getByText('config.mqtt.status_label')).toBeInTheDocument()
+      expect(queryByText('config.mqtt.held_one_connection')).not.toBeInTheDocument()
+      unmount()
+    }
   })
 })

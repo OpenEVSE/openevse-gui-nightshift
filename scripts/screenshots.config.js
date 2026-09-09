@@ -46,6 +46,12 @@ const entries = [
   { name: 'settings-http', route: '/settings/http' },
   { name: 'settings-mqtt', route: '/settings/mqtt' },
   { name: 'settings-ocpp', route: '/settings/ocpp' },
+  // The cloud client is compiled out of the small-flash builds, so the Cloud
+  // page needs the scenario that adds the cloud_* config keys. That same
+  // scenario reports local_mqtt_disabled_reason 'one_connection', which is what
+  // puts the held-down notice on the MQTT page.
+  { name: 'settings-cloud', route: '/settings/cloud', scenario: 'cloud' },
+  { name: 'settings-mqtt-held', route: '/settings/mqtt', scenario: 'cloud' },
   { name: 'settings-evse', route: '/settings/evse' },
   { name: 'settings-safety', route: '/settings/safety' },
   { name: 'settings-time', route: '/settings/time' },

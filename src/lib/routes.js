@@ -11,6 +11,7 @@ import Network from '../routes/settings/Network.svelte'
 import Http from '../routes/settings/Http.svelte'
 import Mqtt from '../routes/settings/Mqtt.svelte'
 import Ocpp from '../routes/settings/Ocpp.svelte'
+import Cloud from '../routes/settings/Cloud.svelte'
 import Evse from '../routes/settings/Evse.svelte'
 import Safety from '../routes/settings/Safety.svelte'
 import Time from '../routes/settings/Time.svelte'
@@ -46,6 +47,7 @@ routes['/settings/network'] = Network
 routes['/settings/http'] = Http
 routes['/settings/mqtt'] = Mqtt
 routes['/settings/ocpp'] = Ocpp
+routes['/settings/cloud'] = Cloud
 
 // Charger pages — override the placeholders set above.
 routes['/settings/evse'] = Evse

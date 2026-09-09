@@ -1,1 +1,5 @@
-[]
+[
+  { "id": "1a2b3c4d", "type": "root", "name": "Broker root CA" },
+  { "id": "5e6f7a8b", "type": "client", "name": "Home broker" },
+  { "id": "9c0d1e2f", "type": "client", "name": "Charger identity" }
+]

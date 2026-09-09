@@ -104,7 +104,12 @@
       "err_version": "Version de protocole non prise en charge",
       "err_network": "Le serveur ne répond pas",
       "err_timeout": "Délai de connexion dépassé",
-      "err_dns": "Échec de la résolution DNS"
+      "err_dns": "Échec de la résolution DNS",
+      "client_id": "Identifiant client",
+      "client_id_desc": "Identifie ce chargeur auprès du broker local. Le modifier relance la connexion et n'affecte pas la connexion cloud.",
+      "held_one_connection": "Cette passerelle ne gère qu'une connexion MQTT à la fois et c'est la connexion cloud qui l'occupe : le publicateur local reste arrêté. Désactivez la connexion cloud pour utiliser un broker local.",
+      "held_low_heap": "La mémoire libre est passée sous le seuil de sécurité ; le publicateur local a été arrêté pour protéger la connexion cloud. Il redémarrera seul dès que la mémoire sera revenue.",
+      "held_cloud_link": "Réglages cloud"
     },
     "ocpp": {
       "enable": "Activer OCPP",
@@ -119,6 +124,36 @@
       "controls": "Contrôles de charge",
       "suspend_evse": "OCPP peut suspendre le chargeur",
       "energize_plug": "Alimenter la prise à l'autorisation"
+    },
+    "cloud": {
+      "enable": "Activer la connexion cloud",
+      "enable_desc": "Une seconde connexion MQTT, indépendante du publicateur MQTT local. Elle transporte la télémétrie vers un broker géré, et rien d'autre.",
+      "status_label": "Connexion",
+      "status_disabled": "Désactivée",
+      "status_unclaimed": "Non revendiqué",
+      "status_interval_zero": "Arrêtée",
+      "status_disconnected": "Déconnectée",
+      "status_connected": "Connectée",
+      "identity": "Identité",
+      "identity_unclaimed": "Pas encore revendiqué",
+      "identity_pending": "pas encore utilisée",
+      "identity_invalid": "identité invalide",
+      "dropped": "Commandes ignorées",
+      "dropped_desc": "depuis le redémarrage",
+      "provisioning": "Provisionnement",
+      "provisioning_desc": "Ces valeurs sont écrites automatiquement lorsqu'un compte revendique le chargeur. Les modifier à la main empêche généralement la connexion de fonctionner.",
+      "server": "Serveur",
+      "port": "Port",
+      "thing": "Identité",
+      "thing_desc": "Laissez vide pour que le chargeur la dérive de son adresse MAC WiFi.",
+      "certificate": "Certificat client",
+      "cert_none": "Aucun",
+      "edit": "Modifier le provisionnement",
+      "edit_done": "Terminé",
+      "telemetry": "Télémétrie",
+      "interval": "Intervalle d'état (secondes)",
+      "interval_desc": "Fréquence d'envoi d'un document d'état quand rien ne change. 0 arrête la connexion cloud.",
+      "learn_more": "À propos de la connexion cloud"
     },
     "title": "Paramètres",
     "back": "Paramètres",
@@ -136,6 +171,7 @@
       "http": "HTTP",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
+      "cloud": "Cloud",
       "evse": "Chargeur",
       "safety": "Sécurité",
       "time": "Date et heure",
@@ -175,7 +211,8 @@
       "required": "Requis",
       "range": "Hors plage",
       "port": "Entrez un port entre 1 et 65535",
-      "hostname": "Nom d'hôte invalide"
+      "hostname": "Nom d'hôte invalide",
+      "cloud_thing": "Doit être evse- suivi de douze chiffres hexadécimaux minuscules"
     },
     "evse": {
       "current": "Limites de courant",
@@ -485,7 +522,9 @@
       "certificate": "Certificat",
       "private_key": "Clef privée",
       "save": "Sauvegarder",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "in_use_mqtt": "Utilisé : MQTT",
+      "in_use_cloud": "Utilisé : cloud"
     },
     "terminal": {
       "labs": "OpenEVSE Labs",

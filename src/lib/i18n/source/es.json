@@ -104,7 +104,12 @@
       "err_version": "Versión de protocolo no admitida",
       "err_network": "El servidor no responde",
       "err_timeout": "Tiempo de conexión agotado",
-      "err_dns": "Fallo en la resolución DNS"
+      "err_dns": "Fallo en la resolución DNS",
+      "client_id": "ID de cliente",
+      "client_id_desc": "Identifica este cargador ante el broker local. Al cambiarlo se reconecta, y no afecta a la conexión en la nube.",
+      "held_one_connection": "Esta pasarela admite una sola conexión MQTT a la vez y la tiene la conexión en la nube, por lo que el publicador local permanece detenido. Desactiva la conexión en la nube para usar un broker local.",
+      "held_low_heap": "La memoria libre cayó por debajo del mínimo seguro, así que el publicador local se detuvo para proteger la conexión en la nube. Volverá a iniciarse solo cuando la memoria se recupere.",
+      "held_cloud_link": "Ajustes de la nube"
     },
     "ocpp": {
       "enable": "Activar OCPP",
@@ -119,6 +124,36 @@
       "controls": "Controles de carga",
       "suspend_evse": "Permitir que OCPP suspenda el cargador",
       "energize_plug": "Activar conector al autorizar"
+    },
+    "cloud": {
+      "enable": "Activar conexión en la nube",
+      "enable_desc": "Una segunda conexión MQTT, independiente del publicador MQTT local. Lleva telemetría a un broker gestionado y nada más.",
+      "status_label": "Conexión",
+      "status_disabled": "Desactivada",
+      "status_unclaimed": "Sin reclamar",
+      "status_interval_zero": "Detenida",
+      "status_disconnected": "Desconectada",
+      "status_connected": "Conectada",
+      "identity": "Identidad",
+      "identity_unclaimed": "Aún sin reclamar",
+      "identity_pending": "aún no en uso",
+      "identity_invalid": "identidad no válida",
+      "dropped": "Comandos descartados",
+      "dropped_desc": "desde el reinicio",
+      "provisioning": "Aprovisionamiento",
+      "provisioning_desc": "Estos valores se escriben automáticamente cuando una cuenta reclama el cargador. Editarlos a mano suele impedir que la conexión funcione.",
+      "server": "Servidor",
+      "port": "Puerto",
+      "thing": "Identidad",
+      "thing_desc": "Déjalo vacío para que el cargador la derive de su dirección MAC WiFi.",
+      "certificate": "Certificado de cliente",
+      "cert_none": "Ninguno",
+      "edit": "Editar aprovisionamiento",
+      "edit_done": "Listo",
+      "telemetry": "Telemetría",
+      "interval": "Intervalo de estado (segundos)",
+      "interval_desc": "Con qué frecuencia se envía un documento de estado cuando nada cambia. 0 detiene la conexión en la nube.",
+      "learn_more": "Acerca de la conexión en la nube"
     },
     "title": "Ajustes",
     "back": "Ajustes",
@@ -136,6 +171,7 @@
       "http": "HTTP",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
+      "cloud": "Nube",
       "evse": "Cargador",
       "safety": "Seguridad",
       "time": "Hora y fecha",
@@ -175,7 +211,8 @@
       "required": "Obligatorio",
       "range": "Fuera de rango",
       "port": "Introduce un puerto entre 1 y 65535",
-      "hostname": "Nombre de host no válido"
+      "hostname": "Nombre de host no válido",
+      "cloud_thing": "Debe ser evse- seguido de doce dígitos hexadecimales en minúscula"
     },
     "evse": {
       "current": "Límites de corriente",
@@ -485,7 +522,9 @@
       "certificate": "Certificado",
       "private_key": "Clave privada",
       "save": "Guardar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "in_use_mqtt": "En uso: MQTT",
+      "in_use_cloud": "En uso: nube"
     },
     "terminal": {
       "labs": "OpenEVSE Labs",

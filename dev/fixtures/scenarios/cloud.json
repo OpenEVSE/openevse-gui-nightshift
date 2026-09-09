@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "A firmware build that has the cloud client, on a gateway that can only run",
+    "one MQTT connection. The base fixtures are deliberately the build WITHOUT",
+    "the client (no cloud_* config keys at all) because the scenario overlay is",
+    "a deep merge and cannot remove a key — so the capability gate can only be",
+    "exercised in this direction.",
+    "local_mqtt_disabled_reason 'one_connection' is what the firmware reports in",
+    "exactly this situation, so this one scenario covers both the Cloud page and",
+    "the held-down notice on the MQTT page."
+  ],
+  "config": {
+    "cloud_enabled": true,
+    "cloud_server": "broker.example.net",
+    "cloud_port": 8883,
+    "cloud_thing": "",
+    "cloud_certificate_id": "9c0d1e2f",
+    "cloud_agent_interval": 60
+  },
+  "status": {
+    "cloud_connected": 1,
+    "cloud_thing": "evse-a4cf12ab9cc0",
+    "cloud_dropped": 2,
+    "local_mqtt_disabled_reason": "one_connection"
+  }
+}

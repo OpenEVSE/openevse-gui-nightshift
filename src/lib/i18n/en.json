@@ -104,7 +104,12 @@
       "err_version": "Unsupported protocol version",
       "err_network": "Server not responding",
       "err_timeout": "Connection timed out",
-      "err_dns": "DNS lookup failed"
+      "err_dns": "DNS lookup failed",
+      "client_id": "Client ID",
+      "client_id_desc": "Identifies this charger to the local broker. Changing it reconnects, and it has no effect on the cloud connection.",
+      "held_one_connection": "This gateway runs one MQTT connection at a time and the cloud connection has it, so the local publisher stays down. Turn the cloud connection off to use a local broker instead.",
+      "held_low_heap": "Free memory fell below the safe floor, so the local publisher was stopped to protect the cloud connection. It starts again on its own once memory recovers.",
+      "held_cloud_link": "Cloud settings"
     },
     "ocpp": {
       "enable": "Enable OCPP",
@@ -119,6 +124,36 @@
       "controls": "Charging controls",
       "suspend_evse": "Let OCPP suspend the charger",
       "energize_plug": "Energize plug on authorization"
+    },
+    "cloud": {
+      "enable": "Enable cloud connection",
+      "enable_desc": "A second MQTT connection, independent of the local MQTT publisher. It carries telemetry to a managed broker and nothing else.",
+      "status_label": "Connection",
+      "status_disabled": "Disabled",
+      "status_unclaimed": "Not claimed",
+      "status_interval_zero": "Stopped",
+      "status_disconnected": "Disconnected",
+      "status_connected": "Connected",
+      "identity": "Identity",
+      "identity_unclaimed": "Not claimed yet",
+      "identity_pending": "not in use yet",
+      "identity_invalid": "not a valid identity",
+      "dropped": "Dropped commands",
+      "dropped_desc": "since restart",
+      "provisioning": "Provisioning",
+      "provisioning_desc": "These are written for you when the charger is claimed by an account. Editing them by hand will usually stop the connection working.",
+      "server": "Server",
+      "port": "Port",
+      "thing": "Identity",
+      "thing_desc": "Leave empty to let the charger derive it from its WiFi MAC address.",
+      "certificate": "Client certificate",
+      "cert_none": "None",
+      "edit": "Edit provisioning",
+      "edit_done": "Done",
+      "telemetry": "Telemetry",
+      "interval": "Status interval (seconds)",
+      "interval_desc": "How often a status document is sent when nothing changes. 0 stops the cloud connection.",
+      "learn_more": "About the cloud connection"
     },
     "title": "Settings",
     "back": "Settings",
@@ -136,6 +171,7 @@
       "http": "HTTP",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
+      "cloud": "Cloud",
       "evse": "Charger",
       "safety": "Safety",
       "time": "Time & Date",
@@ -175,7 +211,8 @@
       "required": "Required",
       "range": "Out of range",
       "port": "Enter a port between 1 and 65535",
-      "hostname": "Invalid hostname"
+      "hostname": "Invalid hostname",
+      "cloud_thing": "Must be evse- followed by twelve lowercase hex digits"
     },
     "evse": {
       "current": "Current limits",
@@ -485,7 +522,9 @@
       "certificate": "Certificate",
       "private_key": "Private key",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "in_use_mqtt": "In use: MQTT",
+      "in_use_cloud": "In use: cloud"
     },
     "terminal": {
       "labs": "OpenEVSE Labs",

@@ -10,6 +10,11 @@ export const SETTINGS_PAGES = [
   { key: 'http', route: '/settings/http', icon: 'mdi:web', labelKey: 'config.pages.http', section: 'connectivity' },
   { key: 'mqtt', route: '/settings/mqtt', icon: 'mdi:transit-connection-variant', labelKey: 'config.pages.mqtt', section: 'connectivity' },
   { key: 'ocpp', route: '/settings/ocpp', icon: 'mdi:ev-station', labelKey: 'config.pages.ocpp', section: 'connectivity' },
+  // Only on firmware built with the cloud client — those builds are the only
+  // ones that serialise the cloud_* keys, so `cloud_enabled` appearing in
+  // /config at all is the capability gate. It gates on presence, not value:
+  // a charger with the connection switched off still needs the page.
+  { key: 'cloud', route: '/settings/cloud', icon: 'mdi:cloud-outline', labelKey: 'config.pages.cloud', section: 'connectivity', requiresKey: 'cloud_enabled' },
   // Charger
   { key: 'evse', route: '/settings/evse', icon: 'mdi:car-electric', labelKey: 'config.pages.evse', section: 'charger' },
   { key: 'safety', route: '/settings/safety', icon: 'mdi:shield-check-outline', labelKey: 'config.pages.safety', section: 'charger' },
@@ -33,7 +38,9 @@ export const SETTINGS_PAGES = [
   { key: 'about', route: '/settings/about', icon: 'mdi:information-outline', labelKey: 'config.pages.about', section: 'system' },
 ]
 
-// `requires` gates on a device-config capability key; `labs` gates on the
+// `requires` gates on a device-config capability key being *truthy*;
+// `requiresKey` gates on that key merely being *present*, for capabilities
+// whose own off switch lives on the page they would hide; `labs` gates on the
 // client-side OpenEVSE Labs switch (uisettings.dev_features), passed in via
 // opts so this stays a pure function of its inputs.
 export function pagesBySection(config, { dev_features = false } = {}) {
@@ -43,6 +50,7 @@ export function pagesBySection(config, { dev_features = false } = {}) {
       (p) =>
         p.section === section &&
         (!p.requires || (config && config[p.requires])) &&
+        (!p.requiresKey || (!!config && p.requiresKey in config)) &&
         (!p.labs || dev_features),
     ),
   })).filter((g) => g.pages.length > 0)

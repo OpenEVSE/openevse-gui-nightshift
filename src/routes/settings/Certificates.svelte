@@ -2,6 +2,8 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { certificate_store } from '../../lib/stores/certificates.js'
+  import { config_store } from '../../lib/stores/config.js'
+  import { certificateUsage } from '../../lib/config/certUsage.js'
   import { serialQueue } from '../../lib/queue.js'
   import { showWriteError } from '../../lib/alerts.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
@@ -59,6 +61,14 @@
             {$_('config.certificates.' + cert.type)}
           </span>
           <span class="flex-1 text-text">{cert.name}</span>
+          <!-- Which connection actually points at this certificate. Keyed on
+               the config reference, never on the certificate's name: how a
+               provisioning tool names its certificates is its own business. -->
+          {#each certificateUsage($config_store, cert.id) as usage}
+            <span class="rounded bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">
+              {$_('config.certificates.in_use_' + usage)}
+            </span>
+          {/each}
           <IconButton
             icon="mdi:trash-can-outline"
             label={$_('config.certificates.delete')}

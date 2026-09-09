@@ -104,7 +104,12 @@
       "err_version": "Nem támogatott protokollverzió",
       "err_network": "A kiszolgáló nem válaszol",
       "err_timeout": "A kapcsolat időtúllépése",
-      "err_dns": "DNS-feloldás sikertelen"
+      "err_dns": "DNS-feloldás sikertelen",
+      "client_id": "Kliensazonosító",
+      "client_id_desc": "Ezzel azonosítja magát a töltő a helyi brókernél. Módosítása újracsatlakozást indít, és nincs hatással a felhőkapcsolatra.",
+      "held_one_connection": "Ez az átjáró egyszerre csak egy MQTT-kapcsolatot tud futtatni, és azt a felhőkapcsolat foglalja, ezért a helyi közzététel áll. Kapcsold ki a felhőkapcsolatot, ha helyi brókert szeretnél használni.",
+      "held_low_heap": "A szabad memória a biztonságos szint alá esett, ezért a helyi közzététel leállt, hogy védje a felhőkapcsolatot. Magától újraindul, amint a memória helyreáll.",
+      "held_cloud_link": "Felhőbeállítások"
     },
     "ocpp": {
       "enable": "OCPP engedélyezése",
@@ -119,6 +124,36 @@
       "controls": "Töltési vezérlők",
       "suspend_evse": "Az OCPP felfüggesztheti a töltőt",
       "energize_plug": "Csatlakozó aktiválása engedélyezéskor"
+    },
+    "cloud": {
+      "enable": "Felhőkapcsolat engedélyezése",
+      "enable_desc": "Egy második MQTT-kapcsolat, a helyi MQTT-közzétételtől függetlenül. Kizárólag telemetriát küld egy felügyelt brókernek.",
+      "status_label": "Kapcsolat",
+      "status_disabled": "Kikapcsolva",
+      "status_unclaimed": "Nincs igényelve",
+      "status_interval_zero": "Leállítva",
+      "status_disconnected": "Nincs kapcsolat",
+      "status_connected": "Csatlakozva",
+      "identity": "Azonosító",
+      "identity_unclaimed": "Még nincs igényelve",
+      "identity_pending": "még nincs használatban",
+      "identity_invalid": "érvénytelen azonosító",
+      "dropped": "Eldobott parancsok",
+      "dropped_desc": "az újraindítás óta",
+      "provisioning": "Kiépítés",
+      "provisioning_desc": "Ezeket az értékeket a rendszer írja be, amikor egy fiók igénybe veszi a töltőt. Kézi módosításuk általában megszakítja a kapcsolatot.",
+      "server": "Kiszolgáló",
+      "port": "Port",
+      "thing": "Azonosító",
+      "thing_desc": "Hagyd üresen, hogy a töltő a WiFi MAC-címéből származtassa.",
+      "certificate": "Klienstanúsítvány",
+      "cert_none": "Nincs",
+      "edit": "Kiépítés szerkesztése",
+      "edit_done": "Kész",
+      "telemetry": "Telemetria",
+      "interval": "Állapotküldés időköze (másodperc)",
+      "interval_desc": "Milyen gyakran menjen állapotdokumentum, ha semmi nem változik. A 0 leállítja a felhőkapcsolatot.",
+      "learn_more": "A felhőkapcsolatról"
     },
     "title": "Beállítások",
     "back": "Beállítások",
@@ -136,6 +171,7 @@
       "http": "HTTP",
       "mqtt": "MQTT",
       "ocpp": "OCPP",
+      "cloud": "Felhő",
       "evse": "Töltő",
       "safety": "Biztonság",
       "time": "Dátum és idő",
@@ -175,7 +211,8 @@
       "required": "Kötelező",
       "range": "Értéken kívül",
       "port": "Adjon meg egy portot 1 és 65535 között",
-      "hostname": "Érvénytelen hosztnév"
+      "hostname": "Érvénytelen hosztnév",
+      "cloud_thing": "evse- után tizenkét kisbetűs hexadecimális számjegy szükséges"
     },
     "evse": {
       "current": "Áramerősség-korlátok",
@@ -485,7 +522,9 @@
       "certificate": "Tanúsítvány",
       "private_key": "Privát kulcs",
       "save": "Mentés",
-      "cancel": "Mégse"
+      "cancel": "Mégse",
+      "in_use_mqtt": "Használatban: MQTT",
+      "in_use_cloud": "Használatban: felhő"
     },
     "terminal": {
       "labs": "OpenEVSE Labs",

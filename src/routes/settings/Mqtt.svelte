@@ -8,6 +8,7 @@
   import { httpAPI } from '../../lib/api/httpAPI.js'
   import { serialQueue } from '../../lib/queue.js'
   import { formatDuration, formatAgo } from '../../lib/format/duration.js'
+  import { hasCloudClient, localMqttHeldDown, localMqttNoticeKey } from '../../lib/cloud/cloud.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
   import ConfigSection from '../../lib/components/config/ConfigSection.svelte'
   import FormField from '../../lib/components/config/FormField.svelte'
@@ -34,6 +35,18 @@
       .map((c) => ({ value: String(c.id), label: c.name })),
   ])
 
+  // ── Held-down local publisher ─────────────────────────────────────────────
+  // On a gateway that can only run one TLS MQTT connection, a configured cloud
+  // connection takes it and this publisher stays down; the same happens if free
+  // memory falls below the floor. The firmware says which through
+  // local_mqtt_disabled_reason on /status (never on GET /mqtt, which carries
+  // only the seven mqtt_* fields). A connection that will never come up should
+  // say so rather than sit in a "connecting…" wait loop.
+  let holdReason = $derived($status_store?.local_mqtt_disabled_reason ?? '')
+  let heldDown = $derived(localMqttHeldDown(holdReason))
+  let holdNoticeKey = $derived(localMqttNoticeKey(holdReason))
+  let showCloudLink = $derived(hasCloudClient($config_store))
+
   // ── Live MQTT status (polled + WebSocket merged) ─────────────────────────
   // Polled snapshot from GET /mqtt — authoritative; merges every 10 s
   let mqttData = $state(null)
@@ -53,6 +66,9 @@
   let nowMs = $state(Date.now())
 
   $effect(() => {
+    // Nothing to poll for while the publisher is deliberately held down — the
+    // status it would report is the absence of a connection we already explain.
+    if (heldDown) return
     refreshMqttStatus()
     const poll = setInterval(refreshMqttStatus, 10_000)
     const tick = setInterval(() => { nowMs = Date.now() }, 1000)
@@ -166,7 +182,17 @@
       />
     </FormField>
 
-    {#if enabled}
+    {#if heldDown}
+      <!-- The publisher will not come up; explain instead of showing a status. -->
+      <div class="mt-2 rounded-xl border border-warning/40 bg-warning/5 p-3">
+        <p class="text-sm text-text">{$_(holdNoticeKey)}</p>
+        {#if showCloudLink}
+          <a href="#/settings/cloud" class="mt-2 inline-block text-xs text-text-dim hover:text-accent">
+            {$_('config.mqtt.held_cloud_link')}
+          </a>
+        {/if}
+      </div>
+    {:else if enabled}
       <!-- Colour-coded connection status — same pattern as NTP status card -->
       <div class="flex items-center justify-between gap-3 py-2 text-sm">
         <span class="text-text-dim">{$_('config.mqtt.status_label')}</span>
@@ -249,6 +275,18 @@
           placeholder="1883"
           revert={form.revert}
           onchange={(v) => form.saveField('mqtt_port', v)}
+        />
+      </FormField>
+      <FormField
+        label={$_('config.mqtt.client_id')}
+        description={$_('config.mqtt.client_id_desc')}
+        status={$ss.mqtt_client_id ?? 'idle'}
+      >
+        <TextInput
+          value={$config_store?.mqtt_client_id ?? ''}
+          placeholder={$config_store?.hostname ?? 'openevse'}
+          revert={form.revert}
+          onchange={(v) => form.saveField('mqtt_client_id', v)}
         />
       </FormField>
       <FormField label={$_('config.mqtt.user')} status={$ss.mqtt_user ?? 'idle'}>

@@ -28,8 +28,9 @@ describe('Settings hub', () => {
   })
   it('renders a link for every config page plus the support links', () => {
     // tft_theme present so the capability-gated Display page renders too;
-    // dev_features on so the Labs-gated Load Sharing page renders too.
-    config_store.set({ tft_theme: 'dark' })
+    // cloud_enabled present so the Cloud page does; dev_features on so the
+    // Labs-gated Load Sharing page renders too.
+    config_store.set({ tft_theme: 'dark', cloud_enabled: false })
     uisettings_store.update((s) => ({ ...s, dev_features: true }))
     const { getAllByRole } = render(Settings)
     const links = getAllByRole('link')
