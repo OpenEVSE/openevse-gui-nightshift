@@ -515,6 +515,7 @@
       "empty": "No hay certificados instalados.",
       "add": "Añadir certificado",
       "delete": "Eliminar certificado",
+      "delete_in_use": "No se puede eliminar: este certificado está en uso",
       "type": "Tipo",
       "root": "Raíz",
       "client": "Cliente",

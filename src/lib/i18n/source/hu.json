@@ -515,6 +515,7 @@
       "empty": "Nincsenek telepített tanúsítványok.",
       "add": "Tanúsítvány hozzáadása",
       "delete": "Tanúsítvány törlése",
+      "delete_in_use": "Nem törölhető – ez a tanúsítvány használatban van",
       "type": "Típus",
       "root": "Gyökér",
       "client": "Ügyfél",

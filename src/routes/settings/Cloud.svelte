@@ -24,8 +24,14 @@
 
   // The charger's own documentation for this connection. Kept as the one
   // explanation of what the cloud client is, so this page does not restate it.
+  //
+  // Deliberately the upstream master path, not the branch this was written
+  // against: a fork/branch URL rots the day that branch merges. It resolves
+  // once the firmware lands, and until then nobody has a build that shows this
+  // page — the page only exists on firmware compiled with the cloud client,
+  // which is the same merge that brings the document to master.
   const DOC_URL =
-    'https://github.com/RAR/openevse_esp32_firmware/blob/feature/cloud-client/docs/user/cloud.md'
+    'https://github.com/OpenEVSE/openevse_esp32_firmware/blob/master/docs/user/cloud.md'
 
   const form = createConfigForm()
   const ss = form.saveState

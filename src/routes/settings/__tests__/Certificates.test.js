@@ -64,6 +64,29 @@ describe('Certificates page', () => {
     expect(queryAllByText(/config\.certificates\.in_use_/)).toHaveLength(2)
   })
 
+  it('refuses to delete a certificate a connection still points at', async () => {
+    // Deleting one leaves the charger reconnect-looping with nothing in the log.
+    certificate_store.set([{ id: '5e6f7a8b', type: 'client', name: 'Home broker' }])
+    config_store.set({ mqtt_certificate_id: '5e6f7a8b' })
+    const { getByLabelText, queryByLabelText } = render(Certificates)
+
+    expect(queryByLabelText('config.certificates.delete')).not.toBeInTheDocument()
+    const button = getByLabelText('config.certificates.delete_in_use')
+    expect(button).toBeDisabled()
+
+    await fireEvent.click(button)
+    expect(httpAPI).not.toHaveBeenCalled()
+  })
+
+  it('still deletes a certificate nothing references', async () => {
+    httpAPI.mockResolvedValue({ msg: 'done' })
+    certificate_store.set([{ id: '1a2b3c4d', type: 'root', name: 'Broker root CA' }])
+    config_store.set({ mqtt_certificate_id: '5e6f7a8b', cloud_certificate_id: '9c0d1e2f' })
+    const { getByLabelText } = render(Certificates)
+    await fireEvent.click(getByLabelText('config.certificates.delete'))
+    expect(httpAPI).toHaveBeenCalledWith('DELETE', '/certificates/1a2b3c4d')
+  })
+
   it('shows an alert when certificate delete returns an error', async () => {
     httpAPI.mockResolvedValue('error')
     certificate_store.set([{ id: '9', type: 'root', name: 'Bad CA' }])

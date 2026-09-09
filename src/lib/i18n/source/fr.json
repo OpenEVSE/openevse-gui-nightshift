@@ -515,6 +515,7 @@
       "empty": "Aucun certificat installé.",
       "add": "Ajouter un certificat",
       "delete": "Supprimer le certificat",
+      "delete_in_use": "Suppression impossible : ce certificat est utilisé",
       "type": "Type",
       "root": "Racine",
       "client": "Client",

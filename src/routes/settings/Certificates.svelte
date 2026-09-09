@@ -17,6 +17,14 @@
 
   let certificates = $derived(Array.isArray($certificate_store) ? $certificate_store : [])
 
+  // Which connection each certificate is load-bearing for. One derivation
+  // drives both the badge and the delete guard, so the two cannot disagree:
+  // deleting a certificate a connection still points at leaves the charger
+  // reconnect-looping with nothing in the log.
+  let rows = $derived(
+    certificates.map((cert) => ({ cert, usage: certificateUsage($config_store, cert.id) })),
+  )
+
   async function addCertificate(cert) {
     if (busy) return
     busy = true
@@ -33,8 +41,10 @@
     }
   }
 
-  async function remove(id) {
-    if (busy) return
+  async function remove(id, usage = []) {
+    // The button is already disabled for an in-use certificate; the guard lives
+    // here too so a stale render cannot get past it.
+    if (busy || usage.length > 0) return
     busy = true
     try {
       const ok = await serialQueue.add(() => certificate_store.remove(id))
@@ -54,7 +64,7 @@
     {#if certificates.length === 0}
       <p class="py-2 text-sm text-text-dim">{$_('config.certificates.empty')}</p>
     {:else}
-      {#each certificates as cert}
+      {#each rows as { cert, usage }}
         <div class="flex items-center gap-3 py-2 text-sm">
           <span class="text-text-dim">{cert.id}</span>
           <span class="rounded bg-surface-3 px-2 py-0.5 text-xs text-text-dim">
@@ -64,16 +74,18 @@
           <!-- Which connection actually points at this certificate. Keyed on
                the config reference, never on the certificate's name: how a
                provisioning tool names its certificates is its own business. -->
-          {#each certificateUsage($config_store, cert.id) as usage}
+          {#each usage as u}
             <span class="rounded bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">
-              {$_('config.certificates.in_use_' + usage)}
+              {$_('config.certificates.in_use_' + u)}
             </span>
           {/each}
           <IconButton
             icon="mdi:trash-can-outline"
-            label={$_('config.certificates.delete')}
-            disabled={busy}
-            onclick={() => remove(cert.id)}
+            label={usage.length > 0
+              ? $_('config.certificates.delete_in_use')
+              : $_('config.certificates.delete')}
+            disabled={busy || usage.length > 0}
+            onclick={() => remove(cert.id, usage)}
           />
         </div>
       {/each}

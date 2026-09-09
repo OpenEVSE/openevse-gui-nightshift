@@ -515,6 +515,7 @@
       "empty": "No certificates installed.",
       "add": "Add certificate",
       "delete": "Delete certificate",
+      "delete_in_use": "Cannot delete — this certificate is in use",
       "type": "Type",
       "root": "Root",
       "client": "Client",
