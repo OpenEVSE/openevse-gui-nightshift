@@ -52,10 +52,16 @@
       label="Toggle theme"
       onclick={() => theme.setTheme($theme.resolved === 'dark' ? 'light' : 'dark')}
     />
-    <span
-      aria-label={$_(statusKey)}
-      title={$_(statusKey)}
-      class="h-2.5 w-2.5 rounded-full {connected ? 'bg-accent' : 'bg-error'}"
-    ></span>
+    <!-- The dot wears the same p-2 as an IconButton so the whole cluster is
+         evenly spaced: gap-2 separates the boxes, but each icon carries its
+         own padding, so a bare dot would sit 8px closer to its neighbour and
+         8px nearer the header edge than any icon does. -->
+    <span class="grid place-items-center p-2">
+      <span
+        aria-label={$_(statusKey)}
+        title={$_(statusKey)}
+        class="h-2.5 w-2.5 rounded-full {connected ? 'bg-accent' : 'bg-error'}"
+      ></span>
+    </span>
   </div>
 </header>
