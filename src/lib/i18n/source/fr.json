@@ -70,7 +70,9 @@
       "https_cert_desc": "Quel certificat stocké présenter. Seuls les certificats comportant une clé privée peuvent être utilisés.",
       "https_cert_none": "Aucun",
       "https_port": "Port HTTPS",
-      "https_no_cert": "Aucun certificat sélectionné : HTTPS ne démarrera pas et l'interface restera en HTTP."
+      "https_no_cert": "Aucun certificat utilisable : HTTPS ne démarrera pas et l'interface restera en HTTP.",
+      "server_restart": "Ces réglages sont lus au démarrage de la passerelle : une modification ne prend effet qu'au prochain redémarrage.",
+      "server_restart_now": "Enregistré. La modification prendra effet au redémarrage de la passerelle."
     },
     "mqtt": {
       "enable": "Activer MQTT",

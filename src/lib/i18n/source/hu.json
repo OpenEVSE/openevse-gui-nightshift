@@ -70,7 +70,9 @@
       "https_cert_desc": "Melyik tárolt tanúsítványt mutassa be. Csak privát kulcsot tartalmazó tanúsítvány használható.",
       "https_cert_none": "Nincs",
       "https_port": "HTTPS port",
-      "https_no_cert": "Nincs kiválasztott tanúsítvány, ezért a HTTPS nem indul el, és a felület HTTP-n marad."
+      "https_no_cert": "Nincs használható tanúsítvány, ezért a HTTPS nem indul el, és a felület HTTP-n marad.",
+      "server_restart": "Ezeket a beállításokat az átjáró induláskor olvassa be, így a módosítás a következő újraindításkor lép életbe.",
+      "server_restart_now": "Mentve. A módosítás az átjáró újraindításakor lép életbe."
     },
     "mqtt": {
       "enable": "MQTT engedélyezése",

@@ -70,7 +70,9 @@
       "https_cert_desc": "Which stored certificate to present. Only certificates that include a private key can be used.",
       "https_cert_none": "None",
       "https_port": "HTTPS port",
-      "https_no_cert": "No certificate selected, so HTTPS will not start and the interface stays on HTTP."
+      "https_no_cert": "No usable certificate, so HTTPS will not start and the interface stays on HTTP.",
+      "server_restart": "These settings are read when the gateway starts, so a change takes effect at the next restart.",
+      "server_restart_now": "Saved. This takes effect when the gateway restarts."
     },
     "mqtt": {
       "enable": "Enable MQTT",

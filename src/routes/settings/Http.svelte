@@ -48,10 +48,35 @@
   let httpOn = $derived($config_store?.www_http_enabled !== false)
   let certId = $derived($config_store?.www_certificate_id ?? '')
 
+  // "Usable" means the stored id still resolves to one of the offered
+  // certificates — web_server_setup() needs getCertificate() *and* getKey() to
+  // return non-NULL before it starts the listener. An id left behind by a
+  // deleted certificate, or pointing at a root certificate with no private
+  // key, shows as "None" in the Select while the config still holds it, so
+  // testing for an empty string would miss exactly the case the warning is for
+  // and the charger would quietly serve plain HTTP.
+  let certUsable = $derived(certId !== '' && certOptions.some((o) => o.value === certId))
+
   // The listener only comes up with both the flag and a usable certificate, and
   // a half-configured HTTPS silently serves plain HTTP instead. Say so rather
   // than letting the user believe they have TLS.
-  let httpsIncomplete = $derived(httpsOn && certId === '')
+  let httpsIncomplete = $derived(httpsOn && !certUsable)
+
+  // should_start_http = config_http_enabled() || false == use_ssl — the
+  // firmware keeps port 80 open whenever TLS is not actually serving, whatever
+  // this flag says. Show that rather than an "off" the charger is ignoring.
+  let httpForced = $derived(!(httpsOn && certUsable))
+
+  // Nothing in this section takes effect until the gateway reboots:
+  // web_server_setup() reads the flags, the certificate and the ports once at
+  // boot, and config_changed() has no branch that re-opens a listener (it only
+  // rotates the auth secret for www_username / www_password). Track a save so
+  // the section can say so instead of leaving the user to discover it.
+  let restartPending = $state(false)
+
+  async function saveServerField(name, value) {
+    if (await form.saveField(name, value)) restartPending = true
+  }
 
   let langOptions = $derived(
     ($locales ?? ['en']).map((l) => ({ value: l, label: LOCALE_NAMES[l] ?? l })),
@@ -105,7 +130,7 @@
       <Toggle
         checked={httpsOn}
         label={$_('config.http.https_enabled')}
-        onchange={(v) => form.saveField('www_https_enabled', v)}
+        onchange={(v) => saveServerField('www_https_enabled', v)}
       />
     </FormField>
     {#if httpsOn}
@@ -117,7 +142,7 @@
         <Select
           options={certOptions}
           value={certId}
-          onchange={(v) => form.saveField('www_certificate_id', v)}
+          onchange={(v) => saveServerField('www_certificate_id', v)}
         />
       </FormField>
       <FormField label={$_('config.http.https_port')} status={$ss.www_https_port ?? 'idle'}>
@@ -126,7 +151,7 @@
           min={1}
           max={65535}
           step={1}
-          onchange={(v) => form.saveField('www_https_port', v)}
+          onchange={(v) => saveServerField('www_https_port', v)}
         />
       </FormField>
       {#if httpsIncomplete}
@@ -135,18 +160,33 @@
     {/if}
     <!-- Turning HTTP off only takes effect once HTTPS is actually serving: the
          firmware keeps port 80 open otherwise so the UI is never stranded, and
-         redirects it to HTTPS once there is somewhere to redirect to. -->
+         redirects it to HTTPS once there is somewhere to redirect to. Until
+         then the control is shown on and disabled — an "off" that the charger
+         ignores is worse than no control at all. -->
     <FormField
       label={$_('config.http.http_enabled')}
       description={$_('config.http.http_enabled_desc')}
       status={$ss.www_http_enabled ?? 'idle'}
     >
       <Toggle
-        checked={httpOn}
+        checked={httpOn || httpForced}
+        disabled={httpForced}
         label={$_('config.http.http_enabled')}
-        onchange={(v) => form.saveField('www_http_enabled', v)}
+        onchange={(v) => saveServerField('www_http_enabled', v)}
       />
     </FormField>
+    <!-- Everything above is read once at boot, so say what happens next. The
+         line upgrades to a prompt with a way through once something is saved. -->
+    {#if restartPending}
+      <p class="py-1 text-sm text-warning">
+        {$_('config.http.server_restart_now')}
+        <a class="underline hover:text-text" href="#/settings/firmware">
+          {$_('config.firmware.restart_gateway')}
+        </a>
+      </p>
+    {:else}
+      <p class="py-1 text-xs text-text-dim">{$_('config.http.server_restart')}</p>
+    {/if}
   </ConfigSection>
 
   <ConfigSection>
