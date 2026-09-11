@@ -16,6 +16,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    // Generate the position-encoded es/fr/hu value arrays (gitignored) before
+    // any test is collected, so a fresh clone or a single-file run works
+    // without an npm pre-hook. See dev/i18n-global-setup.js.
+    globalSetup: ['dev/i18n-global-setup.js'],
     setupFiles: ['src/test-setup.js'],
     include: ['src/**/*.{test,spec}.{js,ts}'],
     coverage: {

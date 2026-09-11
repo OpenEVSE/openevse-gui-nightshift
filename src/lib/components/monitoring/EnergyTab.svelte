@@ -73,6 +73,7 @@
     const oldest = Math.min(...samples.map((s) => s.ts))
     energy_store.loadRaw(oldest)
   }
+  function newerClicked() { energy_store.loadNewer() }
   function currentClicked() { energy_store.loadRaw() }
 </script>
 
@@ -98,16 +99,28 @@
         {:else}{$_('monitoring.energy.latest_samples', { values: { n: $energy_store.raw.samples.length } })}{/if}
       </span>
 
-      <button
-        type="button"
-        class="shrink-0 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-text transition
-               disabled:opacity-0 disabled:cursor-default
-               hover:not-disabled:bg-surface-2"
-        disabled={!$energy_store.raw.historical}
-        onclick={currentClicked}
-      >
-        {$_('monitoring.energy.current')}
-      </button>
+      <div class="flex shrink-0 gap-1.5">
+        <button
+          type="button"
+          class="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-text transition
+                 disabled:opacity-0 disabled:cursor-default
+                 hover:not-disabled:bg-surface-2"
+          disabled={$energy_store.loading.raw || !$energy_store.raw.historical}
+          onclick={newerClicked}
+        >
+          {$_('monitoring.energy.newer')}
+        </button>
+        <button
+          type="button"
+          class="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-text transition
+                 disabled:opacity-0 disabled:cursor-default
+                 hover:not-disabled:bg-surface-2"
+          disabled={$energy_store.loading.raw || !$energy_store.raw.historical}
+          onclick={currentClicked}
+        >
+          {$_('monitoring.energy.current')}
+        </button>
+      </div>
     </div>
 
     {#if $energy_store.error.raw}

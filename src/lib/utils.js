@@ -1,12 +1,7 @@
 import {_} 					from 'svelte-i18n'
 import {DateTime} 			from "luxon";
 import {EvseClients}		from "./vars.js"
-import {uistates_store} 	from "./stores/uistates.js";
 import {get} 				from 'svelte/store'
-import {config_store} 		from './stores/config.js';
-import serialQueue 			from './queue.js';
-import { status_store } 	from './stores/status.js';
-import { limit_store } 		from './stores/limit.js';
 
 
 export const removeDuplicateObjects = (array, key) => {
@@ -131,25 +126,6 @@ export function clientid2name(id) {
 	return output
 }
 
-export function displayIcon(mode) {
-	switch (mode) {
-		case "manual":
-			return "fa6-solid:hand"
-		case "limit":
-			switch (get(limit_store).type) {
-				case "time":
-					return "fa6-solid:hourglass-half"
-				case "energy":
-					return "fa6-solid:bolt"
-				case "soc":
-					return "material-symbols:battery-5-bar-sharp"
-				case "range":
-					return "oi:resize-width"
-			}
-		default:
-			return "fa6-solid:robot"
-	}
-}
 export function getStateDesc(state) {
 	switch (state) {
 		case 0: return get(_)("logs-states.loading")
@@ -169,93 +145,6 @@ export function getStateDesc(state) {
 		case 254: return get(_)("logs-states.sleeping")
 		case 255: return get(_)("logs-states.disabled")
 	}
-}
-
-export function state2icon(state) {
-	let icon = { 
-		type: undefined,
-		color: undefined,
-		tooltip: undefined
-	}
-
-	icon.tooltip = getStateDesc(state)
-	switch (state) {
-		case 0:
-			icon.type = "majesticons:rocket-3-start-line"
-			icon.color = "has-text-info"
-			break
-		case 1: 
-			icon.type = "mdi:car-off"
-			icon.color = "has-text-primary"
-			break
-		case 2:
-			icon.type = "mdi:car"
-			icon.color = "has-text-primary"
-			break
-		case 3:
-			icon.type = "fa6-solid:bolt"
-			icon.color = "has-text-warning"
-			break
-		// Errors
-		case 4: 
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break
-
-		case 5:
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break
-		case 6:
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break
-		case 7:
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break
-		case 8:
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break
-		case 9:
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break
-		case 10:
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break
-		case 11:
-			icon.type = "fluent:shield-error-24-filled"
-			icon.color = "has-text-danger"
-			break;
-		case 254: // sleeping
-			icon.color = "has-text-dark"
-			icon.type = "fa6-solid:ban"
-			break;
-		case 255: 
-			icon.color = "has-text-dark"
-			icon.type = "fa6-solid:ban"
-			break;
-	}
-	return icon
-}
-
-export function type2icon(type) {
-	let icon
-	switch (type) {
-		case "information":
-			icon = "fa6-solid:circle-info"
-			break
-		case "notification":
-			icon = "fa6-solid:bell"
-			break
-		case "warning":
-			icon = "fa6-solid:triangle-exclamation"
-			break
-	}
-	return icon
 }
 
 export function dedup(arr) {
@@ -278,147 +167,6 @@ export function s2mns(s) {
 
 export function miles2km(d) {
 	return d * 1.60934
-}
-
-export function displayRange(r) {
-	if (!get(config_store).tesla_enabled || get(config_store).tesla_enabled && get(config_store).mqtt_vehicle_range_miles) {
-		return r
-	}
-	else if (get(config_store).mqtt_vehicle_range_miles)
-		return miles2km(r)
-}
-
-export function validateFormData({data, i18n_path, req=false, form=null}) {
-	let resp = { 
-		ok: true,
-		msg: null,
-		data: {}
-	}
-	for (const key of Object.keys(data)) {
-		if (data[key].req && !data[key].val && req) {
-				//error
-				resp.ok = false
-				resp.msg = get(_)(i18n_path + key)
-				let val = get(config_store)[key]?get(config_store)[key]:""
-				// refill the input field
-				if (form) {
-					form[key].input.setValue(val)
-				}					
-				else {
-					data[key].input.setValue(val)
-				}
-		}
-		else {
-			const hiddenpass = "••••••••••"
-			resp.data[key] = data[key].val
-			if (data[key].pwd && data[key].val != hiddenpass)
-			{
-				resp.data[key] = data[key].val
-			}
-			else {
-				if (data[key].pwd) {
-					delete resp.data[key]
-				}
-					
-			} 
-
-		}
-	}
-	return resp
-}
-
-export async function postFormData(data,ref=null) {
-	if ( await serialQueue.add(() => config_store.upload(data))) {
-		return true
-	}
-	else {
-		return false
-	}
-}
-
-
-export let submitFormData = async ({form, prop = null,prop_enable = null, i18n_path = null, input = null}) => {
-	let propdata = {}
-	let enabled
-	if (prop_enable)
-		enabled = get(config_store)[prop_enable]
-	else enabled = false
-	if (prop) {
-		propdata[prop] = {
-			val: 	form[prop].val,
-			req: 	form[prop].req,
-			input: 	form[prop].input
-		}
-	}
-	// get input instance
-	if (!input) {
-		let o = {}
-		let p
-		if (!prop) {
-			o = form
-			p = prop_enable
-		}		
-		else {
-			o = propdata
-			p = prop
-		}
-		input = o[p].input
-	}
-
-	let valid = validateFormData(
-		{
-			data: prop?propdata:form,
-			i18n_path: i18n_path,
-			req: prop?enabled:!enabled ,
-			form: prop?form:null
-		}
-	)
-	if (valid.ok) {
-
-		input?.setStatus("loading")
-
-		if (await serialQueue.add(() => config_store.upload(valid.data))) {
-			input?.setStatus("ok")
-			return true
-		}				
-		else {
-			input?.setStatus("error")
-			return true
-		}
-	}
-	else {
-		if (!prop && prop_enable)
-			{
-				const val = get(config_store)[prop_enable]
-				input.setValue(val)
-			}
-			
-		get(uistates_store).alertbox.title = "error"
-		get(uistates_store).alertbox.body = valid.msg
-		get(uistates_store).alertbox.visible = true
-		return false
-	}
-
-}
-
-export function reload2ip() {
-	setTimeout(()=> { 
-				console.log("redirecting to main page")
-				let url = ""
-				// if (!import.meta.env.DEV) {
-				// 	url = "http://" + get(config_store).hostname + ".local"
-				// }
-				//using IP if ready
-				if (get(status_store).ipaddress != window.location.host) {
-					url = "http://" + get(status_store).ipaddress
-				}
-
-				if (get(uistates_store).wizard_step != 0) {
-					url = url +  "/#/wizard/" + get(uistates_store).wizard_step
-				}
-				else url = url + "/#/"
-				window.location.replace(url) }
-			, 0)
 }
 
 export function isFloat(n) {

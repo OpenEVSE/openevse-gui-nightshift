@@ -1,6 +1,6 @@
 // src/lib/components/config/__tests__/ConsoleViewer.test.js
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render } from '@testing-library/svelte'
+import { fireEvent, render } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
@@ -139,5 +139,23 @@ describe('ConsoleViewer', () => {
     expect(socket.closed).toBe(true)
     socket.emit('close')
     expect(queryByText('config.terminal.disconnected')).toBeNull()
+  })
+  it('copies the buffered text to the clipboard', async () => {
+    httpAPI.mockResolvedValue('line 1\nline 2\n')
+    const writeText = vi.fn(() => Promise.resolve())
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    const { getByText } = render(ConsoleViewer, { props: { mode: 'debug' } })
+    await settle()
+    FakeSocket.last.emit('message', { data: 'live\n' })
+    await vi.waitFor(() => expect(getByText('config.terminal.copy')).not.toBeDisabled())
+    await fireEvent.click(getByText('config.terminal.copy'))
+    await vi.waitFor(() => expect(writeText).toHaveBeenCalledWith('line 1\nline 2\nlive\n'))
+    await vi.waitFor(() => expect(getByText('config.terminal.copied')).toBeInTheDocument())
+  })
+
+  it('disables Copy while the console is empty', async () => {
+    const { getByText } = render(ConsoleViewer, { props: { mode: 'debug' } })
+    await settle()
+    expect(getByText('config.terminal.copy')).toBeDisabled()
   })
 })

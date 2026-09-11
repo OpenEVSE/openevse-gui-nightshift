@@ -90,4 +90,20 @@ describe('HealthTab', () => {
       expect(call).toBeTruthy()
     })
   })
+  it('groups both reset buttons in the Maintenance section at the bottom', () => {
+    const relay = [{ key: 'life_pct', value: 100, severity: 'ok' }]
+    const { getByText, container } = render(HealthTab, { props: { data: { errors: [], infos: [] }, relay } })
+    const title = getByText('monitoring.health.maintenance.title')
+    const section = title.parentElement
+    expect(section).toContainElement(getByText('config.safety.reset_faults'))
+    expect(section).toContainElement(getByText('monitoring.health.relay.reset_button'))
+    expect(container.lastElementChild).toBe(section)
+  })
+
+  it('hides the relay reset button but keeps the fault reset when relay data is absent', () => {
+    const { getByText, queryByText } = render(HealthTab, { props: { data: { errors: [], infos: [] } } })
+    expect(getByText('monitoring.health.maintenance.title')).toBeInTheDocument()
+    expect(getByText('config.safety.reset_faults')).toBeInTheDocument()
+    expect(queryByText('monitoring.health.relay.reset_button')).not.toBeInTheDocument()
+  })
 })

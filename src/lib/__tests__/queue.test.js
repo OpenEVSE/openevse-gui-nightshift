@@ -18,10 +18,9 @@ beforeEach(async () => {
 })
 
 describe('SerialQueue', () => {
-  it('should export a default serialQueue instance', () => {
-    expect(SerialQueueModule.default).toBeDefined()
+  it('should export a single named serialQueue instance', () => {
     expect(SerialQueueModule.serialQueue).toBeDefined()
-    expect(SerialQueueModule.default).toBe(SerialQueueModule.serialQueue)
+    expect(SerialQueueModule.default).toBeUndefined()
   })
 
   it('should have add, pause, and resume methods', () => {

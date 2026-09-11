@@ -29,56 +29,6 @@ vi.mock('svelte/store', async () => {
   }
 })
 
-// Mock the stores
-vi.mock('../stores/uistates.js', () => ({
-  uistates_store: {
-    subscribe: vi.fn(),
-    update: vi.fn((fn) => fn({ has_fetched: false })),
-    _mockValue: {
-      has_fetched: false,
-      alertbox: { title: undefined, body: undefined, visible: false }
-    }
-  }
-}))
-
-vi.mock('../stores/config.js', () => ({
-  config_store: {
-    subscribe: vi.fn(),
-    upload: vi.fn(() => Promise.resolve(true)),
-    _mockValue: {
-      tesla_enabled: false,
-      mqtt_vehicle_range_miles: false
-    }
-  }
-}))
-
-vi.mock('../stores/status.js', () => ({
-  status_store: {
-    subscribe: vi.fn(),
-    _mockValue: { ipaddress: '192.168.1.1' }
-  }
-}))
-
-vi.mock('../stores/limit.js', () => ({
-  limit_store: {
-    subscribe: vi.fn(),
-    _mockValue: { type: 'time' }
-  }
-}))
-
-vi.mock('../queue.js', () => ({
-  default: {
-    add: vi.fn((fn) => fn()),
-    pause: vi.fn(),
-    resume: vi.fn()
-  },
-  serialQueue: {
-    add: vi.fn((fn) => fn()),
-    pause: vi.fn(),
-    resume: vi.fn()
-  }
-}))
-
 import {
   sec2time,
   formatDate,
@@ -89,7 +39,6 @@ import {
   temp_round,
   getBreakpoint,
   clientid2name,
-  type2icon,
   dedup,
   s2mns,
   miles2km,
@@ -98,7 +47,6 @@ import {
   JSONTryParse,
   compareVersion,
   removeDuplicateObjects,
-  validateFormData,
 } from '../utils.js'
 
 describe('sec2time', () => {
@@ -400,24 +348,6 @@ describe('clientid2name', () => {
   })
 })
 
-describe('type2icon', () => {
-  it('should return correct icon for information', () => {
-    expect(type2icon('information')).toBe('fa6-solid:circle-info')
-  })
-
-  it('should return correct icon for notification', () => {
-    expect(type2icon('notification')).toBe('fa6-solid:bell')
-  })
-
-  it('should return correct icon for warning', () => {
-    expect(type2icon('warning')).toBe('fa6-solid:triangle-exclamation')
-  })
-
-  it('should return undefined for unknown type', () => {
-    expect(type2icon('unknown')).toBeUndefined()
-  })
-})
-
 describe('getTZ', () => {
   it('should extract timezone from pipe-separated string', () => {
     expect(getTZ('America/New_York|EST')).toBe('America/New_York')
@@ -508,54 +438,5 @@ describe('getBreakpoint', () => {
   it('should return desktop at boundary (1281)', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1281, writable: true })
     expect(getBreakpoint()).toBe('desktop')
-  })
-})
-
-describe('validateFormData', () => {
-  it('should return ok for valid data with no required fields', () => {
-    const data = {
-      field1: { val: 'test', req: false }
-    }
-    const result = validateFormData({ data, i18n_path: 'test.' })
-    expect(result.ok).toBe(true)
-    expect(result.data.field1).toBe('test')
-  })
-
-  it('should include non-password values in result data', () => {
-    const data = {
-      name: { val: 'myname', req: false },
-      host: { val: 'localhost', req: false }
-    }
-    const result = validateFormData({ data, i18n_path: 'test.' })
-    expect(result.ok).toBe(true)
-    expect(result.data.name).toBe('myname')
-    expect(result.data.host).toBe('localhost')
-  })
-
-  it('should exclude password fields with hidden password marker', () => {
-    const data = {
-      pass: { val: '••••••••••', req: false, pwd: true }
-    }
-    const result = validateFormData({ data, i18n_path: 'test.' })
-    expect(result.ok).toBe(true)
-    expect(result.data.pass).toBeUndefined()
-  })
-
-  it('should include password fields with actual value', () => {
-    const data = {
-      pass: { val: 'realpassword', req: false, pwd: true }
-    }
-    const result = validateFormData({ data, i18n_path: 'test.' })
-    expect(result.ok).toBe(true)
-    expect(result.data.pass).toBe('realpassword')
-  })
-
-  it('should fail validation for required empty field when req flag is true', () => {
-    const mockSetValue = vi.fn()
-    const data = {
-      username: { val: '', req: true, input: { setValue: mockSetValue } }
-    }
-    const result = validateFormData({ data, i18n_path: 'config.errors.', req: true })
-    expect(result.ok).toBe(false)
   })
 })

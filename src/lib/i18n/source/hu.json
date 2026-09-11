@@ -80,6 +80,8 @@
       "port": "Port",
       "user": "Felhasználónév",
       "password": "Jelszó",
+      "sys_query": "Broker verzió lekérdezése",
+      "sys_query_desc": "Feliratkozás a $SYS/broker/version témára a broker verziójának megjelenítéséhez. Kapcsold ki felügyelt brokereknél, például AWS IoT Core esetén, amelyek elutasítják a $SYS feliratkozásokat.",
       "tls": "TLS",
       "reject_unauthorized": "Saját aláírású tanúsítványok elutasítása",
       "certificate": "Ügyfél tanúsítvány",
@@ -166,6 +168,10 @@
       "theme_desc": "A töltő beépített kijelzőjének témája.",
       "dark": "Sötét",
       "light": "Világos",
+      "clock": "Óra formátum",
+      "clock_desc": "Az idő formátuma a töltő kijelzőjének dátum/idő sorában.",
+      "clock_24": "24 órás",
+      "clock_12": "12 órás",
       "brightness": "Aktív fényerő",
       "brightness_desc": "A kijelző fényereje használat közben. A 10%-os minimum olvashatóan tartja.",
       "standby": "Készenléti fényerő",
@@ -458,6 +464,7 @@
       "versions": "Verziók",
       "firmware": "OpenEVSE firmware",
       "gateway": "WiFi átjáró firmware",
+      "gui": "Webes felület",
       "chip_id": "EVSE chip azonosító",
       "links": "Hivatkozások",
       "docs": "Dokumentáció",
@@ -507,6 +514,8 @@
       "waiting": "Csatlakoztatva — várakozás az üzenetekre…",
       "disconnected": "Az élő adatfolyam megszakadt — a puffer tartalma látható.",
       "unavailable": "Konzol nem elérhető.",
+      "copy": "Másolás",
+      "copied": "Másolva",
       "diagnostics": "Diagnosztika",
       "diagnostics_desc": "Tölts le egy JSON-pillanatképet az összes store-ról (config, status, ütemezés, claims…) hibajelentéshez. A jelszavak és tokenek szerkesztve vannak.",
       "diagnostics_export": "Diagnosztika letöltése",
@@ -950,7 +959,8 @@
       "monthly": "Havi",
       "annual": "Éves",
       "older": "← Korábbi",
-      "current": "Jelenlegi →",
+      "newer": "Újabb →",
+      "current": "Aktuális ⇥",
       "no_older": "Nincs korábbi adat",
       "historical": "Korábbi nézet",
       "latest_samples": "Utolsó {n} minta",
@@ -1024,6 +1034,9 @@
         "reset_button": "Relé kicserélve – egészségértékek visszaállítása",
         "resetting": "Visszaállítás…",
         "reset_done": "Visszaállítva"
+      },
+      "maintenance": {
+        "title": "Karbantartás"
       }
     },
     "manager": {

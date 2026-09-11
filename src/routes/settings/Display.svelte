@@ -31,6 +31,10 @@
     { value: 'dark', label: $_('config.display.dark') },
     { value: 'light', label: $_('config.display.light') },
   ])
+  let clockOptions = $derived([
+    { value: '24', label: $_('config.display.clock_24') },
+    { value: '12', label: $_('config.display.clock_12') },
+  ])
   let theme = $derived(cfg.tft_theme ?? 'dark')
 
   // Brightness, percent. Active has a 10% firmware floor; standby allows 0 to
@@ -74,6 +78,18 @@
         options={themeOptions}
         value={theme}
         onchange={(v) => form.saveField('tft_theme', v)}
+      />
+    </FormField>
+
+    <FormField
+      label={$_('config.display.clock')}
+      description={$_('config.display.clock_desc')}
+      status={$ss.tft_12h_clock ?? 'idle'}
+    >
+      <SegmentedControl
+        options={clockOptions}
+        value={cfg.tft_12h_clock ? '12' : '24'}
+        onchange={(v) => form.saveField('tft_12h_clock', v === '12')}
       />
     </FormField>
 

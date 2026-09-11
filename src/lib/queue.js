@@ -28,4 +28,3 @@ class SerialQueue {
 
 
 export const serialQueue = new SerialQueue()
-export default serialQueue

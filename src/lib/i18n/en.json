@@ -80,6 +80,8 @@
       "port": "Port",
       "user": "Username",
       "password": "Password",
+      "sys_query": "Query broker version",
+      "sys_query_desc": "Subscribe to $SYS/broker/version to show the broker version. Turn off for managed brokers such as AWS IoT Core, which reject $SYS subscriptions.",
       "tls": "TLS",
       "reject_unauthorized": "Reject self-signed certificates",
       "certificate": "Client certificate",
@@ -166,6 +168,10 @@
       "theme_desc": "Theme for the charger's built-in screen.",
       "dark": "Dark",
       "light": "Light",
+      "clock": "Clock format",
+      "clock_desc": "Time format for the date/time line on the charger screen.",
+      "clock_24": "24-hour",
+      "clock_12": "12-hour",
       "brightness": "Active brightness",
       "brightness_desc": "Screen brightness while the display is in use. A 10% minimum keeps it readable.",
       "standby": "Standby brightness",
@@ -458,6 +464,7 @@
       "versions": "Versions",
       "firmware": "OpenEVSE firmware",
       "gateway": "WiFi gateway firmware",
+      "gui": "Web UI",
       "chip_id": "EVSE chip ID",
       "links": "Links",
       "docs": "Documentation",
@@ -507,6 +514,8 @@
       "waiting": "Connected — waiting for messages…",
       "disconnected": "Live stream disconnected — showing buffered output.",
       "unavailable": "Console unavailable.",
+      "copy": "Copy",
+      "copied": "Copied",
       "diagnostics": "Diagnostics",
       "diagnostics_desc": "Download a JSON snapshot of every store (config, status, schedule, claims…) for a bug report. Passwords and tokens are redacted.",
       "diagnostics_export": "Download diagnostics",
@@ -950,7 +959,8 @@
       "monthly": "Monthly",
       "annual": "Annual",
       "older": "← Older",
-      "current": "Current →",
+      "newer": "Newer →",
+      "current": "Current ⇥",
       "no_older": "No earlier data",
       "historical": "Historical view",
       "latest_samples": "Latest {n} samples",
@@ -1024,6 +1034,9 @@
         "reset_button": "Relay Replaced - Reset Health Values",
         "resetting": "Resetting…",
         "reset_done": "Reset done"
+      },
+      "maintenance": {
+        "title": "Maintenance"
       }
     },
     "manager": {
