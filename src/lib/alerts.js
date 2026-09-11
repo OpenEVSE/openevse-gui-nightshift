@@ -5,12 +5,16 @@ import { uistates_store } from './stores/uistates.js'
 /**
  * Surface the global AlertBox for a failed device write.
  * Shared by every screen so the write-failure experience is identical.
+ *
+ * @param {string} [body] Replaces the generic body. Pass the device's own `msg`
+ *   when it explains something the generic text cannot -- a firmware that
+ *   declined the operation outright, say, rather than a write that failed.
  */
-export function showWriteError() {
+export function showWriteError(body) {
   const t = get(_)
   uistates_store.setObject('alertbox', {
     title: t('alert.write_failed_title'),
-    body: t('alert.write_failed_body'),
+    body: body || t('alert.write_failed_body'),
     visible: true,
     button: true,
     closable: true,

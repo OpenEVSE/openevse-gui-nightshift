@@ -84,8 +84,11 @@ status updates every 2 seconds. No `VITE_OPENEVSEHOST` and no proxy are needed.
 
 Fixture files live in `dev/fixtures/` and can be edited to simulate different device
 states (e.g. set `state` in `status.json` to `1` for standby or `3` for charging).
-Note: the mock serves reads only — it does not accept config writes, so Settings-page
-saves report a write error in mock mode. They work against a real device.
+Config writes are accepted: `POST /api/config` merges into an in-memory overlay,
+answers `{"msg":"done"}` and bumps `config_version` so the app re-reads over the
+websocket, exactly as the device does. The overlay lasts for the life of the dev
+server and is cleared when you switch scenario, so a save sticks across a reload
+but never edits the fixtures on disk.
 
 Two dev-only endpoints switch the simulated device at runtime, no restart needed:
 
@@ -94,7 +97,9 @@ Two dev-only endpoints switch the simulated device at runtime, no restart needed
 - `GET /api/_mock/scenario/<name>` — overlay `dev/fixtures/scenarios/<name>.json`
   onto the base fixtures (`reset` clears). A scenario file holds partial fixture
   objects keyed by fixture stem, e.g. `{ "config": { "wizard_passed": false } }`
-  re-enables the first-run wizard.
+  re-enables the first-run wizard. `https` is a charger whose stored certificate
+  has been deleted — HTTPS reads as enabled while the charger is serving plain
+  HTTP, which is the state the *Web server* section exists to make visible.
 
 Setting `MOCK_STATIC=1` freezes the mock completely (no WebSocket ticks, fixed
 server clock) — this is what the screenshot generator uses.
