@@ -2,6 +2,67 @@
   "app": "OpenEVSE",
   "loading": "Loading…",
   "notification": "Notification",
+  "notifications": {
+    "title_panel": "Advisories",
+    "bell": "Advisories ({count})",
+    "close": "Close",
+    "empty": "Nothing to report.",
+    "muted": "Muted",
+    "mute": "Mute",
+    "dismiss": "Dismiss",
+    "mute_note": "Muting silences the alarm only. A muted advisory stays in this list and keeps its marker beside the setting it is about.",
+    "raised": "Raised {ago}",
+    "time_unknown": "Time unknown",
+    "checks_off": "Advisories: {count}",
+    "strip_title": "Needs your attention",
+    "strip_dismiss": "Dismiss",
+    "strip_action": "View",
+    "severity": {
+      "info": "Info",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "link": {
+      "safety": "Safety settings",
+      "health": "Relay health"
+    },
+    "title": {
+      "safety.ground_check": "Ground monitoring is off",
+      "safety.gfci_check": "GFCI self-test is off",
+      "safety.relay_check": "Stuck-relay detection is off",
+      "safety.diode_check": "Diode check is off",
+      "safety.vent_check": "Ventilation check is off",
+      "safety.temp_check": "Temperature monitoring is off",
+      "fault.gfci_tripped": "A GFCI trip was recorded",
+      "fault.no_ground": "A ground fault was recorded",
+      "fault.stuck_relay": "A stuck relay was recorded",
+      "thermal.throttling": "Charge current reduced by heat",
+      "thermal.high_temp": "Charger temperature is high",
+      "thermal.relay_thermal": "The relay is running hot",
+      "wear.relay_life": "The relay is nearing end of life",
+      "wear.relay_transit_drift": "The relay is opening more slowly",
+      "wear.relay_cold_open": "The relay has opened under load",
+      "wear.stuck_relay_recovery": "A relay recovery has run"
+    },
+    "detail": {
+      "safety.ground_check": "The charger will not check for a missing earth connection before it starts.",
+      "safety.gfci_check": "The charger will not test its residual-current detection at the start of a session.",
+      "safety.relay_check": "The charger will not check that its relay actually opened.",
+      "safety.diode_check": "The charger will not verify the vehicle's pilot diode before charging.",
+      "safety.vent_check": "The charger will not require ventilation for vehicles that ask for it.",
+      "safety.temp_check": "The charger will not stop on an over-temperature condition.",
+      "fault.gfci_tripped": "Residual current was detected during an earlier session. Charging has resumed since.",
+      "fault.no_ground": "The charger lost its earth connection during an earlier session.",
+      "fault.stuck_relay": "The relay failed to open when the charger asked it to.",
+      "thermal.throttling": "The charger is limiting current to keep its own temperature down.",
+      "thermal.high_temp": "The charger is close to the temperature at which it shuts down.",
+      "thermal.relay_thermal": "The contacts are heating more than they did when new. Relay health has the figures.",
+      "wear.relay_life": "Relay health tracks how much switching life is left.",
+      "wear.relay_transit_drift": "Contacts that slow down are usually worn. Relay health has the figures.",
+      "wear.relay_cold_open": "Opening while current flows burns the contacts. Relay health counts them.",
+      "wear.stuck_relay_recovery": "A stuck relay was freed automatically. Relay health counts these."
+    }
+  },
   "logs-states": {
     "loading": "Starting",
     "active-nocar": "Active - Car not connected",
@@ -1105,7 +1166,8 @@
       "manager_disabled": "Charger disabled",
       "manager_changed": "Charger state changed",
       "boot": "Restarted",
-      "periodic": "Periodic sample"
+      "periodic": "Periodic sample",
+      "notification": "Advisory: {advisory}"
     }
   },
   "wizard": {

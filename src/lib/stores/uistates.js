@@ -13,6 +13,15 @@ const model = {
 		schedule_version: 0,
 		schedule_plan_version: 0,
 		limit_version: 0,
+		// "<count>:<severity>@<nonce>" — the advisory list's stand-in for a
+		// version counter. null until the first frame from a charger that has
+		// the advisory engine; stays null forever on one that doesn't.
+		notification_badge: null,
+		// Bumped by WebSocket.svelte whenever a frame carries the notifications
+		// object. The firmware sends it on connect and then only when the live
+		// set changes, so each arrival is a reason to re-read the list — even
+		// when count and severity happen to land on the same pair.
+		notification_event: 0,
 		logidx_min: 0,
 		logidx_max: 0,
 		// (todo) derived from other stores

@@ -51,6 +51,7 @@ export function mockPlugin() {
     '/api/energy/daily':  'energy_daily.json',
     '/api/energy/monthly':'energy_monthly.json',
     '/api/energy/annual': 'energy_annual.json',
+    '/api/notifications':  'notifications.json',
   }
   const baseFixtures = {}
   const fixtureKeyByUrl = {}
@@ -118,15 +119,48 @@ export function mockPlugin() {
   // the "Clear dump" flow can be exercised without hardware.
   let crashPresent = true
 
+  // Advisory acks laid over whatever fixture/scenario is live. The firmware
+  // persists these; here they live for the dev-server run and are dropped when
+  // the scenario changes, since a different scenario is a different charger.
+  const notificationAcks = new Set()
+
+  const SEVERITY_NAMES = ['info', 'warning', 'critical']
+
+  // Serve the list the way the firmware serialises it: every advisory is
+  // listed, muted ones included, while `count` and `max_severity` cover the
+  // unmuted entries only. So `count: 0` beside a non-empty array is a
+  // legitimate answer, and the GUI has to render it as one.
+  function notificationList() {
+    const base = effectiveFixture('/api/notifications')
+    const items = (base?.notifications ?? []).map((n) => ({
+      ...n,
+      acked: !!n.acked || notificationAcks.has(n.id),
+    }))
+    const unmuted = items.filter((n) => !n.acked)
+    const rank = unmuted.reduce(
+      (m, n) => Math.max(m, Math.max(0, SEVERITY_NAMES.indexOf(n.severity))),
+      0,
+    )
+    return {
+      count: unmuted.length,
+      max_severity: SEVERITY_NAMES[rank],
+      notifications: items,
+    }
+  }
+
   function buildStatusMessage(tickCount) {
     // Mirror the device's real status shape; nudge only genuine live fields
     // so the connection looks alive without inventing nonexistent keys.
     const baseStatus = effectiveFixture('/api/status')
     const state = stateOverride == null ? baseStatus.state : stateOverride
     const charging = state === 3
+    const advisories = notificationList()
     return JSON.stringify({
       ...baseStatus,
       state,
+      // Exactly the two fields the firmware sends here — the list lives on
+      // its own endpoint. Their presence is the GUI's capability gate.
+      notifications: { count: advisories.count, severity: advisories.max_severity },
       claims_version: claimsVersion,
       boost: !!boost,
       boost_version: boostVersion,
@@ -172,6 +206,9 @@ export function mockPlugin() {
             }
             scenario = JSON.parse(readFileSync(file, 'utf-8'))
           }
+          // A different scenario is a different charger; its advisories are
+          // not the ones the previous set's acks were given to.
+          notificationAcks.clear()
           const msg = buildStatusMessage(tickCount)
           for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
           res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -339,6 +376,58 @@ export function mockPlugin() {
             ntp_next_sync_ms: 28440000,          // ~7h 54m
             ntp_server_ip: '185.96.2.100',
           }))
+          return
+        }
+
+        // ── Notification advisories ───────────────────────────────────────────
+        // Ack first: the exact-match table below would otherwise never see it,
+        // and the list route is a prefix of this one.
+        //
+        // The replies are text/plain, like the firmware's — "acknowledged",
+        // "id required" (400), "no such active notification" (404) — because
+        // the GUI reads the body to tell an ack from a miss.
+        if (url === '/api/notifications/ack') {
+          const finish = (rawId) => {
+            const id = (rawId ?? '').trim()
+            if (!id) {
+              res.writeHead(400, { 'Content-Type': 'text/plain' })
+              res.end('id required')
+              return
+            }
+            const live = notificationList().notifications.some((n) => n.id === id)
+            if (!live) {
+              res.writeHead(404, { 'Content-Type': 'text/plain' })
+              res.end('no such active notification')
+              return
+            }
+            notificationAcks.add(id)
+            // Deliberately no websocket push. The firmware only emits an event
+            // when the live *set* changes, and an ack does not change it — so
+            // the GUI has to re-read the list for itself, and the mock has to
+            // let it find out that it must.
+            res.writeHead(200, { 'Content-Type': 'text/plain' })
+            res.end('acknowledged')
+          }
+          const fromQuery = req.url?.match(/[?&]id=([^&]*)/)
+          if (req.method === 'GET') {
+            finish(fromQuery ? decodeURIComponent(fromQuery[1]) : '')
+            return
+          }
+          let body = ''
+          req.on('data', (chunk) => { body += chunk })
+          req.on('end', () => {
+            // application/x-www-form-urlencoded body, then the query string —
+            // the same two places the firmware looks, in the same order.
+            const fromBody = body.match(/(?:^|&)id=([^&]*)/)
+            const raw = fromBody ? fromBody[1] : fromQuery ? fromQuery[1] : ''
+            finish(decodeURIComponent(raw.replace(/\+/g, ' ')))
+          })
+          return
+        }
+
+        if (url === '/api/notifications') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify(notificationList()))
           return
         }
 

@@ -2,6 +2,67 @@
   "app": "OpenEVSE",
   "loading": "Betöltés…",
   "notification": "Értesítés",
+  "notifications": {
+    "title_panel": "Figyelmeztetések",
+    "bell": "Figyelmeztetések ({count})",
+    "close": "Bezárás",
+    "empty": "Nincs jelentenivaló.",
+    "muted": "Némítva",
+    "mute": "Némítás",
+    "dismiss": "Elvetés",
+    "mute_note": "A némítás csak a riasztást kapcsolja ki. A némított figyelmeztetés a listában marad, és megtartja a jelölést az érintett beállítás mellett.",
+    "raised": "{ago} óta",
+    "time_unknown": "Ismeretlen időpont",
+    "checks_off": "Figyelmeztetések: {count}",
+    "strip_title": "Figyelmet igényel",
+    "strip_dismiss": "Elvetés",
+    "strip_action": "Megnyitás",
+    "severity": {
+      "info": "Információ",
+      "warning": "Figyelmeztetés",
+      "critical": "Kritikus"
+    },
+    "link": {
+      "safety": "Biztonsági beállítások",
+      "health": "Relé állapota"
+    },
+    "title": {
+      "safety.ground_check": "A földelésfigyelés ki van kapcsolva",
+      "safety.gfci_check": "Az áram-védőkapcsoló önteszt ki van kapcsolva",
+      "safety.relay_check": "A beragadt relé érzékelése ki van kapcsolva",
+      "safety.diode_check": "A diódaellenőrzés ki van kapcsolva",
+      "safety.vent_check": "A szellőzésellenőrzés ki van kapcsolva",
+      "safety.temp_check": "A hőmérsékletfigyelés ki van kapcsolva",
+      "fault.gfci_tripped": "Áram-védőkapcsoló kioldás lett rögzítve",
+      "fault.no_ground": "Földelési hiba lett rögzítve",
+      "fault.stuck_relay": "Beragadt relé lett rögzítve",
+      "thermal.throttling": "A meleg miatt csökkentett töltőáram",
+      "thermal.high_temp": "A töltő hőmérséklete magas",
+      "thermal.relay_thermal": "A relé melegszik",
+      "wear.relay_life": "A relé élettartama a végéhez közeledik",
+      "wear.relay_transit_drift": "A relé lassabban nyit",
+      "wear.relay_cold_open": "A relé terhelés alatt nyitott",
+      "wear.stuck_relay_recovery": "Relé-helyreállítás futott le"
+    },
+    "detail": {
+      "safety.ground_check": "A töltő indulás előtt nem ellenőrzi a hiányzó földelést.",
+      "safety.gfci_check": "A töltő a munkamenet elején nem teszteli az áramkülönbség-érzékelést.",
+      "safety.relay_check": "A töltő nem ellenőrzi, hogy a relé valóban kinyitott-e.",
+      "safety.diode_check": "A töltő töltés előtt nem ellenőrzi a jármű pilot diódáját.",
+      "safety.vent_check": "A töltő nem követel meg szellőzést az azt kérő járműveknél.",
+      "safety.temp_check": "A töltő túlmelegedés esetén nem áll le.",
+      "fault.gfci_tripped": "Egy korábbi munkamenetben áramkülönbséget észlelt. A töltés azóta folytatódott.",
+      "fault.no_ground": "A töltő egy korábbi munkamenetben elvesztette a földelést.",
+      "fault.stuck_relay": "A relé nem nyitott ki, amikor a töltő ezt kérte.",
+      "thermal.throttling": "A töltő korlátozza az áramot, hogy csökkentse a saját hőmérsékletét.",
+      "thermal.high_temp": "A töltő közel jár ahhoz a hőmérséklethez, amelynél leáll.",
+      "thermal.relay_thermal": "Az érintkezők jobban melegszenek, mint újkorukban. A relé állapota tartalmazza a számokat.",
+      "wear.relay_life": "A relé állapota mutatja, mennyi kapcsolási élettartam maradt.",
+      "wear.relay_transit_drift": "A lelassuló érintkezők általában kopottak. A relé állapota tartalmazza a számokat.",
+      "wear.relay_cold_open": "A terhelés alatti nyitás égeti az érintkezőket. A relé állapota számolja őket.",
+      "wear.stuck_relay_recovery": "Egy beragadt relé automatikusan kiszabadult. A relé állapota számolja ezeket."
+    }
+  },
   "logs-states": {
     "loading": "Indulás",
     "active-nocar": "Aktív - Autó nincs csatlakoztatva",
@@ -1105,7 +1166,8 @@
       "manager_disabled": "Töltő letiltva",
       "manager_changed": "Töltő állapota megváltozott",
       "boot": "Újraindítva",
-      "periodic": "Időszakos minta"
+      "periodic": "Időszakos minta",
+      "notification": "Figyelmeztetés: {advisory}"
     }
   },
   "wizard": {

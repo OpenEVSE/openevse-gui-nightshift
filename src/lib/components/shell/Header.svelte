@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n'
   import ChargePointMark from '../../../assets/ChargePointMark.svelte'
   import IconButton from '../ui/IconButton.svelte'
+  import NotificationBell from '../notifications/NotificationBell.svelte'
   import { theme } from '../../stores/theme.js'
   import { host, openDrawer } from '../../nativeHost.js'
   let { deviceName = 'OpenEVSE', wsConnected = true, evseConnected = true } = $props()
@@ -43,15 +44,24 @@
     </div>
   </div>
   <div class="flex items-center gap-2">
+    <!-- Renders nothing until the charger reports an advisory, so a clean
+         charger's header is exactly what it was before. -->
+    <NotificationBell />
     <IconButton
       icon={$theme.resolved === 'dark' ? 'mdi:weather-sunny' : 'mdi:weather-night'}
       label="Toggle theme"
       onclick={() => theme.setTheme($theme.resolved === 'dark' ? 'light' : 'dark')}
     />
-    <span
-      aria-label={$_(statusKey)}
-      title={$_(statusKey)}
-      class="h-2.5 w-2.5 rounded-full {connected ? 'bg-accent' : 'bg-error'}"
-    ></span>
+    <!-- The dot wears the same p-2 as an IconButton so the whole cluster is
+         evenly spaced: gap-2 separates the boxes, but each icon carries its
+         own padding, so a bare dot would sit 8px closer to its neighbour and
+         8px nearer the header edge than any icon does. -->
+    <span class="grid place-items-center p-2">
+      <span
+        aria-label={$_(statusKey)}
+        title={$_(statusKey)}
+        class="h-2.5 w-2.5 rounded-full {connected ? 'bg-accent' : 'bg-error'}"
+      ></span>
+    </span>
   </div>
 </header>

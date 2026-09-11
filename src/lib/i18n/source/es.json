@@ -2,6 +2,67 @@
   "app": "OpenEVSE",
   "loading": "Cargando…",
   "notification": "Notificación",
+  "notifications": {
+    "title_panel": "Avisos",
+    "bell": "Avisos ({count})",
+    "close": "Cerrar",
+    "empty": "Nada que informar.",
+    "muted": "Silenciado",
+    "mute": "Silenciar",
+    "dismiss": "Descartar",
+    "mute_note": "Silenciar solo apaga la alarma. Un aviso silenciado sigue en esta lista y mantiene su marca junto al ajuste al que se refiere.",
+    "raised": "Detectado hace {ago}",
+    "time_unknown": "Hora desconocida",
+    "checks_off": "Avisos: {count}",
+    "strip_title": "Requiere tu atención",
+    "strip_dismiss": "Descartar",
+    "strip_action": "Ver",
+    "severity": {
+      "info": "Información",
+      "warning": "Advertencia",
+      "critical": "Crítico"
+    },
+    "link": {
+      "safety": "Ajustes de seguridad",
+      "health": "Estado del relé"
+    },
+    "title": {
+      "safety.ground_check": "La comprobación de tierra está desactivada",
+      "safety.gfci_check": "La autoprueba del diferencial está desactivada",
+      "safety.relay_check": "La detección de relé pegado está desactivada",
+      "safety.diode_check": "La comprobación del diodo está desactivada",
+      "safety.vent_check": "La comprobación de ventilación está desactivada",
+      "safety.temp_check": "La vigilancia de temperatura está desactivada",
+      "fault.gfci_tripped": "Se registró un disparo del diferencial",
+      "fault.no_ground": "Se registró un fallo de tierra",
+      "fault.stuck_relay": "Se registró un relé pegado",
+      "thermal.throttling": "Corriente reducida por temperatura",
+      "thermal.high_temp": "La temperatura del cargador es alta",
+      "thermal.relay_thermal": "El relé se está calentando",
+      "wear.relay_life": "El relé se acerca al final de su vida útil",
+      "wear.relay_transit_drift": "El relé abre más despacio",
+      "wear.relay_cold_open": "El relé ha abierto con carga",
+      "wear.stuck_relay_recovery": "Se ha ejecutado una recuperación de relé"
+    },
+    "detail": {
+      "safety.ground_check": "El cargador no comprobará si falta la conexión a tierra antes de empezar.",
+      "safety.gfci_check": "El cargador no probará su detección de corriente residual al iniciar una sesión.",
+      "safety.relay_check": "El cargador no comprobará que su relé haya abierto realmente.",
+      "safety.diode_check": "El cargador no verificará el diodo piloto del vehículo antes de cargar.",
+      "safety.vent_check": "El cargador no exigirá ventilación a los vehículos que la soliciten.",
+      "safety.temp_check": "El cargador no se detendrá por exceso de temperatura.",
+      "fault.gfci_tripped": "Se detectó corriente residual en una sesión anterior. La carga se ha reanudado desde entonces.",
+      "fault.no_ground": "El cargador perdió su conexión a tierra en una sesión anterior.",
+      "fault.stuck_relay": "El relé no abrió cuando el cargador se lo pidió.",
+      "thermal.throttling": "El cargador limita la corriente para bajar su propia temperatura.",
+      "thermal.high_temp": "El cargador está cerca de la temperatura a la que se apaga.",
+      "thermal.relay_thermal": "Los contactos se calientan más que cuando eran nuevos. El estado del relé tiene las cifras.",
+      "wear.relay_life": "El estado del relé indica cuánta vida de conmutación le queda.",
+      "wear.relay_transit_drift": "Unos contactos que se vuelven lentos suelen estar desgastados. El estado del relé tiene las cifras.",
+      "wear.relay_cold_open": "Abrir con corriente quema los contactos. El estado del relé los cuenta.",
+      "wear.stuck_relay_recovery": "Un relé pegado se liberó automáticamente. El estado del relé los cuenta."
+    }
+  },
   "logs-states": {
     "loading": "Iniciando",
     "active-nocar": "Activo - vehículo no conectado",
@@ -1105,7 +1166,8 @@
       "manager_disabled": "Cargador deshabilitado",
       "manager_changed": "Estado del cargador cambiado",
       "boot": "Reiniciado",
-      "periodic": "Muestra periódica"
+      "periodic": "Muestra periódica",
+      "notification": "Aviso: {advisory}"
     }
   },
   "wizard": {

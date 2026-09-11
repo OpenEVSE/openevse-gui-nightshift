@@ -59,6 +59,7 @@
   "gfcicount": 1,
   "nogndcount": 5,
   "stuckcount": 0,
+  "notifications": { "count": 0, "severity": "info" },
   "solar": 3200,
   "grid_ie": -1500,
   "charge_rate": 32,

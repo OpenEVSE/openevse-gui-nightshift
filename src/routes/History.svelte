@@ -12,6 +12,7 @@
     pageRange, logTypeIcon, logTypeTone, logStateInfo, logEnergyKwh, logTempC,
     logPilotAmps, logReason,
   } from '../lib/history/logs.js'
+  import { isKnownAdvisory } from '../lib/notifications/notifications.js'
   import { formatTemp } from '../lib/temperature.js'
   import { formatCost } from '../lib/cost.js'
   import Card from '../lib/components/ui/Card.svelte'
@@ -32,6 +33,15 @@
   // Translate a logReason() descriptor into display text. null → no reason line.
   function reasonTextFor(reason) {
     if (!reason || reason.code === 'periodic') return null
+    if (reason.code === 'notification') {
+      // Advisory ids are stable and locale-independent; the prose is ours, and
+      // it is the same prose the bell panel shows. A row written by a firmware
+      // that added an id this build has no copy for falls back to the raw id
+      // rather than a missing-key placeholder.
+      const id = reason.params?.id ?? ''
+      const advisory = isKnownAdvisory(id) ? $_('notifications.title.' + id) : id
+      return $_('history.reason.notification', { values: { advisory } })
+    }
     return $_('history.reason.' + reason.code, { values: reason.params ?? {} })
   }
 
