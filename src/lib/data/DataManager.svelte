@@ -2,6 +2,8 @@
   import { derived } from 'svelte/store'
   import { limit_store } from '../stores/limit.js'
   import { boost_store } from '../stores/boost.js'
+  import { notification_store } from '../stores/notifications.js'
+  import { badgeSignature } from '../notifications/notifications.js'
   import { uisettings_store } from '../stores/uisettings.js'
   import { EvseClients } from '../vars.js'
   import { uistates_store } from '../stores/uistates.js'
@@ -34,6 +36,10 @@
   const override_version = derived(status_store, ($s) => $s?.override_version)
   const limit_version = derived(status_store, ($s) => $s?.limit_version)
   const boost_version = derived(status_store, ($s) => $s?.boost_version)
+  // Advisories have no version counter of their own: /status carries the two
+  // badge fields, and the firmware pushes them over the websocket whenever the
+  // live set changes. The pair, flattened to a string, is the version.
+  const notification_badge = derived(status_store, ($s) => badgeSignature($s))
   const evse_state = derived(status_store, ($s) => $s?.state)
   const charging = derived(evse_state, ($s) => $s == 3 ? true : false)
   const rfid_waiting = derived(status_store, ($s) => $s?.rfid_waiting)
@@ -48,6 +54,7 @@
   let refresh_plan = false
   let refresh_limit = false
   let refresh_boost = false
+  let refresh_notifications = false
   let prev_ip
   let ip_changed = false
 
@@ -196,6 +203,28 @@
     else return true
   }
 
+  export async function refreshNotificationStore(signature) {
+    if (refresh_notifications)
+      return
+    // null → no `notifications` object in /status → firmware predates
+    // advisories. Leave the store idle so the bell, the strip and the settings
+    // markers stay hidden, mirroring how refreshBoostStore gates on
+    // boost_version. The gate is presence, never the values: a charger with
+    // nothing to report still sends {count: 0, severity: "info"}.
+    if (signature === null || signature === undefined)
+      return
+    if ($uistates_store.notification_badge === signature)
+      return
+    refresh_notifications = true
+    const res = await serialQueue.add(notification_store.download)
+    refresh_notifications = false
+    if (res) {
+      $uistates_store.notification_badge = signature
+      return res
+    }
+    return false
+  }
+
   export function refreshChargingState(val) {
     $uistates_store.charging = val
   }
@@ -301,6 +330,7 @@
   $effect(() => { refreshOverrideStore($override_version) })
   $effect(() => { refreshLimitStore($limit_version) })
   $effect(() => { refreshBoostStore($boost_version) })
+  $effect(() => { refreshNotificationStore($notification_badge) })
   $effect(() => { refreshDateTime($time, $config_store?.time_zone) })
   $effect(() => { refreshChargingState($charging) })
   $effect(() => { refreshLocale($config_store?.lang) })

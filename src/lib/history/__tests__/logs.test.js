@@ -187,4 +187,19 @@ describe('logReason', () => {
     })
     expect(logReason({ changed: ['boot'] }, null)).toEqual({ code: 'boot' })
   })
+
+  it('names the advisory on a notification row', () => {
+    // The firmware writes these rows outside the field-diff path, so their
+    // `changed` mask is empty and the early return would leave them blank.
+    expect(
+      logReason({ type: 'notification', notification: 'safety.ground_check', changed: [] }, null),
+    ).toEqual({ code: 'notification', params: { id: 'safety.ground_check' } })
+  })
+
+  it('treats an absent notification field as normal, not as an error', () => {
+    // The field is absent on every non-advisory row and on rows written
+    // before it existed.
+    expect(logReason({ notification: '', changed: ['boot'] }, null)).toEqual({ code: 'boot' })
+    expect(logReason({ notification: null, changed: [] }, null)).toBeNull()
+  })
 })

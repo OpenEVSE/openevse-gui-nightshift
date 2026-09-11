@@ -39,6 +39,10 @@ const entries = [
   { name: 'monitoring', route: '/monitoring', viewports: ['desktop', 'mobile'] },
   { name: 'history', route: '/history', viewports: ['desktop', 'mobile'] },
   { name: 'wizard', route: '/', scenario: 'wizard', viewports: ['desktop', 'mobile'] },
+  // Advisories. The base fixture is a charger with nothing to report, so this
+  // scenario is the only place the header bell, the critical strip and the
+  // settings markers show up.
+  { name: 'dashboard-advisories', route: '/', scenario: 'notifications', viewports: ['desktop', 'mobile'] },
 
   // ── Settings hub + pages ──────────────────────────────────────────────────
   { name: 'settings', route: '/settings', themes: ['dark', 'light'], viewports: ['desktop', 'mobile'] },
@@ -48,6 +52,7 @@ const entries = [
   { name: 'settings-ocpp', route: '/settings/ocpp' },
   { name: 'settings-evse', route: '/settings/evse' },
   { name: 'settings-safety', route: '/settings/safety' },
+  { name: 'settings-safety-advisories', route: '/settings/safety', scenario: 'notifications' },
   { name: 'settings-time', route: '/settings/time' },
   { name: 'settings-rfid', route: '/settings/rfid' },
   { name: 'settings-vehicle', route: '/settings/vehicle' },

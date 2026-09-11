@@ -13,6 +13,10 @@ const model = {
 		schedule_version: 0,
 		schedule_plan_version: 0,
 		limit_version: 0,
+		// "<count>:<severity>" from /status — the advisory list's version
+		// counter. null until the first frame from a charger that has the
+		// advisory engine; stays null forever on one that doesn't.
+		notification_badge: null,
 		logidx_min: 0,
 		logidx_max: 0,
 		// (todo) derived from other stores

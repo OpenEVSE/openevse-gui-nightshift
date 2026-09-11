@@ -2,6 +2,67 @@
   "app": "OpenEVSE",
   "loading": "Chargement…",
   "notification": "Notification",
+  "notifications": {
+    "title_panel": "Avertissements",
+    "bell": "Avertissements ({count})",
+    "close": "Fermer",
+    "empty": "Rien à signaler.",
+    "muted": "Masqué",
+    "mute": "Masquer",
+    "dismiss": "Ignorer",
+    "mute_note": "Masquer ne fait que couper l'alerte. Un avertissement masqué reste dans cette liste et garde sa marque à côté du réglage concerné.",
+    "raised": "Signalé il y a {ago}",
+    "time_unknown": "Heure inconnue",
+    "checks_off": "Avertissements : {count}",
+    "strip_title": "Demande votre attention",
+    "strip_dismiss": "Ignorer",
+    "strip_action": "Voir",
+    "severity": {
+      "info": "Info",
+      "warning": "Avertissement",
+      "critical": "Critique"
+    },
+    "link": {
+      "safety": "Réglages de sécurité",
+      "health": "État du relais"
+    },
+    "title": {
+      "safety.ground_check": "La surveillance de la terre est désactivée",
+      "safety.gfci_check": "L'autotest du différentiel est désactivé",
+      "safety.relay_check": "La détection de relais collé est désactivée",
+      "safety.diode_check": "Le contrôle de la diode est désactivé",
+      "safety.vent_check": "Le contrôle de ventilation est désactivé",
+      "safety.temp_check": "La surveillance de température est désactivée",
+      "fault.gfci_tripped": "Un déclenchement du différentiel a été enregistré",
+      "fault.no_ground": "Un défaut de terre a été enregistré",
+      "fault.stuck_relay": "Un relais collé a été enregistré",
+      "thermal.throttling": "Courant réduit par la chaleur",
+      "thermal.high_temp": "La température du chargeur est élevée",
+      "thermal.relay_thermal": "Le relais chauffe",
+      "wear.relay_life": "Le relais approche de sa fin de vie",
+      "wear.relay_transit_drift": "Le relais s'ouvre plus lentement",
+      "wear.relay_cold_open": "Le relais s'est ouvert en charge",
+      "wear.stuck_relay_recovery": "Une récupération de relais a été exécutée"
+    },
+    "detail": {
+      "safety.ground_check": "Le chargeur ne vérifiera pas l'absence de mise à la terre avant de démarrer.",
+      "safety.gfci_check": "Le chargeur ne testera pas sa détection de courant résiduel au début d'une session.",
+      "safety.relay_check": "Le chargeur ne vérifiera pas que son relais s'est réellement ouvert.",
+      "safety.diode_check": "Le chargeur ne vérifiera pas la diode pilote du véhicule avant de charger.",
+      "safety.vent_check": "Le chargeur n'exigera pas de ventilation pour les véhicules qui la demandent.",
+      "safety.temp_check": "Le chargeur ne s'arrêtera pas en cas de surchauffe.",
+      "fault.gfci_tripped": "Un courant résiduel a été détecté lors d'une session précédente. La charge a repris depuis.",
+      "fault.no_ground": "Le chargeur a perdu sa mise à la terre lors d'une session précédente.",
+      "fault.stuck_relay": "Le relais ne s'est pas ouvert quand le chargeur le lui a demandé.",
+      "thermal.throttling": "Le chargeur limite le courant pour faire baisser sa propre température.",
+      "thermal.high_temp": "Le chargeur approche de la température à laquelle il s'arrête.",
+      "thermal.relay_thermal": "Les contacts chauffent plus qu'à l'état neuf. L'état du relais donne les chiffres.",
+      "wear.relay_life": "L'état du relais indique la durée de commutation restante.",
+      "wear.relay_transit_drift": "Des contacts qui ralentissent sont généralement usés. L'état du relais donne les chiffres.",
+      "wear.relay_cold_open": "S'ouvrir sous courant brûle les contacts. L'état du relais les compte.",
+      "wear.stuck_relay_recovery": "Un relais collé a été libéré automatiquement. L'état du relais les compte."
+    }
+  },
   "logs-states": {
     "loading": "Démarrage",
     "active-nocar": "Actif - VE non connecté",
@@ -1105,7 +1166,8 @@
       "manager_disabled": "Chargeur désactivé",
       "manager_changed": "État du chargeur modifié",
       "boot": "Redémarré",
-      "periodic": "Échantillon périodique"
+      "periodic": "Échantillon périodique",
+      "notification": "Avertissement : {advisory}"
     }
   },
   "wizard": {

@@ -1,0 +1,72 @@
+{
+  "_comment": [
+    "Every advisory surface at once. The base fixture is a charger with nothing",
+    "to report, so the quiet case is the default and only this scenario shows",
+    "the bell, the dashboard strip and the Settings > Safety markers.",
+    "One row per path worth exercising: an unacked critical (ground_check), an",
+    "acked sticky one that must stay listed and keep its marker (vent_check), a",
+    "non-sticky critical that offers Dismiss rather than Mute (gfci_tripped), a",
+    "wear item that links to relay health (relay_life), and one recorded before",
+    "the clock synced (relay_thermal, first_seen 0 -> unknown, not 1970).",
+    "count is 4, not 5: it excludes the muted entry, which is the contract.",
+    "Timestamps are anchored on the status fixture's frozen 2026-05-21T22:00:30Z."
+  ],
+  "config": {
+    "ground_check": false,
+    "vent_check": false
+  },
+  "status": {
+    "notifications": { "count": 4, "severity": "critical" }
+  },
+  "notifications": {
+    "count": 4,
+    "max_severity": "critical",
+    "notifications": [
+      {
+        "id": "safety.ground_check",
+        "category": "safety",
+        "severity": "critical",
+        "sticky": true,
+        "acked": false,
+        "first_seen": 1779382830,
+        "last_seen": 1779400830
+      },
+      {
+        "id": "safety.vent_check",
+        "category": "safety",
+        "severity": "warning",
+        "sticky": true,
+        "acked": true,
+        "first_seen": 1777960830,
+        "last_seen": 1779400830
+      },
+      {
+        "id": "fault.gfci_tripped",
+        "category": "fault",
+        "severity": "critical",
+        "sticky": false,
+        "acked": false,
+        "first_seen": 1779400530,
+        "last_seen": 1779400830
+      },
+      {
+        "id": "wear.relay_life",
+        "category": "wear",
+        "severity": "info",
+        "sticky": false,
+        "acked": false,
+        "first_seen": 1779307230,
+        "last_seen": 1779400830
+      },
+      {
+        "id": "thermal.relay_thermal",
+        "category": "thermal",
+        "severity": "info",
+        "sticky": true,
+        "acked": false,
+        "first_seen": 0,
+        "last_seen": 0
+      }
+    ]
+  }
+}

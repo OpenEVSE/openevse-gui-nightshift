@@ -2,6 +2,7 @@
   import { _ } from 'svelte-i18n'
   import ChargePointMark from '../../../assets/ChargePointMark.svelte'
   import IconButton from '../ui/IconButton.svelte'
+  import NotificationBell from '../notifications/NotificationBell.svelte'
   import { theme } from '../../stores/theme.js'
   import { host, openDrawer } from '../../nativeHost.js'
   let { deviceName = 'OpenEVSE', wsConnected = true, evseConnected = true } = $props()
@@ -43,6 +44,9 @@
     </div>
   </div>
   <div class="flex items-center gap-2">
+    <!-- Renders nothing until the charger reports an advisory, so a clean
+         charger's header is exactly what it was before. -->
+    <NotificationBell />
     <IconButton
       icon={$theme.resolved === 'dark' ? 'mdi:weather-sunny' : 'mdi:weather-night'}
       label="Toggle theme"
