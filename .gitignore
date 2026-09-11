@@ -33,3 +33,8 @@ dev-dist
 OVERNIGHT.md
 openevse-gui-nightshift-*.tar.gz
 openevse-gui-nightshift-*.zip
+
+# Generated from src/lib/i18n/source/*.json by scripts/build-locale-values.mjs
+/src/lib/i18n/es.json
+/src/lib/i18n/fr.json
+/src/lib/i18n/hu.json
