@@ -38,8 +38,17 @@
   const boost_version = derived(status_store, ($s) => $s?.boost_version)
   // Advisories have no version counter of their own: /status carries the two
   // badge fields, and the firmware pushes them over the websocket whenever the
-  // live set changes. The pair, flattened to a string, is the version.
-  const notification_badge = derived(status_store, ($s) => badgeSignature($s))
+  // live set changes. The pair alone is not enough — one advisory clearing as
+  // another of the same severity is raised moves the set without moving either
+  // number — so WebSocket.svelte bumps notification_event on every frame that
+  // carries the object, and the two together make the version.
+  const notification_badge = derived(
+    [status_store, uistates_store],
+    ([$s, $ui]) => {
+      const sig = badgeSignature($s)
+      return sig === null ? null : sig + '@' + ($ui?.notification_event ?? 0)
+    },
+  )
   const evse_state = derived(status_store, ($s) => $s?.state)
   const charging = derived(evse_state, ($s) => $s == 3 ? true : false)
   const rfid_waiting = derived(status_store, ($s) => $s?.rfid_waiting)

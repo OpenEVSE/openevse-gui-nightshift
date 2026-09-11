@@ -41,7 +41,7 @@ beforeEach(() => {
   )
   status_store.set(undefined)
   notification_store.reset()
-  uistates_store.update((s) => ({ ...s, notification_badge: null }))
+  uistates_store.update((s) => ({ ...s, notification_badge: null, notification_event: 0 }))
 })
 
 afterEach(() => cleanup())
@@ -62,7 +62,7 @@ describe('the advisory capability gate', () => {
     status_store.set({ state: 1, notifications: { count: 0, severity: 'info' } })
     render(DataManager)
     await vi.waitFor(() => expect(notificationCalls()).toHaveLength(1))
-    expect(get(uistates_store).notification_badge).toBe('0:info')
+    expect(get(uistates_store).notification_badge).toBe('0:info@0')
   })
 
   it('re-reads when the badge moves and not while it holds still', async () => {
@@ -77,6 +77,21 @@ describe('the advisory capability gate', () => {
 
     // Now the set really moves.
     status_store.update((s) => ({ ...s, notifications: { count: 2, severity: 'critical' } }))
+    await vi.waitFor(() => expect(notificationCalls()).toHaveLength(2))
+  })
+
+  it('re-reads when the set changes but the two badge fields do not', async () => {
+    // One critical clears in the same five-second pass another is raised:
+    // count and severity land on exactly the pair they started from, and a
+    // signature built from them alone would leave the panel showing an
+    // advisory the charger has stopped reporting. WebSocket.svelte bumps
+    // notification_event on every frame carrying the object, which is the
+    // part that actually moved.
+    status_store.set({ state: 1, notifications: { count: 1, severity: 'critical' } })
+    render(DataManager)
+    await vi.waitFor(() => expect(notificationCalls()).toHaveLength(1))
+
+    uistates_store.update((s) => ({ ...s, notification_event: (s.notification_event ?? 0) + 1 }))
     await vi.waitFor(() => expect(notificationCalls()).toHaveLength(2))
   })
 })
