@@ -16,6 +16,7 @@ vi.mock('../../../lib/alerts.js', async (importOriginal) => ({
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { showWriteError } from '../../../lib/alerts.js'
+import { config_store } from '../../../lib/stores/config.js'
 import { status_store } from '../../../lib/stores/status.js'
 import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import Terminal from '../Terminal.svelte'
@@ -110,6 +111,80 @@ describe('Terminal — Memory & health', () => {
     expect(getByText('config.terminal.memory')).toBeInTheDocument()
     expect(getByText('config.terminal.reset_reason')).toBeInTheDocument()
     expect(getByText('config.terminal.ws_conns')).toBeInTheDocument()
+  })
+
+  it('adds microSD rows to the storage table only when a card is mounted', () => {
+    config_store.set({ espflash: 16777216, sd_size: 31914983424, sd_used: 33554432, sd_log_size: 33554432 })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.sd_card')).toBeInTheDocument()
+    expect(getByText('config.terminal.sd_log')).toBeInTheDocument()
+    config_store.set({ espflash: 16777216 })
+  })
+
+  it('offers to format a mounted card and POSTs after confirmation', async () => {
+    config_store.set({ espflash: 16777216, sd_size: 31914983424, sd_used: 33554432, sd_log_size: 33554432 })
+    status_store.set({ sd_status: 'mounted' })
+    httpAPI.mockResolvedValue({ msg: 'started' })
+    const { getByText } = render(Terminal)
+    await fireEvent.click(getByText('config.terminal.sd_format_button'))
+    await fireEvent.click(getByText('config.terminal.sd_format_confirm_yes'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/sdcard/format', '{}')
+    config_store.set({ espflash: 16777216 })
+    status_store.set({})
+  })
+
+  it('shows the format phase from sd_status while the card is unmounted', () => {
+    config_store.set({ espflash: 16777216 })
+    status_store.set({ sd_status: 'creating log' })
+    const { getByText, queryByText } = render(Terminal)
+    expect(getByText('config.terminal.sd_format_phase_creating')).toBeInTheDocument()
+    expect(queryByText('config.terminal.sd_format_button')).not.toBeInTheDocument()
+    status_store.set({})
+  })
+
+  it('omits the microSD rows without sd_size', () => {
+    config_store.set({ espflash: 16777216 })
+    const { queryByText } = render(Terminal)
+    expect(queryByText('config.terminal.sd_card')).not.toBeInTheDocument()
+    config_store.set({})
+  })
+
+  it('falls back to espinfo for the chip row on older firmware', () => {
+    config_store.set({ espinfo: 'ESP32-S3r2 2 core WiFi BLE' })
+    status_store.set({ ...MEM })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.chip')).toBeInTheDocument()
+    expect(getByText('ESP32-S3r2 2 core WiFi BLE')).toBeInTheDocument()
+    config_store.set({})
+  })
+
+  it('composes the chip row from the structured fields when present', () => {
+    config_store.set({ espinfo: 'ESP32-S3r2 2 core WiFi BLE', chip_model: 'ESP32-S3', chip_rev: 2,
+      chip_cores: 2, espflash: 16777216, psram_size: 8388608 })
+    status_store.set({ ...MEM })
+    const { getByText, queryByText } = render(Terminal)
+    expect(getByText(/ESP32-S3 v0\.2 · 2 cores · .*flash · .*PSRAM/)).toBeInTheDocument()
+    expect(queryByText('ESP32-S3r2 2 core WiFi BLE')).not.toBeInTheDocument()
+    config_store.set({})
+  })
+
+  it('shows PSRAM rows only when the firmware reports psram_free', () => {
+    status_store.set({ ...MEM, psram_free: 8294468, psram_largest: 8257524 })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.psram_free')).toBeInTheDocument()
+    expect(getByText('config.terminal.psram_largest')).toBeInTheDocument()
+  })
+
+  it('omits the PSRAM rows on boards without PSRAM', () => {
+    status_store.set({ ...MEM })
+    const { queryByText } = render(Terminal)
+    expect(queryByText('config.terminal.psram_free')).not.toBeInTheDocument()
+  })
+
+  it('names the IDF 5 USB reset without a warning tone', () => {
+    status_store.set({ ...MEM, reset_reason_name: 'usb', reset_reason: 11 })
+    const { getByText } = render(Terminal)
+    expect(getByText('config.terminal.reset_reasons.usb')).toBeInTheDocument()
   })
 
   it('omits the whole section when heap_largest is absent', () => {
