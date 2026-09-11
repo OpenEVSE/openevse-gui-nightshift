@@ -78,6 +78,18 @@ describe('HTTP page', () => {
     expect(getByText('config.http.https_no_cert')).toBeInTheDocument()
   })
 
+  it('falls back to None when the stored id matches no option', () => {
+    // A native select given a value no option carries selects nothing at all,
+    // which looks like a broken control instead of "no usable certificate".
+    certificate_store.set([{ id: 'bbb', type: 'client', name: 'Server cert' }])
+    config_store.set({
+      www_username: '', www_password: '', lang: 'en',
+      www_https_enabled: true, www_certificate_id: 'gone',
+    })
+    const { container } = render(Http)
+    expect(container.querySelector('select').value).toBe('')
+  })
+
   it('warns when the stored certificate has no private key', () => {
     // A root certificate is never offered in the Select, so selecting one is
     // only reachable from outside the UI — but the firmware treats it the same

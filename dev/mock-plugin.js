@@ -66,10 +66,22 @@ export function mockPlugin() {
   // screenshot runner and handy for manual dev.
   let scenario = null
 
+  // Dev-only config writes, held in memory for the life of the dev server.
+  // The device persists POST /config and answers `{"msg":"done"}`; the mock
+  // used to fall through to the GET fixture, which has no `msg`, so
+  // config_store.upload() read every save as a failure and every settings
+  // page raised the write-error alert. Merging here means a save sticks and
+  // a reload shows what was saved.
+  const configWrites = {}
+  let configVersion = baseFixtures['/api/status'].config_version ?? 1
+
   function effectiveFixture(url) {
     const base = baseFixtures[url]
     const overlay = scenario?.[fixtureKeyByUrl[url]]
-    return overlay ? deepMerge(base, overlay) : base
+    const merged = overlay ? deepMerge(base, overlay) : base
+    // Writes sit on top of the scenario overlay: the scenario is the charger
+    // you started with, the writes are what you have changed since.
+    return url === '/api/config' ? { ...merged, ...configWrites } : merged
   }
 
   // Static mode (MOCK_STATIC=1): no periodic WebSocket ticks and a frozen
@@ -127,6 +139,7 @@ export function mockPlugin() {
     return JSON.stringify({
       ...baseStatus,
       state,
+      config_version: configVersion,
       claims_version: claimsVersion,
       boost: !!boost,
       boost_version: boostVersion,
@@ -172,6 +185,9 @@ export function mockPlugin() {
             }
             scenario = JSON.parse(readFileSync(file, 'utf-8'))
           }
+          // A scenario describes a charger as found, so drop anything written
+          // during the previous one rather than letting it bleed through.
+          for (const key of Object.keys(configWrites)) delete configWrites[key]
           const msg = buildStatusMessage(tickCount)
           for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
           res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -499,6 +515,31 @@ export function mockPlugin() {
           const rapi = rapiParam ? decodeURIComponent(rapiParam[1]) : ''
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ cmd: rapi, ret: '$OK^20' }))
+          return
+        }
+
+        // Config writes. The device merges the body into its stored config,
+        // answers {"msg":"done"} and bumps config_version; DataManager watches
+        // that counter and re-downloads, so a save here round-trips exactly as
+        // it does on hardware instead of only updating the store optimistically.
+        if (url === '/api/config' && req.method === 'POST') {
+          let body = ''
+          req.on('data', (c) => { body += c })
+          req.on('end', () => {
+            let data
+            try { data = JSON.parse(body) } catch { data = null }
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
+              res.writeHead(400, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'failed to parse JSON' }))
+              return
+            }
+            Object.assign(configWrites, data)
+            configVersion++
+            const msg = buildStatusMessage(tickCount)
+            for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ msg: 'done' }))
+          })
           return
         }
 

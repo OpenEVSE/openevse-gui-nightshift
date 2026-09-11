@@ -139,9 +139,13 @@
         description={$_('config.http.https_cert_desc')}
         status={$ss.www_certificate_id ?? 'idle'}
       >
+        <!-- An id that matches no option would leave a native <select> with
+             nothing selected, which reads as a broken control rather than as
+             a charger with no usable certificate. Show None and let the
+             warning below say why. -->
         <Select
           options={certOptions}
-          value={certId}
+          value={certUsable ? certId : ''}
           onchange={(v) => saveServerField('www_certificate_id', v)}
         />
       </FormField>
