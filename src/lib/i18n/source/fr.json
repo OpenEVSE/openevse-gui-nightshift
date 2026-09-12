@@ -169,7 +169,11 @@
       "standby_off": "Éteint",
       "timeout": "Délai d'inactivité",
       "timeout_desc": "Durée pendant laquelle l'écran reste allumé avant de passer en veille. Il reste à pleine luminosité pendant la charge ou en cas de défaut.",
-      "never": "Jamais"
+      "never": "Jamais",
+      "lcd": "Écran LCD 2 lignes",
+      "lcd_desc": "Type de rétroéclairage de l'écran LCD 2 lignes du contrôleur. Pour un remplacement de JuiceBox v2, choisissez Rouge - Vert - Bleu.",
+      "lcd_mono": "Monochrome",
+      "lcd_rgb": "Rouge - Vert - Bleu"
     },
     "validation": {
       "required": "Requis",
