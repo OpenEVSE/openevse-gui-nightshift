@@ -233,6 +233,8 @@
       "overcurrent_monitor": "Over-current monitoring",
       "zero_cross": "Relay wear protection (zero-cross)",
       "zero_cross_desc": "Switch the relay only at AC zero-crossing to reduce contact wear.",
+      "cable_temp": "Cable Temperature Monitoring",
+      "cable_temp_desc": "Monitor NTC thermistors in the EV or input cable and fault the charger if one overheats.",
       "faults": "Fault counters",
       "gfci_count": "GFCI faults",
       "noground_count": "No-ground faults",
@@ -247,6 +249,26 @@
       "temp_throttle_enable": "Enable temperature throttle",
       "temp_throttle_setpoint": "Setpoint",
       "temp_throttle_desc": "Reduce charge current automatically when the EVSE reaches the setpoint temperature."
+    },
+    "cabletemp": {
+      "title": "Cable Temperature",
+      "input1": "Input 1 (PP)",
+      "input2": "Input 2 (PP2)",
+      "pp_note": "Shares a pin with PP auto-ampacity — assigning a sensor here turns that off.",
+      "none": "None",
+      "source_ev1": "EV Cable 1",
+      "source_ev2": "EV Cable 2",
+      "source_in1": "Input Cable 1",
+      "source_in2": "Input Cable 2",
+      "reading": "Current reading",
+      "calibration_desc": "Thermistor calibration for this sensor. Defaults suit the Phoenix Contact NACS cable.",
+      "r25": "NTC resistance at 25°C",
+      "beta": "NTC beta coefficient",
+      "offset": "Calibration offset",
+      "panic": "Shutdown threshold",
+      "status_not_installed": "No sensor",
+      "status_open": "Open circuit / unplugged",
+      "status_shorted": "Shorted"
     },
     "time": {
       "status": "Device time",
@@ -933,7 +955,8 @@
       "sensors": "Sensors",
       "service": "Service",
       "vehicle": "Vehicle",
-      "home_battery": "Home Battery"
+      "home_battery": "Home Battery",
+      "cable_temp": "Cable Temperature"
     },
     "energy": {
       "session": "Session",
@@ -1046,7 +1069,8 @@
     "miles": "mi",
     "percent": "%",
     "watt": "W",
-    "hz": "Hz"
+    "hz": "Hz",
+    "ohm": "Ω"
   },
   "clients": {
     "manual": "Manual",
