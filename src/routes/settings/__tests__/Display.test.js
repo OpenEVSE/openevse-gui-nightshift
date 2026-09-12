@@ -41,12 +41,22 @@ describe('Display page', () => {
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ tft_theme: 'light' }))
   })
 
-  it('hides brightness and timeout controls when their keys are absent', () => {
+  it('hides brightness, timeout and LCD controls when their keys are absent', () => {
     config_store.set({ tft_theme: 'dark' })
-    const { queryByLabelText } = render(Display)
+    const { queryByLabelText, queryByText } = render(Display)
     expect(queryByLabelText('config.display.brightness')).toBeNull()
     expect(queryByLabelText('config.display.standby')).toBeNull()
     expect(queryByLabelText('config.display.timeout')).toBeNull()
+    expect(queryByText('config.display.lcd_mono')).toBeNull()
+  })
+
+  it('defaults the 2-line LCD selector to RGB and writes on change', async () => {
+    config_store.set({ tft_theme: 'dark', lcd_type: 'rgb' })
+    const { getByText } = render(Display)
+    expect(getByText('config.display.lcd_rgb')).toHaveAttribute('aria-pressed', 'true')
+    expect(getByText('config.display.lcd_mono')).toHaveAttribute('aria-pressed', 'false')
+    await fireEvent.click(getByText('config.display.lcd_mono'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_type: 'mono' }))
   })
 
   it('renders the active brightness slider at the current value and writes on change', async () => {
