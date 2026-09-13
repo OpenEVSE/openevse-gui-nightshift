@@ -2,7 +2,10 @@
   import { _ } from 'svelte-i18n'
   import StatChip from '../ui/StatChip.svelte'
 
-  let { charging = false, live = {}, summary = {}, sessionCost = null } = $props()
+  // `currentLimited`: load sharing is holding the current below this
+  // charger's own max — say so on the number itself, so 6.0 A reads as
+  // "limited" without scrolling to the card that explains why.
+  let { charging = false, live = {}, summary = {}, sessionCost = null, currentLimited = false } = $props()
 </script>
 
 <!-- Fixed-height band: the charging layout (chips + sensor row) is taller
@@ -19,7 +22,12 @@
         label={$_('dashboard.chips.elapsed')}
         sub={live.toFull ? $_('dashboard.vehicle.to_full', { values: { time: live.toFull } }) : null}
       />
-      <StatChip value={`${live.currentA} A`} label={$_('dashboard.chips.current')} />
+      <StatChip
+        value={`${live.currentA} A`}
+        label={$_('dashboard.chips.current')}
+        sub={currentLimited ? $_('dashboard.loadsharing.tile_limited') : null}
+        subTone="warning"
+      />
     </div>
     <!-- Sensor trio: compact underlined row on mobile; at lg it joins the
          pill language of the chips above (and drops the rule). -->

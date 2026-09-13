@@ -27,22 +27,32 @@ export const SETTINGS_PAGES = [
   { key: 'firmware', route: '/settings/firmware', icon: 'mdi:chip', labelKey: 'config.pages.firmware', section: 'system' },
   { key: 'certificates', route: '/settings/certificates', icon: 'mdi:certificate', labelKey: 'config.pages.certificates', section: 'system' },
   { key: 'terminal', route: '/settings/terminal', icon: 'mdi:console', labelKey: 'config.pages.terminal', section: 'system' },
-  // Only present on firmware with the on-device LVGL TFT panel — `tft_theme`
-  // appears in /config there, so it doubles as the "has a panel" capability gate.
-  { key: 'display', route: '/settings/display', icon: 'mdi:monitor', labelKey: 'config.pages.display', section: 'system', requires: 'tft_theme' },
+  // Shown for either kind of on-device display. `tft_theme` only appears in
+  // /config on LVGL-TFT builds; `lcd_type` appears on every build whose
+  // controller might carry the 2-line character LCD (classic V6, JuiceBox v2
+  // conversions), which have no TFT at all — so either key is the "has a
+  // display" signal, and the page itself gates each section on its own key.
+  { key: 'display', route: '/settings/display', icon: 'mdi:monitor', labelKey: 'config.pages.display', section: 'system', requires: ['tft_theme', 'lcd_type'] },
   { key: 'about', route: '/settings/about', icon: 'mdi:information-outline', labelKey: 'config.pages.about', section: 'system' },
 ]
 
-// `requires` gates on a device-config capability key; `labs` gates on the
-// client-side OpenEVSE Labs switch (uisettings.dev_features), passed in via
-// opts so this stays a pure function of its inputs.
+// `requires` gates on a device-config capability key, or on any one of a list
+// of keys; `labs` gates on the client-side OpenEVSE Labs switch
+// (uisettings.dev_features), passed in via opts so this stays a pure function
+// of its inputs.
+function hasCapability(config, requires) {
+  if (!requires) return true
+  const keys = Array.isArray(requires) ? requires : [requires]
+  return !!config && keys.some((k) => config[k])
+}
+
 export function pagesBySection(config, { dev_features = false } = {}) {
   return SECTIONS.map((section) => ({
     section,
     pages: SETTINGS_PAGES.filter(
       (p) =>
         p.section === section &&
-        (!p.requires || (config && config[p.requires])) &&
+        hasCapability(config, p.requires) &&
         (!p.labs || dev_features),
     ),
   })).filter((g) => g.pages.length > 0)

@@ -47,6 +47,7 @@ import {
   JSONTryParse,
   compareVersion,
   removeDuplicateObjects,
+  hardMaxCurrent,
 } from '../utils.js'
 
 describe('sec2time', () => {
@@ -438,5 +439,18 @@ describe('getBreakpoint', () => {
   it('should return desktop at boundary (1281)', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1281, writable: true })
     expect(getBreakpoint()).toBe('desktop')
+  })
+})
+
+describe('hardMaxCurrent', () => {
+  it('returns the hardware ceiling when the firmware has read it', () => {
+    expect(hardMaxCurrent({ max_current_hard: 40 })).toBe(40)
+  })
+  it('treats 0, missing and junk as "not read yet" and uses the fallback', () => {
+    expect(hardMaxCurrent({ max_current_hard: 0 })).toBe(32)
+    expect(hardMaxCurrent({ max_current_hard: 0 }, 48)).toBe(48)
+    expect(hardMaxCurrent({})).toBe(32)
+    expect(hardMaxCurrent(undefined, 48)).toBe(48)
+    expect(hardMaxCurrent({ max_current_hard: 'x' })).toBe(32)
   })
 })

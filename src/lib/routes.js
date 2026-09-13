@@ -31,6 +31,11 @@ export const routes = {
   '/schedule': ChargeManager,
   '/schedule/legacy': Schedule,
   '/monitoring': Monitoring,
+  // Deep link to the Health tab. Advisories about relay wear and cleared
+  // faults point here rather than restating figures the tab already renders,
+  // and an exact-match route table means the tab needs a path of its own.
+  // BottomNav's isActive() already lights Monitoring for its sub-routes.
+  '/monitoring/health': Monitoring,
   '/history': History,
   '/settings': Settings,
 }

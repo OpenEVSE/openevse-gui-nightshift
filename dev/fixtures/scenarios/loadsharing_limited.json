@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "Controller of a 48 A group, allocated 16 A of its own 32 A because the",
+    "other chargers are drawing. The load-sharing client holds the",
+    "max_current claim; that claim is what the Home card reads as the limit."
+  ],
+  "config": {
+    "loadsharing_enabled": true,
+    "loadsharing_role": "controller",
+    "loadsharing_group_max_current": 48,
+    "max_current_soft": 32
+  },
+  "status": {
+    "pilot": 16,
+    "amp": 16000,
+    "loadsharing_status_version": 1,
+    "loadsharing_group_current_total": 40000,
+    "loadsharing_joined_peers": [
+      { "hostname": "openevse-9cc0.local", "name": "This charger", "amp": 16000, "pilot": 16 },
+      { "hostname": "garage.local", "name": "Garage", "amp": 24000, "pilot": 24 }
+    ]
+  },
+  "claims_target": {
+    "properties": { "max_current": 16 },
+    "claims": { "max_current": 65550 }
+  }
+}
