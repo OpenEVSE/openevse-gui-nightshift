@@ -906,15 +906,20 @@
       "active": "Limitado · {amps} A"
     },
     "loadsharing": {
-      "badge_active": "Load Sharing Active",
-      "badge_limited": "Load Sharing Limited",
-      "badge_controlled": "Load Sharing Controlled",
-      "local_max": "Local max",
-      "shared_cap": "Shared cap",
-      "applied_pilot": "Applied pilot",
-      "reason": "Reason",
-      "reduced": "Reduced due to load sharing",
-      "controlled_by": "Controlled by {controller}"
+      "title": "Reparto de carga",
+      "line_controller": "Compartiendo con {count} cargadores · {total} A de {max} A",
+      "line_alone": "Reparto de carga activo, aún sin otros cargadores · {total} A de {max} A",
+      "line_member": "Compartiendo vía {controller} · {amps} A de {max} A",
+      "pill_member_limited": "Miembro · limitado",
+      "pill_controller_limited": "Controlador · limitado",
+      "pill_failsafe": "Modo seguro",
+      "bar": "{limit} A de {max} A",
+      "limited_group": "Limitado a {limit} A, grupo en {total} de {max} A",
+      "limited": "Limitado a {limit} A",
+      "failsafe_for": "inaccesible desde hace {duration}, usando el límite seguro de {limit} A.",
+      "failsafe_never": "no ha respondido desde el arranque, usando el límite seguro de {limit} A.",
+      "settings": "Ajustes de reparto de carga",
+      "tile_limited": "limitado"
     },
     "session": {
       "collecting": "Recopilando datos de la sesión…",

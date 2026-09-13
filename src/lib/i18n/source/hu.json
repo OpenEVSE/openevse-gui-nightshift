@@ -906,15 +906,20 @@
       "active": "Korlátozva · {amps} A"
     },
     "loadsharing": {
-      "badge_active": "Load Sharing Active",
-      "badge_limited": "Load Sharing Limited",
-      "badge_controlled": "Load Sharing Controlled",
-      "local_max": "Local max",
-      "shared_cap": "Shared cap",
-      "applied_pilot": "Applied pilot",
-      "reason": "Reason",
-      "reduced": "Reduced due to load sharing",
-      "controlled_by": "Controlled by {controller}"
+      "title": "Terheléselosztás",
+      "line_controller": "Megosztva {count} töltővel · {total} A / {max} A",
+      "line_alone": "Terheléselosztás bekapcsolva, még nincs más töltő · {total} A / {max} A",
+      "line_member": "Megosztva {controller} felé · {amps} A / {max} A",
+      "pill_member_limited": "Tag · korlátozva",
+      "pill_controller_limited": "Vezérlő · korlátozva",
+      "pill_failsafe": "Biztonsági mód",
+      "bar": "{limit} A / {max} A",
+      "limited_group": "Korlátozva {limit} A-re, a csoport {total} / {max} A-nél",
+      "limited": "Korlátozva {limit} A-re",
+      "failsafe_for": "{duration} óta nem elérhető, biztonsági korlát: {limit} A.",
+      "failsafe_never": "indítás óta nem válaszolt, biztonsági korlát: {limit} A.",
+      "settings": "Terheléselosztás beállításai",
+      "tile_limited": "korlátozva"
     },
     "session": {
       "collecting": "Töltési adatok gyűjtése…",

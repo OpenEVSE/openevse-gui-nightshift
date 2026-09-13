@@ -906,15 +906,20 @@
       "active": "Bridé · {amps} A"
     },
     "loadsharing": {
-      "badge_active": "Load Sharing Active",
-      "badge_limited": "Load Sharing Limited",
-      "badge_controlled": "Load Sharing Controlled",
-      "local_max": "Local max",
-      "shared_cap": "Shared cap",
-      "applied_pilot": "Applied pilot",
-      "reason": "Reason",
-      "reduced": "Reduced due to load sharing",
-      "controlled_by": "Controlled by {controller}"
+      "title": "Partage de charge",
+      "line_controller": "Partage avec {count} chargeurs · {total} A sur {max} A",
+      "line_alone": "Partage de charge actif, aucun autre chargeur pour l'instant · {total} A sur {max} A",
+      "line_member": "Partage via {controller} · {amps} A sur {max} A",
+      "pill_member_limited": "Membre · limité",
+      "pill_controller_limited": "Contrôleur · limité",
+      "pill_failsafe": "Mode de secours",
+      "bar": "{limit} A sur {max} A",
+      "limited_group": "Limité à {limit} A, groupe à {total} sur {max} A",
+      "limited": "Limité à {limit} A",
+      "failsafe_for": "injoignable depuis {duration}, limite de sécurité de {limit} A appliquée.",
+      "failsafe_never": "n'a pas répondu depuis le démarrage, limite de sécurité de {limit} A appliquée.",
+      "settings": "Paramètres du partage de charge",
+      "tile_limited": "limité"
     },
     "session": {
       "collecting": "Collecte des données de session…",

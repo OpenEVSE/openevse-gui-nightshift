@@ -906,15 +906,20 @@
       "active": "Throttled · {amps} A"
     },
     "loadsharing": {
-      "badge_active": "Load Sharing Active",
-      "badge_limited": "Load Sharing Limited",
-      "badge_controlled": "Load Sharing Controlled",
-      "local_max": "Local max",
-      "shared_cap": "Shared cap",
-      "applied_pilot": "Applied pilot",
-      "reason": "Reason",
-      "reduced": "Reduced due to load sharing",
-      "controlled_by": "Controlled by {controller}"
+      "title": "Load sharing",
+      "line_controller": "Sharing with {count} chargers · {total} A of {max} A",
+      "line_alone": "Load sharing on, no other chargers yet · {total} A of {max} A",
+      "line_member": "Sharing via {controller} · {amps} A of {max} A",
+      "pill_member_limited": "Member · limited",
+      "pill_controller_limited": "Controller · limited",
+      "pill_failsafe": "Failsafe",
+      "bar": "{limit} A of {max} A",
+      "limited_group": "Limited to {limit} A, group at {total} of {max} A",
+      "limited": "Limited to {limit} A",
+      "failsafe_for": "unreachable for {duration}, using safe limit {limit} A.",
+      "failsafe_never": "has not answered since startup, using safe limit {limit} A.",
+      "settings": "Load sharing settings",
+      "tile_limited": "limited"
     },
     "session": {
       "collecting": "Collecting session data…",

@@ -94,7 +94,10 @@ Two dev-only endpoints switch the simulated device at runtime, no restart needed
 - `GET /api/_mock/scenario/<name>` — overlay `dev/fixtures/scenarios/<name>.json`
   onto the base fixtures (`reset` clears). A scenario file holds partial fixture
   objects keyed by fixture stem, e.g. `{ "config": { "wizard_passed": false } }`
-  re-enables the first-run wizard.
+  re-enables the first-run wizard. `loadsharing_limited` and
+  `loadsharing_failsafe` put the Home page's load-sharing card into its two
+  non-trivial states (an allocation holding the current down; a member whose
+  controller has gone quiet) — both need the OpenEVSE Labs switch on.
 
 Setting `MOCK_STATIC=1` freezes the mock completely (no WebSocket ticks, fixed
 server clock) — this is what the screenshot generator uses.
