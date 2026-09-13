@@ -1,4 +1,5 @@
 <script>
+  import { hardMaxCurrent } from '../lib/utils.js'
   import { _ } from 'svelte-i18n'
   import { schedule_store } from '../lib/stores/schedule.js'
   import { limit_store } from '../lib/stores/limit.js'
@@ -52,7 +53,7 @@
   let defaultActive   = $derived($config_store?.default_state !== false)
   // Hardware current bounds (same as Settings > EVSE slider)
   let minCurrent      = $derived($config_store?.min_current_hard ?? 6)
-  let maxCurrent      = $derived($config_store?.max_current_hard ?? 32)
+  let maxCurrent      = $derived(hardMaxCurrent($config_store, 32))
   // Soft current limit = what the DefaultStateCard slider controls
   let defaultCurrent  = $derived($config_store?.max_current_soft ?? minCurrent)
 

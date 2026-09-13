@@ -89,6 +89,25 @@ describe('Dashboard', () => {
     expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '40')
   })
 
+  it('ignores a hardware max of 0 (not read from the controller yet) for the rate slider', async () => {
+    // GET /config reports max_current_hard straight from the controller
+    // cache, which is 0 until $GC has been answered — and min(soft, 0) would
+    // pin the pill at 0 A with a slider that cannot move.
+    config_store.set({ max_current_soft: 32, max_current_hard: 0, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '32')
+  })
+
+  it('falls back to 48 A when neither max is usable', async () => {
+    config_store.set({ max_current_hard: 0, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '48')
+  })
+
   it('locks the mode pill to the claim owner (RFID)', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     claims_target_store.set({ properties: {}, claims: { state: EvseClients.rfid.id } })
