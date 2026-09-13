@@ -528,6 +528,10 @@
       "free": "Libre",
       "memory": "Mémoire et santé",
       "chip": "Puce",
+      "chip_core": "{count} cœur",
+      "chip_cores": "{count} cœurs",
+      "chip_flash": "{size} de flash",
+      "chip_psram": "{size} de PSRAM",
       "reset_reason": "Dernier redémarrage",
       "reset_reasons": {
         "poweron": "Mise sous tension",

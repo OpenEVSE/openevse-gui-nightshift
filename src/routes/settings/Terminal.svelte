@@ -88,9 +88,14 @@
     if (!c.chip_model) return c.espinfo || ''
     const rev = c.chip_rev != null ? ` v${Math.floor(c.chip_rev / 100)}.${c.chip_rev % 100}` : ''
     const parts = [`${c.chip_model}${rev}`]
-    if (c.chip_cores) parts.push(`${c.chip_cores} core${c.chip_cores > 1 ? 's' : ''}`)
-    if (c.espflash) parts.push(`${formatBytes(c.espflash)} flash`)
-    if (c.psram_size) parts.push(`${formatBytes(c.psram_size)} PSRAM`)
+    // Two keys rather than an ICU plural: the locale-parity test reads
+    // placeholders as plain {name} tokens. A single-core ESP32-C3 is real.
+    if (c.chip_cores) {
+      parts.push($_(c.chip_cores === 1 ? 'config.terminal.chip_core' : 'config.terminal.chip_cores',
+        { values: { count: c.chip_cores } }))
+    }
+    if (c.espflash) parts.push($_('config.terminal.chip_flash', { values: { size: formatBytes(c.espflash) } }))
+    if (c.psram_size) parts.push($_('config.terminal.chip_psram', { values: { size: formatBytes(c.psram_size) } }))
     return parts.join(' · ')
   })
   let app = $derived.by(() => {

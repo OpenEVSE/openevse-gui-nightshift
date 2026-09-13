@@ -163,7 +163,8 @@ describe('Terminal — Memory & health', () => {
       chip_cores: 2, espflash: 16777216, psram_size: 8388608 })
     status_store.set({ ...MEM })
     const { getByText, queryByText } = render(Terminal)
-    expect(getByText(/ESP32-S3 v0\.2 · 2 cores · .*flash · .*PSRAM/)).toBeInTheDocument()
+    // $_ is mocked to echo its key, so the three translated parts show as keys.
+    expect(getByText('ESP32-S3 v0.2 · config.terminal.chip_cores · config.terminal.chip_flash · config.terminal.chip_psram')).toBeInTheDocument()
     expect(queryByText('ESP32-S3r2 2 core WiFi BLE')).not.toBeInTheDocument()
     config_store.set({})
   })

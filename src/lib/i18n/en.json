@@ -528,6 +528,10 @@
       "free": "Free",
       "memory": "Memory & health",
       "chip": "Chip",
+      "chip_core": "{count} core",
+      "chip_cores": "{count} cores",
+      "chip_flash": "{size} flash",
+      "chip_psram": "{size} PSRAM",
       "reset_reason": "Last restart",
       "reset_reasons": {
         "poweron": "Power-on",
