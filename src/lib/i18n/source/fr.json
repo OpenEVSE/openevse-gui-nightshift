@@ -233,6 +233,8 @@
       "overcurrent_monitor": "Surveillance de surintensité",
       "zero_cross": "Protection contre l’usure du relais (passage à zéro)",
       "zero_cross_desc": "Commute le relais uniquement au passage à zéro du courant alternatif pour réduire l’usure des contacts.",
+      "cable_temp": "Surveillance de la température du câble",
+      "cable_temp_desc": "Surveille les thermistances NTC dans le câble VE ou d'entrée et met le chargeur en défaut si l'une surchauffe.",
       "faults": "Compteurs de défauts",
       "gfci_count": "Défauts GFCI",
       "noground_count": "Défauts de terre",
@@ -247,6 +249,26 @@
       "temp_throttle_enable": "Activer la limitation thermique",
       "temp_throttle_setpoint": "Seuil",
       "temp_throttle_desc": "Réduit automatiquement le courant de charge lorsque l'EVSE atteint la température définie."
+    },
+    "cabletemp": {
+      "title": "Température du câble",
+      "input1": "Entrée 1 (PP)",
+      "input2": "Entrée 2 (PP2)",
+      "pp_note": "Partage une broche avec l'ampacité automatique PP — assigner un capteur ici la désactive.",
+      "none": "Aucun",
+      "source_ev1": "Câble VE 1",
+      "source_ev2": "Câble VE 2",
+      "source_in1": "Câble d'entrée 1",
+      "source_in2": "Câble d'entrée 2",
+      "reading": "Lecture actuelle",
+      "calibration_desc": "Calibration de la thermistance pour ce capteur. Les valeurs par défaut conviennent au câble Phoenix Contact NACS.",
+      "r25": "Résistance NTC à 25 °C",
+      "beta": "Coefficient bêta NTC",
+      "offset": "Décalage de calibration",
+      "panic": "Seuil d'arrêt",
+      "status_not_installed": "Aucun capteur",
+      "status_open": "Circuit ouvert / débranché",
+      "status_shorted": "Court-circuité"
     },
     "time": {
       "status": "Heure de l'appareil",
@@ -933,7 +955,8 @@
       "sensors": "Capteurs",
       "service": "Service",
       "vehicle": "Véhicule",
-      "home_battery": "Batterie domestique"
+      "home_battery": "Batterie domestique",
+      "cable_temp": "Température du câble"
     },
     "energy": {
       "session": "Session",
@@ -1046,7 +1069,8 @@
     "miles": "mi",
     "percent": "%",
     "watt": "W",
-    "hz": "Hz"
+    "hz": "Hz",
+    "ohm": "Ω"
   },
   "clients": {
     "manual": "Manuel",

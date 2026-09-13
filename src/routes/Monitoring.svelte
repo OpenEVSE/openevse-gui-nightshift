@@ -3,10 +3,13 @@
   import { onMount } from 'svelte'
   import { status_store } from '../lib/stores/status.js'
   import { config_store } from '../lib/stores/config.js'
+  import { cabletemp_store } from '../lib/stores/cabletemp.js'
   import { uistates_store } from '../lib/stores/uistates.js'
+  import { serialQueue } from '../lib/queue.js'
   import {
     energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
     showVehicle, homeBatteryMetrics, showHomeBattery, safetyData, relayHealthData,
+    cableTempMetrics, showCableTemp,
   } from '../lib/monitoring/metrics.js'
   import Tabs from '../lib/components/ui/Tabs.svelte'
   import MetricsTab from '../lib/components/monitoring/MetricsTab.svelte'
@@ -21,6 +24,18 @@
 
   onMount(() => {
     if ($uistates_store?.error) activeId = 'health'
+  })
+
+  // Cable Temperature Monitoring readings live on their own endpoint (see
+  // src/lib/stores/cabletemp.js) rather than status_store, so this page
+  // fetches them itself — once on mount, then every 10s while the feature is
+  // on, same cadence as Mqtt.svelte's status poll. Shared cabletemp_store
+  // means Safety's config UI and this reading box always agree.
+  $effect(() => {
+    if (!$config_store?.cable_temp) return
+    serialQueue.add(() => cabletemp_store.download())
+    const poll = setInterval(() => serialQueue.add(() => cabletemp_store.download()), 10_000)
+    return () => clearInterval(poll)
   })
 
   // Desktop has room for everything at once, so the Data groups start
@@ -41,6 +56,9 @@
       : []),
     ...(showHomeBattery($status_store)
       ? [{ group: homeBatteryMetrics($status_store), expanded: desktop }]
+      : []),
+    ...(showCableTemp($cabletemp_store)
+      ? [{ group: cableTempMetrics($cabletemp_store, $config_store?.temp_unit ?? 'c'), expanded: desktop }]
       : []),
     { group: serviceMetrics($status_store, $config_store), expanded: desktop },
   ])

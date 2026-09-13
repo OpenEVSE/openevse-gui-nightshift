@@ -233,6 +233,8 @@
       "overcurrent_monitor": "Túláram-figyelés",
       "zero_cross": "Relékopás-védelem (nullátmenet)",
       "zero_cross_desc": "A relét csak a váltóáram nullátmeneténél kapcsolja az érintkezők kopásának csökkentésére.",
+      "cable_temp": "Kábelhőmérséklet-figyelés",
+      "cable_temp_desc": "Az EV- vagy bemeneti kábel NTC hőmérőit figyeli, és hibát jelez, ha az egyik túlmelegszik.",
       "faults": "Hibaszámlálók",
       "gfci_count": "GFCI hibák",
       "noground_count": "Földelés nélküli hibák",
@@ -247,6 +249,26 @@
       "temp_throttle_enable": "Hőmérséklet-szabályozás bekapcsolása",
       "temp_throttle_setpoint": "Beállított érték",
       "temp_throttle_desc": "Automatikusan csökkenti a töltőáramot, ha az EVSE eléri a beállított hőmérsékletet."
+    },
+    "cabletemp": {
+      "title": "Kábelhőmérséklet",
+      "input1": "1. bemenet (PP)",
+      "input2": "2. bemenet (PP2)",
+      "pp_note": "Egy lábon osztozik a PP automatikus áramkapacitással — ha itt érzékelőt rendel hozzá, az kikapcsolja azt.",
+      "none": "Nincs",
+      "source_ev1": "EV kábel 1",
+      "source_ev2": "EV kábel 2",
+      "source_in1": "Bemeneti kábel 1",
+      "source_in2": "Bemeneti kábel 2",
+      "reading": "Aktuális érték",
+      "calibration_desc": "A hőmérő kalibrálása ehhez az érzékelőhöz. Az alapértelmezett értékek a Phoenix Contact NACS kábelhez illenek.",
+      "r25": "NTC ellenállás 25°C-on",
+      "beta": "NTC béta együttható",
+      "offset": "Kalibrációs eltolás",
+      "panic": "Leállítási küszöb",
+      "status_not_installed": "Nincs érzékelő",
+      "status_open": "Szakadás / nincs csatlakoztatva",
+      "status_shorted": "Zárlatos"
     },
     "time": {
       "status": "Eszköz ideje",
@@ -933,7 +955,8 @@
       "sensors": "Érzékelők",
       "service": "Szolgáltatás",
       "vehicle": "Jármű",
-      "home_battery": "Otthoni akkumulátor"
+      "home_battery": "Otthoni akkumulátor",
+      "cable_temp": "Kábelhőmérséklet"
     },
     "energy": {
       "session": "Ez a töltés",
@@ -1046,7 +1069,8 @@
     "miles": "mérföld",
     "percent": "%",
     "watt": "W",
-    "hz": "Hz"
+    "hz": "Hz",
+    "ohm": "Ω"
   },
   "clients": {
     "manual": "Kézi",
