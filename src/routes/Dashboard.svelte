@@ -14,7 +14,7 @@
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { EvseClients } from '../lib/vars.js'
-  import { sec2time, temp_round, round, clientid2name, getStateDesc } from '../lib/utils.js'
+  import { sec2time, temp_round, round, clientid2name, getStateDesc, hardMaxCurrent } from '../lib/utils.js'
   import { formatTemp } from '../lib/temperature.js'
   import { formatCost } from '../lib/cost.js'
   import { showWriteError, showBoostError } from '../lib/alerts.js'
@@ -48,10 +48,12 @@
   let showChart = $derived(charging)
   // Rate pill slider stops at the configured soft max (Settings > Charger), so
   // the home page can't request — or display — more current than the user has
-  // allowed. Falls back to the hardware ceiling when the soft max is unset.
+  // allowed. Falls back to the hardware ceiling when the soft max is unset —
+  // and past a hardware ceiling the firmware has not read yet (0), which
+  // would otherwise pin the pill at 0 A (see hardMaxCurrent).
   let minAmps = $derived($config_store?.min_current_hard ?? 6)
   let maxAmps = $derived(
-    Math.min($config_store?.max_current_soft ?? Infinity, $config_store?.max_current_hard ?? 48),
+    Math.min($config_store?.max_current_soft ?? Infinity, hardMaxCurrent($config_store, 48)),
   )
   let defaultAmps = $derived($config_store?.max_current_soft ?? maxAmps)
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))

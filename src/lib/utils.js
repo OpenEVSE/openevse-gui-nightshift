@@ -215,3 +215,15 @@ export function compareVersion(last, old) {
 	}
 	return last.length == old.length ? 0 : (last.length < old.length ? -1 : 1)
 }
+
+/**
+ * The controller's hardware current ceiling, or `fallback` when the firmware
+ * has not learned it yet. GET /config reports max_current_hard straight from
+ * evse.getMaxHardwareCurrent(), which is 0 until the ESP has read $GC from the
+ * controller (and in the mock fixture) — treated as a real ceiling, that 0
+ * collapses every slider and cap that uses it to nothing.
+ */
+export function hardMaxCurrent(config, fallback = 32) {
+  const n = Number(config?.max_current_hard)
+  return Number.isFinite(n) && n > 0 ? n : fallback
+}
