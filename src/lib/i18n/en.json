@@ -230,7 +230,12 @@
       "standby_off": "Off",
       "timeout": "Idle timeout",
       "timeout_desc": "How long the screen stays bright before dimming to standby. It stays full-bright while charging or in a fault.",
-      "never": "Never"
+      "never": "Never",
+      "lcd": "2-line LCD",
+      "lcd_type": "Backlight type",
+      "lcd_desc": "Backlight type for the controller's 2-line character display. For a JuiceBox v2 replacement, select RGB.",
+      "lcd_mono": "Monochrome",
+      "lcd_rgb": "RGB"
     },
     "validation": {
       "required": "Required",

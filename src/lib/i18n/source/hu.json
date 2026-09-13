@@ -230,7 +230,12 @@
       "standby_off": "Ki",
       "timeout": "Tétlenségi időkorlát",
       "timeout_desc": "Mennyi ideig marad világos a kijelző, mielőtt készenléti állapotba halványul. Töltés közben vagy hiba esetén teljes fényerőn marad.",
-      "never": "Soha"
+      "never": "Soha",
+      "lcd": "2 soros LCD",
+      "lcd_type": "Háttérvilágítás típusa",
+      "lcd_desc": "A vezérlő 2 soros karakteres LCD kijelzőjének háttérvilágítás-típusa. JuiceBox v2 csere esetén válassza az RGB lehetőséget.",
+      "lcd_mono": "Monokróm",
+      "lcd_rgb": "RGB"
     },
     "validation": {
       "required": "Kötelező",

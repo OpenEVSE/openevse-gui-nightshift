@@ -28,10 +28,15 @@ describe('Display page', () => {
     expect(getByText('config.display.light')).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('defaults to dark when tft_theme is absent', () => {
-    config_store.set({})
-    const { getByText } = render(Display)
-    expect(getByText('config.display.dark')).toHaveAttribute('aria-pressed', 'true')
+  it('hides the TFT section entirely when tft_theme is absent', () => {
+    // A charger with the 2-line character LCD and no TFT reaches this page
+    // through lcd_type; showing it a theme and clock for a panel it lacks
+    // would be a lie.
+    config_store.set({ lcd_type: 'rgb' })
+    const { queryByText, getByText } = render(Display)
+    expect(queryByText('config.display.dark')).toBeNull()
+    expect(queryByText('config.display.clock_24')).toBeNull()
+    expect(getByText('config.display.lcd_rgb')).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('writes tft_theme to /config when a theme is picked', async () => {
@@ -41,12 +46,31 @@ describe('Display page', () => {
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ tft_theme: 'light' }))
   })
 
-  it('hides brightness and timeout controls when their keys are absent', () => {
+  it('hides brightness, timeout and LCD controls when their keys are absent', () => {
     config_store.set({ tft_theme: 'dark' })
-    const { queryByLabelText } = render(Display)
+    const { queryByLabelText, queryByText } = render(Display)
     expect(queryByLabelText('config.display.brightness')).toBeNull()
     expect(queryByLabelText('config.display.standby')).toBeNull()
     expect(queryByLabelText('config.display.timeout')).toBeNull()
+    expect(queryByText('config.display.lcd_mono')).toBeNull()
+    expect(queryByText('config.display.lcd')).toBeNull()
+  })
+
+  it('shows both sections when a device reports both displays', () => {
+    config_store.set({ tft_theme: 'dark', lcd_type: 'mono' })
+    const { getByText } = render(Display)
+    expect(getByText('config.display.panel')).toBeInTheDocument()
+    expect(getByText('config.display.lcd')).toBeInTheDocument()
+    expect(getByText('config.display.lcd_mono')).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('defaults the 2-line LCD selector to RGB and writes on change', async () => {
+    config_store.set({ lcd_type: 'rgb' })
+    const { getByText } = render(Display)
+    expect(getByText('config.display.lcd_rgb')).toHaveAttribute('aria-pressed', 'true')
+    expect(getByText('config.display.lcd_mono')).toHaveAttribute('aria-pressed', 'false')
+    await fireEvent.click(getByText('config.display.lcd_mono'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_type: 'mono' }))
   })
 
   it('renders the active brightness slider at the current value and writes on change', async () => {

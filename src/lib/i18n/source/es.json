@@ -230,7 +230,12 @@
       "standby_off": "Apagado",
       "timeout": "Tiempo de inactividad",
       "timeout_desc": "Cuánto tiempo permanece encendida la pantalla antes de atenuarse al modo de reposo. Permanece a pleno brillo mientras carga o en caso de fallo.",
-      "never": "Nunca"
+      "never": "Nunca",
+      "lcd": "LCD de 2 líneas",
+      "lcd_type": "Tipo de retroiluminación",
+      "lcd_desc": "Tipo de retroiluminación de la pantalla LCD de 2 líneas del controlador. Para un reemplazo de JuiceBox v2, seleccione RGB.",
+      "lcd_mono": "Monocromo",
+      "lcd_rgb": "RGB"
     },
     "validation": {
       "required": "Obligatorio",
