@@ -3,6 +3,7 @@ import {
   CABLE_TEMP_PIN_PP, CABLE_TEMP_PIN_PP2,
   cableTempStatusKey, cableTempSourceOnPin, cableTempSourceByIndex,
   cableTempSourceOptions, c10ToC, cToC10, cableTempHasAssignedSource,
+  cToUnit, unitToC, c10ToUnit, unitToC10,
 } from '../cabletemp.js'
 
 const cabletemp = {
@@ -64,6 +65,31 @@ describe('c10ToC / cToC10', () => {
     expect(c10ToC(null)).toBe(null)
     expect(c10ToC(undefined)).toBe(null)
     expect(cToC10(null)).toBe(null)
+  })
+})
+
+describe('display-unit conversion (temp_unit)', () => {
+  it('passes Celsius through, rounded to a tenth', () => {
+    expect(cToUnit(90, 'c')).toBe(90)
+    expect(cToUnit(34.56, 'c')).toBe(34.6)
+    expect(unitToC(90, 'c')).toBe(90)
+  })
+  it('converts an absolute temperature to and from Fahrenheit', () => {
+    expect(cToUnit(90, 'f')).toBe(194)
+    expect(unitToC(194, 'f')).toBe(90)
+    expect(c10ToUnit(900, 'f')).toBe(194)
+    expect(unitToC10(200, 'f')).toBe(933) // 93.33 °C on the wire, in tenths
+  })
+  it('converts a difference by ratio alone — no +32 on an offset', () => {
+    expect(cToUnit(-0.5, 'f', true)).toBe(-0.9)
+    expect(unitToC10(-0.9, 'f', true)).toBe(-5)
+    expect(c10ToUnit(0, 'f', true)).toBe(0)
+  })
+  it('is null-safe', () => {
+    expect(cToUnit(null, 'f')).toBe(null)
+    expect(unitToC(undefined, 'f')).toBe(null)
+    expect(c10ToUnit(undefined, 'c')).toBe(null)
+    expect(unitToC10(null, 'c')).toBe(null)
   })
 })
 

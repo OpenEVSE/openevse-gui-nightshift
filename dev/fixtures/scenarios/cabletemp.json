@@ -1,0 +1,22 @@
+{
+  "_comment": [
+    "Cable temperature monitoring in use: EV Cable 1 on Input 2 (PP2) with a",
+    "live reading, Input Cable 1 on Input 1 (PP) reading open-circuit (a",
+    "connector with nothing plugged in), the other two sources unassigned.",
+    "The base config.json carries no cable_temp key, so the Safety card and",
+    "the Monitoring group only appear under this scenario and the committed",
+    "screenshot set is unchanged."
+  ],
+  "config": {
+    "cable_temp": true
+  },
+  "cabletemp": {
+    "enabled": true,
+    "sources": [
+      { "source": 0, "name": "ev1", "pin": 2, "status": 0, "temperature": 34.5, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 },
+      { "source": 1, "name": "ev2", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 },
+      { "source": 2, "name": "in1", "pin": 1, "status": 2, "r25": 10000, "beta": 3950, "offset_c10": -5, "panic_c10": 850 },
+      { "source": 3, "name": "in2", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 }
+    ]
+  }
+}

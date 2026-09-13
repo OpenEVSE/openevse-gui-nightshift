@@ -9,6 +9,7 @@
 // the 4 sources independently picks a pin) — see openevse_esp32_firmware's
 // docs/rapi.md $SN entry for why only 2 of the 4 sources can be active at
 // once, and the PP_READ/PP-auto-ampacity pin-sharing note.
+import { cToF } from './temperature.js'
 
 export const CABLE_TEMP_PIN_NONE = 0
 export const CABLE_TEMP_PIN_PP = 1
@@ -68,6 +69,36 @@ export function c10ToC(c10) {
 /** °C -> tenths-of-°C (offset_c10/panic_c10 wire format), or null. */
 export function cToC10(c) {
   return typeof c === 'number' && Number.isFinite(c) ? Math.round(c * 10) : null
+}
+
+// The device stores and reports every temperature in °C; only what the user
+// sees and types follows the temp_unit config, the same rule
+// TempProtectionCard applies to the enclosure thresholds. A calibration
+// *offset* is a difference, not a point on the scale, so in °F it converts by
+// the 9/5 ratio alone — no +32.
+
+/** °C -> the display unit ('c' | 'f'), 1 dp; `delta` for a difference. null-safe. */
+export function cToUnit(c, unit, delta = false) {
+  if (typeof c !== 'number' || !Number.isFinite(c)) return null
+  if (unit !== 'f') return Math.round(c * 10) / 10
+  return delta ? Math.round(c * 9 / 5 * 10) / 10 : cToF(c)
+}
+
+/** The display unit ('c' | 'f') -> °C; `delta` for a difference. null-safe. */
+export function unitToC(v, unit, delta = false) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null
+  if (unit !== 'f') return v
+  return delta ? v * 5 / 9 : (v - 32) * 5 / 9
+}
+
+/** Tenths-of-°C wire value -> the display unit. */
+export function c10ToUnit(c10, unit, delta = false) {
+  return cToUnit(c10ToC(c10), unit, delta)
+}
+
+/** The display unit -> tenths-of-°C wire value. */
+export function unitToC10(v, unit, delta = false) {
+  return cToC10(unitToC(v, unit, delta))
 }
 
 /** Whether any Cable Temperature Monitoring source is assigned to a pin. */

@@ -94,7 +94,11 @@ Two dev-only endpoints switch the simulated device at runtime, no restart needed
 - `GET /api/_mock/scenario/<name>` — overlay `dev/fixtures/scenarios/<name>.json`
   onto the base fixtures (`reset` clears). A scenario file holds partial fixture
   objects keyed by fixture stem, e.g. `{ "config": { "wizard_passed": false } }`
-  re-enables the first-run wizard.
+  re-enables the first-run wizard. `cabletemp` is a charger with cable
+  temperature monitoring on, one sensor reading and one open-circuit;
+  `cabletemp_f` is the same charger set to Fahrenheit with the temperature
+  throttle card showing, for checking that every threshold on the Safety page
+  agrees on a unit.
 
 Setting `MOCK_STATIC=1` freezes the mock completely (no WebSocket ticks, fixed
 server clock) — this is what the screenshot generator uses.

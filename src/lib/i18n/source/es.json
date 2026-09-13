@@ -233,8 +233,6 @@
       "overcurrent_monitor": "Monitoreo de sobrecorriente",
       "zero_cross": "Protección de desgaste del relé (cruce por cero)",
       "zero_cross_desc": "Conmuta el relé solo en el cruce por cero de CA para reducir el desgaste de los contactos.",
-      "cable_temp": "Monitorización de temperatura del cable",
-      "cable_temp_desc": "Supervisa termistores NTC en el cable de VE o de entrada y detiene el cargador si uno se sobrecalienta.",
       "faults": "Contadores de fallos",
       "gfci_count": "Fallos GFCI",
       "noground_count": "Fallos sin tierra",
@@ -252,6 +250,8 @@
     },
     "cabletemp": {
       "title": "Temperatura del cable",
+      "enable": "Monitorización de temperatura del cable",
+      "enable_desc": "Supervisa termistores NTC en el cable de VE o de entrada y detiene el cargador si uno se sobrecalienta.",
       "input1": "Entrada 1 (PP)",
       "input2": "Entrada 2 (PP2)",
       "pp_note": "Comparte pin con la ampacidad automática PP — asignar un sensor aquí la desactiva.",
@@ -265,7 +265,7 @@
       "r25": "Resistencia NTC a 25 °C",
       "beta": "Coeficiente beta NTC",
       "offset": "Desplazamiento de calibración",
-      "panic": "Umbral de apagado",
+      "panic": "Umbral de pánico",
       "status_not_installed": "Sin sensor",
       "status_open": "Circuito abierto / desconectado",
       "status_shorted": "Cortocircuitado"

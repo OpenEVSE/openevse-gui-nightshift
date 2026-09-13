@@ -233,8 +233,6 @@
       "overcurrent_monitor": "Over-current monitoring",
       "zero_cross": "Relay wear protection (zero-cross)",
       "zero_cross_desc": "Switch the relay only at AC zero-crossing to reduce contact wear.",
-      "cable_temp": "Cable Temperature Monitoring",
-      "cable_temp_desc": "Monitor NTC thermistors in the EV or input cable and fault the charger if one overheats.",
       "faults": "Fault counters",
       "gfci_count": "GFCI faults",
       "noground_count": "No-ground faults",
@@ -251,7 +249,9 @@
       "temp_throttle_desc": "Reduce charge current automatically when the EVSE reaches the setpoint temperature."
     },
     "cabletemp": {
-      "title": "Cable Temperature",
+      "title": "Cable temperature",
+      "enable": "Cable temperature monitoring",
+      "enable_desc": "Monitor NTC thermistors in the EV or input cable and fault the charger if one overheats.",
       "input1": "Input 1 (PP)",
       "input2": "Input 2 (PP2)",
       "pp_note": "Shares a pin with PP auto-ampacity — assigning a sensor here turns that off.",
@@ -265,7 +265,7 @@
       "r25": "NTC resistance at 25°C",
       "beta": "NTC beta coefficient",
       "offset": "Calibration offset",
-      "panic": "Shutdown threshold",
+      "panic": "Panic threshold",
       "status_not_installed": "No sensor",
       "status_open": "Open circuit / unplugged",
       "status_shorted": "Shorted"

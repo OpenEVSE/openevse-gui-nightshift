@@ -1,0 +1,10 @@
+{
+  "supported": true,
+  "enabled": false,
+  "sources": [
+    { "source": 0, "name": "ev1", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 },
+    { "source": 1, "name": "ev2", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 },
+    { "source": 2, "name": "in1", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 },
+    { "source": 3, "name": "in2", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 }
+  ]
+}

@@ -9,7 +9,7 @@
   import {
     CABLE_TEMP_PIN_PP, CABLE_TEMP_PIN_PP2,
     cableTempSourceOnPin, cableTempSourceOptions, cableTempStatusKey,
-    c10ToC, cToC10,
+    cToUnit, c10ToUnit, unitToC10,
   } from '../../lib/cabletemp.js'
   import { formatTemp } from '../../lib/temperature.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
@@ -39,12 +39,12 @@
   // (see lib/config/safety.js, shared with the Charge Manager).
   let allOn = $derived(allRequiredSafetyChecksOn($config_store))
 
-  // Cable Temperature Monitoring (NTC thermistors in the EV/input cables,
-  // RAPI $SN/$GN). Collapsed by default like the Safety Checks card above.
+  // Cable temperature monitoring (NTC thermistors in the EV/input cables,
+  // RAPI $SN/$GN). Collapsed by default like the Safety checks card above.
   // Its own toggle lives in /config (`cable_temp`); the per-input source
   // assignment and per-source calibration live on the dedicated /cabletemp
   // endpoint (~20 fields — too many for /config's near-exhausted document),
-  // fetched on demand once the section is actually in use.
+  // fetched once the card is open with the feature on.
   let cableTempOpen = $state(false)
   const ctForm = createCableTempForm()
   const ctSaveState = ctForm.saveState
@@ -54,20 +54,56 @@
     { pin: CABLE_TEMP_PIN_PP2, other: CABLE_TEMP_PIN_PP, labelKey: 'config.cabletemp.input2' },
   ]
 
+  // Derived first so the effect re-runs when the flag changes, not on every
+  // /config re-read while the page is mounted.
+  let cableTempOn = $derived(!!$config_store?.cable_temp)
   $effect(() => {
-    if ($config_store?.cable_temp) ctForm.refresh()
+    if (cableTempOpen && cableTempOn) ctForm.refresh()
   })
 
   function pinSource(pin) {
     return cableTempSourceOnPin($cabletemp_store, pin)
   }
 
+  // The device stores and reports every temperature in °C; like
+  // TempProtectionCard below, only what the user sees and types follows
+  // temp_unit — so the reading, the offset and the panic threshold all show
+  // in the same unit as the enclosure thresholds two sections down.
+  let tempUnit = $derived($config_store?.temp_unit ?? 'c')
+  let tempUnitKey = $derived(tempUnit === 'f' ? 'units.fahrenheit' : 'units.celsius')
+
   function readingText(source) {
     const statusKey = cableTempStatusKey(source.status)
     if (statusKey) return $_('config.cabletemp.status_' + statusKey)
     if (typeof source.temperature !== 'number') return '—'
-    const t = formatTemp(source.temperature, $config_store?.temp_unit ?? 'c')
+    const t = formatTemp(source.temperature, tempUnit)
     return t.value === null ? '—' : `${t.value} ${$_(t.unitKey)}`
+  }
+
+  // One entry per calibration field. `temp` marks the two that are
+  // temperatures on the wire (tenths of °C): 'abs' for a point on the scale,
+  // 'delta' for a difference, which converts to °F by ratio alone. Bounds for
+  // those are in °C and converted alongside the value.
+  const CALIBRATION = [
+    { field: 'r25', labelKey: 'config.cabletemp.r25', unitKey: 'units.ohm', min: 100, max: 65535, step: 1 },
+    { field: 'beta', labelKey: 'config.cabletemp.beta', unitKey: null, min: 1000, max: 6000, step: 1 },
+    { field: 'offset_c10', labelKey: 'config.cabletemp.offset', temp: 'delta', min: -20, max: 20, step: 0.1 },
+    { field: 'panic_c10', labelKey: 'config.cabletemp.panic', temp: 'abs', min: 30, max: 150, step: 0.1 },
+  ]
+
+  function calLabel(f) {
+    const unitKey = f.temp ? tempUnitKey : f.unitKey
+    return unitKey ? `${$_(f.labelKey)} (${$_(unitKey)})` : $_(f.labelKey)
+  }
+  function calValue(source, f) {
+    return f.temp ? c10ToUnit(source[f.field], tempUnit, f.temp === 'delta') : (source[f.field] ?? null)
+  }
+  function calBound(f, c) {
+    return f.temp ? Math.round(cToUnit(c, tempUnit, f.temp === 'delta')) : c
+  }
+  function calSave(source, f, v) {
+    const wire = f.temp ? unitToC10(v, tempUnit, f.temp === 'delta') : v
+    ctForm.saveField(source.source, source, f.field, wire)
   }
 </script>
 
@@ -120,7 +156,7 @@
   </Card>
 
   {#if $config_store?.cable_temp !== undefined}
-    <!-- Collapsible Cable Temperature card, same disclosure pattern as Safety Checks above -->
+    <!-- Collapsible Cable temperature card, same disclosure pattern as Safety checks above -->
     <Card class="mb-4 p-4">
       <button
         type="button"
@@ -139,18 +175,18 @@
       {#if cableTempOpen}
         <div class="mt-3">
           <FormField
-            label={$_('config.safety.cable_temp')}
-            description={$_('config.safety.cable_temp_desc')}
+            label={$_('config.cabletemp.enable')}
+            description={$_('config.cabletemp.enable_desc')}
             status={$ss.cable_temp ?? 'idle'}
           >
             <Toggle
-              checked={!!$config_store?.cable_temp}
-              label={$_('config.safety.cable_temp')}
+              checked={cableTempOn}
+              label={$_('config.cabletemp.enable')}
               onchange={(v) => form.saveField('cable_temp', v)}
             />
           </FormField>
 
-          {#if $config_store?.cable_temp}
+          {#if cableTempOn}
             {#each CABLE_TEMP_INPUTS as input (input.pin)}
               {@const source = pinSource(input.pin)}
               <FormField
@@ -171,49 +207,32 @@
               </FormField>
 
               {#if source}
-                <div class="mb-3 rounded-xl border border-border bg-surface-2 p-3">
-                  <div class="mb-2 flex items-center justify-between text-sm">
+                <!-- Calibration for the source on this input. Each value is a
+                     FormField like every other numeric setting, so its own
+                     save state shows beside its label; the box only groups the
+                     four under the input they belong to. -->
+                <div class="mb-3 rounded-xl border border-border bg-surface-2 px-3 py-1">
+                  <div class="flex items-center justify-between py-2 text-sm">
                     <span class="text-text-dim">{$_('config.cabletemp.reading')}</span>
                     <span class="font-semibold text-text">{readingText(source)}</span>
                   </div>
-                  <p class="mb-2 text-xs text-text-dim">{$_('config.cabletemp.calibration_desc')}</p>
-                  <div class="grid grid-cols-2 gap-2">
-                    <label class="text-xs text-text-dim">
-                      {$_('config.cabletemp.r25')} ({$_('units.ohm')})
-                      <NumberInput
-                        value={source.r25 ?? null}
-                        min={100} max={65535} step={1}
-                        disabled={ctForm.busy}
-                        onchange={(v) => ctForm.saveField(source.source, source, 'r25', v)}
-                      />
-                    </label>
-                    <label class="text-xs text-text-dim">
-                      {$_('config.cabletemp.beta')}
-                      <NumberInput
-                        value={source.beta ?? null}
-                        min={1000} max={6000} step={1}
-                        disabled={ctForm.busy}
-                        onchange={(v) => ctForm.saveField(source.source, source, 'beta', v)}
-                      />
-                    </label>
-                    <label class="text-xs text-text-dim">
-                      {$_('config.cabletemp.offset')} ({$_('units.celsius')})
-                      <NumberInput
-                        value={c10ToC(source.offset_c10)}
-                        min={-200} max={200} step={0.1}
-                        disabled={ctForm.busy}
-                        onchange={(v) => ctForm.saveField(source.source, source, 'offset_c10', cToC10(v))}
-                      />
-                    </label>
-                    <label class="text-xs text-text-dim">
-                      {$_('config.cabletemp.panic')} ({$_('units.celsius')})
-                      <NumberInput
-                        value={c10ToC(source.panic_c10)}
-                        min={30} max={150} step={0.1}
-                        disabled={ctForm.busy}
-                        onchange={(v) => ctForm.saveField(source.source, source, 'panic_c10', cToC10(v))}
-                      />
-                    </label>
+                  <p class="text-xs text-text-dim">{$_('config.cabletemp.calibration_desc')}</p>
+                  <div class="grid grid-cols-2 gap-x-3">
+                    {#each CALIBRATION as f (f.field)}
+                      <FormField
+                        label={calLabel(f)}
+                        status={$ctSaveState[`source${source.source}_${f.field}`] ?? 'idle'}
+                      >
+                        <NumberInput
+                          value={calValue(source, f)}
+                          min={calBound(f, f.min)}
+                          max={calBound(f, f.max)}
+                          step={f.step}
+                          disabled={ctForm.busy}
+                          onchange={(v) => calSave(source, f, v)}
+                        />
+                      </FormField>
+                    {/each}
                   </div>
                 </div>
               {/if}

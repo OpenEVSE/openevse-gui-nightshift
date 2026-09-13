@@ -26,7 +26,7 @@
     if ($uistates_store?.error) activeId = 'health'
   })
 
-  // Cable Temperature Monitoring readings live on their own endpoint (see
+  // Cable temperature readings live on their own endpoint (see
   // src/lib/stores/cabletemp.js) rather than status_store, so this page
   // fetches them itself — once on mount, then every 10s while the feature is
   // on, same cadence as Mqtt.svelte's status poll. Shared cabletemp_store
@@ -57,7 +57,9 @@
     ...(showHomeBattery($status_store)
       ? [{ group: homeBatteryMetrics($status_store), expanded: desktop }]
       : []),
-    ...(showCableTemp($cabletemp_store)
+    // Gated on the config flag as well as the store: the poll above stops when
+    // the feature is turned off, but the store keeps its last readings.
+    ...($config_store?.cable_temp && showCableTemp($cabletemp_store)
       ? [{ group: cableTempMetrics($cabletemp_store, $config_store?.temp_unit ?? 'c'), expanded: desktop }]
       : []),
     { group: serviceMetrics($status_store, $config_store), expanded: desktop },

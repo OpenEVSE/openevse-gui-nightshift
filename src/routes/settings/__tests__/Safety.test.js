@@ -123,16 +123,16 @@ describe('Safety page — Cable Temperature Monitoring', () => {
   it('shows the card collapsed, and the enable toggle once expanded', async () => {
     config_store.set({ ...ALL_ON, cable_temp: false })
     const { getByText, getByLabelText, queryByLabelText } = render(Safety)
-    expect(queryByLabelText('config.safety.cable_temp')).toBeNull()
+    expect(queryByLabelText('config.cabletemp.enable')).toBeNull()
     await fireEvent.click(getByText('config.cabletemp.title'))
-    expect(getByLabelText('config.safety.cable_temp')).toBeInTheDocument()
+    expect(getByLabelText('config.cabletemp.enable')).toBeInTheDocument()
   })
 
   it('saves the enable toggle to /config', async () => {
     config_store.set({ ...ALL_ON, cable_temp: false })
     const { getByText, getByLabelText } = render(Safety)
     await fireEvent.click(getByText('config.cabletemp.title'))
-    await fireEvent.click(getByLabelText('config.safety.cable_temp'))
+    await fireEvent.click(getByLabelText('config.cabletemp.enable'))
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ cable_temp: true }))
   })
 
@@ -204,9 +204,70 @@ describe('Safety page — Cable Temperature Monitoring', () => {
     httpAPI.mockClear()
     const selects = getAllByRole('combobox')
     await fireEvent.change(selects[0], { target: { value: '2' } }) // Input 1: EV1 -> IN1
+    await vi.waitFor(() => expect(httpAPI).toHaveBeenCalledTimes(3))
+    // Order matters: the old source has to be off the pin before the new one
+    // takes it, and the re-read comes last so the store reflects both writes.
+    expect(httpAPI.mock.calls.map((c) => c.slice(0, 3))).toEqual([
+      ['POST', '/cabletemp', JSON.stringify({ source: 0, pin: 0 })],
+      ['POST', '/cabletemp', JSON.stringify({ source: 2, pin: 1 })],
+      ['GET', '/cabletemp'],
+    ])
+  })
+
+  it('puts the old source back and re-reads when the second write of a reassign fails', async () => {
+    // Unassign lands, assign is refused: without the compensating write the
+    // input would be left silently empty on the device.
+    config_store.set({ ...ALL_ON, cable_temp: true })
+    const assigned = UNASSIGNED_SOURCES.map((s) => (s.source === 0 ? { ...s, pin: 1, status: 0, temperature: 20 } : s))
+    httpAPI.mockImplementation((method, url, body) => {
+      if (method === 'GET' && url === '/cabletemp') return Promise.resolve({ supported: true, enabled: true, sources: assigned })
+      if (body === JSON.stringify({ source: 2, pin: 1 })) return Promise.resolve({ msg: 'error' })
+      return Promise.resolve({ msg: 'done' })
+    })
+    const { getByText, getAllByRole } = render(Safety)
+    await fireEvent.click(getByText('config.cabletemp.title'))
+    await vi.waitFor(() => expect(getByText('config.cabletemp.input1')).toBeInTheDocument())
+
+    httpAPI.mockClear()
+    await fireEvent.change(getAllByRole('combobox')[0], { target: { value: '2' } })
+    await vi.waitFor(() => expect(httpAPI).toHaveBeenCalledTimes(4))
+    expect(httpAPI.mock.calls.map((c) => c.slice(0, 3))).toEqual([
+      ['POST', '/cabletemp', JSON.stringify({ source: 0, pin: 0 })],
+      ['POST', '/cabletemp', JSON.stringify({ source: 2, pin: 1 })],
+      ['POST', '/cabletemp', JSON.stringify({ source: 0, pin: 1 })],
+      ['GET', '/cabletemp'],
+    ])
+    await vi.waitFor(() => expect(get(uistates_store).alertbox.visible).toBe(true))
+  })
+
+  it('shows the offset and panic threshold in the device unit, and writes tenths of °C', async () => {
+    // A Fahrenheit charger: the reading, both cable thresholds and the
+    // enclosure thresholds further down must all agree on a unit.
+    config_store.set({ ...ALL_ON, cable_temp: true, temp_unit: 'f' })
+    const assigned = UNASSIGNED_SOURCES.map((s) =>
+      s.source === 0 ? { ...s, pin: 1, status: 0, temperature: 34.5, r25: 10000, beta: 3443, offset_c10: -5, panic_c10: 900 } : s,
+    )
+    httpAPI.mockImplementation((method, url) =>
+      (method === 'GET' && url === '/cabletemp')
+        ? Promise.resolve({ supported: true, enabled: true, sources: assigned })
+        : Promise.resolve({ msg: 'done' }),
+    )
+    const { getByText, getAllByRole } = render(Safety)
+    await fireEvent.click(getByText('config.cabletemp.title'))
+    await vi.waitFor(() => expect(getByText('94.1 units.fahrenheit')).toBeInTheDocument())
+    const numbers = getAllByRole('spinbutton')
+    expect(numbers[2]).toHaveValue(-0.9) // offset: -0.5 °C as a difference, no +32
+    expect(numbers[3]).toHaveValue(194) // panic: 90 °C
+    expect(getByText('config.cabletemp.panic (units.fahrenheit)')).toBeInTheDocument()
+
+    httpAPI.mockClear()
+    await fireEvent.input(numbers[3], { target: { value: '200' } })
+    await fireEvent.blur(numbers[3])
     await vi.waitFor(() => {
-      expect(httpAPI).toHaveBeenCalledWith('POST', '/cabletemp', JSON.stringify({ source: 0, pin: 0 }))
-      expect(httpAPI).toHaveBeenCalledWith('POST', '/cabletemp', JSON.stringify({ source: 2, pin: 1 }))
+      expect(httpAPI).toHaveBeenCalledWith(
+        'POST', '/cabletemp',
+        JSON.stringify({ source: 0, pin: 1, r25: 10000, beta: 3443, offset_c10: -5, panic_c10: 933 }),
+      )
     })
   })
 

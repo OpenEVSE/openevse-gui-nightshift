@@ -35,8 +35,18 @@ export function createCableTempForm() {
     }
     if (ok && newSource !== null) {
       ok = await serialQueue.add(() => cabletemp_store.upload({ source: newSource, pin }))
+      // The unassign above has already landed. Put the old source back rather
+      // than leave the input silently empty on a failed reassign — the user
+      // asked to swap a sensor, not to remove one.
+      if (!ok && current !== null) {
+        await serialQueue.add(() => cabletemp_store.upload({ source: current, pin }))
+      }
     }
-    if (ok) ok = await refresh()
+    // Re-read whatever happened: after a failure the controller's own state
+    // is the only version worth showing, and it may now differ from the
+    // store either way.
+    const refreshed = await refresh()
+    ok = ok && refreshed
     busy = false
 
     if (ok) saveState.succeed(name)

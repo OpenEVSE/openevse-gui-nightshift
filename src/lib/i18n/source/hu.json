@@ -233,8 +233,6 @@
       "overcurrent_monitor": "Túláram-figyelés",
       "zero_cross": "Relékopás-védelem (nullátmenet)",
       "zero_cross_desc": "A relét csak a váltóáram nullátmeneténél kapcsolja az érintkezők kopásának csökkentésére.",
-      "cable_temp": "Kábelhőmérséklet-figyelés",
-      "cable_temp_desc": "Az EV- vagy bemeneti kábel NTC hőmérőit figyeli, és hibát jelez, ha az egyik túlmelegszik.",
       "faults": "Hibaszámlálók",
       "gfci_count": "GFCI hibák",
       "noground_count": "Földelés nélküli hibák",
@@ -252,6 +250,8 @@
     },
     "cabletemp": {
       "title": "Kábelhőmérséklet",
+      "enable": "Kábelhőmérséklet-figyelés",
+      "enable_desc": "Az EV- vagy bemeneti kábel NTC hőmérőit figyeli, és hibát jelez, ha az egyik túlmelegszik.",
       "input1": "1. bemenet (PP)",
       "input2": "2. bemenet (PP2)",
       "pp_note": "Egy lábon osztozik a PP automatikus áramkapacitással — ha itt érzékelőt rendel hozzá, az kikapcsolja azt.",
@@ -265,7 +265,7 @@
       "r25": "NTC ellenállás 25°C-on",
       "beta": "NTC béta együttható",
       "offset": "Kalibrációs eltolás",
-      "panic": "Leállítási küszöb",
+      "panic": "Pánikküszöb",
       "status_not_installed": "Nincs érzékelő",
       "status_open": "Szakadás / nincs csatlakoztatva",
       "status_shorted": "Zárlatos"

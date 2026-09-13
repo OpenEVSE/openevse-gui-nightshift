@@ -233,8 +233,6 @@
       "overcurrent_monitor": "Surveillance de surintensité",
       "zero_cross": "Protection contre l’usure du relais (passage à zéro)",
       "zero_cross_desc": "Commute le relais uniquement au passage à zéro du courant alternatif pour réduire l’usure des contacts.",
-      "cable_temp": "Surveillance de la température du câble",
-      "cable_temp_desc": "Surveille les thermistances NTC dans le câble VE ou d'entrée et met le chargeur en défaut si l'une surchauffe.",
       "faults": "Compteurs de défauts",
       "gfci_count": "Défauts GFCI",
       "noground_count": "Défauts de terre",
@@ -252,6 +250,8 @@
     },
     "cabletemp": {
       "title": "Température du câble",
+      "enable": "Surveillance de la température du câble",
+      "enable_desc": "Surveille les thermistances NTC dans le câble VE ou d'entrée et met le chargeur en défaut si l'une surchauffe.",
       "input1": "Entrée 1 (PP)",
       "input2": "Entrée 2 (PP2)",
       "pp_note": "Partage une broche avec l'ampacité automatique PP — assigner un capteur ici la désactive.",
@@ -265,7 +265,7 @@
       "r25": "Résistance NTC à 25 °C",
       "beta": "Coefficient bêta NTC",
       "offset": "Décalage de calibration",
-      "panic": "Seuil d'arrêt",
+      "panic": "Seuil critique",
       "status_not_installed": "Aucun capteur",
       "status_open": "Circuit ouvert / débranché",
       "status_shorted": "Court-circuité"
