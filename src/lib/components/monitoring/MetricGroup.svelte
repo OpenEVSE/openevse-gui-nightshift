@@ -23,7 +23,7 @@
   {#if open}
     <div class="border-t border-border px-3 pb-1">
       {#each group.rows as row}
-        <MetricRow labelKey={row.labelKey} value={row.value} unit={row.unit} />
+        <MetricRow labelKey={row.labelKey} value={row.value} unit={row.unit} textKey={row.textKey} />
       {/each}
     </div>
   {/if}

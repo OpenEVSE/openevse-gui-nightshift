@@ -94,10 +94,13 @@ Two dev-only endpoints switch the simulated device at runtime, no restart needed
 - `GET /api/_mock/scenario/<name>` — overlay `dev/fixtures/scenarios/<name>.json`
   onto the base fixtures (`reset` clears). A scenario file holds partial fixture
   objects keyed by fixture stem, e.g. `{ "config": { "wizard_passed": false } }`
-  re-enables the first-run wizard. `loadsharing_limited` and
-  `loadsharing_failsafe` put the Home page's load-sharing card into its two
-  non-trivial states (an allocation holding the current down; a member whose
-  controller has gone quiet) — both need the OpenEVSE Labs switch on.
+  re-enables the first-run wizard. `notifications` is the one to reach for when
+  working on advisories: the base fixtures are a charger with nothing to report,
+  so the header bell, the dashboard strip and the Safety-page markers only
+  appear under that overlay. `loadsharing_limited` and `loadsharing_failsafe`
+  put the Home page's load-sharing card into its two non-trivial states (an
+  allocation holding the current down; a member whose controller has gone
+  quiet) — both need the OpenEVSE Labs switch on.
 
 Setting `MOCK_STATIC=1` freezes the mock completely (no WebSocket ticks, fixed
 server clock) — this is what the screenshot generator uses.
@@ -171,7 +174,7 @@ src/
 dev/
   mock-plugin.js     the mock-mode Vite plugin
   fixtures/          canned device responses for mock mode
-    scenarios/       named fixture overlays (wizard, display, ...)
+    scenarios/       named fixture overlays (wizard, display, notifications, ...)
 scripts/
   screenshots.mjs    automated screenshot generator (npm run screenshots)
   screenshots.config.js  the capture manifest
