@@ -12,7 +12,7 @@
   import IconButton from '../ui/IconButton.svelte'
   import { notification_store } from '../../stores/notifications.js'
   import { sortNewestFirst, advisoryRoute, isKnownAdvisory } from '../../notifications/notifications.js'
-  import { formatAgo } from '../../format/duration.js'
+  import { formatDuration } from '../../format/duration.js'
   import { serialQueue } from '../../queue.js'
   import { showWriteError } from '../../alerts.js'
 
@@ -45,8 +45,13 @@
   function raisedLabel(item) {
     // first_seen is null when the clock had not synced at the moment the
     // charger recorded this — unknown, never 1970.
-    const ago = formatAgo(item.first_seen)
-    return ago ? $_('notifications.raised', { values: { ago } }) : $_('notifications.time_unknown')
+    if (!item.first_seen) return $_('notifications.time_unknown')
+    // A bare duration, not formatAgo(): the "ago" belongs to the locale
+    // string, which each language phrases its own way ("hace 5m", "il y a
+    // 5m", "5m óta"). Baking an English "ago" into the value would render
+    // "Detectado hace 5m ago".
+    const ago = formatDuration(Math.floor(Date.now() / 1000) - item.first_seen)
+    return $_('notifications.raised', { values: { ago } })
   }
 
   async function ack(id) {

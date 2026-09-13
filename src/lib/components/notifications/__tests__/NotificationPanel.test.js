@@ -80,6 +80,20 @@ describe('NotificationPanel', () => {
     expect(getByText('notifications.time_unknown')).toBeInTheDocument()
   })
 
+  it('hands the locale string a bare duration, leaving "ago" to the translation', () => {
+    // es/fr/hu phrase "ago" their own way ("hace", "il y a", "óta"); an
+    // English "ago" baked into the value would render "Detectado hace 5m ago".
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date((1779400000 + 300) * 1000))
+    try {
+      seed([item('safety.ground_check', { first_seen: 1779400000 })])
+      const { getByText } = render(NotificationPanel, { props: { visible: true } })
+      expect(getByText('notifications.raised:{"ago":"5m 0s"}')).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('links each advisory to the page that acts on it', () => {
     seed([item('safety.ground_check'), item('wear.relay_life', { first_seen: 1779300000 })])
     const { getByText } = render(NotificationPanel, { props: { visible: true } })

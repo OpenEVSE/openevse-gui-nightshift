@@ -18,9 +18,9 @@ const model = {
 		// the advisory engine; stays null forever on one that doesn't.
 		notification_badge: null,
 		// Bumped by WebSocket.svelte whenever a frame carries the notifications
-		// object. The firmware sends it on connect and then only when the live
-		// set changes, so each arrival is a reason to re-read the list — even
-		// when count and severity happen to land on the same pair.
+		// object. The firmware sends it on connect, when the live set changes
+		// and on every ack, so each arrival is a reason to re-read the list —
+		// even when count and severity happen to land on the same pair.
 		notification_event: 0,
 		logidx_min: 0,
 		logidx_max: 0,

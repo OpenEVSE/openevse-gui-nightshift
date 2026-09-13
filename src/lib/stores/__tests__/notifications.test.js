@@ -66,7 +66,7 @@ describe('notification_store', () => {
   })
 
   it('acks with a form-encoded body and a text response', async () => {
-    httpAPI.mockResolvedValueOnce('acknowledged').mockResolvedValueOnce(LIST)
+    httpAPI.mockResolvedValueOnce('acknowledged')
 
     const ok = await notification_store.ack('safety.ground_check')
 
@@ -80,20 +80,21 @@ describe('notification_store', () => {
     )
   })
 
-  it('re-reads the list after an ack', async () => {
-    // The firmware pushes a websocket event only when the live set changes,
-    // and an ack does not change it — so nothing would arrive to correct the
-    // badge. The store has to go and look.
-    httpAPI.mockResolvedValueOnce('acknowledged').mockResolvedValueOnce(LIST)
+  it('leaves the re-read to the websocket event after a successful ack', async () => {
+    // The firmware's ack() pushes the badge fields itself, which DataManager
+    // turns into a GET /notifications. A second GET from here would only
+    // queue behind that one on the device's single-threaded server.
+    httpAPI.mockResolvedValueOnce('acknowledged')
 
     await notification_store.ack('safety.ground_check')
 
-    expect(httpAPI).toHaveBeenNthCalledWith(2, 'GET', '/notifications')
-    expect(get(notification_store).items).toHaveLength(2)
+    expect(httpAPI).toHaveBeenCalledTimes(1)
   })
 
-  it('reports a 404 as a miss but still re-reads', async () => {
-    // "no such active notification" means it cleared between render and tap.
+  it('reports a 404 as a miss and re-reads to reconcile', async () => {
+    // "no such active notification" means it cleared between render and tap;
+    // the event for that clearing went out before the tap, so nothing further
+    // is coming over the websocket and the store has to go and look.
     httpAPI
       .mockResolvedValueOnce('no such active notification')
       .mockResolvedValueOnce({ count: 0, max_severity: 'info', notifications: [] })
@@ -106,7 +107,7 @@ describe('notification_store', () => {
   })
 
   it('percent-encodes the id rather than pasting it into the body', async () => {
-    httpAPI.mockResolvedValueOnce('acknowledged').mockResolvedValueOnce(LIST)
+    httpAPI.mockResolvedValueOnce('acknowledged')
     await notification_store.ack('a&b=c')
     expect(httpAPI).toHaveBeenNthCalledWith(1, 'POST', '/notifications/ack', 'id=a%26b%3Dc', 'text')
   })

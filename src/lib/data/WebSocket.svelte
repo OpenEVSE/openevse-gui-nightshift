@@ -158,9 +158,9 @@
       // cannot stand in for one: an advisory clearing while another of the
       // same severity is raised moves the set without moving count or
       // severity. What is reliable is that the firmware sends these fields on
-      // the connect snapshot and then only when the live set changes — so the
-      // *arrival* of the object is the signal, and a nonce is the only way to
-      // carry "it arrived again with the same values" through a merged store.
+      // the connect snapshot, when the live set changes and on every ack — so
+      // the *arrival* of the object is the signal, and a nonce is the only way
+      // to carry "it arrived again with the same values" through a merged store.
       if (jsondata.notifications) {
         $uistates_store.notification_event = ($uistates_store.notification_event ?? 0) + 1
       }

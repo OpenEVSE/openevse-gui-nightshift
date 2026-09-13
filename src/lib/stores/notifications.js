@@ -41,12 +41,14 @@ function createNotificationStore() {
       'text',
     )
     const ok = typeof res === 'string' && res.includes('acknowledged')
-    // Re-read whatever the answer was. An ack changes `acked` and `count` but
-    // not the live *set*, and the firmware only pushes on a set change — so
-    // nothing would arrive over the websocket to correct the badge. A 404
-    // ("no such active notification") means the advisory cleared between
-    // render and tap, which the same re-read reconciles.
-    await download()
+    // On success the firmware's ack() calls pushEvent() (notifications.cpp),
+    // so the badge fields arrive over the websocket and DataManager re-reads
+    // the list through the normal path — a second GET here would only queue
+    // behind it on the device's single-threaded server. A miss is different:
+    // "no such active notification" (404) means the advisory cleared between
+    // render and tap, and the event for *that* went out before the tap, so
+    // re-read now to reconcile the row the user is looking at.
+    if (!ok) await download()
     return ok
   }
 

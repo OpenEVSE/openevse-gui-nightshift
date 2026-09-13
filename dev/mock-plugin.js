@@ -401,10 +401,15 @@ export function mockPlugin() {
               return
             }
             notificationAcks.add(id)
-            // Deliberately no websocket push. The firmware only emits an event
-            // when the live *set* changes, and an ack does not change it — so
-            // the GUI has to re-read the list for itself, and the mock has to
-            // let it find out that it must.
+            // Notifications::ack() calls pushEvent() after saving, so a second
+            // browser sees the badge drop without polling. Send the same
+            // two-field frame the firmware does; the GUI relies on it for the
+            // re-read rather than fetching the list itself after an ack.
+            const advisories = notificationList()
+            const msg = JSON.stringify({
+              notifications: { count: advisories.count, severity: advisories.max_severity },
+            })
+            for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
             res.writeHead(200, { 'Content-Type': 'text/plain' })
             res.end('acknowledged')
           }

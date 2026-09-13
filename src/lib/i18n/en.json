@@ -11,7 +11,7 @@
     "mute": "Mute",
     "dismiss": "Dismiss",
     "mute_note": "Muting silences the alarm only. A muted advisory stays in this list and keeps its marker beside the setting it is about.",
-    "raised": "Raised {ago}",
+    "raised": "Raised {ago} ago",
     "time_unknown": "Time unknown",
     "checks_off": "Advisories: {count}",
     "strip_title": "Needs your attention",

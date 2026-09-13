@@ -207,12 +207,14 @@ export function hasNotifications(status) {
 /**
  * The two /status fields as one comparable string, or null on a build without
  * the feature. This is the re-fetch trigger: the firmware pushes these two
- * over the websocket whenever the live set changes, and the list itself only
- * ever arrives from GET /notifications — there is no per-item push.
+ * over the websocket whenever the live set changes and on every ack
+ * (Notifications::ack() calls pushEvent()), and the list itself only ever
+ * arrives from GET /notifications — there is no per-item push.
  *
- * Note what this cannot see: acking changes `count` but not the live set, so
- * the firmware sends no event for it. The ack path re-downloads for itself
- * rather than waiting for a signature that will not move.
+ * Note what this cannot see on its own: one advisory clearing as another of
+ * the same severity is raised, or an ack of an already-muted entry, moves the
+ * set without moving either number. DataManager pairs this with the arrival
+ * nonce from WebSocket.svelte for that reason.
  */
 export function badgeSignature(status) {
   if (!hasNotifications(status)) return null
