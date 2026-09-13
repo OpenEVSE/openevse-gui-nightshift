@@ -21,6 +21,25 @@ describe('certificate_store', () => {
     expect(typeof certificate_store.remove).toBe('function')
   })
 
+  it('generates a self-signed certificate', async () => {
+    httpAPI.mockResolvedValue({ msg: 'done', id: 'abc123' })
+
+    const result = await certificate_store.generateSelfSigned()
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/certificates/self-signed')
+    expect(result).toEqual({ success: true, id: 'abc123' })
+  })
+
+  it('passes the firmware message through when self-signing is unavailable', async () => {
+    // Builds without mbedTLS answer 501 rather than generating a key.
+    httpAPI.mockResolvedValue({
+      msg: 'Self-signed certificate generation is not available in native builds.',
+    })
+
+    const result = await certificate_store.generateSelfSigned()
+    expect(result.success).toBe(false)
+    expect(result.msg).toContain('not available')
+  })
+
   it('should download certificates', async () => {
     const mockCerts = [
       { id: 1, name: 'cert1' },

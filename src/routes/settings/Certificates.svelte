@@ -31,6 +31,23 @@
     }
   }
 
+  async function generateSelfSigned() {
+    if (busy) return
+    busy = true
+    try {
+      const res = await serialQueue.add(() => certificate_store.generateSelfSigned())
+      if (res && res.success) {
+        await serialQueue.add(() => certificate_store.download())
+      } else {
+        // The firmware explains why it declined (e.g. 501 on builds without
+        // mbedTLS); pass that through rather than a bare "write failed".
+        showWriteError(res && res.msg ? res.msg : undefined)
+      }
+    } finally {
+      busy = false
+    }
+  }
+
   async function remove(id) {
     if (busy) return
     busy = true
@@ -70,9 +87,15 @@
     {/if}
   </ConfigSection>
 
-  <div class="mt-4">
+  <div class="mt-4 flex flex-wrap gap-2">
     <Button label={$_('config.certificates.add')} disabled={busy} onclick={() => (modalOpen = true)} />
+    <Button
+      label={$_('config.certificates.self_signed')}
+      disabled={busy}
+      onclick={generateSelfSigned}
+    />
   </div>
+  <p class="mt-2 text-sm text-text-dim">{$_('config.certificates.self_signed_desc')}</p>
 </ConfigPage>
 
 <CertificateModal
