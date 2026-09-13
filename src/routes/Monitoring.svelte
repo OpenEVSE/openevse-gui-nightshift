@@ -1,6 +1,8 @@
 <script>
   import { _ } from 'svelte-i18n'
   import { onMount } from 'svelte'
+  import { get } from 'svelte/store'
+  import { currentPath } from '../lib/router.js'
   import { status_store } from '../lib/stores/status.js'
   import { config_store } from '../lib/stores/config.js'
   import { uistates_store } from '../lib/stores/uistates.js'
@@ -20,7 +22,11 @@
   let activeId = $state('energy')
 
   onMount(() => {
-    if ($uistates_store?.error) activeId = 'health'
+    // #/monitoring/health is the deep link advisories about relay wear and
+    // cleared faults use; a live fault also lands here on its own. Read once
+    // on mount, not reactively, so changing tabs afterwards is not fought by
+    // the URL that got us here.
+    if (get(currentPath) === '/monitoring/health' || $uistates_store?.error) activeId = 'health'
   })
 
   // Desktop has room for everything at once, so the Data groups start

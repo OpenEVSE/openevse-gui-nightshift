@@ -2,12 +2,17 @@
 <script>
   import Icon from '../../icons/Icon.svelte'
 
-  let { label = '', description = '', status = 'idle', children } = $props()
+  // `badge` is an optional snippet rendered immediately after the label — the
+  // slot an advisory marker sits in, beside the very switch it is about.
+  let { label = '', description = '', status = 'idle', badge, children } = $props()
 </script>
 
 <div class="py-3">
   <div class="flex items-center justify-between gap-3">
-    <span class="text-sm text-text">{label}</span>
+    <span class="flex min-w-0 items-center gap-2">
+      <span class="text-sm text-text">{label}</span>
+      {@render badge?.()}
+    </span>
     {#if status === 'saving'}
       <Icon icon="mdi:loading" size={16} class="animate-spin text-text-dim" />
     {:else if status === 'saved'}

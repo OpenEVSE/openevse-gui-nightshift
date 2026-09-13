@@ -32,6 +32,7 @@
   import BoostCard from '../lib/components/dashboard/BoostCard.svelte'
   import RatePill from '../lib/components/dashboard/RatePill.svelte'
   import ChargeLimitCard from '../lib/components/dashboard/ChargeLimitCard.svelte'
+  import AdvisoryStrip from '../lib/components/notifications/AdvisoryStrip.svelte'
 
   let busy = $state(false)
   let rateNonce = $state(0)
@@ -422,6 +423,11 @@
   class="flex flex-col px-4 pb-4 lg:mx-auto lg:grid lg:w-full lg:max-w-5xl
          lg:grid-cols-2 lg:items-start lg:gap-x-6"
 >
+  <!-- Above the hero in both layouts: no `order`, so it precedes the
+       order-1 hero on mobile, and it spans the desktop grid. Renders nothing
+       unless there is an unmuted critical advisory. -->
+  <div class="lg:col-span-2"><AdvisoryStrip /></div>
+
   {#if showChart}
     <!-- Labs chart hero: full content width on desktop, first block on mobile -->
     <div class="max-lg:order-1 lg:col-span-2" in:fade={{ duration: 150 }}>

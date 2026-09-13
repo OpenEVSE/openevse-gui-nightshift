@@ -114,6 +114,15 @@ function managerReason(entry) {
  * oldest row).
  */
 export function logReason(entry, prev) {
+  // An advisory row names the advisory and nothing else. Tested before the
+  // `changed` guard because the firmware writes these rows outside the
+  // field-diff path, so their mask is empty and the early return below would
+  // otherwise leave the row blank. The field is absent on every other row and
+  // on rows written before it existed — absence is normal, not an error.
+  if (typeof entry?.notification === 'string' && entry.notification !== '') {
+    return { code: 'notification', params: { id: entry.notification } }
+  }
+
   const changed = Array.isArray(entry?.changed) ? entry.changed : []
   if (changed.length === 0) return null
 
