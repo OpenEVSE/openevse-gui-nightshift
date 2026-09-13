@@ -89,6 +89,25 @@ describe('Dashboard', () => {
     expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '40')
   })
 
+  it('ignores a hardware max of 0 (not read from the controller yet) for the rate slider', async () => {
+    // GET /config reports max_current_hard straight from the controller
+    // cache, which is 0 until $GC has been answered — and min(soft, 0) would
+    // pin the pill at 0 A with a slider that cannot move.
+    config_store.set({ max_current_soft: 32, max_current_hard: 0, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '32')
+  })
+
+  it('falls back to 48 A when neither max is usable', async () => {
+    config_store.set({ max_current_hard: 0, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '48')
+  })
+
   it('locks the mode pill to the claim owner (RFID)', () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     claims_target_store.set({ properties: {}, claims: { state: EvseClients.rfid.id } })
@@ -372,51 +391,83 @@ describe('Dashboard', () => {
     })
     status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
     const { queryByText } = render(Dashboard)
-    expect(queryByText('dashboard.loadsharing.badge_active')).not.toBeInTheDocument()
+    expect(queryByText('dashboard.loadsharing.title')).not.toBeInTheDocument()
+    expect(queryByText('dashboard.loadsharing.line_controller')).not.toBeInTheDocument()
   })
 
-  it('shows load sharing active/limited badges and reduced messaging', async () => {
+  it('collapses to one line when nothing is limited', async () => {
     uisettings_store.update((s) => ({ ...s, dev_features: true }))
     config_store.set({
-      max_current_soft: 48,
-      divert_enabled: false,
-      current_shaper_enabled: false,
-      loadsharing_enabled: true,
-      loadsharing_role: 'controller',
-      loadsharing_group_max_current: 40,
+      max_current_soft: 32, divert_enabled: false, current_shaper_enabled: false,
+      loadsharing_enabled: true, loadsharing_role: 'controller', loadsharing_group_max_current: 48,
     })
+    claims_target_store.set({ properties: {}, claims: { state: null } })
+    status_store.set({
+      state: 1, total_day: 0, total_energy: 0, pilot: 32, loadsharing_status_version: 1,
+      loadsharing_joined_peers: [{ hostname: 'me' }, { hostname: 'garage' }, { hostname: 'yard' }],
+    })
+    const { getByText, queryByText } = render(Dashboard)
+    await vi.waitFor(() => expect(getByText('dashboard.loadsharing.line_controller')).toBeInTheDocument())
+    expect(queryByText('dashboard.loadsharing.title')).not.toBeInTheDocument()
+    expect(queryByText('dashboard.loadsharing.tile_limited')).not.toBeInTheDocument()
+    // The verdict lives on /loadsharing/status; the version tick fetches it.
+    expect(httpAPI).toHaveBeenCalledWith('GET', '/loadsharing/status')
+  })
+
+  it('shows the limited card, one amber reason, and tags the current tile', async () => {
+    uisettings_store.update((s) => ({ ...s, dev_features: true }))
+    config_store.set({
+      max_current_soft: 32, divert_enabled: false, current_shaper_enabled: false,
+      loadsharing_enabled: true, loadsharing_role: 'member', loadsharing_controller_host: 'controller.local',
+    })
+    httpAPI.mockImplementation((m, url) =>
+      Promise.resolve(url === '/loadsharing/status' ? { failsafe_active: false, online_count: 2, peers: [] } : {}),
+    )
     claims_target_store.set({
       properties: { max_current: 16 },
       claims: { state: null, max_current: EvseClients.loadsharing.id },
     })
-    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
-    const { getByText, getAllByText } = render(Dashboard)
-    await vi.waitFor(() => {
-      expect(getByText('dashboard.loadsharing.badge_active')).toBeInTheDocument()
-      expect(getByText('dashboard.loadsharing.badge_limited')).toBeInTheDocument()
-      expect(getAllByText('dashboard.loadsharing.reduced').length).toBeGreaterThan(0)
+    status_store.set({
+      state: 3, power: 3800, voltage: 240, amp: 16000, session_energy: 0, session_elapsed: 0, temp: 0,
+      pilot: 16, loadsharing_status_version: 1,
     })
+    const { getByText, queryByText } = render(Dashboard)
+    await vi.waitFor(() => {
+      expect(getByText('dashboard.loadsharing.pill_member_limited')).toBeInTheDocument()
+      expect(getByText('dashboard.loadsharing.limited')).toBeInTheDocument()
+    })
+    expect(getByText('dashboard.loadsharing.tile_limited')).toBeInTheDocument()
+    expect(queryByText('dashboard.loadsharing.pill_failsafe')).not.toBeInTheDocument()
+    expect(queryByText('dashboard.loadsharing.line_member')).not.toBeInTheDocument()
   })
 
-  it('shows controlled-by messaging for member devices', async () => {
+  it('calls a lost controller a failsafe, not sharing, with the host as a link', async () => {
     uisettings_store.update((s) => ({ ...s, dev_features: true }))
     config_store.set({
-      max_current_soft: 48,
-      divert_enabled: false,
-      current_shaper_enabled: false,
-      loadsharing_enabled: true,
-      loadsharing_role: 'member',
-      loadsharing_controller_host: 'controller.local',
+      max_current_soft: 32, divert_enabled: false, current_shaper_enabled: false,
+      loadsharing_enabled: true, loadsharing_role: 'member',
+      loadsharing_controller_host: 'openevse-bench32.local', loadsharing_failsafe_safe_current: 6,
     })
+    // The 6 A claim is identical to an allocation; only the firmware's
+    // failsafe_active on /loadsharing/status tells them apart.
+    httpAPI.mockImplementation((m, url) =>
+      Promise.resolve(
+        url === '/loadsharing/status'
+          ? { failsafe_active: true, online_count: 0, peers: [{ host: 'openevse-bench32.local', online: false, last_seen: 80 }] }
+          : {},
+      ),
+    )
     claims_target_store.set({
-      properties: {},
-      claims: { state: null, charge_current: null },
+      properties: { max_current: 6 },
+      claims: { state: null, max_current: EvseClients.loadsharing.id },
     })
-    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 10 })
-    const { getByText } = render(Dashboard)
-    await vi.waitFor(() => {
-      expect(getByText('dashboard.loadsharing.badge_controlled')).toBeInTheDocument()
-      expect(getByText('dashboard.loadsharing.controlled_by')).toBeInTheDocument()
-    })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 6, uptime: 8000, loadsharing_status_version: 3 })
+    const { getByText, queryByText } = render(Dashboard)
+    await vi.waitFor(() => expect(getByText('dashboard.loadsharing.pill_failsafe')).toBeInTheDocument())
+    expect(getByText('dashboard.loadsharing.failsafe_for')).toBeInTheDocument()
+    expect(getByText('openevse-bench32.local').closest('a')).toHaveAttribute('href', 'http://openevse-bench32.local')
+    expect(getByText('dashboard.loadsharing.settings').closest('a')).toHaveAttribute('href', '#/settings/loadsharing')
+    expect(queryByText('dashboard.loadsharing.pill_member_limited')).not.toBeInTheDocument()
+    expect(queryByText('dashboard.loadsharing.limited')).not.toBeInTheDocument()
   })
 })

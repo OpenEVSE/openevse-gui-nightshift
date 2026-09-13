@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "A member whose controller has never answered: the heartbeat failsafe",
+    "holds the pilot at the 6 A safe current. The claim is identical to an",
+    "allocation; only failsafe_active on /loadsharing/status says otherwise,",
+    "and the mock derives that from the controller host not being an online",
+    "peer."
+  ],
+  "config": {
+    "loadsharing_enabled": true,
+    "loadsharing_role": "member",
+    "loadsharing_controller_host": "openevse-bench32.local",
+    "loadsharing_failsafe_mode": "safe_current",
+    "loadsharing_failsafe_safe_current": 6,
+    "max_current_soft": 32
+  },
+  "status": {
+    "pilot": 6,
+    "amp": 6000,
+    "loadsharing_status_version": 1
+  },
+  "claims_target": {
+    "properties": { "max_current": 6 },
+    "claims": { "max_current": 65550 }
+  }
+}

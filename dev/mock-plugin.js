@@ -52,6 +52,7 @@ export function mockPlugin() {
     '/api/energy/monthly':'energy_monthly.json',
     '/api/energy/annual': 'energy_annual.json',
     '/api/cabletemp':     'cabletemp.json',
+    '/api/notifications':  'notifications.json',
   }
   const baseFixtures = {}
   const fixtureKeyByUrl = {}
@@ -67,10 +68,22 @@ export function mockPlugin() {
   // screenshot runner and handy for manual dev.
   let scenario = null
 
+  // Dev-only config writes, held in memory for the life of the dev server.
+  // The device persists POST /config and answers `{"msg":"done"}`; the mock
+  // used to fall through to the GET fixture, which has no `msg`, so
+  // config_store.upload() read every save as a failure and every settings
+  // page raised the write-error alert. Merging here means a save sticks and
+  // a reload shows what was saved.
+  const configWrites = {}
+  let configVersion = baseFixtures['/api/status'].config_version ?? 1
+
   function effectiveFixture(url) {
     const base = baseFixtures[url]
     const overlay = scenario?.[fixtureKeyByUrl[url]]
-    return overlay ? deepMerge(base, overlay) : base
+    const merged = overlay ? deepMerge(base, overlay) : base
+    // Writes sit on top of the scenario overlay: the scenario is the charger
+    // you started with, the writes are what you have changed since.
+    return url === '/api/config' ? { ...merged, ...configWrites } : merged
   }
 
   // Static mode (MOCK_STATIC=1): no periodic WebSocket ticks and a frozen
@@ -119,15 +132,49 @@ export function mockPlugin() {
   // the "Clear dump" flow can be exercised without hardware.
   let crashPresent = true
 
+  // Advisory acks laid over whatever fixture/scenario is live. The firmware
+  // persists these; here they live for the dev-server run and are dropped when
+  // the scenario changes, since a different scenario is a different charger.
+  const notificationAcks = new Set()
+
+  const SEVERITY_NAMES = ['info', 'warning', 'critical']
+
+  // Serve the list the way the firmware serialises it: every advisory is
+  // listed, muted ones included, while `count` and `max_severity` cover the
+  // unmuted entries only. So `count: 0` beside a non-empty array is a
+  // legitimate answer, and the GUI has to render it as one.
+  function notificationList() {
+    const base = effectiveFixture('/api/notifications')
+    const items = (base?.notifications ?? []).map((n) => ({
+      ...n,
+      acked: !!n.acked || notificationAcks.has(n.id),
+    }))
+    const unmuted = items.filter((n) => !n.acked)
+    const rank = unmuted.reduce(
+      (m, n) => Math.max(m, Math.max(0, SEVERITY_NAMES.indexOf(n.severity))),
+      0,
+    )
+    return {
+      count: unmuted.length,
+      max_severity: SEVERITY_NAMES[rank],
+      notifications: items,
+    }
+  }
+
   function buildStatusMessage(tickCount) {
     // Mirror the device's real status shape; nudge only genuine live fields
     // so the connection looks alive without inventing nonexistent keys.
     const baseStatus = effectiveFixture('/api/status')
     const state = stateOverride == null ? baseStatus.state : stateOverride
     const charging = state === 3
+    const advisories = notificationList()
     return JSON.stringify({
       ...baseStatus,
       state,
+      config_version: configVersion,
+      // Exactly the two fields the firmware sends here — the list lives on
+      // its own endpoint. Their presence is the GUI's capability gate.
+      notifications: { count: advisories.count, severity: advisories.max_severity },
       claims_version: claimsVersion,
       boost: !!boost,
       boost_version: boostVersion,
@@ -173,6 +220,12 @@ export function mockPlugin() {
             }
             scenario = JSON.parse(readFileSync(file, 'utf-8'))
           }
+          // A scenario describes a charger as found, so drop anything written
+          // during the previous one rather than letting it bleed through.
+          for (const key of Object.keys(configWrites)) delete configWrites[key]
+          // A different scenario is a different charger; its advisories are
+          // not the ones the previous set's acks were given to.
+          notificationAcks.clear()
           const msg = buildStatusMessage(tickCount)
           for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
           res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -260,12 +313,21 @@ export function mockPlugin() {
         if (url === '/api/loadsharing/status') {
           const onlineCount = loadsharingPeers.filter(p => p.online && p.joined).length
           const offlineCount = loadsharingPeers.filter(p => !p.online && p.joined).length
+          // The firmware's verdict: a member whose controller has not
+          // answered within the heartbeat timeout. Here: a member whose
+          // controller host is not an online peer (see the
+          // loadsharing_failsafe scenario).
+          const cfg = effectiveFixture('/api/config')
+          const controllerOnline = loadsharingPeers.some(
+            (p) => p.host === cfg.loadsharing_controller_host && p.online,
+          )
+          const failsafe = cfg.loadsharing_role === 'member' && !controllerOnline
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({
             enabled: true,
             group_id: 'main_circuit',
             computed_at: Math.floor(nowMs() / 1000),
-            failsafe_active: false,
+            failsafe_active: failsafe,
             online_count: onlineCount,
             offline_count: offlineCount,
             peers: loadsharingPeers,
@@ -343,6 +405,63 @@ export function mockPlugin() {
           return
         }
 
+        // ── Notification advisories ───────────────────────────────────────────
+        // Ack first: the exact-match table below would otherwise never see it,
+        // and the list route is a prefix of this one.
+        //
+        // The replies are text/plain, like the firmware's — "acknowledged",
+        // "id required" (400), "no such active notification" (404) — because
+        // the GUI reads the body to tell an ack from a miss.
+        if (url === '/api/notifications/ack') {
+          const finish = (rawId) => {
+            const id = (rawId ?? '').trim()
+            if (!id) {
+              res.writeHead(400, { 'Content-Type': 'text/plain' })
+              res.end('id required')
+              return
+            }
+            const live = notificationList().notifications.some((n) => n.id === id)
+            if (!live) {
+              res.writeHead(404, { 'Content-Type': 'text/plain' })
+              res.end('no such active notification')
+              return
+            }
+            notificationAcks.add(id)
+            // Notifications::ack() calls pushEvent() after saving, so a second
+            // browser sees the badge drop without polling. Send the same
+            // two-field frame the firmware does; the GUI relies on it for the
+            // re-read rather than fetching the list itself after an ack.
+            const advisories = notificationList()
+            const msg = JSON.stringify({
+              notifications: { count: advisories.count, severity: advisories.max_severity },
+            })
+            for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
+            res.writeHead(200, { 'Content-Type': 'text/plain' })
+            res.end('acknowledged')
+          }
+          const fromQuery = req.url?.match(/[?&]id=([^&]*)/)
+          if (req.method === 'GET') {
+            finish(fromQuery ? decodeURIComponent(fromQuery[1]) : '')
+            return
+          }
+          let body = ''
+          req.on('data', (chunk) => { body += chunk })
+          req.on('end', () => {
+            // application/x-www-form-urlencoded body, then the query string —
+            // the same two places the firmware looks, in the same order.
+            const fromBody = body.match(/(?:^|&)id=([^&]*)/)
+            const raw = fromBody ? fromBody[1] : fromQuery ? fromQuery[1] : ''
+            finish(decodeURIComponent(raw.replace(/\+/g, ' ')))
+          })
+          return
+        }
+
+        if (url === '/api/notifications') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify(notificationList()))
+          return
+        }
+
         // Status reflects any runtime override so a fresh load matches the WS.
         if (url === '/api/status') {
           res.writeHead(200, { 'Content-Type': 'application/json' })
@@ -407,8 +526,11 @@ export function mockPlugin() {
 
         // Claims/target reflects the switcher so the derived mode is coherent.
         if (url === '/api/claims/target') {
+          // A scenario may overlay claims_target (e.g. a load-sharing
+          // allocation on max_current) on top of whatever the switcher set.
+          const overlay = scenario?.claims_target
           res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify(claimsState))
+          res.end(JSON.stringify(overlay ? deepMerge(claimsState, overlay) : claimsState))
           return
         }
 
@@ -500,6 +622,31 @@ export function mockPlugin() {
           const rapi = rapiParam ? decodeURIComponent(rapiParam[1]) : ''
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ cmd: rapi, ret: '$OK^20' }))
+          return
+        }
+
+        // Config writes. The device merges the body into its stored config,
+        // answers {"msg":"done"} and bumps config_version; DataManager watches
+        // that counter and re-downloads, so a save here round-trips exactly as
+        // it does on hardware instead of only updating the store optimistically.
+        if (url === '/api/config' && req.method === 'POST') {
+          let body = ''
+          req.on('data', (c) => { body += c })
+          req.on('end', () => {
+            let data
+            try { data = JSON.parse(body) } catch { data = null }
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
+              res.writeHead(400, { 'Content-Type': 'application/json' })
+              res.end(JSON.stringify({ msg: 'failed to parse JSON' }))
+              return
+            }
+            Object.assign(configWrites, data)
+            configVersion++
+            const msg = buildStatusMessage(tickCount)
+            for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
+            res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.end(JSON.stringify({ msg: 'done' }))
+          })
           return
         }
 

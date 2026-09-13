@@ -13,15 +13,22 @@
   const form = createConfigForm()
   const ss = form.saveState
 
-  // Every control here maps to an LVGL-TFT firmware config key. The firmware
-  // only emits a key in GET /config when it supports it, so each control is
-  // gated on the key being *present* (`in`), not truthy — `tft_standby_brightness`
-  // and `lcd_backlight_timeout` are validly 0 (backlight off / never sleep) and a
-  // truthiness gate would wrongly hide those configurations.
+  // Two different displays can land here. The TFT section maps to the
+  // LVGL-TFT firmware config keys; the 2-line LCD section to the controller's
+  // own `lcd_type`. A charger has one or the other (a classic V6 or JuiceBox
+  // v2 conversion has the character LCD and no TFT), and the Settings hub
+  // lists this page when either key is present, so each section gates on its
+  // own key. The firmware only emits a key in GET /config when it supports it,
+  // so every gate is on the key being *present* (`in`), not truthy —
+  // `tft_standby_brightness` and `lcd_backlight_timeout` are validly 0
+  // (backlight off / never sleep) and a truthiness gate would wrongly hide
+  // those configurations.
   let cfg = $derived($config_store ?? {})
+  let hasTft = $derived('tft_theme' in cfg)
   let hasBrightness = $derived('tft_brightness' in cfg)
   let hasStandby = $derived('tft_standby_brightness' in cfg)
   let hasTimeout = $derived('lcd_backlight_timeout' in cfg)
+  let hasLcdType = $derived('lcd_type' in cfg)
 
   // On-device LVGL panel theme (config key `tft_theme`) — distinct from the web
   // UI's own site theme. Values mirror the GUI's [data-theme] tokens so the
@@ -36,6 +43,22 @@
     { value: '12', label: $_('config.display.clock_12') },
   ])
   let theme = $derived(cfg.tft_theme ?? 'dark')
+
+  // 2-line character LCD backlight type on the OpenEVSE controller itself
+  // (distinct from the TFT panel settings above). RAPI $S0, ECF_MONO_LCD
+  // flag - defaults to RGB, since that's the controller firmware default
+  // and what a JuiceBox v2 replacement backlight needs.
+  //
+  // The firmware has no capability bit for the LCD, so it emits `lcd_type`
+  // optimistically and only learns otherwise when a $S0 write comes back
+  // $NK. On a controller without the LCD flags, then, the first save here is
+  // what makes the key drop out of /config and this section disappear on the
+  // next re-read. That is the firmware working as designed, not a bug.
+  let lcdTypeOptions = $derived([
+    { value: 'mono', label: $_('config.display.lcd_mono') },
+    { value: 'rgb', label: $_('config.display.lcd_rgb') },
+  ])
+  let lcdType = $derived(cfg.lcd_type ?? 'rgb')
 
   // Brightness, percent. Active has a 10% firmware floor; standby allows 0 to
   // blank the backlight on idle.
@@ -68,6 +91,7 @@
 </script>
 
 <ConfigPage title={$_('config.pages.display')}>
+  {#if hasTft}
   <ConfigSection title={$_('config.display.panel')}>
     <FormField
       label={$_('config.display.theme')}
@@ -159,4 +183,21 @@
       </FormField>
     {/if}
   </ConfigSection>
+  {/if}
+
+  {#if hasLcdType}
+    <ConfigSection title={$_('config.display.lcd')}>
+      <FormField
+        label={$_('config.display.lcd_type')}
+        description={$_('config.display.lcd_desc')}
+        status={$ss.lcd_type ?? 'idle'}
+      >
+        <SegmentedControl
+          options={lcdTypeOptions}
+          value={lcdType}
+          onchange={(v) => form.saveField('lcd_type', v)}
+        />
+      </FormField>
+    </ConfigSection>
+  {/if}
 </ConfigPage>
