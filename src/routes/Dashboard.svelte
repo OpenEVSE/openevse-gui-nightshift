@@ -11,6 +11,7 @@
   import { energy_store } from '../lib/stores/energy.js'
   import { uistates_store } from '../lib/stores/uistates.js'
   import { uisettings_store } from '../lib/stores/uisettings.js'
+  import { loadsharing_store } from '../lib/stores/loadsharing.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { EvseClients } from '../lib/vars.js'
@@ -20,12 +21,14 @@
   import { showWriteError, showBoostError } from '../lib/alerts.js'
   import { displayState, ringFill, connectedReason, maxPowerW, vehicleConnected } from '../lib/dashboard/state.js'
   import { socCeiling, estMaxRange, hmsShort } from '../lib/dashboard/soc.js'
+  import { loadSharingView } from '../lib/dashboard/loadsharing.js'
 
   import PlugPill from '../lib/components/dashboard/PlugPill.svelte'
   import PowerRing from '../lib/components/dashboard/PowerRing.svelte'
   import ChargingHero from '../lib/components/dashboard/ChargingHero.svelte'
   import StatChips from '../lib/components/dashboard/StatChips.svelte'
   import ShaperDivertRow from '../lib/components/dashboard/ShaperDivertRow.svelte'
+  import LoadSharingCard from '../lib/components/dashboard/LoadSharingCard.svelte'
   import ThrottleBadge from '../lib/components/dashboard/ThrottleBadge.svelte'
   import { selectedSegment } from '../lib/dashboard/controls.js'
   import ChargeControls from '../lib/components/dashboard/ChargeControls.svelte'
@@ -117,34 +120,32 @@
       ? clientid2name($claims_target_store.claims.charge_current)
       : '',
   )
-  let loadSharingEnabled = $derived(!!$config_store?.loadsharing_enabled)
   // Load sharing is Labs-gated (see the OpenEVSE Labs switch on Settings →
   // Terminal). Even when the device reports it enabled, the dashboard block
   // stays hidden until the user opts into Labs features.
-  let loadSharingVisible = $derived(loadSharingEnabled && !!$uisettings_store?.dev_features)
-  let loadSharingRole = $derived($config_store?.loadsharing_role ?? '')
-  let loadSharingControlled = $derived(loadSharingEnabled && loadSharingRole === 'member')
-  let loadSharingController = $derived($config_store?.loadsharing_controller_host ?? '')
-  let loadSharingClaimed = $derived(
-    [EvseClients.shaper.id, EvseClients.loadsharing.id].includes(
-      $claims_target_store?.claims?.max_current,
-    ),
+  let loadSharingVisible = $derived(
+    !!$config_store?.loadsharing_enabled && !!$uisettings_store?.dev_features,
   )
-  let loadSharingBadges = $derived({
-    active: loadSharingEnabled,
-    controlled: loadSharingControlled,
+  // failsafe_active and the controller's last_seen live on GET
+  // /loadsharing/status, not on the websocket; the firmware ticks
+  // loadsharing_status_version when either changes, so fetch on the tick —
+  // the same trigger Settings → Load sharing uses.
+  $effect(() => {
+    const version = $status_store?.loadsharing_status_version
+    if (loadSharingVisible && version !== undefined) loadsharing_store.downloadStatus()
   })
-  let loadSharingAssignedLimit = $derived(
-    loadSharingClaimed ? $claims_target_store?.properties?.max_current ?? null : null,
+  let loadSharing = $derived(
+    loadSharingVisible
+      ? loadSharingView({
+          config: $config_store,
+          status: $status_store,
+          claimsTarget: $claims_target_store,
+          lsStatus: $loadsharing_store?.status ?? null,
+          localMax: maxAmps,
+        })
+      : null,
   )
-  let loadSharingReason = $derived(loadSharingClaimed ? $_('dashboard.loadsharing.reduced') : '')
-  let loadSharingSharedCap = $derived(loadSharingAssignedLimit)
-  let loadSharingLimited = $derived(
-    loadSharingClaimed &&
-      Number.isFinite(loadSharingAssignedLimit) &&
-      Number(loadSharingAssignedLimit) >= 0 &&
-      Number(loadSharingAssignedLimit) < Number(maxAmps),
-  )
+  let currentLimited = $derived(loadSharing !== null && loadSharing.state !== 'sharing')
 
   // OCPP/RFID are external authorities that genuinely own the charge — lock the
   // mode controls. A reached limit is handled separately (see limitTripped).
@@ -530,52 +531,10 @@
   <!-- Observe column: stat chips -->
   <div class="max-lg:contents lg:flex lg:flex-col">
     <div class="max-lg:order-4">
-      <StatChips {charging} {live} {summary} {sessionCost} />
+      <StatChips {charging} {live} {summary} {sessionCost} {currentLimited} />
       <ShaperDivertRow />
-      {#if loadSharingVisible}
-        <div class="mt-2 rounded-xl border border-border bg-surface-2 px-3 py-2">
-          <div class="mb-2 flex flex-wrap gap-1.5">
-            {#if loadSharingBadges.active}
-              <span class="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold text-accent">
-                {$_('dashboard.loadsharing.badge_active')}
-              </span>
-            {/if}
-            {#if loadSharingLimited}
-              <span class="rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold text-warning">
-                {$_('dashboard.loadsharing.badge_limited')}
-              </span>
-            {/if}
-            {#if loadSharingBadges.controlled}
-              <span class="rounded-full bg-text-dim/20 px-2 py-0.5 text-[10px] font-semibold text-text">
-                {$_('dashboard.loadsharing.badge_controlled')}
-              </span>
-            {/if}
-          </div>
-          <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-            <span class="text-text-dim">{$_('dashboard.loadsharing.local_max')}</span>
-            <span class="text-right font-medium text-text">{maxAmps} A</span>
-            <span class="text-text-dim">{$_('dashboard.loadsharing.shared_cap')}</span>
-            <span class="text-right font-medium text-text">
-              {loadSharingSharedCap !== null && loadSharingSharedCap !== undefined ? `${loadSharingSharedCap} A` : '—'}
-            </span>
-            <span class="text-text-dim">{$_('dashboard.loadsharing.applied_pilot')}</span>
-            <span class="text-right font-medium text-text">{$status_store?.pilot ?? 0} A</span>
-            <span class="text-text-dim">{$_('dashboard.loadsharing.reason')}</span>
-            <span class="text-right font-medium text-text">
-              {loadSharingReason || (loadSharingLimited ? $_('dashboard.loadsharing.reduced') : '—')}
-            </span>
-          </div>
-          {#if loadSharingLimited}
-            <p class="mt-2 text-xs font-semibold text-warning">
-              {$_('dashboard.loadsharing.reduced')}
-            </p>
-          {/if}
-          {#if loadSharingBadges.controlled}
-            <p class="mt-1 text-xs font-semibold text-text-dim">
-              {$_('dashboard.loadsharing.controlled_by', { values: { controller: loadSharingController || $_('config.loadsharing.unknown') } })}
-            </p>
-          {/if}
-        </div>
+      {#if loadSharing}
+        <LoadSharingCard view={loadSharing} />
       {/if}
     </div>
   </div>

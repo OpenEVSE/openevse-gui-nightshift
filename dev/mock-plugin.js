@@ -296,12 +296,21 @@ export function mockPlugin() {
         if (url === '/api/loadsharing/status') {
           const onlineCount = loadsharingPeers.filter(p => p.online && p.joined).length
           const offlineCount = loadsharingPeers.filter(p => !p.online && p.joined).length
+          // The firmware's verdict: a member whose controller has not
+          // answered within the heartbeat timeout. Here: a member whose
+          // controller host is not an online peer (see the
+          // loadsharing_failsafe scenario).
+          const cfg = effectiveFixture('/api/config')
+          const controllerOnline = loadsharingPeers.some(
+            (p) => p.host === cfg.loadsharing_controller_host && p.online,
+          )
+          const failsafe = cfg.loadsharing_role === 'member' && !controllerOnline
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({
             enabled: true,
             group_id: 'main_circuit',
             computed_at: Math.floor(nowMs() / 1000),
-            failsafe_active: false,
+            failsafe_active: failsafe,
             online_count: onlineCount,
             offline_count: offlineCount,
             peers: loadsharingPeers,
@@ -500,8 +509,11 @@ export function mockPlugin() {
 
         // Claims/target reflects the switcher so the derived mode is coherent.
         if (url === '/api/claims/target') {
+          // A scenario may overlay claims_target (e.g. a load-sharing
+          // allocation on max_current) on top of whatever the switcher set.
+          const overlay = scenario?.claims_target
           res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify(claimsState))
+          res.end(JSON.stringify(overlay ? deepMerge(claimsState, overlay) : claimsState))
           return
         }
 
