@@ -84,8 +84,11 @@ status updates every 2 seconds. No `VITE_OPENEVSEHOST` and no proxy are needed.
 
 Fixture files live in `dev/fixtures/` and can be edited to simulate different device
 states (e.g. set `state` in `status.json` to `1` for standby or `3` for charging).
-Note: the mock serves reads only — it does not accept config writes, so Settings-page
-saves report a write error in mock mode. They work against a real device.
+Config writes are accepted: `POST /api/config` merges into an in-memory overlay,
+answers `{"msg":"done"}` and bumps `config_version` so the app re-reads over the
+websocket, exactly as the device does. The overlay lasts for the life of the dev
+server and is cleared when you switch scenario, so a save sticks across a reload
+but never edits the fixtures on disk.
 
 Two dev-only endpoints switch the simulated device at runtime, no restart needed:
 
@@ -94,7 +97,20 @@ Two dev-only endpoints switch the simulated device at runtime, no restart needed
 - `GET /api/_mock/scenario/<name>` — overlay `dev/fixtures/scenarios/<name>.json`
   onto the base fixtures (`reset` clears). A scenario file holds partial fixture
   objects keyed by fixture stem, e.g. `{ "config": { "wizard_passed": false } }`
-  re-enables the first-run wizard.
+  re-enables the first-run wizard. `notifications` is the one to reach for when
+  working on advisories: the base fixtures are a charger with nothing to report,
+  so the header bell, the dashboard strip and the Safety-page markers only
+  appear under that overlay. `loadsharing_limited` and `loadsharing_failsafe`
+  put the Home page's load-sharing card into its two non-trivial states (an
+  allocation holding the current down; a member whose controller has gone
+  quiet) — both need the OpenEVSE Labs switch on.
+  `https` is a charger whose stored certificate has been deleted — HTTPS reads
+  as enabled while the charger is serving plain HTTP, which is the state the
+  *Web server* section exists to make visible.
+  `cabletemp` is a charger with cable temperature monitoring on, one sensor
+  reading and one open-circuit; `cabletemp_f` is the same charger set to
+  Fahrenheit with the temperature throttle card showing, for checking that
+  every threshold on the Safety page agrees on a unit.
 
 Setting `MOCK_STATIC=1` freezes the mock completely (no WebSocket ticks, fixed
 server clock) — this is what the screenshot generator uses.
@@ -168,7 +184,7 @@ src/
 dev/
   mock-plugin.js     the mock-mode Vite plugin
   fixtures/          canned device responses for mock mode
-    scenarios/       named fixture overlays (wizard, display, ...)
+    scenarios/       named fixture overlays (wizard, display, notifications, ...)
 scripts/
   screenshots.mjs    automated screenshot generator (npm run screenshots)
   screenshots.config.js  the capture manifest

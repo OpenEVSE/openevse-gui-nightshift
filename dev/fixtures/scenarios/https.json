@@ -1,0 +1,36 @@
+{
+  "_comment": [
+    "A charger with TLS half-configured, which is the state the Web server",
+    "section exists to make visible. www_certificate_id still holds the id of",
+    "a certificate that has since been deleted, so the Select falls back to",
+    "None, web_server_setup() finds no key and serves plain HTTP, and the",
+    "charger reports HTTPS as enabled while none is running.",
+    "",
+    "It also carries www_http_enabled: false, which the firmware ignores while",
+    "TLS is down (should_start_http = config_http_enabled() || !use_ssl), so",
+    "the HTTP toggle should read on and locked rather than off.",
+    "",
+    "Pick 'openevse.local' in the certificate Select to walk out of it: the",
+    "warning clears, the HTTP toggle unlocks, and the restart prompt appears.",
+    "The base fixtures stay quiet (no certificates, HTTPS off) so the rest of",
+    "the screenshot set is unaffected."
+  ],
+  "certificates": [
+    {
+      "id": "7c9a1f3b52e84d06",
+      "type": "client",
+      "name": "openevse.local"
+    },
+    {
+      "id": "1e40b8d7a6c35f92",
+      "type": "root",
+      "name": "OpenEVSE Root CA"
+    }
+  ],
+  "config": {
+    "www_https_enabled": true,
+    "www_certificate_id": "3ab77e01c4d9820f",
+    "www_https_port": 443,
+    "www_http_enabled": false
+  }
+}

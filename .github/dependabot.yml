@@ -4,6 +4,16 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      # vitest and its coverage provider pin each other to an *exact* version
+      # — @vitest/coverage-v8@5.0.0 peer-requires vitest@5.0.0, and vitest
+      # returns the favour — so a split update leaves the lockfile with an
+      # unmet peer and `npm ci` fails with ERESOLVE before a single job runs.
+      # One PR for the family keeps them in step.
+      vitest:
+        patterns:
+          - vitest
+          - '@vitest/*'
 
   - package-ecosystem: github-actions
     directory: /

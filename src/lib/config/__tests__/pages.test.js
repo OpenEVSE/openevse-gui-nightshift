@@ -49,11 +49,15 @@ describe('pagesBySection', () => {
     }
     expect(total).toBe(19)
   })
-  it('gates the Display page on tft_theme presence', () => {
+  it('gates the Display page on either display key being present', () => {
+    // A TFT build sends tft_theme; a controller with the 2-line character LCD
+    // (no TFT) sends lcd_type. Either is a display to configure.
     const keysFor = (config) =>
       pagesBySection(config, { dev_features: true }).flatMap((g) => g.pages.map((p) => p.key))
     expect(keysFor({})).not.toContain('display')
     expect(keysFor({ tft_theme: 'dark' })).toContain('display')
+    expect(keysFor({ lcd_type: 'rgb' })).toContain('display')
+    expect(keysFor({ tft_theme: 'dark', lcd_type: 'mono' })).toContain('display')
   })
   it('gates the Cloud page on cloud_enabled being present, not on its value', () => {
     const keysFor = (config) =>

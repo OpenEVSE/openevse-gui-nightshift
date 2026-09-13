@@ -6,6 +6,7 @@
   else is reachable from Settings later.
 -->
 <script>
+  import { hardMaxCurrent } from '../../../utils.js'
   import { _ } from 'svelte-i18n'
   import { config_store } from '../../../stores/config.js'
   import { createConfigForm } from '../../../config/configForm.svelte.js'
@@ -65,7 +66,7 @@
     >
       <Slider
         min={$config_store?.min_current_hard ?? 6}
-        max={$config_store?.max_current_hard ?? 32}
+        max={hardMaxCurrent($config_store, 32)}
         value={$config_store?.max_current_soft ?? 6}
         oninput={(v) => (liveMaxCurrent = v)}
         onchange={saveMaxCurrent}

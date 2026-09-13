@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   round, energyMetrics, sensorMetrics, serviceMetrics, vehicleMetrics,
   showVehicle, countSeverity, safetyData, claimRows,
-  homeBatteryMetrics, showHomeBattery,
+  homeBatteryMetrics, showHomeBattery, cableTempMetrics, showCableTemp,
 } from '../metrics.js'
 
 describe('round', () => {
@@ -148,6 +148,39 @@ describe('homeBatteryMetrics / showHomeBattery', () => {
     expect(showHomeBattery({})).toBe(false)
     expect(showHomeBattery({ home_battery_soc: null })).toBe(false)
     expect(showHomeBattery({ home_battery_soc: false })).toBe(false)
+  })
+})
+
+describe('cableTempMetrics / showCableTemp', () => {
+  const cabletemp = {
+    supported: true,
+    enabled: true,
+    sources: [
+      { source: 0, name: 'ev1', pin: 1, status: 0, temperature: 34.5 },
+      { source: 1, name: 'ev2', pin: 0, status: 1 },
+      { source: 2, name: 'in1', pin: 2, status: 2 },
+      { source: 3, name: 'in2', pin: 0, status: 1 },
+    ],
+  }
+
+  it('shows only when at least one source is assigned to a pin', () => {
+    expect(showCableTemp(cabletemp)).toBe(true)
+    expect(showCableTemp({ sources: cabletemp.sources.map((s) => ({ ...s, pin: 0 })) })).toBe(false)
+    expect(showCableTemp(undefined)).toBe(false)
+  })
+
+  it('includes a row only for assigned sources, keyed off config.cabletemp.source_*', () => {
+    const g = cableTempMetrics(cabletemp)
+    expect(g.titleKey).toBe('monitoring.group.cable_temp')
+    const labels = g.rows.map((r) => r.labelKey)
+    expect(labels).toEqual(['config.cabletemp.source_ev1', 'config.cabletemp.source_in1'])
+  })
+
+  it('renders a valid reading as value+unit, and a non-OK status as textKey', () => {
+    const g = cableTempMetrics(cabletemp, 'c')
+    const byLabel = Object.fromEntries(g.rows.map((r) => [r.labelKey, r]))
+    expect(byLabel['config.cabletemp.source_ev1']).toEqual({ labelKey: 'config.cabletemp.source_ev1', value: 34.5, unit: 'units.celsius' })
+    expect(byLabel['config.cabletemp.source_in1']).toEqual({ labelKey: 'config.cabletemp.source_in1', textKey: 'config.cabletemp.status_open', unit: '' })
   })
 })
 
