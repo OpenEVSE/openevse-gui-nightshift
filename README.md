@@ -107,6 +107,10 @@ Two dev-only endpoints switch the simulated device at runtime, no restart needed
   `https` is a charger whose stored certificate has been deleted — HTTPS reads
   as enabled while the charger is serving plain HTTP, which is the state the
   *Web server* section exists to make visible.
+  `cabletemp` is a charger with cable temperature monitoring on, one sensor
+  reading and one open-circuit; `cabletemp_f` is the same charger set to
+  Fahrenheit with the temperature throttle card showing, for checking that
+  every threshold on the Safety page agrees on a unit.
 
 Setting `MOCK_STATIC=1` freezes the mock completely (no WebSocket ticks, fixed
 server clock) — this is what the screenshot generator uses.

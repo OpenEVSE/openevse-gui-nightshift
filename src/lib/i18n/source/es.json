@@ -326,6 +326,28 @@
       "temp_throttle_setpoint": "Punto de consigna",
       "temp_throttle_desc": "Reduce automáticamente la corriente de carga cuando el EVSE alcanza la temperatura indicada."
     },
+    "cabletemp": {
+      "title": "Temperatura del cable",
+      "enable": "Monitorización de temperatura del cable",
+      "enable_desc": "Supervisa termistores NTC en el cable de VE o de entrada y detiene el cargador si uno se sobrecalienta.",
+      "input1": "Entrada 1 (PP)",
+      "input2": "Entrada 2 (PP2)",
+      "pp_note": "Comparte pin con la ampacidad automática PP — asignar un sensor aquí la desactiva.",
+      "none": "Ninguno",
+      "source_ev1": "Cable de VE 1",
+      "source_ev2": "Cable de VE 2",
+      "source_in1": "Cable de entrada 1",
+      "source_in2": "Cable de entrada 2",
+      "reading": "Lectura actual",
+      "calibration_desc": "Calibración del termistor para este sensor. Los valores predeterminados son para el cable Phoenix Contact NACS.",
+      "r25": "Resistencia NTC a 25 °C",
+      "beta": "Coeficiente beta NTC",
+      "offset": "Desplazamiento de calibración",
+      "panic": "Umbral de pánico",
+      "status_not_installed": "Sin sensor",
+      "status_open": "Circuito abierto / desconectado",
+      "status_shorted": "Cortocircuitado"
+    },
     "time": {
       "status": "Hora del dispositivo",
       "device_time": "Hora actual",
@@ -1041,7 +1063,8 @@
       "sensors": "Sensores",
       "service": "Servicio",
       "vehicle": "Vehículo",
-      "home_battery": "Batería doméstica"
+      "home_battery": "Batería doméstica",
+      "cable_temp": "Temperatura del cable"
     },
     "energy": {
       "session": "Sesión",
@@ -1154,7 +1177,8 @@
     "miles": "mi",
     "percent": "%",
     "watt": "W",
-    "hz": "Hz"
+    "hz": "Hz",
+    "ohm": "Ω"
   },
   "clients": {
     "manual": "Manual",

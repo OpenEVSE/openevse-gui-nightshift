@@ -1,0 +1,23 @@
+{
+  "_comment": [
+    "The cabletemp scenario on a charger set to Fahrenheit, with the",
+    "temperature throttle on so the enclosure thresholds card renders too.",
+    "Every temperature on the Safety page - the cable reading, its offset and",
+    "panic threshold, and the enclosure throttle/panic pair - should agree on",
+    "a unit here."
+  ],
+  "config": {
+    "cable_temp": true,
+    "temp_unit": "f",
+    "temp_throttle_enabled": true
+  },
+  "cabletemp": {
+    "enabled": true,
+    "sources": [
+      { "source": 0, "name": "ev1", "pin": 2, "status": 0, "temperature": 34.5, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 },
+      { "source": 1, "name": "ev2", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 },
+      { "source": 2, "name": "in1", "pin": 1, "status": 2, "r25": 10000, "beta": 3950, "offset_c10": -5, "panic_c10": 850 },
+      { "source": 3, "name": "in2", "pin": 0, "status": 1, "r25": 10000, "beta": 3443, "offset_c10": 0, "panic_c10": 900 }
+    ]
+  }
+}

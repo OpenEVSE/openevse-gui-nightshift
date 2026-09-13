@@ -1,6 +1,7 @@
 /** Pure helpers for the Monitoring screen. Self-contained — no store/DOM imports. */
 import { formatTemp } from '../temperature.js'
 import { EvseClients } from '../vars.js'
+import { cableTempStatusKey } from '../cabletemp.js'
 
 /** Claim priority for an EVSE client id (higher wins); 0 if unknown. */
 function clientPriority(id) {
@@ -139,6 +140,33 @@ export function homeBatteryMetrics(status) {
 /** Whether the Home Battery group should render. */
 export function showHomeBattery(status) {
   return round((status ?? {}).home_battery_soc, 0) !== null
+}
+
+/**
+ * Cable Temperature Monitoring readings, from GET /cabletemp — one row per
+ * *assigned* source (unassigned sources have nothing to show and are
+ * omitted, not just blanked, same convention as sensorMetrics' temp1-4).
+ * Labels reuse the Safety page's `config.cabletemp.source_*` keys rather
+ * than duplicating them under `monitoring.*`.
+ */
+export function cableTempMetrics(cabletemp, tempUnit = 'c') {
+  const sources = (cabletemp ?? {}).sources ?? []
+  const rows = sources
+    .filter((s) => s.pin)
+    .map((s) => {
+      const statusKey = cableTempStatusKey(s.status)
+      if (statusKey) {
+        return { labelKey: `config.cabletemp.source_${s.name}`, textKey: `config.cabletemp.status_${statusKey}`, unit: '' }
+      }
+      const t = formatTemp(s.temperature, tempUnit)
+      return { labelKey: `config.cabletemp.source_${s.name}`, value: t.value, unit: t.unitKey }
+    })
+  return { titleKey: 'monitoring.group.cable_temp', rows }
+}
+
+/** Whether the Cable Temperature group should render (at least one source assigned to a pin). */
+export function showCableTemp(cabletemp) {
+  return !!(cabletemp?.sources ?? []).some((s) => s.pin)
 }
 
 /** 'ok' | 'warning' | 'error' for a count against warning / alert thresholds. */

@@ -51,6 +51,7 @@ export function mockPlugin() {
     '/api/energy/daily':  'energy_daily.json',
     '/api/energy/monthly':'energy_monthly.json',
     '/api/energy/annual': 'energy_annual.json',
+    '/api/cabletemp':     'cabletemp.json',
     '/api/notifications':  'notifications.json',
   }
   const baseFixtures = {}
