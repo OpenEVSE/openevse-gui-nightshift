@@ -1,0 +1,8 @@
+# CodeRabbit is installed org-wide. This repo opts out of automatic reviews;
+# ask for one explicitly with "@coderabbitai review" on a PR if you want it.
+# Schema: https://coderabbit.ai/integrations/schema.v2.json
+reviews:
+  auto_review:
+    enabled: false
+chat:
+  auto_reply: false
