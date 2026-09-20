@@ -1191,6 +1191,7 @@
     "rfid": "RFID",
     "mqtt": "MQTT",
     "shaper": "Terheléscsökkentő",
+    "evcc": "evcc",
     "null": "—"
   },
   "alert": {

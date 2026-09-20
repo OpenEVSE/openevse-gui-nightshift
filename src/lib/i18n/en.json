@@ -1191,6 +1191,7 @@
     "rfid": "RFID",
     "mqtt": "MQTT",
     "shaper": "Load shaper",
+    "evcc": "evcc",
     "null": "—"
   },
   "alert": {

@@ -10,6 +10,8 @@ export const EvseClients = {
 	mqtt: 	{ id: 65547, priority: 500},
 	shaper: { id: 65548, priority: 5000},
 	loadsharing: { id: 0x0001000E, priority: 5000},
-	tempThrottle: { id: 0x0001000D, priority: 10000}
+	tempThrottle: { id: 0x0001000D, priority: 10000},
+	// evcc (github.com/OpenEVSE/go-openevse): vendor 0x0004, claims at API priority
+	evcc: { id: 0x00040001, priority: 500 }
 
 }
