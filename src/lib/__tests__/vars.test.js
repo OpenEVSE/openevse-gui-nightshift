@@ -5,7 +5,7 @@ describe('EvseClients', () => {
   it('should have all expected client keys', () => {
     const expectedKeys = [
       'manual', 'divert', 'boost', 'timer', 'limit',
-      'error', 'ocpp', 'rfid', 'mqtt', 'shaper', 'loadsharing', 'tempThrottle'
+      'error', 'ocpp', 'rfid', 'mqtt', 'shaper', 'loadsharing', 'tempThrottle', 'evcc',
     ]
     expect(Object.keys(EvseClients)).toEqual(expectedKeys)
   })
