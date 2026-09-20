@@ -1191,6 +1191,7 @@
     "rfid": "RFID",
     "mqtt": "MQTT",
     "shaper": "Limitador de carga",
+    "evcc": "evcc",
     "null": "—"
   },
   "alert": {

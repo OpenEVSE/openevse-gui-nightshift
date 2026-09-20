@@ -26,6 +26,7 @@ describe('EvseClients', () => {
     expect(EvseClients.ocpp.id).toBe(65545)
     expect(EvseClients.rfid.id).toBe(65546)
     expect(EvseClients.mqtt.id).toBe(65547)
+    expect(EvseClients.evcc.id).toBe(262145)
     expect(EvseClients.shaper.id).toBe(65548)
     expect(EvseClients.loadsharing.id).toBe(0x0001000E)
     expect(EvseClients.tempThrottle.id).toBe(0x0001000D)
