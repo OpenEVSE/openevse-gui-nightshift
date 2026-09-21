@@ -70,6 +70,12 @@
   // Idle timeout, seconds. 0 = never sleep (Never toggle). The slider works in
   // 5–3600s; we remember the last non-zero value so toggling Never off restores
   // a sensible position rather than snapping to the floor.
+  //
+  // `lcd_backlight_timeout` is one firmware key shared by both displays: the
+  // TFT dims to its standby brightness, the 2-line LCD's RGB backlight simply
+  // switches off (RAPI $FB 0). It's rendered once — in the TFT section when
+  // there is a TFT, else in the LCD section with copy describing an
+  // on/off backlight rather than a dimming one.
   let timeout = $derived(cfg.lcd_backlight_timeout ?? 600)
   let never = $derived(timeout === 0)
   let lastSecs = $state(600)
@@ -154,33 +160,7 @@
     {/if}
 
     {#if hasTimeout}
-      <FormField
-        label={$_('config.display.timeout')}
-        description={$_('config.display.timeout_desc')}
-        status={$ss.lcd_backlight_timeout ?? 'idle'}
-      >
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-xs text-text-dim">{fmtTimeout(sliderSecs)}</span>
-          <label class="flex items-center gap-2 text-xs text-text-dim">
-            {$_('config.display.never')}
-            <Toggle
-              checked={never}
-              label={$_('config.display.never')}
-              onchange={setNever}
-            />
-          </label>
-        </div>
-        <Slider
-          min={5}
-          max={3600}
-          step={5}
-          value={sliderSecs}
-          disabled={never}
-          format={fmtTimeout}
-          ariaLabel={$_('config.display.timeout')}
-          onchange={(v) => form.saveField('lcd_backlight_timeout', v)}
-        />
-      </FormField>
+      {@render timeoutField($_('config.display.timeout_desc'))}
     {/if}
   </ConfigSection>
   {/if}
@@ -198,6 +178,40 @@
           onchange={(v) => form.saveField('lcd_type', v)}
         />
       </FormField>
+
+      {#if hasTimeout && !hasTft}
+        {@render timeoutField($_('config.display.lcd_timeout_desc'))}
+      {/if}
     </ConfigSection>
   {/if}
 </ConfigPage>
+
+{#snippet timeoutField(description)}
+  <FormField
+    label={$_('config.display.timeout')}
+    {description}
+    status={$ss.lcd_backlight_timeout ?? 'idle'}
+  >
+    <div class="flex items-center justify-between gap-3">
+      <span class="text-xs text-text-dim">{fmtTimeout(sliderSecs)}</span>
+      <label class="flex items-center gap-2 text-xs text-text-dim">
+        {$_('config.display.never')}
+        <Toggle
+          checked={never}
+          label={$_('config.display.never')}
+          onchange={setNever}
+        />
+      </label>
+    </div>
+    <Slider
+      min={5}
+      max={3600}
+      step={5}
+      value={sliderSecs}
+      disabled={never}
+      format={fmtTimeout}
+      ariaLabel={$_('config.display.timeout')}
+      onchange={(v) => form.saveField('lcd_backlight_timeout', v)}
+    />
+  </FormField>
+{/snippet}

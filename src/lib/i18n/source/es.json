@@ -247,7 +247,8 @@
       "lcd_type": "Tipo de retroiluminación",
       "lcd_desc": "Tipo de retroiluminación de la pantalla LCD de 2 líneas del controlador. Para un reemplazo de JuiceBox v2, seleccione RGB.",
       "lcd_mono": "Monocromo",
-      "lcd_rgb": "RGB"
+      "lcd_rgb": "RGB",
+      "lcd_timeout_desc": "How long the backlight stays lit before switching off. It stays on while charging or in a fault, and any state change or button press lights it again."
     },
     "validation": {
       "required": "Obligatorio",

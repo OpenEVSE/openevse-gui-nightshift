@@ -247,7 +247,8 @@
       "lcd_type": "Backlight type",
       "lcd_desc": "Backlight type for the controller's 2-line character display. For a JuiceBox v2 replacement, select RGB.",
       "lcd_mono": "Monochrome",
-      "lcd_rgb": "RGB"
+      "lcd_rgb": "RGB",
+      "lcd_timeout_desc": "How long the backlight stays lit before switching off. It stays on while charging or in a fault, and any state change or button press lights it again."
     },
     "validation": {
       "required": "Required",
