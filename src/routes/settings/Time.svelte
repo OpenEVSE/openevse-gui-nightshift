@@ -160,7 +160,7 @@
         <div class="flex flex-col gap-1.5">
           <TextInput
             value={$config_store?.sntp_hostname ?? ''}
-            placeholder="pool.ntp.org"
+            placeholder="time.cloudflare.com"
             revert={form.revert}
             onchange={(v) => form.saveField('sntp_hostname', v)}
           />
