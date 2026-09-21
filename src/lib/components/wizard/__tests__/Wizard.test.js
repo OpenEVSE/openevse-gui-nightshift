@@ -180,4 +180,24 @@ describe('Wizard route', () => {
       expect(upload).toHaveBeenCalledWith({ ssid: 'Hidden network', pass: 'secret' })
     })
   })
+
+  // A charger already online over Ethernet doesn't need WiFi — the wizard
+  // must offer a way out of the WiFi step other than joining a network.
+  it('shows Finish (not a WiFi trap) on the WiFi step when Ethernet is connected', async () => {
+    status_store.set({ ipaddress: '10.0.0.5', eth_connected: 1 })
+    const { getByText, queryByText } = render(Wizard)
+
+    for (let i = 0; i < 5; i++) await fireEvent.click(getByText('wizard.next'))
+    expect(getByText('wizard.wifi.title')).toBeInTheDocument()
+    expect(getByText('wizard.wifi.eth_title')).toBeInTheDocument()
+    // The AP hand-off warning doesn't apply — there's no softAP to lose.
+    expect(queryByText('wizard.wifi.handoff_title')).toBeNull()
+
+    await fireEvent.click(getByText('wizard.finish'))
+
+    await vi.waitFor(() => {
+      expect(saveParam).toHaveBeenCalledWith('wizard_passed', true)
+    })
+    expect(upload).not.toHaveBeenCalled()
+  })
 })

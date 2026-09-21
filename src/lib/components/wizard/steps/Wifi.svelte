@@ -21,7 +21,8 @@
   import Icon from '../../../icons/Icon.svelte'
   import Button from '../../ui/Button.svelte'
 
-  let { onJoined = () => {}, beforeJoin = async () => {} } = $props()
+  let { onJoined = () => {}, beforeJoin = async () => {}, ethConnected = false } =
+    $props()
 
   // Where to reach the charger once it leaves the setup hotspot. The DHCP IP
   // isn't known ahead of time, so we show the mDNS hostname (same as
@@ -120,6 +121,16 @@
         <p class="break-all text-sm font-semibold text-accent">http://{displayHost}</p>
       {/if}
     </div>
+  {:else if ethConnected}
+    <!-- Already reachable over Ethernet: no softAP to lose, so WiFi here is
+         purely optional. No handoff warning — connecting won't drop this
+         session, and the wizard can also finish without it (see Finish
+         button in WizardShell, unhidden via Wizard.svelte's ethConnected). -->
+    <div class="rounded-xl border border-border bg-surface-2 p-3 text-sm">
+      <p class="font-semibold text-text">{$_('wizard.wifi.eth_title')}</p>
+      <p class="mt-1 text-text-dim">{$_('wizard.wifi.eth_body')}</p>
+    </div>
+    <p class="text-sm text-text-dim">{$_('wizard.wifi.intro')}</p>
   {:else}
     <!-- Heads-up before the AP hand-off: connecting ends this setup session. -->
     <div class="rounded-xl border border-border bg-surface-2 p-3 text-sm">
