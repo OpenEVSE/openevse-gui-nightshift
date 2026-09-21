@@ -2,7 +2,14 @@ import { get } from 'svelte/store'
 import { uistates_store } from '../stores/uistates.js'
 import { redirect } from '../router.js'
 
-export async function httpAPI(method, url, body = null, type = 'json', timeout = 60000) {
+// `raw: true` resolves to { status, body } instead of just the parsed body,
+// for callers that need to tell an HTTP error apart from a successful
+// response by status code rather than by matching the response text (which
+// breaks silently if the server's wording ever changes). The 401/network
+// error paths still resolve to the plain 'error' string either way, so a
+// caller that opts in only needs to check `res === 'error'` before reading
+// `res.status`.
+export async function httpAPI(method, url, body = null, type = 'json', timeout = 60000, { raw = false } = {}) {
   const content_type =
     type === 'json'
       ? 'application/json'
@@ -24,7 +31,7 @@ export async function httpAPI(method, url, body = null, type = 'json', timeout =
     if (!url.includes('http', 0)) url = '/api' + url
   }
   const res = await fetch(url, data)
-    .then((response) => {
+    .then(async (response) => {
       // Session expired / not logged in: send the user to the login page.
       // Login.svelte posts to /login with a bare fetch (not httpAPI), so this
       // interceptor never fires during the login request itself.
@@ -32,7 +39,8 @@ export async function httpAPI(method, url, body = null, type = 'json', timeout =
         redirect('/login')
         return 'error'
       }
-      return type === 'json' ? response.json() : response.text()
+      const parsed = type === 'json' ? await response.json() : await response.text()
+      return raw ? { status: response.status, body: parsed } : parsed
     })
     .catch((error) => {
       console.log(error)

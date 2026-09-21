@@ -383,6 +383,7 @@
       "manage": "Scan a tag",
       "scan": "Scan",
       "place_tag": "Hold a tag against the reader…",
+      "not_enabled": "RFID isn't enabled yet — add it in Charge Manager first.",
       "uid": "UID",
       "register": "Register tag",
       "already": "This tag is already registered.",
@@ -1196,7 +1197,8 @@
   },
   "alert": {
     "write_failed_title": "Change not saved",
-    "write_failed_body": "The charger didn't accept the change. Please try again."
+    "write_failed_body": "The charger didn't accept the change. Please try again.",
+    "rfid_scan_failed_title": "Couldn't start scan"
   },
   "history": {
     "loading": "Loading history…",

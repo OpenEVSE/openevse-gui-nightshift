@@ -383,6 +383,7 @@
       "manage": "Scanner un badge",
       "scan": "Scanner",
       "place_tag": "Approchez un badge du lecteur…",
+      "not_enabled": "RFID n'est pas encore activé — ajoutez-le d'abord dans le gestionnaire de charge.",
       "uid": "UID",
       "register": "Enregistrer le badge",
       "already": "Ce badge est déjà enregistré.",
@@ -1196,7 +1197,8 @@
   },
   "alert": {
     "write_failed_title": "Modification non sauvegardée",
-    "write_failed_body": "Le chargeur n'a pas accepté la modification. Veuillez réessayer."
+    "write_failed_body": "Le chargeur n'a pas accepté la modification. Veuillez réessayer.",
+    "rfid_scan_failed_title": "Impossible de démarrer le scan"
   },
   "history": {
     "loading": "Chargement de l'historique…",

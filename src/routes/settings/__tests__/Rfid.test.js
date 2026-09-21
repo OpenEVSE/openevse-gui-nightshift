@@ -8,7 +8,11 @@ vi.mock('svelte-i18n', () => {
   t.subscribe = (fn) => { fn(t); return () => {} }
   return { _: t }
 })
-vi.mock('../../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn(() => Promise.resolve({ msg: 'done' })) }))
+vi.mock('../../../lib/api/httpAPI.js', () => ({
+  httpAPI: vi.fn(() =>
+    Promise.resolve({ status: 200, body: JSON.stringify({ msg: 'Waiting for badge' }) }),
+  ),
+}))
 
 import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
@@ -21,18 +25,18 @@ import Rfid from '../Rfid.svelte'
 beforeEach(() => {
   uistates_store.resetAlertBox()
   httpAPI.mockReset()
-  httpAPI.mockResolvedValue({ msg: 'done' })
+  httpAPI.mockResolvedValue({ status: 200, body: JSON.stringify({ msg: 'Waiting for badge' }) })
   status_store.set({ rfid_input: '' })
   uisettings_store.update((s) => ({ ...s, dev_features: false }))
   rfid_users_store.reset()
 })
 
 describe('RFID page', () => {
-  it('shows the tag manager expanded by default (no enable switch)', () => {
+  it('hides Scan and shows a hint when RFID is not enabled', () => {
     config_store.set({ rfid_enabled: false, rfid_storage: '' })
     const { getByText, queryByText } = render(Rfid)
-    expect(getByText('config.rfid.scan')).toBeInTheDocument()
-    expect(queryByText('config.rfid.enable')).not.toBeInTheDocument()
+    expect(getByText('config.rfid.not_enabled')).toBeInTheDocument()
+    expect(queryByText('config.rfid.scan')).not.toBeInTheDocument()
   })
 
   it('links to the Charge Manager to enable/schedule RFID', () => {
@@ -69,7 +73,7 @@ describe('RFID page', () => {
     config_store.set({ rfid_enabled: true, rfid_storage: '' })
     const { getByText } = render(Rfid)
     await fireEvent.click(getByText('config.rfid.scan'))
-    expect(httpAPI).toHaveBeenCalledWith('GET', '/rfid/add', null, 'txt', 60000)
+    expect(httpAPI).toHaveBeenCalledWith('GET', '/rfid/add', null, 'txt', 60000, { raw: true })
   })
 
   it('registers a freshly scanned tag', async () => {
@@ -109,6 +113,37 @@ describe('RFID page', () => {
     await fireEvent.click(getByText('config.rfid.scan'))
     await vi.waitFor(() => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
+    })
+  })
+
+  it('shows a specific alert when the firmware rejects the scan because RFID is disabled', async () => {
+    httpAPI.mockResolvedValue({
+      status: 400,
+      body: JSON.stringify({ msg: 'RFID is not enabled, add it in Charge Manager first' }),
+    })
+    config_store.set({ rfid_enabled: true, rfid_storage: '' })
+    const { getByText } = render(Rfid)
+    await fireEvent.click(getByText('config.rfid.scan'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.title).toBe('alert.rfid_scan_failed_title')
+      expect(get(uistates_store).alertbox.body).toBe('config.rfid.not_enabled')
+    })
+  })
+
+  it('detects a rejected scan by HTTP status, not by the response wording', async () => {
+    // Same shape as a real rejection, but with different wording than the
+    // firmware currently sends -- this only alerts because status !== 200.
+    httpAPI.mockResolvedValue({
+      status: 400,
+      body: JSON.stringify({ msg: 'nope, not today' }),
+    })
+    config_store.set({ rfid_enabled: true, rfid_storage: '' })
+    const { getByText } = render(Rfid)
+    await fireEvent.click(getByText('config.rfid.scan'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.body).toBe('alert.write_failed_body')
     })
   })
 })

@@ -383,6 +383,7 @@
       "manage": "Címke beolvasása",
       "scan": "Beolvasás",
       "place_tag": "Tartsa a címkét az olvasó elé…",
+      "not_enabled": "Az RFID még nincs engedélyezve — először add hozzá a töltéskezelőben.",
       "uid": "UID",
       "register": "Címke regisztrálása",
       "already": "Ez a címke már regisztrálva van.",
@@ -1196,7 +1197,8 @@
   },
   "alert": {
     "write_failed_title": "A változtatás nem lett elmentve",
-    "write_failed_body": "A töltő nem fogadta el a változtatást. Kérjük, próbálja újra."
+    "write_failed_body": "A töltő nem fogadta el a változtatást. Kérjük, próbálja újra.",
+    "rfid_scan_failed_title": "A beolvasás nem indult el"
   },
   "history": {
     "loading": "Történet betöltése…",

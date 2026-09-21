@@ -9,7 +9,7 @@
   import { rfid_users_store } from '../../lib/stores/rfid_users.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { serialQueue } from '../../lib/queue.js'
-  import { showWriteError } from '../../lib/alerts.js'
+  import { showWriteError, showRfidScanError } from '../../lib/alerts.js'
   import { httpAPI } from '../../lib/api/httpAPI.js'
   import { parseTags, serializeTags, addTag, removeTag } from '../../lib/config/rfid.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
@@ -22,6 +22,7 @@
 
   // Reader present on the I2C bus, reported independent of RFID being enabled.
   let readerPresent = $derived($status_store?.rfid_reader)
+  let rfidEnabled = $derived(!!$config_store?.rfid_enabled)
   let tags = $derived(parseTags($config_store?.rfid_storage))
   let scanned = $derived($status_store?.rfid_input ?? '')
   let scanWaiting = $derived($uistates_store?.rfid_waiting ?? 0)
@@ -39,8 +40,27 @@
   })
 
   async function scan() {
-    const res = await serialQueue.add(() => httpAPI('GET', '/rfid/add', null, 'txt', 60000))
-    if (!res || res === 'error') showWriteError()
+    // rfidEnabled already gates whether this can be called (see markup below),
+    // but the firmware is the source of truth, so this stays as a backstop --
+    // keyed off the response status rather than its wording, so a future
+    // change to the firmware's message text can't turn a rejected scan into a
+    // silently-ignored click again.
+    const res = await serialQueue.add(() =>
+      httpAPI('GET', '/rfid/add', null, 'txt', 60000, { raw: true }),
+    )
+    if (!res || res === 'error') {
+      showWriteError()
+      return
+    }
+    if (res.status !== 200) {
+      let msg
+      try {
+        msg = JSON.parse(res.body).msg
+      } catch {
+        // no parseable message -- showRfidScanError falls back to a generic body
+      }
+      showRfidScanError(msg)
+    }
   }
   function saveTags(next) {
     return form.saveField('rfid_storage', serializeTags(next))
@@ -108,6 +128,9 @@
   </div>
 
     <ConfigSection title={$_('config.rfid.manage')}>
+      {#if !rfidEnabled}
+        <p class="py-2 text-sm text-text-dim">{$_('config.rfid.not_enabled')}</p>
+      {:else}
       <div class="flex flex-col items-center gap-2 py-2">
         <Button
           label={scanWaiting > 0 ? String(scanWaiting) : $_('config.rfid.scan')}
@@ -126,6 +149,7 @@
           {/if}
         {/if}
       </div>
+      {/if}
     </ConfigSection>
 
     {#if tags.length > 0}
