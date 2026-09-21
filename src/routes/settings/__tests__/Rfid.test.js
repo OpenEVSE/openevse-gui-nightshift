@@ -111,4 +111,17 @@ describe('RFID page', () => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
   })
+
+  it('shows a specific alert when the firmware rejects the scan because RFID is disabled', async () => {
+    httpAPI.mockResolvedValue(
+      JSON.stringify({ msg: 'RFID is not enabled, add it in Charge Manager first' })
+    )
+    config_store.set({ rfid_enabled: true, rfid_storage: '' })
+    const { getByText } = render(Rfid)
+    await fireEvent.click(getByText('config.rfid.scan'))
+    await vi.waitFor(() => {
+      expect(get(uistates_store).alertbox.visible).toBe(true)
+      expect(get(uistates_store).alertbox.body).toBe('config.rfid.not_enabled')
+    })
+  })
 })

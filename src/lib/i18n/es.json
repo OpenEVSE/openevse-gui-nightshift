@@ -283,6 +283,7 @@
       "manage": "Escanear una etiqueta",
       "scan": "Escanear",
       "place_tag": "Acerque una etiqueta al lector…",
+      "not_enabled": "RFID todavía no está activado. Actívalo primero en el Gestor de carga.",
       "uid": "UID",
       "register": "Registrar etiqueta",
       "already": "Esta etiqueta ya está registrada.",

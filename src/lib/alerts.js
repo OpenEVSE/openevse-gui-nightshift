@@ -38,3 +38,23 @@ export function showBoostError(msg) {
     action: () => uistates_store.resetAlertBox(),
   })
 }
+
+/**
+ * Surface the AlertBox for a rejected RFID scan. The device speaks English in
+ * its `msg`; we translate the one case the UI can provoke (RFID feature not
+ * enabled in Charge Manager) and fall back to the generic write-failure body
+ * for anything else.
+ */
+export function showRfidScanError(msg) {
+  const t = get(_)
+  const notEnabled = typeof msg === 'string' && msg.includes('not enabled')
+  uistates_store.setObject('alertbox', {
+    title: t('alert.write_failed_title'),
+    body: notEnabled ? t('config.rfid.not_enabled') : t('alert.write_failed_body'),
+    visible: true,
+    button: true,
+    closable: true,
+    component: undefined,
+    action: () => uistates_store.resetAlertBox(),
+  })
+}
