@@ -1134,7 +1134,9 @@
       "empty": "Aucun réseau trouvé. Appuyez sur Scanner pour réessayer.",
       "handoff_title": "Vous allez perdre cette connexion",
       "handoff_body": "Lorsque vous vous connectez, le chargeur rejoint votre WiFi et ce point d'accès de configuration s'éteint. Reconnectez ensuite ce téléphone ou cet ordinateur à votre WiFi domestique pour accéder de nouveau au chargeur.",
-      "reach_at": "Ouvrez ensuite le chargeur à l'adresse"
+      "reach_at": "Ouvrez ensuite le chargeur à l'adresse",
+      "eth_title": "Ethernet connecté",
+      "eth_body": "Ce chargeur dispose déjà d'une connexion fonctionnelle par Ethernet. Le WiFi est optionnel : rejoignez un réseau ci-dessous, ou appuyez sur Terminer pour finir la configuration sans WiFi."
     },
     "time": {
       "title": "Heure",

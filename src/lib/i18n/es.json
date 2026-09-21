@@ -1134,7 +1134,9 @@
       "empty": "No se han encontrado redes. Toca Buscar para intentarlo de nuevo.",
       "handoff_title": "Perderás esta conexión",
       "handoff_body": "Cuando te conectes, el cargador se unirá a tu WiFi y este punto de acceso de configuración se apagará. Después, vuelve a conectar este teléfono u ordenador a tu WiFi doméstica para volver a acceder al cargador.",
-      "reach_at": "Luego abre el cargador en"
+      "reach_at": "Luego abre el cargador en",
+      "eth_title": "Ethernet conectado",
+      "eth_body": "Este cargador ya tiene una conexión funcionando por Ethernet. El WiFi es opcional: únete a una red más abajo, o toca Finalizar para completar la configuración sin WiFi."
     },
     "time": {
       "title": "Hora",

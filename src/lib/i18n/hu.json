@@ -1134,7 +1134,9 @@
       "empty": "Nem található hálózat. Érintsd meg a Keresés gombot az ismétléshez.",
       "handoff_title": "El fogja veszíteni ezt a kapcsolatot",
       "handoff_body": "Amikor csatlakozik, a töltő csatlakozik a WiFi-hálózatához, és ez a beállítási hotspot kikapcsol. Ezután csatlakoztassa újra ezt a telefont vagy számítógépet az otthoni WiFi-hálózatához, hogy ismét elérje a töltőt.",
-      "reach_at": "Ezután nyissa meg a töltőt itt:"
+      "reach_at": "Ezután nyissa meg a töltőt itt:",
+      "eth_title": "Ethernet csatlakoztatva",
+      "eth_body": "Ennek a töltőnek már van működő Ethernet-kapcsolata. A WiFi opcionális — csatlakozzon egy hálózathoz lent, vagy koppintson a Befejezés gombra a WiFi nélküli beállítás befejezéséhez."
     },
     "time": {
       "title": "Idő",
