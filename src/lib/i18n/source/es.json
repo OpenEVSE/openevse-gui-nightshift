@@ -1197,7 +1197,8 @@
   },
   "alert": {
     "write_failed_title": "Cambio no guardado",
-    "write_failed_body": "El cargador no aceptó el cambio. Inténtalo de nuevo."
+    "write_failed_body": "El cargador no aceptó el cambio. Inténtalo de nuevo.",
+    "rfid_scan_failed_title": "No se pudo iniciar el escaneo"
   },
   "history": {
     "loading": "Cargando historial…",

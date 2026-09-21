@@ -26,4 +26,18 @@ describe('httpAPI', () => {
     const res = await httpAPI('GET', '/status')
     expect(res).toBe('error')
   })
+
+  it('with raw: true, resolves to { status, body } instead of just the body', async () => {
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve({ status: 400, text: () => Promise.resolve('nope') }),
+    )
+    const res = await httpAPI('GET', '/rfid/add', null, 'txt', 60000, { raw: true })
+    expect(res).toEqual({ status: 400, body: 'nope' })
+  })
+
+  it('with raw: true, still resolves to the plain "error" string on a network failure', async () => {
+    globalThis.fetch = vi.fn(() => Promise.reject(new Error('network')))
+    const res = await httpAPI('GET', '/status', null, 'json', 60000, { raw: true })
+    expect(res).toBe('error')
+  })
 })

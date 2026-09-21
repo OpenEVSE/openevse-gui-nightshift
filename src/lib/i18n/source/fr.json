@@ -1197,7 +1197,8 @@
   },
   "alert": {
     "write_failed_title": "Modification non sauvegardée",
-    "write_failed_body": "Le chargeur n'a pas accepté la modification. Veuillez réessayer."
+    "write_failed_body": "Le chargeur n'a pas accepté la modification. Veuillez réessayer.",
+    "rfid_scan_failed_title": "Impossible de démarrer le scan"
   },
   "history": {
     "loading": "Chargement de l'historique…",
