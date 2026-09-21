@@ -383,6 +383,7 @@
       "manage": "Címke beolvasása",
       "scan": "Beolvasás",
       "place_tag": "Tartsa a címkét az olvasó elé…",
+      "not_enabled": "Az RFID még nincs engedélyezve — először add hozzá a töltéskezelőben.",
       "uid": "UID",
       "register": "Címke regisztrálása",
       "already": "Ez a címke már regisztrálva van.",

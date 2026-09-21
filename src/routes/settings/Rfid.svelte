@@ -9,7 +9,7 @@
   import { rfid_users_store } from '../../lib/stores/rfid_users.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { serialQueue } from '../../lib/queue.js'
-  import { showWriteError } from '../../lib/alerts.js'
+  import { showWriteError, showRfidScanError } from '../../lib/alerts.js'
   import { httpAPI } from '../../lib/api/httpAPI.js'
   import { parseTags, serializeTags, addTag, removeTag } from '../../lib/config/rfid.js'
   import ConfigPage from '../../lib/components/config/ConfigPage.svelte'
@@ -40,7 +40,18 @@
 
   async function scan() {
     const res = await serialQueue.add(() => httpAPI('GET', '/rfid/add', null, 'txt', 60000))
-    if (!res || res === 'error') showWriteError()
+    if (!res || res === 'error') {
+      showWriteError()
+      return
+    }
+    let msg
+    try {
+      msg = JSON.parse(res).msg
+    } catch {
+      showWriteError()
+      return
+    }
+    if (msg !== 'Waiting for badge') showRfidScanError(msg)
   }
   function saveTags(next) {
     return form.saveField('rfid_storage', serializeTags(next))

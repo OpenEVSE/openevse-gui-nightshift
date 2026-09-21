@@ -383,6 +383,7 @@
       "manage": "Scan a tag",
       "scan": "Scan",
       "place_tag": "Hold a tag against the reader…",
+      "not_enabled": "RFID isn't enabled yet — add it in Charge Manager first.",
       "uid": "UID",
       "register": "Register tag",
       "already": "This tag is already registered.",
