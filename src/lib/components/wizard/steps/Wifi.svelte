@@ -122,10 +122,12 @@
       {/if}
     </div>
   {:else if ethConnected}
-    <!-- Already reachable over Ethernet: no softAP to lose, so WiFi here is
-         purely optional. No handoff warning — connecting won't drop this
-         session, and the wizard can also finish without it (see Finish
-         button in WizardShell, unhidden via Wizard.svelte's ethConnected). -->
+    <!-- Already reachable over Ethernet, so WiFi here is purely optional. No
+         handoff warning — connecting won't drop this session (net_manager
+         auto-stops the softAP once Connected regardless of link type, so
+         there's nothing left to lose from it either way), and the wizard can
+         also finish without it (see Finish button in WizardShell, unhidden
+         via Wizard.svelte's ethConnected). -->
     <div class="rounded-xl border border-border bg-surface-2 p-3 text-sm">
       <p class="font-semibold text-text">{$_('wizard.wifi.eth_title')}</p>
       <p class="mt-1 text-text-dim">{$_('wizard.wifi.eth_body')}</p>
