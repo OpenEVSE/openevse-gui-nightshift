@@ -374,6 +374,15 @@
       "ntp_retry": "Reintentar",
       "ntp_dns_ok": "DNS resuelto a: ",
       "ntp_dns_failed": "Error de DNS",
+      "ntp_dhcp": "Use NTP server from DHCP",
+      "ntp_dhcp_desc": "When the network's DHCP server offers an NTP server, use it. The configured server is kept as a fallback.",
+      "ntp_host_from_dhcp": "NTP server (from DHCP)",
+      "ntp_host_fallback": "Fallback NTP server",
+      "ntp_host_fallback_desc": "Used if the server from DHCP stops answering.",
+      "ntp_dhcp_none": "No NTP server offered by DHCP",
+      "ntp_server_in_use": "Server in use",
+      "ntp_source_dhcp": "from DHCP",
+      "ntp_source_config": "configured",
       "device_date": "Fecha"
     },
     "rfid": {

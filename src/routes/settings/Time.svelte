@@ -16,6 +16,7 @@
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import Select from '../../lib/components/ui/Select.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
+  import Toggle from '../../lib/components/ui/Toggle.svelte'
 
   const form = createConfigForm()
   const ss = form.saveState
@@ -28,6 +29,13 @@
 
   let isNtp = $derived(!!$config_store?.sntp_enabled)
   let busy = $state(false)
+
+  // NTP server from DHCP (option 42). The firmware prefers it over
+  // sntp_hostname while `sntp_dhcp` is on, falling back to the configured host
+  // if it stops answering. Older firmware has no `sntp_dhcp` key, so the
+  // toggle gates on the key being present rather than on its value.
+  let hasDhcpOption = $derived($config_store != null && 'sntp_dhcp' in $config_store)
+  let dhcpOn = $derived(!!$config_store?.sntp_dhcp)
 
   // ── NTP status card ──────────────────────────────────────────────────────
   let ntpData = $state(null)       // response from GET /time
@@ -92,6 +100,9 @@
   }
 
   let ntpStatus = $derived(ntpData?.ntp_status ?? null)
+  let dhcpServer = $derived(ntpData?.ntp_dhcp_server ?? null)
+  let activeServer = $derived(ntpData?.ntp_server ?? null)
+  let activeSource = $derived(ntpData?.ntp_server_source ?? null)
 
   // Milliseconds remaining until next event (sync or retry), adjusted for elapsed
   let remainingMs = $derived(
@@ -156,7 +167,34 @@
     </FormField>
 
     {#if isNtp}
-      <FormField label={$_('config.time.ntp_host')} status={$ss.sntp_hostname ?? 'idle'}>
+      {#if hasDhcpOption}
+        <FormField
+          label={$_('config.time.ntp_dhcp')}
+          description={$_('config.time.ntp_dhcp_desc')}
+          status={$ss.sntp_dhcp ?? 'idle'}
+        >
+          <Toggle
+            checked={dhcpOn}
+            label={$_('config.time.ntp_dhcp')}
+            onchange={(v) => form.saveField('sntp_dhcp', v)}
+          />
+          {#if dhcpOn && ntpData && !dhcpServer}
+            <p class="mt-1 text-xs text-text-dim">{$_('config.time.ntp_dhcp_none')}</p>
+          {/if}
+        </FormField>
+      {/if}
+
+      <!-- With DHCP on and a server offered, that server is the one in use and
+           gets top billing; the hostname box stays editable as the fallback -->
+      {#if dhcpOn && dhcpServer}
+        <ReadOnlyRow label={$_('config.time.ntp_host_from_dhcp')} value={dhcpServer} />
+      {/if}
+
+      <FormField
+        label={$_(dhcpOn && dhcpServer ? 'config.time.ntp_host_fallback' : 'config.time.ntp_host')}
+        description={dhcpOn && dhcpServer ? $_('config.time.ntp_host_fallback_desc') : ''}
+        status={$ss.sntp_hostname ?? 'idle'}
+      >
         <div class="flex flex-col gap-1.5">
           <TextInput
             value={$config_store?.sntp_hostname ?? ''}
@@ -164,7 +202,10 @@
             revert={form.revert}
             onchange={(v) => form.saveField('sntp_hostname', v)}
           />
-          {#if shownIp}
+          <!-- The DNS badge describes the hostname above; when the DHCP server
+               is the one in use the resolved IP is just that server, so the
+               "Server in use" row in the status card tells the story instead -->
+          {#if shownIp && activeSource !== 'dhcp'}
             <span class="inline-flex w-fit items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium
               {shownIp === 'failed'
                 ? 'bg-error/15 text-error'
@@ -201,6 +242,13 @@
           {#if ntpStatus === 'synchronized'}✓{/if}
         </span>
       </div>
+
+      {#if activeServer}
+        <ReadOnlyRow
+          label={$_('config.time.ntp_server_in_use')}
+          value="{activeServer} ({$_(activeSource === 'dhcp' ? 'config.time.ntp_source_dhcp' : 'config.time.ntp_source_config')})"
+        />
+      {/if}
 
       <ReadOnlyRow
         label={$_('config.time.ntp_last_sync')}
