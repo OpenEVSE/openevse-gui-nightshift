@@ -247,7 +247,8 @@
       "lcd_type": "Háttérvilágítás típusa",
       "lcd_desc": "A vezérlő 2 soros karakteres LCD kijelzőjének háttérvilágítás-típusa. JuiceBox v2 csere esetén válassza az RGB lehetőséget.",
       "lcd_mono": "Monokróm",
-      "lcd_rgb": "RGB"
+      "lcd_rgb": "RGB",
+      "lcd_timeout_desc": "How long the backlight stays lit before switching off. It stays on while charging or in a fault, and any state change or button press lights it again."
     },
     "validation": {
       "required": "Kötelező",

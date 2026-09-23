@@ -1,7 +1,8 @@
 {
   "config": {
-    "tft_theme": "default",
-    "tft_brightness": 200,
-    "tft_sleep_timeout": 300
+    "tft_theme": "dark",
+    "tft_brightness": 100,
+    "tft_standby_brightness": 15,
+    "lcd_backlight_timeout": 600
   }
 }
