@@ -46,7 +46,7 @@ beforeEach(() => {
 describe('LoadSharing page', () => {
   it('redirects to the settings index when Labs (dev features) is off', () => {
     uisettings_store.update((s) => ({ ...s, dev_features: false }))
-    config_store.set({ loadsharing_enabled: true, loadsharing_role: 'controller' })
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false })
     render(LoadSharing)
     expect(window.location.hash).toBe('#/settings')
   })
@@ -54,7 +54,7 @@ describe('LoadSharing page', () => {
   it('shows grouped load sharing settings when enabled', () => {
     config_store.set({
       loadsharing_enabled: true,
-      loadsharing_role: 'controller',
+      loadsharing_role: false,
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
       loadsharing_safety_factor: 0.9,
@@ -66,13 +66,15 @@ describe('LoadSharing page', () => {
     })
     const { getByText, queryByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.group_id')).toBeInTheDocument()
-    expect(getByText('config.loadsharing.role')).toBeInTheDocument()
     expect(getByText('config.loadsharing.site_max_current')).toBeInTheDocument()
     expect(getByText('config.loadsharing.failsafe_peer_assumed_current')).toBeInTheDocument()
     expect(getByText('config.loadsharing.rotation_interval')).toBeInTheDocument()
     // No top-level Priority field: firmware has no loadsharing_priority key;
     // priority is per-peer only (peer_priority in the peer table/details).
     expect(queryByText('config.loadsharing.priority')).not.toBeInTheDocument()
+    // Role is a read-only row in Group status now, not a selectable field.
+    expect(getByText('config.loadsharing.role')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.role_controller')).toBeInTheDocument()
   })
 
   it('renders peer management for controller role', async () => {
@@ -85,7 +87,7 @@ describe('LoadSharing page', () => {
     })
     config_store.set({
       loadsharing_enabled: true,
-      loadsharing_role: 'controller',
+      loadsharing_role: false,
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
       loadsharing_safety_factor: 0.9,
@@ -120,7 +122,7 @@ describe('LoadSharing page', () => {
     })
     config_store.set({
       loadsharing_enabled: true,
-      loadsharing_role: 'member',
+      loadsharing_role: true,
       loadsharing_controller_host: 'controller.local',
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
@@ -151,6 +153,52 @@ describe('LoadSharing page', () => {
     expect(getByText('Main Panel')).toBeInTheDocument()
     expect(queryByText('config.loadsharing.peers')).not.toBeInTheDocument()
     expect(queryByText('config.loadsharing.group_id')).not.toBeInTheDocument()
+    // Role reads "Member" (read-only) rather than exposing a role selector.
+    expect(getByText('config.loadsharing.role_member')).toBeInTheDocument()
+  })
+
+  it('lets a member force-leave the group from the confirmation modal', async () => {
+    loadsharing_store.set({
+      peers: [{ id: 'peer-controller', name: 'Main Panel', host: 'controller.local', url: 'http://controller.local', online: true }],
+      status: {
+        enabled: true,
+        group_id: 'main',
+        computed_at: 1,
+        failsafe_active: false,
+        online_count: 1,
+        offline_count: 0,
+      },
+    })
+    claims_target_store.set({
+      properties: { max_current: 10 },
+      claims: { state: null, max_current: EvseClients.loadsharing.id },
+    })
+    config_store.set({
+      loadsharing_enabled: true,
+      loadsharing_role: true,
+      loadsharing_controller_host: 'controller.local',
+      loadsharing_group_id: 'main',
+    })
+    httpAPI.mockImplementation((method, url) => {
+      if (method === 'GET' && url === '/loadsharing/peers') {
+        return Promise.resolve([{ id: 'peer-controller', name: 'Main Panel', host: 'controller.local', url: 'http://controller.local', online: true }])
+      }
+      if (method === 'GET' && url === '/loadsharing/status') {
+        return Promise.resolve({ enabled: true, group_id: 'main', computed_at: 1, failsafe_active: false, online_count: 1, offline_count: 0 })
+      }
+      return Promise.resolve({ msg: 'done' })
+    })
+
+    const { getByText, queryByText } = render(LoadSharing)
+    expect(queryByText('config.loadsharing.leave_warning')).not.toBeInTheDocument()
+
+    await fireEvent.click(getByText('config.loadsharing.leave_group'))
+    expect(getByText('config.loadsharing.leave_warning')).toBeInTheDocument()
+
+    await fireEvent.click(getByText('config.loadsharing.force_removal'))
+
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ loadsharing_role: false }))
+    expect(queryByText('config.loadsharing.leave_warning')).not.toBeInTheDocument()
   })
 
   it('allows adding discovered peers from the peers list', async () => {
@@ -163,7 +211,7 @@ describe('LoadSharing page', () => {
     })
     config_store.set({
       loadsharing_enabled: true,
-      loadsharing_role: 'controller',
+      loadsharing_role: false,
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
       loadsharing_safety_factor: 0.9,
@@ -185,7 +233,7 @@ describe('LoadSharing page', () => {
   it('allows refreshing peers from the controller toolbar', async () => {
     config_store.set({
       loadsharing_enabled: true,
-      loadsharing_role: 'controller',
+      loadsharing_role: false,
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
       loadsharing_safety_factor: 0.9,
@@ -209,7 +257,7 @@ describe('LoadSharing page', () => {
     })
     config_store.set({
       loadsharing_enabled: true,
-      loadsharing_role: 'controller',
+      loadsharing_role: false,
       loadsharing_group_id: 'main',
       loadsharing_group_max_current: 50,
       loadsharing_safety_factor: 1.0,
