@@ -1,0 +1,6 @@
+{
+  "config": {
+    "lcd_type": "rgb",
+    "lcd_backlight_timeout": 600
+  }
+}

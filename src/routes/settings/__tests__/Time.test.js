@@ -59,4 +59,59 @@ describe('Time page', () => {
       expect(get(uistates_store).alertbox.visible).toBe(true)
     })
   })
+
+  describe('NTP server from DHCP', () => {
+    const timeStatus = {
+      ntp_status: 'synchronized',
+      ntp_last_sync: 1_700_000_000,
+      ntp_next_sync_ms: 1000,
+      ntp_server_ip: '192.168.1.1',
+      ntp_server: '192.168.1.1',
+      ntp_server_source: 'dhcp',
+      ntp_dhcp_server: '192.168.1.1',
+    }
+
+    it('hides the DHCP toggle when the firmware has no sntp_dhcp key', () => {
+      config_store.set({ sntp_enabled: true, sntp_hostname: 'pool.ntp.org', time_zone: 'UTC|UTC0' })
+      const { queryByLabelText } = render(Time)
+      expect(queryByLabelText('config.time.ntp_dhcp')).toBeNull()
+    })
+
+    it('shows the toggle checked and writes sntp_dhcp when flipped', async () => {
+      config_store.set({ sntp_enabled: true, sntp_dhcp: true, sntp_hostname: 'pool.ntp.org', time_zone: 'UTC|UTC0' })
+      const { getByLabelText } = render(Time)
+      const toggle = getByLabelText('config.time.ntp_dhcp')
+      expect(toggle).toHaveAttribute('aria-checked', 'true')
+      await fireEvent.click(toggle)
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ sntp_dhcp: false }))
+    })
+
+    it('reports the DHCP-offered server and that it is the one in use', async () => {
+      httpAPI.mockImplementation((method, url) =>
+        Promise.resolve(url === '/time' ? timeStatus : { msg: 'done' }))
+      config_store.set({ sntp_enabled: true, sntp_dhcp: true, sntp_hostname: 'pool.ntp.org', time_zone: 'UTC|UTC0' })
+      const { findByText, getByText, queryByText } = render(Time)
+      // the DHCP server gets top billing; the hostname box becomes the fallback
+      expect(await findByText('config.time.ntp_host_from_dhcp')).toBeInTheDocument()
+      expect(getByText('config.time.ntp_host_fallback')).toBeInTheDocument()
+      expect(queryByText('config.time.ntp_host')).toBeNull()
+      expect(getByText('config.time.ntp_server_in_use')).toBeInTheDocument()
+      expect(getByText('192.168.1.1 (config.time.ntp_source_dhcp)')).toBeInTheDocument()
+      // the DNS badge is about the hostname field, not the DHCP server
+      expect(queryByText(/config\.time\.ntp_dns_ok/)).toBeNull()
+    })
+
+    it('says when DHCP offered nothing and the configured host is in use', async () => {
+      httpAPI.mockImplementation((method, url) =>
+        Promise.resolve(url === '/time'
+          ? { ...timeStatus, ntp_server: 'pool.ntp.org', ntp_server_source: 'config', ntp_dhcp_server: undefined }
+          : { msg: 'done' }))
+      config_store.set({ sntp_enabled: true, sntp_dhcp: true, sntp_hostname: 'pool.ntp.org', time_zone: 'UTC|UTC0' })
+      const { findByText, getByText, queryByText } = render(Time)
+      expect(await findByText('config.time.ntp_dhcp_none')).toBeInTheDocument()
+      expect(getByText('config.time.ntp_host')).toBeInTheDocument()
+      expect(queryByText('config.time.ntp_host_from_dhcp')).toBeNull()
+      expect(getByText('pool.ntp.org (config.time.ntp_source_config)')).toBeInTheDocument()
+    })
+  })
 })

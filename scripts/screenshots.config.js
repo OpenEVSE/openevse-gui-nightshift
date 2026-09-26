@@ -66,6 +66,7 @@ const entries = [
   { name: 'settings-certificates', route: '/settings/certificates' },
   { name: 'settings-terminal', route: '/settings/terminal' },
   { name: 'settings-display', route: '/settings/display', scenario: 'display' },
+  { name: 'settings-display-lcd', route: '/settings/display', scenario: 'display_lcd' },
   { name: 'settings-about', route: '/settings/about' },
 ]
 

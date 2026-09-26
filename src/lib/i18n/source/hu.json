@@ -247,7 +247,8 @@
       "lcd_type": "Háttérvilágítás típusa",
       "lcd_desc": "A vezérlő 2 soros karakteres LCD kijelzőjének háttérvilágítás-típusa. JuiceBox v2 csere esetén válassza az RGB lehetőséget.",
       "lcd_mono": "Monokróm",
-      "lcd_rgb": "RGB"
+      "lcd_rgb": "RGB",
+      "lcd_timeout_desc": "How long the backlight stays lit before switching off. It stays on while charging or in a fault, and any state change or button press lights it again."
     },
     "validation": {
       "required": "Kötelező",
@@ -374,6 +375,15 @@
       "ntp_retry": "Újrapróbálkozás",
       "ntp_dns_ok": "DNS feloldva: ",
       "ntp_dns_failed": "DNS hiba",
+      "ntp_dhcp": "Use NTP server from DHCP",
+      "ntp_dhcp_desc": "When the network's DHCP server offers an NTP server, use it. The configured server is kept as a fallback.",
+      "ntp_host_from_dhcp": "NTP server (from DHCP)",
+      "ntp_host_fallback": "Fallback NTP server",
+      "ntp_host_fallback_desc": "Used if the server from DHCP stops answering.",
+      "ntp_dhcp_none": "No NTP server offered by DHCP",
+      "ntp_server_in_use": "Server in use",
+      "ntp_source_dhcp": "from DHCP",
+      "ntp_source_config": "configured",
       "device_date": "Dátum"
     },
     "rfid": {
@@ -383,6 +393,7 @@
       "manage": "Címke beolvasása",
       "scan": "Beolvasás",
       "place_tag": "Tartsa a címkét az olvasó elé…",
+      "not_enabled": "Az RFID még nincs engedélyezve — először add hozzá a töltéskezelőben.",
       "uid": "UID",
       "register": "Címke regisztrálása",
       "already": "Ez a címke már regisztrálva van.",
@@ -1196,7 +1207,8 @@
   },
   "alert": {
     "write_failed_title": "A változtatás nem lett elmentve",
-    "write_failed_body": "A töltő nem fogadta el a változtatást. Kérjük, próbálja újra."
+    "write_failed_body": "A töltő nem fogadta el a változtatást. Kérjük, próbálja újra.",
+    "rfid_scan_failed_title": "A beolvasás nem indult el"
   },
   "history": {
     "loading": "Történet betöltése…",
@@ -1268,7 +1280,9 @@
       "empty": "Nem található hálózat. Érintsd meg a Keresés gombot az ismétléshez.",
       "handoff_title": "El fogja veszíteni ezt a kapcsolatot",
       "handoff_body": "Amikor csatlakozik, a töltő csatlakozik a WiFi-hálózatához, és ez a beállítási hotspot kikapcsol. Ezután csatlakoztassa újra ezt a telefont vagy számítógépet az otthoni WiFi-hálózatához, hogy ismét elérje a töltőt.",
-      "reach_at": "Ezután nyissa meg a töltőt itt:"
+      "reach_at": "Ezután nyissa meg a töltőt itt:",
+      "eth_title": "Ethernet csatlakoztatva",
+      "eth_body": "Ennek a töltőnek már van működő Ethernet-kapcsolata. A WiFi opcionális — csatlakozzon egy hálózathoz lent, vagy koppintson a Befejezés gombra a WiFi nélküli beállítás befejezéséhez."
     },
     "time": {
       "title": "Idő",

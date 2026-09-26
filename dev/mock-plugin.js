@@ -400,7 +400,10 @@ export function mockPlugin() {
             ntp_status: 'synchronized',
             ntp_last_sync: nowSec - 312,        // 5m 12s ago
             ntp_next_sync_ms: 28440000,          // ~7h 54m
-            ntp_server_ip: '185.96.2.100',
+            ntp_server_ip: '192.168.1.1',
+            ntp_server: '192.168.1.1',           // DHCP option 42 wins over sntp_hostname
+            ntp_server_source: 'dhcp',
+            ntp_dhcp_server: '192.168.1.1',
           }))
           return
         }

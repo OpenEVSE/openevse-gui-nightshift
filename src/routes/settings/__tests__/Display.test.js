@@ -64,6 +64,34 @@ describe('Display page', () => {
     expect(getByText('config.display.lcd_mono')).toHaveAttribute('aria-pressed', 'true')
   })
 
+  it('shows the backlight timeout in the LCD section on an LCD-only charger', async () => {
+    // Issue #8: the char-LCD driver honours lcd_backlight_timeout too, so a
+    // classic V6 with no TFT gets the same slider, described for a backlight
+    // that switches off rather than dims.
+    config_store.set({ lcd_type: 'rgb', lcd_backlight_timeout: 300 })
+    const { getByLabelText, getByText, queryByText } = render(Display)
+    const slider = getByLabelText('config.display.timeout')
+    expect(slider).toHaveValue('300')
+    expect(getByText('config.display.lcd_timeout_desc')).toBeInTheDocument()
+    expect(queryByText('config.display.timeout_desc')).toBeNull()
+    await fireEvent.change(slider, { target: { value: '120' } })
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_backlight_timeout: 120 }))
+  })
+
+  it('hides the backlight timeout on an LCD-only charger whose firmware lacks the key', () => {
+    config_store.set({ lcd_type: 'rgb' })
+    const { queryByLabelText } = render(Display)
+    expect(queryByLabelText('config.display.timeout')).toBeNull()
+  })
+
+  it('shows the timeout once, in the TFT section, when a device has both displays', () => {
+    config_store.set({ tft_theme: 'dark', lcd_type: 'rgb', lcd_backlight_timeout: 600 })
+    const { getAllByLabelText, getByText, queryByText } = render(Display)
+    expect(getAllByLabelText('config.display.timeout')).toHaveLength(1)
+    expect(getByText('config.display.timeout_desc')).toBeInTheDocument()
+    expect(queryByText('config.display.lcd_timeout_desc')).toBeNull()
+  })
+
   it('defaults the 2-line LCD selector to RGB and writes on change', async () => {
     config_store.set({ lcd_type: 'rgb' })
     const { getByText } = render(Display)

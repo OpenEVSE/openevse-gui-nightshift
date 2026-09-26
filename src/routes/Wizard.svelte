@@ -43,6 +43,13 @@
   let evseConnected = $derived($status_store?.evse_connected ?? true)
   let commsBlocked = $derived(STEPS[step] === 'evse' && !evseConnected)
 
+  // The WiFi step is normally a dead end until you join a network (see
+  // WizardShell's hideAdvance below) — joining IS how the wizard finishes.
+  // But a charger already online over Ethernet doesn't need WiFi at all, so
+  // when eth_connected is reported we show a Finish button on this step
+  // instead of trapping the user into picking a network they don't want.
+  let ethConnected = $derived($status_store?.eth_connected === 1)
+
   // Escape hatch: a charger may be genuinely absent (bench-flashing a module,
   // a dead serial link the user will fix later) yet the person still needs to
   // finish WiFi/time setup. Rather than trap them, we let a deliberate triple
@@ -96,15 +103,24 @@
   function dismissFinish() {
     finishDialog = false
   }
+
+  // "Finish" path for the Ethernet case: no network hand-off happens (the
+  // device was never on its own softAP if it's already reachable over the
+  // wire), so we can write wizard_passed and go straight to the dashboard.
+  async function finishWithoutWifi() {
+    await markComplete()
+    navigate('/')
+  }
 </script>
 
 <WizardShell
   {step}
   total={TOTAL}
   title={$_(titleKey)}
-  hideAdvance={STEPS[step] === 'wifi'}
+  hideAdvance={STEPS[step] === 'wifi' && !ethConnected}
   onPrev={goPrev}
   onNext={goNext}
+  onFinish={finishWithoutWifi}
 >
   {#if step === 0}
     <Welcome />
@@ -117,7 +133,7 @@
   {:else if step === 4}
     <FirmwareInfo />
   {:else if step === 5}
-    <Wifi beforeJoin={markComplete} onJoined={onWifiJoined} />
+    <Wifi beforeJoin={markComplete} onJoined={onWifiJoined} {ethConnected} />
   {/if}
 </WizardShell>
 
