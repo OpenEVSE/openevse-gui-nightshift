@@ -37,13 +37,16 @@ if (typeof globalThis.MutationObserver !== 'function') {
   }
 }
 
-// Node 26 defines `localStorage` as a global accessor that returns undefined
-// unless the process was started with --localstorage-file. Because the binding
+// Node 25+ defines `localStorage` as a global accessor backed by
+// --localstorage-file; without that flag the binding still exists but is
+// non-functional (setItem etc. throw/are missing). Because the binding
 // exists it shadows the one jsdom installs — window === globalThis here, so
-// `window.localStorage` is undefined too — and anything touching storage sees
-// undefined rather than jsdom's implementation. The accessor is configurable,
-// so defineProperty replaces it with a minimal in-memory Storage.
-if (!globalThis.localStorage) {
+// `window.localStorage` is the same broken object — and anything touching
+// storage fails rather than reaching jsdom's implementation. Checking only
+// for a *missing* localStorage isn't enough here; check it actually works.
+// The accessor is configurable, so defineProperty replaces it with a
+// minimal in-memory Storage.
+if (typeof globalThis.localStorage?.setItem !== 'function') {
   const store = new Map()
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,

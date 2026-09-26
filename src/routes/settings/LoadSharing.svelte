@@ -33,15 +33,16 @@
   let peersBusy = $state(false)
   let detailsPeer = $state(null)
   let priorityRevert = $state(0)
+  let leaveGroupOpen = $state(false)
 
   let enabled = $derived(!!$config_store?.loadsharing_enabled)
-  let role = $derived($config_store?.loadsharing_role ?? '')
+  // loadsharing_role is a bool on the wire: false = controller (the
+  // default -- no manual selection needed), true = member (set
+  // automatically when this device is joined into another charger's
+  // group; see pushConfigToPeer in the firmware).
+  let role = $derived($config_store?.loadsharing_role ? 'member' : 'controller')
   let isMember = $derived(enabled && role === 'member')
   let isController = $derived(enabled && role === 'controller')
-  let roleOptions = $derived([
-    { value: 'controller', label: $_('config.loadsharing.role_controller') },
-    { value: 'member', label: $_('config.loadsharing.role_member') },
-  ])
   let failsafeModeOptions = $derived([
     { value: 'safe_current', label: $_('config.loadsharing.failsafe_safe_current') },
     { value: 'disable', label: $_('config.loadsharing.failsafe_disable') },
@@ -179,6 +180,16 @@
     }
   }
 
+  // The member-side escape hatch when the controller can't be reached to
+  // remove this device properly: posting role=false is the same leave path
+  // the controller's own removal push already uses (web_server_config.cpp),
+  // just self-triggered. It only clears this device's own membership --
+  // the controller still has to notice the peer went away on its own.
+  async function forceLeaveGroup() {
+    leaveGroupOpen = false
+    await form.saveField('loadsharing_role', false)
+  }
+
   // Watch for peer list changes via version number
   $effect(() => {
     const version = $status_store?.loadsharing_peers_version
@@ -221,13 +232,6 @@
           placeholder="main_circuit"
           revert={form.revert}
           onchange={(v) => form.saveField('loadsharing_group_id', v)}
-        />
-      </FormField>
-      <FormField label={$_('config.loadsharing.role')} status={$ss.loadsharing_role ?? 'idle'}>
-        <Select
-          options={roleOptions}
-          value={role}
-          onchange={(v) => form.saveField('loadsharing_role', v)}
         />
       </FormField>
       <FormField
@@ -327,6 +331,10 @@
 
     <ConfigSection title={$_('config.loadsharing.runtime_status')}>
       <ReadOnlyRow
+        label={$_('config.loadsharing.role')}
+        value={isController ? $_('config.loadsharing.role_controller') : $_('config.loadsharing.role_member')}
+      />
+      <ReadOnlyRow
         label={$_('config.loadsharing.failsafe_active')}
         value={runtimeStatus.failsafe_active
           ? $_('config.loadsharing.active')
@@ -340,6 +348,15 @@
         label={$_('config.loadsharing.offline_count')}
         value={runtimeStatus.offline_count ?? '—'}
       />
+      {#if isMember}
+        <div class="mt-3">
+          <Button
+            label={$_('config.loadsharing.leave_group')}
+            variant="ghost"
+            onclick={() => (leaveGroupOpen = true)}
+          />
+        </div>
+      {/if}
     </ConfigSection>
 
     {#if isController}
@@ -491,10 +508,6 @@
         />
         <ReadOnlyRow label={$_('config.loadsharing.comms_status')} value={memberComms} />
       </ConfigSection>
-    {:else}
-      <ConfigSection title={$_('config.loadsharing.settings')}>
-        <p class="text-sm text-text-dim">{$_('config.loadsharing.role_required')}</p>
-      </ConfigSection>
     {/if}
   {/if}
 
@@ -529,5 +542,37 @@
         </div>
       </div>
     {/if}
+  </Modal>
+
+  <Modal visible={leaveGroupOpen} closable={true} onclose={() => (leaveGroupOpen = false)}>
+    <div class="p-4">
+      <h2 class="mb-4 text-base font-semibold text-text">
+        {$_('config.loadsharing.leave_group')}
+      </h2>
+      <p class="text-sm text-text-dim">{$_('config.loadsharing.leave_warning')}</p>
+      <div class="mt-5 flex flex-col gap-2">
+        <!-- A real navigation, not a Button onclick -- this hands the user
+             off to do the removal properly from the controller's own peer
+             table, so it needs to be a normal link the browser can follow
+             (including open-in-new-tab), not a JS-driven action. -->
+        <a
+          href={controllerUrl}
+          onclick={() => (leaveGroupOpen = false)}
+          class="w-full rounded-2xl bg-accent px-4 py-3 text-center text-sm font-semibold text-surface transition"
+        >
+          {$_('config.loadsharing.go_to_controller')}
+        </a>
+        <Button
+          label={$_('config.loadsharing.force_removal')}
+          variant="ghost"
+          onclick={forceLeaveGroup}
+        />
+        <Button
+          label={$_('config.loadsharing.close')}
+          variant="ghost"
+          onclick={() => (leaveGroupOpen = false)}
+        />
+      </div>
+    </div>
   </Modal>
 </ConfigPage>

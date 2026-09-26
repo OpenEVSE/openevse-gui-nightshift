@@ -98,10 +98,20 @@ export function mockPlugin() {
   // In-memory state for endpoints that mutate. Seeded once per dev-server
   // run; reset by restarting the server.
   const rfidUsers = JSON.parse(loadFixture('rfid_users.json'))
+  // The real GET /loadsharing/peers and /loadsharing/status always include the
+  // local device itself (isLocal: true, joined: true) alongside remote peers
+  // (LoadSharingGroupState::getAllPeers) — mirror that here.
+  const localHostname = baseFixtures['/api/config'].hostname ?? 'openevse-mock'
   const loadsharingPeers = [
-    { id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true, priority: 0 },
-    { id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false, priority: 0 }
+    { id: 'local-device', name: 'This charger', host: `${localHostname}.local`, online: true, joined: true, priority: 0, isLocal: true },
+    { id: 'peer-1', name: 'Garage', host: 'garage.local', online: true, joined: true, priority: 0, isLocal: false },
+    { id: 'peer-2', name: 'Yard', host: 'yard.local', online: true, joined: false, priority: 0, isLocal: false }
   ]
+  // Bumped like the firmware's loadsharing_peers_version / _status_version
+  // counters, whose mere presence on /status is what the Settings > Load
+  // sharing page's peer-table $effect watches to know to (re)fetch.
+  let loadsharingPeersVersion = 1
+  let loadsharingStatusVersion = 1
 
   // Dev-only runtime state override. Lets the resting/charging layouts be
   // previewed without a real device: GET /api/_mock/state/<code> flips it
@@ -178,6 +188,8 @@ export function mockPlugin() {
       claims_version: claimsVersion,
       boost: !!boost,
       boost_version: boostVersion,
+      loadsharing_peers_version: loadsharingPeersVersion,
+      loadsharing_status_version: loadsharingStatusVersion,
       uptime: (baseStatus.uptime ?? 0) + tickCount * 2,
       session_elapsed: charging
         ? (baseStatus.session_elapsed ?? 0) + tickCount * 2
@@ -270,11 +282,16 @@ export function mockPlugin() {
                 if (existing) {
                   existing.joined = true
                 } else {
-                  loadsharingPeers.push({ id: `peer-${Date.now()}`, name: host, host, online: true, joined: true, priority: 0 })
+                  loadsharingPeers.push({ id: `peer-${Date.now()}`, name: host, host, online: true, joined: true, priority: 0, isLocal: false })
                 }
               } catch {}
+              // Real firmware replies {"msg":"done"} — loadsharing_store.addPeer()
+              // checks for exactly that string, so anything else reads as failure.
+              loadsharingPeersVersion++
+              const msg = buildStatusMessage(tickCount)
+              for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
               res.writeHead(200, { 'Content-Type': 'application/json' })
-              res.end(JSON.stringify({ msg: 'erased' }))
+              res.end(JSON.stringify({ msg: 'done' }))
             })
             return
           }
@@ -293,8 +310,11 @@ export function mockPlugin() {
                   peer.priority = priority
                 }
               } catch {}
+              loadsharingStatusVersion++
+              const msg = buildStatusMessage(tickCount)
+              for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
               res.writeHead(200, { 'Content-Type': 'application/json' })
-              res.end(JSON.stringify({ msg: 'erased' }))
+              res.end(JSON.stringify({ msg: 'done' }))
             })
             return
           }
@@ -304,8 +324,11 @@ export function mockPlugin() {
             if (idx !== -1) {
               loadsharingPeers[idx].joined = false
             }
+            loadsharingPeersVersion++
+            const msg = buildStatusMessage(tickCount)
+            for (const ws of clients) if (ws.readyState === ws.OPEN) ws.send(msg)
             res.writeHead(200, { 'Content-Type': 'application/json' })
-            res.end(JSON.stringify({ msg: 'erased' }))
+            res.end(JSON.stringify({ msg: 'done' }))
             return
           }
         }
@@ -321,7 +344,7 @@ export function mockPlugin() {
           const controllerOnline = loadsharingPeers.some(
             (p) => p.host === cfg.loadsharing_controller_host && p.online,
           )
-          const failsafe = cfg.loadsharing_role === 'member' && !controllerOnline
+          const failsafe = cfg.loadsharing_role === true && !controllerOnline
           res.writeHead(200, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({
             enabled: true,

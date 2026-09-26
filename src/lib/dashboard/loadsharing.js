@@ -26,7 +26,7 @@ function num(v) {
  * @param {object|null} args.lsStatus GET /loadsharing/status, or null when not fetched yet
  * @param {number} args.localMax      this charger's own ceiling (soft max), amps
  * @returns {null | {
- *   role: 'controller'|'member'|'',
+ *   role: 'controller'|'member',
  *   state: 'sharing'|'limited'|'failsafe',
  *   limit: number|null, localMax: number, pilot: number,
  *   others: number|null, online: number|null,
@@ -38,7 +38,8 @@ export function loadSharingView({ config, status, claimsTarget, lsStatus, localM
   const c = config ?? {}
   if (!c.loadsharing_enabled) return null
   const s = status ?? {}
-  const role = c.loadsharing_role === 'controller' || c.loadsharing_role === 'member' ? c.loadsharing_role : ''
+  // loadsharing_role is a bool on the wire: false = controller (default), true = member.
+  const role = c.loadsharing_role ? 'member' : 'controller'
   const controller = c.loadsharing_controller_host ?? ''
 
   // This charger's own ceiling. The dashboard's maxAmps is min(soft, hard),
