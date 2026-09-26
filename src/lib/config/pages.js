@@ -37,23 +37,22 @@ export const SETTINGS_PAGES = [
 ]
 
 // `requires` gates on a device-config capability key, or on any one of a list
-// of keys; `labs` gates on the client-side OpenEVSE Labs switch
-// (uisettings.dev_features), passed in via opts so this stays a pure function
-// of its inputs.
+// of keys; `labs` gates on the OpenEVSE Labs switch (config.labs_enabled,
+// stored on the device).
 function hasCapability(config, requires) {
   if (!requires) return true
   const keys = Array.isArray(requires) ? requires : [requires]
   return !!config && keys.some((k) => config[k])
 }
 
-export function pagesBySection(config, { dev_features = false } = {}) {
+export function pagesBySection(config) {
   return SECTIONS.map((section) => ({
     section,
     pages: SETTINGS_PAGES.filter(
       (p) =>
         p.section === section &&
         hasCapability(config, p.requires) &&
-        (!p.labs || dev_features),
+        (!p.labs || !!config?.labs_enabled),
     ),
   })).filter((g) => g.pages.length > 0)
 }

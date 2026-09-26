@@ -3,7 +3,6 @@
   import { onMount } from 'svelte'
   import { _ } from 'svelte-i18n'
   import { httpAPI } from '../../lib/api/httpAPI.js'
-  import { uisettings_store } from '../../lib/stores/uisettings.js'
   import { config_store } from '../../lib/stores/config.js'
   import { status_store } from '../../lib/stores/status.js'
   import { serialQueue } from '../../lib/queue.js'
@@ -20,9 +19,18 @@
   import { downloadDiagnostics } from '../../lib/diagnostics.js'
   import { formatBytes } from '../../lib/utils.js'
 
-  function setDevFeatures(on) {
-    uisettings_store.update((s) => ({ ...s, dev_features: !!on }))
+  // Stored on the device (not browser localStorage) so the switch survives
+  // reloads and applies to every browser/hostname that opens this charger.
+  async function setLabs(on) {
+    if (!(await serialQueue.add(() => config_store.saveParam('labs_enabled', !!on)))) showWriteError()
   }
+
+  // What the Labs switch reveals; `href` links to it once Labs is on.
+  const LABS_FEATURES = [
+    { key: 'loadsharing', href: '#/settings/loadsharing' },
+    { key: 'rfid_names', href: '#/settings/rfid' },
+    { key: 'probes' }, // shown above, under Memory & health
+  ]
 
   // ── Flash repartition: expand a 16MB module flashed with the 4MB layout ──
   // The gateway reports can_expand_16mb only when the chip is >=16MB, the live
@@ -507,7 +515,7 @@
         <ReadOnlyRow label={$_('config.terminal.lv_frag')} value={pct(mem.lv_frag_max)} />
       {/if}
 
-      {#if $uisettings_store?.dev_features && probes.length}
+      {#if $config_store?.labs_enabled && probes.length}
         <h3 class="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-text-dim">{$_('config.terminal.probes')}</h3>
         <p class="mb-1 text-xs text-text-dim">{$_('config.terminal.probes_desc')}</p>
         {#each probes as p (p.i)}
@@ -582,11 +590,23 @@
       description={$_('config.terminal.labs_desc')}
     >
       <Toggle
-        checked={!!$uisettings_store?.dev_features}
+        checked={!!$config_store?.labs_enabled}
         label={$_('config.terminal.labs_enable')}
-        onchange={setDevFeatures}
+        onchange={setLabs}
       />
     </FormField>
+    <ul class="mt-2 space-y-2 text-sm">
+      {#each LABS_FEATURES as f (f.key)}
+        <li>
+          {#if $config_store?.labs_enabled && f.href}
+            <a class="font-medium text-accent underline" href={f.href}>{$_(`config.terminal.labs_features.${f.key}`)}</a>
+          {:else}
+            <span class="font-medium text-text">{$_(`config.terminal.labs_features.${f.key}`)}</span>
+          {/if}
+          <p class="text-xs text-text-dim">{$_(`config.terminal.labs_features.${f.key}_desc`)}</p>
+        </li>
+      {/each}
+    </ul>
   </ConfigSection>
 </ConfigPage>
 

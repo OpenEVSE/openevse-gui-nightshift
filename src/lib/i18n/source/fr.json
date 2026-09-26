@@ -604,6 +604,14 @@
       "labs": "OpenEVSE Labs",
       "labs_enable": "Activer les fonctions Labs",
       "labs_desc": "Révèle les fonctions en cours de développement qui dépendent du firmware correspondant. Laissez désactivé tant que ce firmware n'est pas flashé.",
+      "labs_features": {
+        "loadsharing": "Load sharing",
+        "loadsharing_desc": "Share one supply circuit between several chargers on the same network.",
+        "rfid_names": "RFID tag names",
+        "rfid_names_desc": "Give registered RFID tags a friendly user name.",
+        "probes": "Fragmentation probes",
+        "probes_desc": "Extra heap diagnostics under Memory & health above."
+      },
       "rapi": "Console de commandes RAPI",
       "command": "Commande",
       "send": "Envoyer",

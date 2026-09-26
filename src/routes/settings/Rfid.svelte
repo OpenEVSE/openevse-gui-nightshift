@@ -5,7 +5,6 @@
   import { config_store } from '../../lib/stores/config.js'
   import { status_store } from '../../lib/stores/status.js'
   import { uistates_store } from '../../lib/stores/uistates.js'
-  import { uisettings_store } from '../../lib/stores/uisettings.js'
   import { rfid_users_store } from '../../lib/stores/rfid_users.js'
   import { createConfigForm } from '../../lib/config/configForm.svelte.js'
   import { serialQueue } from '../../lib/queue.js'
@@ -28,7 +27,7 @@
   let scanWaiting = $derived($uistates_store?.rfid_waiting ?? 0)
   let alreadyRegistered = $derived(scanned !== '' && tags.includes(scanned))
 
-  let labsOn = $derived(!!$uisettings_store?.dev_features)
+  let labsOn = $derived(!!$config_store?.labs_enabled)
   let editingUid = $state(null)
   let editingInitial = $state('')
   let editBusy = $state(false)

@@ -126,7 +126,7 @@
   // Terminal). Even when the device reports it enabled, the dashboard block
   // stays hidden until the user opts into Labs features.
   let loadSharingVisible = $derived(
-    !!$config_store?.loadsharing_enabled && !!$uisettings_store?.dev_features,
+    !!$config_store?.loadsharing_enabled && !!$config_store?.labs_enabled,
   )
   // failsafe_active and the controller's last_seen live on GET
   // /loadsharing/status, not on the websocket; the firmware ticks

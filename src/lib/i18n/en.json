@@ -603,7 +603,15 @@
     "terminal": {
       "labs": "OpenEVSE Labs",
       "labs_enable": "Enable Labs features",
-      "labs_desc": "Reveals in-development features that depend on matching firmware support. Leave off until the corresponding firmware is flashed.",
+      "labs_desc": "Reveals in-development features that depend on matching firmware support. Saved on the charger, so it applies to every browser.",
+      "labs_features": {
+        "loadsharing": "Load sharing",
+        "loadsharing_desc": "Share one supply circuit between several chargers on the same network.",
+        "rfid_names": "RFID tag names",
+        "rfid_names_desc": "Give registered RFID tags a friendly user name.",
+        "probes": "Fragmentation probes",
+        "probes_desc": "Extra heap diagnostics under Memory & health above."
+      },
       "rapi": "RAPI command console",
       "command": "Command",
       "send": "Send",

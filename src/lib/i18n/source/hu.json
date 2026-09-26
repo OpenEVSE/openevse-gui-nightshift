@@ -604,6 +604,14 @@
       "labs": "OpenEVSE Labs",
       "labs_enable": "Labs funkciók engedélyezése",
       "labs_desc": "Megjeleníti a fejlesztés alatt álló funkciókat, amelyek megfelelő firmware támogatást igényelnek. Hagyd kikapcsolva, amíg a megfelelő firmware nincs feltöltve.",
+      "labs_features": {
+        "loadsharing": "Load sharing",
+        "loadsharing_desc": "Share one supply circuit between several chargers on the same network.",
+        "rfid_names": "RFID tag names",
+        "rfid_names_desc": "Give registered RFID tags a friendly user name.",
+        "probes": "Fragmentation probes",
+        "probes_desc": "Extra heap diagnostics under Memory & health above."
+      },
       "rapi": "RAPI parancskonsol",
       "command": "Parancs",
       "send": "Elküld",
