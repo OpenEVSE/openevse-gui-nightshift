@@ -18,7 +18,6 @@ import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { showWriteError } from '../../../lib/alerts.js'
 import { config_store } from '../../../lib/stores/config.js'
 import { status_store } from '../../../lib/stores/status.js'
-import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import Terminal from '../Terminal.svelte'
 
 beforeEach(() => {
@@ -102,7 +101,7 @@ describe('Terminal — Memory & health', () => {
 
   beforeEach(() => {
     status_store.set({})
-    uisettings_store.update((s) => ({ ...s, dev_features: false }))
+    config_store.update((c) => ({ ...c, labs_enabled: false }))
   })
 
   it('renders the section when heap_largest is present', () => {
@@ -212,7 +211,7 @@ describe('Terminal — Memory & health', () => {
     const { queryByText, rerender } = render(Terminal)
     expect(queryByText('config.terminal.probes')).not.toBeInTheDocument()
 
-    uisettings_store.update((s) => ({ ...s, dev_features: true }))
+    config_store.update((c) => ({ ...c, labs_enabled: true }))
     rerender({})
     expect(queryByText('config.terminal.probes')).toBeInTheDocument()
     expect(queryByText('config.terminal.probe_buildstatus')).toBeInTheDocument()
@@ -364,5 +363,34 @@ describe('Terminal — Crash core dump', () => {
     await fireEvent.click(getByText('config.terminal.crash.clear_confirm_yes'))
     await vi.waitFor(() => expect(showWriteError).toHaveBeenCalled())
     expect(getByText('config.terminal.crash.title')).toBeInTheDocument()
+  })
+})
+
+describe('Terminal — OpenEVSE Labs', () => {
+  beforeEach(() => config_store.set({ labs_enabled: false }))
+
+  it('lists the Labs features, linking them only once Labs is on', async () => {
+    const { getByText, getByRole } = render(Terminal)
+    const name = getByText('config.terminal.labs_features.loadsharing')
+    expect(name.closest('a')).toBeNull()
+
+    httpAPI.mockResolvedValue({ msg: 'done' })
+    await fireEvent.click(getByRole('switch', { name: 'config.terminal.labs_enable' }))
+    // Saved on the device, not in browser localStorage.
+    await vi.waitFor(() =>
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ labs_enabled: true })),
+    )
+    await vi.waitFor(() =>
+      expect(getByText('config.terminal.labs_features.loadsharing').closest('a'))
+        .toHaveAttribute('href', '#/settings/loadsharing'),
+    )
+    expect(showWriteError).not.toHaveBeenCalled()
+  })
+
+  it('surfaces a failed save', async () => {
+    const { getByRole } = render(Terminal)
+    httpAPI.mockResolvedValue({ msg: 'error' })
+    await fireEvent.click(getByRole('switch', { name: 'config.terminal.labs_enable' }))
+    await vi.waitFor(() => expect(showWriteError).toHaveBeenCalled())
   })
 })

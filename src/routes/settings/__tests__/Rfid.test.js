@@ -18,7 +18,6 @@ import { httpAPI } from '../../../lib/api/httpAPI.js'
 import { config_store } from '../../../lib/stores/config.js'
 import { status_store } from '../../../lib/stores/status.js'
 import { uistates_store } from '../../../lib/stores/uistates.js'
-import { uisettings_store } from '../../../lib/stores/uisettings.js'
 import { rfid_users_store } from '../../../lib/stores/rfid_users.js'
 import Rfid from '../Rfid.svelte'
 
@@ -27,7 +26,7 @@ beforeEach(() => {
   httpAPI.mockReset()
   httpAPI.mockResolvedValue({ status: 200, body: JSON.stringify({ msg: 'Waiting for badge' }) })
   status_store.set({ rfid_input: '' })
-  uisettings_store.update((s) => ({ ...s, dev_features: false }))
+  config_store.update((c) => ({ ...c, labs_enabled: false }))
   rfid_users_store.reset()
 })
 
@@ -91,16 +90,14 @@ describe('RFID page', () => {
   })
 
   it('exposes the add-name affordance when Labs is on and the tag has no name', () => {
-    uisettings_store.update((s) => ({ ...s, dev_features: true }))
-    config_store.set({ rfid_enabled: true, rfid_storage: 'AA11' })
+    config_store.set({ labs_enabled: true, rfid_enabled: true, rfid_storage: 'AA11' })
     const { getByText } = render(Rfid)
     expect(getByText('config.rfid.add_user_name')).toBeInTheDocument()
   })
 
   it('shows the assigned name when Labs is on and the user-name map is loaded', () => {
-    uisettings_store.update((s) => ({ ...s, dev_features: true }))
     rfid_users_store.set({ users: { AA11: 'Alice' }, loading: false, error: false })
-    config_store.set({ rfid_enabled: true, rfid_storage: 'AA11' })
+    config_store.set({ labs_enabled: true, rfid_enabled: true, rfid_storage: 'AA11' })
     const { getByText, queryByText } = render(Rfid)
     expect(getByText('Alice')).toBeInTheDocument()
     expect(queryByText('config.rfid.add_user_name')).not.toBeInTheDocument()
