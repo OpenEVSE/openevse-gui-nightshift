@@ -441,6 +441,19 @@ describe('Terminal — Crash core dump', () => {
     expect(await findByText('config.terminal.crash.upload_done')).toBeInTheDocument()
   })
 
+  it('shows plain progress, not a byte count, while only the summary is sent', async () => {
+    // A summary-only upload goes metadata -> done with no bytes counted; a
+    // "0 of 20 KB" line would look stuck.
+    mockUpload()
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.upload'))
+    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
+
+    status_store.set({ crash_upload: 'metadata', crash_upload_sent: 0, crash_upload_total: 20100 })
+    expect(await findByText('config.terminal.crash.upload_sending')).toBeInTheDocument()
+    expect(queryByText('config.terminal.crash.upload_progress')).not.toBeInTheDocument()
+  })
+
   it('reports a failed upload and keeps the button so it can be retried', async () => {
     mockUpload()
     const { findByText, getByText } = render(Terminal)

@@ -9,7 +9,7 @@ import hu from '../source/hu.json'
 
 const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
-  'upload_progress', 'upload_done', 'upload_failed',
+  'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
 ]
 
@@ -31,18 +31,22 @@ describe('crash upload strings', () => {
       }
     })
 
-  it('the confirmation names the credentials, in every locale', () => {
-    // A user clicking this is sending their Wi-Fi password and every stored
-    // token off the device. Consent that does not say so is not consent
-    // (spec section 8) -- so every locale must actually mention it, not just
-    // carry some text.
-    const mentions = {
-      en: /wi-?fi/i, es: /wi-?fi/i, fr: /wi-?fi/i, hu: /wi-?fi/i,
+  it('the confirmation says the credentials stay on the charger, in every locale', () => {
+    // Only the decoded summary leaves the device; the raw memory image, which
+    // can hold the Wi-Fi password, does not. Consent has to say what is sent
+    // (spec section 8), and in particular that credentials are not -- so every
+    // locale must name Wi-Fi and say the memory copy is not sent.
+    const says = {
+      en: [/wi-?fi/i, /not/i], es: [/wi-?fi/i, /no /i],
+      fr: [/wi-?fi/i, /pas/i], hu: [/wi-?fi/i, /nem/i],
     }
     for (const [name, l] of Object.entries({ en, es, fr, hu })) {
-      expect(l.config.terminal.crash.upload_confirm_body, name)
-        .toMatch(mentions[name])
+      for (const re of says[name]) {
+        expect(l.config.terminal.crash.upload_confirm_body, name).toMatch(re)
+      }
     }
+    // The old wording promised the reverse; it must not survive in any locale.
+    expect(en.config.terminal.crash.upload_confirm_body).not.toMatch(/can contain your Wi-Fi/i)
   })
 
   it('the progress string carries both placeholders', () => {
