@@ -682,12 +682,15 @@
           <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
         </div>
       </div>
-    {:else if uploadBusy}
+    {:else if uploadState === 'uploading'}
       <p class="mt-2 text-sm text-text-dim">
         {$_('config.terminal.crash.upload_progress', {
           values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
         })}
       </p>
+    {:else if uploadBusy}
+      <!-- A summary-only report counts no bytes: metadata goes straight to done. -->
+      <p class="mt-2 text-sm text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
     {:else if uploadState === 'done'}
       <p class="mt-2 text-sm text-text">{$_('config.terminal.crash.upload_done')}</p>
     {:else if uploadState === 'failed'}
