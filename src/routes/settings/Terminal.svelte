@@ -295,6 +295,7 @@
 
   async function startUpload() {
     pendingUpload = false
+    lastUploadEvent = $status_store?.crash_upload
     // A body on purpose: mongoose 6 holds a POST with no Content-Length until
     // the client closes the socket. fetch() sends Content-Length: 0 for a
     // bodyless POST anyway, but nothing downstream has to know that.
@@ -307,17 +308,25 @@
   }
 
   async function cancelDeferred() {
+    lastUploadEvent = $status_store?.crash_upload
     await serialQueue.add(() => httpAPI('DELETE', '/debug/crash/upload'))
     uploadDeferred = false
     uploadState = 'idle'
   }
 
-  // Live progress from the device. Only acted on once the page knows the
-  // uploader exists, so a stale event cannot conjure the controls on a build
-  // that has none.
+  // Live progress from the device. Every websocket frame is merged into
+  // status_store, so an event, once seen, stays there for the session -- and
+  // this effect re-runs on every EVSE reading. Act on an event only when it
+  // CHANGES; otherwise a withdrawn deferral would reappear on the next frame
+  // and a finished upload would re-fetch the crash summary forever. Whatever
+  // is already in the store when the page opens, or when the user acts, is
+  // treated as stale -- GET /debug/crash/upload is the authority then.
+  // Plain, not $state: it is bookkeeping, and must not re-trigger the effect.
+  let lastUploadEvent = $status_store?.crash_upload
   $effect(() => {
     const st = $status_store?.crash_upload
-    if (typeof st !== 'string' || !uploadSupported) return
+    if (typeof st !== 'string' || !uploadSupported || st === lastUploadEvent) return
+    lastUploadEvent = st
     uploadState = st
     if (st === 'deferred') uploadDeferred = true
     if (st === 'done') {

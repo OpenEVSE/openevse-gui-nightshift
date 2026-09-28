@@ -451,4 +451,37 @@ describe('Terminal — Crash core dump', () => {
     expect(await findByText('config.terminal.crash.upload_failed')).toBeInTheDocument()
     expect(getByText('config.terminal.crash.upload')).toBeInTheDocument()
   })
+
+  it('a cancelled deferral stays cancelled when unrelated status frames arrive', async () => {
+    // Every websocket frame is merged into status_store, so a 'deferred' seen
+    // once stays in the store for the session. Re-applying it on the next
+    // EVSE reading would tell the user the report will still be sent after
+    // they withdrew it -- and the device's flag is already gone.
+    mockUpload()
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await findByText('config.terminal.crash.upload')
+    status_store.set({ crash_upload: 'deferred' })
+    expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
+
+    await fireEvent.click(getByText('config.terminal.crash.upload_cancel_deferred'))
+    await vi.waitFor(() =>
+      expect(queryByText('config.terminal.crash.upload_deferred')).not.toBeInTheDocument())
+
+    status_store.update((s) => ({ ...s, amp: 16000 }))   // an ordinary reading
+    await new Promise((r) => setTimeout(r, 20))
+    expect(queryByText('config.terminal.crash.upload_deferred')).not.toBeInTheDocument()
+  })
+
+  it('does not re-fetch the crash summary on every frame after an upload finishes', async () => {
+    mockUpload()
+    const { findByText } = render(Terminal)
+    await findByText('config.terminal.crash.upload')
+    status_store.set({ crash_upload: 'done' })
+    await findByText('config.terminal.crash.upload_done')
+    const fetches = () => httpAPI.mock.calls.filter(([m, u]) => m === 'GET' && u === '/debug/crash').length
+    const before = fetches()
+    for (let i = 0; i < 5; i++) status_store.update((s) => ({ ...s, amp: i }))
+    await new Promise((r) => setTimeout(r, 20))
+    expect(fetches()).toBe(before)
+  })
 })
