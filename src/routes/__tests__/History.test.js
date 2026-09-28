@@ -11,7 +11,6 @@ vi.mock('../../lib/api/httpAPI.js', () => ({ httpAPI: vi.fn() }))
 import { httpAPI } from '../../lib/api/httpAPI.js'
 import { history_store } from '../../lib/stores/history.js'
 import { config_store } from '../../lib/stores/config.js'
-import { uisettings_store } from '../../lib/stores/uisettings.js'
 import { rfid_users_store } from '../../lib/stores/rfid_users.js'
 import History from '../History.svelte'
 
@@ -25,7 +24,6 @@ describe('History', () => {
     history_store.set(undefined)
     config_store.set({})
     httpAPI.mockReset()
-    uisettings_store.update((s) => ({ ...s, dev_features: false }))
     rfid_users_store.reset()
   })
 

@@ -58,7 +58,7 @@ const entries = [
   { name: 'settings-vehicle', route: '/settings/vehicle' },
   { name: 'settings-solar', route: '/settings/solar' },
   { name: 'settings-shaper', route: '/settings/shaper' },
-  // Load Sharing is Labs-gated (uisettings.dev_features) and hidden by default,
+  // Load Sharing is Labs-gated (config labs_enabled) and hidden by default,
   // so it is intentionally omitted from the default screenshot set.
   { name: 'settings-emoncms', route: '/settings/emoncms' },
   { name: 'settings-ohmconnect', route: '/settings/ohmconnect' },
