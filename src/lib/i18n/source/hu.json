@@ -696,7 +696,16 @@
         "clear_confirm_title": "Törlöd a memóriaképet?",
         "clear_confirm_body": "Ez véglegesen törli az eszközön tárolt összeomlási memóriaképet. Előbb töltsd le, ha még szükséged van rá.",
         "clear_confirm_yes": "Törlés",
-        "clear_confirm_no": "Mégse"
+        "clear_confirm_no": "Mégse",
+        "upload": "Küldés az OpenEVSE-nek",
+        "upload_confirm_title": "Elküldöd ezt az összeomlási jelentést?",
+        "upload_confirm_body": "Az összeomlási jelentés a töltő memóriájának másolatát is tartalmazza. Ez a másolat tartalmazhatja a Wi-Fi-jelszavadat, az MQTT-jelszavadat és a tárolt hozzáférési tokeneket. Titkosított kapcsolaton keresztül jut el az OpenEVSE-hez, 90 napig bizalmasan őrizzük, majd töröljük. A jelentés az elküldés után törlődik erről a töltőről.",
+        "upload_confirm_yes": "Küldés",
+        "upload_progress": "Küldés… {sent} / {total} KB",
+        "upload_done": "Elküldve. Az összeomlási jelentés törlődött erről a töltőről.",
+        "upload_failed": "Nem sikerült elküldeni a jelentést. Semmi sem törlődött erről a töltőről — próbáld újra.",
+        "upload_deferred": "Még nincs elküldve. A töltőnek most nincs elég szabad memóriája; a jelentés a következő újraindítás után automatikusan elküldésre kerül.",
+        "upload_cancel_deferred": "Ne küldd el"
       },
       "now": "Most",
       "min": "Min",
