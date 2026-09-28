@@ -44,11 +44,11 @@ beforeEach(() => {
 
 describe('LoadSharing page', () => {
   it('redirects to the settings index when Labs (dev features) is off', () => {
-  config_store.update((c) => ({ ...c, labs_enabled: false }))
-  config_store.set({ loadsharing_enabled: true, loadsharing_role: false })
-  render(LoadSharing)
-  expect(window.location.hash).toBe('#/settings')
-})
+    config_store.update((c) => ({ ...c, labs_enabled: false }))
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false })
+    render(LoadSharing)
+    expect(window.location.hash).toBe('#/settings')
+  })
 
   it('shows grouped load sharing settings when enabled', () => {
     config_store.set({
