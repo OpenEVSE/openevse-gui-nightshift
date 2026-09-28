@@ -685,7 +685,16 @@
         "clear_confirm_title": "Effacer le vidage ?",
         "clear_confirm_body": "Cela supprime définitivement le vidage stocké sur l'appareil. Téléchargez-le d'abord si vous en avez encore besoin.",
         "clear_confirm_yes": "Effacer",
-        "clear_confirm_no": "Annuler"
+        "clear_confirm_no": "Annuler",
+        "upload": "Envoyer à OpenEVSE",
+        "upload_confirm_title": "Envoyer ce rapport de plantage ?",
+        "upload_confirm_body": "Le rapport de plantage contient une copie de la mémoire du chargeur. Cette copie peut contenir votre mot de passe Wi-Fi, votre mot de passe MQTT et tout jeton d'accès enregistré. Il est envoyé à OpenEVSE par une connexion chiffrée, conservé de façon privée pendant 90 jours, puis supprimé. Le rapport est effacé de ce chargeur une fois envoyé.",
+        "upload_confirm_yes": "Envoyer",
+        "upload_progress": "Envoi… {sent} sur {total} Ko",
+        "upload_done": "Envoyé. Le rapport de plantage a été effacé de ce chargeur.",
+        "upload_failed": "Impossible d'envoyer le rapport. Rien n'a été effacé de ce chargeur — vous pouvez réessayer.",
+        "upload_deferred": "Pas encore envoyé. Ce chargeur n'a pas assez de mémoire libre pour le moment ; le rapport sera envoyé automatiquement après le prochain redémarrage.",
+        "upload_cancel_deferred": "Ne pas l'envoyer"
       },
       "now": "Actuel",
       "min": "Min",

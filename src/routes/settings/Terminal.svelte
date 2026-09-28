@@ -264,10 +264,83 @@
     }
   }
 
+  // ── Crash report upload (spec section 3) ─────────────────────────────────
+  // One click; the device does the three requests itself and reports progress
+  // on the event stream, which lands in status_store. A deferred result is NOT
+  // a success: the dump is still on the charger and a restart is what sends
+  // it, so it is shown as "not yet", never as done.
+  //
+  // 'unknown' until GET /debug/crash/upload answers. It stays that way on
+  // firmware older than the route (a non-JSON 404 comes back as 'error'), and
+  // 4 MB builds report 'unsupported' -- neither shows a button.
+  let uploadState = $state('unknown')
+  let uploadSent = $state(0)
+  let uploadTotal = $state(0)
+  let uploadDeferred = $state(false)
+  let pendingUpload = $state(false) // credentials warning open
+  let uploadSupported = $derived(uploadState !== 'unknown' && uploadState !== 'unsupported')
+  let uploadBusy = $derived(['metadata', 'uploading', 'completing'].includes(uploadState))
+
+  function applyUpload(res) {
+    if (!res || res === 'error' || typeof res.state !== 'string') return
+    uploadState = res.state
+    if (typeof res.deferred === 'boolean') uploadDeferred = res.deferred
+    if (res.sent != null) uploadSent = res.sent
+    if (res.total != null) uploadTotal = res.total
+  }
+
+  async function loadUploadState() {
+    applyUpload(await serialQueue.add(() => httpAPI('GET', '/debug/crash/upload')))
+  }
+
+  async function startUpload() {
+    pendingUpload = false
+    // A body on purpose: mongoose 6 holds a POST with no Content-Length until
+    // the client closes the socket. fetch() sends Content-Length: 0 for a
+    // bodyless POST anyway, but nothing downstream has to know that.
+    const res = await serialQueue.add(() => httpAPI('POST', '/debug/crash/upload', '{}'))
+    if (!res || res === 'error') {
+      uploadState = 'failed'
+      return
+    }
+    applyUpload(res)
+  }
+
+  async function cancelDeferred() {
+    await serialQueue.add(() => httpAPI('DELETE', '/debug/crash/upload'))
+    uploadDeferred = false
+    uploadState = 'idle'
+  }
+
+  // Live progress from the device. Only acted on once the page knows the
+  // uploader exists, so a stale event cannot conjure the controls on a build
+  // that has none.
+  $effect(() => {
+    const st = $status_store?.crash_upload
+    if (typeof st !== 'string' || !uploadSupported) return
+    uploadState = st
+    if (st === 'deferred') uploadDeferred = true
+    if (st === 'done') {
+      uploadDeferred = false
+      // The device erased the dump after the broker confirmed it; refresh
+      // rather than assume.
+      loadCrash()
+    }
+  })
+  $effect(() => {
+    const n = $status_store?.crash_upload_sent
+    if (n != null) uploadSent = n
+  })
+  $effect(() => {
+    const n = $status_store?.crash_upload_total
+    if (n != null) uploadTotal = n
+  })
+
   // Config is loaded globally, but refresh so the figures are current on visit.
   onMount(() => {
     config_store.download()
     loadCrash()
+    loadUploadState()
   })
 
   let command = $state('$')
@@ -572,8 +645,37 @@
           <Button label={$_('config.terminal.crash.download_summary')} variant="ghost" onclick={downloadCrashSummary} />
           <Button label={$_('config.terminal.crash.clear')} variant="ghost" onclick={() => (pendingClear = true)} />
         </div>
+        {#if uploadSupported && !uploadDeferred}
+          <Button
+            label={$_('config.terminal.crash.upload')}
+            disabled={uploadBusy}
+            onclick={() => (pendingUpload = true)}
+          />
+        {/if}
       </div>
     </ConfigSection>
+  {/if}
+
+  {#if uploadSupported}
+    {#if uploadDeferred}
+      <!-- Warning tone: the report has NOT been sent. -->
+      <div class="mt-2 rounded-xl border border-warning/40 bg-warning/15 p-3 text-sm text-text">
+        <p>{$_('config.terminal.crash.upload_deferred')}</p>
+        <div class="mt-2">
+          <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
+        </div>
+      </div>
+    {:else if uploadBusy}
+      <p class="mt-2 text-sm text-text-dim">
+        {$_('config.terminal.crash.upload_progress', {
+          values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
+        })}
+      </p>
+    {:else if uploadState === 'done'}
+      <p class="mt-2 text-sm text-text">{$_('config.terminal.crash.upload_done')}</p>
+    {:else if uploadState === 'failed'}
+      <p class="mt-2 text-sm text-error">{$_('config.terminal.crash.upload_failed')}</p>
+    {/if}
   {/if}
 
   <ConfigSection title={$_('config.terminal.labs')}>
@@ -660,6 +762,17 @@
       />
     </div>
   {/if}
+</Modal>
+
+<!-- Send crash report confirmation: says plainly that this is a memory image
+     that can carry the Wi-Fi password (spec section 8). -->
+<Modal visible={pendingUpload} onclose={() => (pendingUpload = false)}>
+  <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.crash.upload_confirm_title')}</h2>
+  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.crash.upload_confirm_body')}</p>
+  <div class="flex gap-2">
+    <Button label={$_('config.terminal.crash.upload_confirm_yes')} onclick={startUpload} />
+    <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingUpload = false)} />
+  </div>
 </Modal>
 
 <!-- Clear core dump confirmation -->

@@ -372,6 +372,25 @@ export function mockPlugin() {
             : { present: false }))
           return
         }
+        // One-click crash report upload. The real device runs three requests
+        // and streams progress over the websocket; the preview skips straight
+        // to the outcome, which is what the page renders after them anyway.
+        if (url === '/api/debug/crash/upload') {
+          res.writeHead(crashPresent || req.method !== 'POST' ? 200 : 409,
+            { 'Content-Type': 'application/json' })
+          if (req.method === 'POST') {
+            const had = crashPresent
+            crashPresent = false
+            res.end(JSON.stringify(had
+              ? { msg: 'uploading', state: 'done', deferred: false }
+              : { msg: 'no crash dump stored', state: 'idle', deferred: false }))
+          } else if (req.method === 'DELETE') {
+            res.end(JSON.stringify({ msg: 'cancelled' }))
+          } else {
+            res.end(JSON.stringify({ state: 'idle', sent: 0, total: 0, deferred: false }))
+          }
+          return
+        }
         if (url === '/api/debug/crash/raw') {
           if (!crashPresent) { res.writeHead(404); res.end(); return }
           res.writeHead(200, { 'Content-Type': 'application/octet-stream' })

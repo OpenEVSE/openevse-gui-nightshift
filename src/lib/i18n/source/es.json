@@ -685,7 +685,16 @@
         "clear_confirm_title": "¿Borrar el volcado?",
         "clear_confirm_body": "Esto elimina permanentemente el volcado guardado en el dispositivo. Descárgalo antes si aún lo necesitas.",
         "clear_confirm_yes": "Borrar",
-        "clear_confirm_no": "Cancelar"
+        "clear_confirm_no": "Cancelar",
+        "upload": "Enviar a OpenEVSE",
+        "upload_confirm_title": "¿Enviar este informe de fallo?",
+        "upload_confirm_body": "El informe de fallo incluye una copia de la memoria del cargador. Esa copia puede contener tu contraseña de Wi-Fi, la contraseña de MQTT y cualquier token de acceso guardado. Se envía a OpenEVSE mediante una conexión cifrada, se conserva de forma privada durante 90 días y después se elimina. El informe se borra de este cargador una vez enviado.",
+        "upload_confirm_yes": "Enviar",
+        "upload_progress": "Enviando… {sent} de {total} KB",
+        "upload_done": "Enviado. El informe de fallo se ha borrado de este cargador.",
+        "upload_failed": "No se pudo enviar el informe. No se ha borrado nada de este cargador; puedes volver a intentarlo.",
+        "upload_deferred": "Aún no se ha enviado. Este cargador no tiene suficiente memoria libre ahora mismo; el informe se enviará automáticamente tras el próximo reinicio.",
+        "upload_cancel_deferred": "No enviarlo"
       },
       "now": "Ahora",
       "min": "Mín",

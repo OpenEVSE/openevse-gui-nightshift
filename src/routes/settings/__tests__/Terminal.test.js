@@ -365,4 +365,90 @@ describe('Terminal — Crash core dump', () => {
     await vi.waitFor(() => expect(showWriteError).toHaveBeenCalled())
     expect(getByText('config.terminal.crash.title')).toBeInTheDocument()
   })
+
+  // Route both crash endpoints. `up` is what GET /debug/crash/upload answers;
+  // `post` is the reply to starting an upload.
+  function mockUpload({ up = { state: 'idle', sent: 0, total: 0, deferred: false },
+                        post = { msg: 'uploading', state: 'metadata', deferred: false } } = {}) {
+    httpAPI.mockImplementation((method, url) => {
+      if (url === '/debug/crash') return Promise.resolve(CRASH)
+      if (url === '/debug/crash/upload') {
+        if (method === 'POST') return Promise.resolve(post)
+        if (method === 'DELETE') return Promise.resolve({ msg: 'cancelled' })
+        return Promise.resolve(up)
+      }
+      return Promise.resolve({ cmd: '', ret: '' })
+    })
+  }
+
+  it('offers to send the dump, and POSTs only after the credentials warning is confirmed', async () => {
+    mockUpload()
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.upload'))
+    // The warning is shown before anything is sent (spec section 8).
+    expect(getByText('config.terminal.crash.upload_confirm_body')).toBeInTheDocument()
+    expect(httpAPI).not.toHaveBeenCalledWith('POST', '/debug/crash/upload', expect.anything())
+    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
+    // With a body: mongoose 6 holds a POST that has no Content-Length until
+    // the client closes the socket, so a bodyless request can hang.
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/debug/crash/upload', '{}')
+  })
+
+  it('hides the button on builds without the uploader', async () => {
+    // 4 MB boards compile the stubs, which report "unsupported"; firmware
+    // older than the route answers a non-JSON 404, which httpAPI turns into
+    // 'error'. Neither may show a button that cannot work.
+    for (const up of [{ state: 'unsupported' }, 'error']) {
+      mockUpload({ up })
+      const { findByText, queryByText, unmount } = render(Terminal)
+      await findByText('config.terminal.crash.title')
+      await vi.waitFor(() =>
+        expect(httpAPI).toHaveBeenCalledWith('GET', '/debug/crash/upload'))
+      expect(queryByText('config.terminal.crash.upload')).not.toBeInTheDocument()
+      unmount()
+    }
+  })
+
+  it('says a deferred upload has NOT happened yet, and offers to cancel it', async () => {
+    mockUpload({ post: { msg: 'not enough contiguous memory', state: 'deferred', deferred: true } })
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.upload'))
+    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
+    expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
+    expect(queryByText('config.terminal.crash.upload_done')).not.toBeInTheDocument()
+
+    await fireEvent.click(getByText('config.terminal.crash.upload_cancel_deferred'))
+    expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash/upload')
+    await vi.waitFor(() =>
+      expect(queryByText('config.terminal.crash.upload_deferred')).not.toBeInTheDocument())
+  })
+
+  it('shows a deferral already armed on an earlier visit', async () => {
+    mockUpload({ up: { state: 'deferred', sent: 0, total: 0, deferred: true } })
+    const { findByText } = render(Terminal)
+    expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
+  })
+
+  it('follows progress and completion from the device event stream', async () => {
+    mockUpload()
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.upload'))
+    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
+
+    status_store.set({ crash_upload: 'uploading', crash_upload_sent: 8192, crash_upload_total: 26084 })
+    expect(await findByText('config.terminal.crash.upload_progress')).toBeInTheDocument()
+
+    status_store.set({ crash_upload: 'done' })
+    expect(await findByText('config.terminal.crash.upload_done')).toBeInTheDocument()
+  })
+
+  it('reports a failed upload and keeps the button so it can be retried', async () => {
+    mockUpload()
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.upload'))
+    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
+    status_store.set({ crash_upload: 'failed', crash_upload_error: 'timed out' })
+    expect(await findByText('config.terminal.crash.upload_failed')).toBeInTheDocument()
+    expect(getByText('config.terminal.crash.upload')).toBeInTheDocument()
+  })
 })

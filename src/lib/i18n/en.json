@@ -685,7 +685,16 @@
         "clear_confirm_title": "Clear core dump?",
         "clear_confirm_body": "This permanently deletes the stored crash dump from the device. Download it first if you still need it.",
         "clear_confirm_yes": "Clear",
-        "clear_confirm_no": "Cancel"
+        "clear_confirm_no": "Cancel",
+        "upload": "Send to OpenEVSE",
+        "upload_confirm_title": "Send this crash report?",
+        "upload_confirm_body": "The crash report includes a copy of the charger's memory. That copy can contain your Wi-Fi password, MQTT password and any stored access tokens. It is sent to OpenEVSE over an encrypted connection, kept privately for 90 days, and then deleted. The report is removed from this charger once it has been sent.",
+        "upload_confirm_yes": "Send",
+        "upload_progress": "Sending… {sent} of {total} KB",
+        "upload_done": "Sent. The crash report has been removed from this charger.",
+        "upload_failed": "Could not send the report. Nothing was removed from this charger — you can try again.",
+        "upload_deferred": "Not sent yet. This charger does not have enough free memory right now; the report will be sent automatically after the next restart.",
+        "upload_cancel_deferred": "Don't send it"
       },
       "now": "Now",
       "min": "Min",
