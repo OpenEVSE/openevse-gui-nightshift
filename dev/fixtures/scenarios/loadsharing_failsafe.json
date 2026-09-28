@@ -8,7 +8,7 @@
   ],
   "config": {
     "loadsharing_enabled": true,
-    "loadsharing_role": "member",
+    "loadsharing_role": true,
     "loadsharing_controller_host": "openevse-bench32.local",
     "loadsharing_failsafe_mode": "safe_current",
     "loadsharing_failsafe_safe_current": 6,

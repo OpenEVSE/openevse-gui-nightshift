@@ -6,7 +6,7 @@
   ],
   "config": {
     "loadsharing_enabled": true,
-    "loadsharing_role": "controller",
+    "loadsharing_role": false,
     "loadsharing_group_max_current": 48,
     "max_current_soft": 32
   },

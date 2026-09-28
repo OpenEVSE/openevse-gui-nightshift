@@ -382,7 +382,7 @@ describe('Dashboard', () => {
       divert_enabled: false,
       current_shaper_enabled: false,
       loadsharing_enabled: true,
-      loadsharing_role: 'controller',
+      loadsharing_role: false,
       loadsharing_group_max_current: 40,
     })
     claims_target_store.set({
@@ -398,7 +398,7 @@ describe('Dashboard', () => {
   it('collapses to one line when nothing is limited', async () => {
     config_store.set({ labs_enabled: true,
       max_current_soft: 32, divert_enabled: false, current_shaper_enabled: false,
-      loadsharing_enabled: true, loadsharing_role: 'controller', loadsharing_group_max_current: 48,
+      loadsharing_enabled: true, loadsharing_role: false, loadsharing_group_max_current: 48,
     })
     claims_target_store.set({ properties: {}, claims: { state: null } })
     status_store.set({
@@ -416,7 +416,7 @@ describe('Dashboard', () => {
   it('shows the limited card, one amber reason, and tags the current tile', async () => {
     config_store.set({ labs_enabled: true,
       max_current_soft: 32, divert_enabled: false, current_shaper_enabled: false,
-      loadsharing_enabled: true, loadsharing_role: 'member', loadsharing_controller_host: 'controller.local',
+      loadsharing_enabled: true, loadsharing_role: true, loadsharing_controller_host: 'controller.local',
     })
     httpAPI.mockImplementation((m, url) =>
       Promise.resolve(url === '/loadsharing/status' ? { failsafe_active: false, online_count: 2, peers: [] } : {}),
@@ -442,7 +442,7 @@ describe('Dashboard', () => {
   it('calls a lost controller a failsafe, not sharing, with the host as a link', async () => {
     config_store.set({ labs_enabled: true,
       max_current_soft: 32, divert_enabled: false, current_shaper_enabled: false,
-      loadsharing_enabled: true, loadsharing_role: 'member',
+      loadsharing_enabled: true, loadsharing_role: true,
       loadsharing_controller_host: 'openevse-bench32.local', loadsharing_failsafe_safe_current: 6,
     })
     // The 6 A claim is identical to an allocation; only the firmware's

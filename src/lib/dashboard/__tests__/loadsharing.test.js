@@ -6,12 +6,12 @@ const LS = EvseClients.loadsharing.id
 
 const controllerConfig = {
   loadsharing_enabled: true,
-  loadsharing_role: 'controller',
+  loadsharing_role: false,
   loadsharing_group_max_current: 48,
 }
 const memberConfig = {
   loadsharing_enabled: true,
-  loadsharing_role: 'member',
+  loadsharing_role: true,
   loadsharing_controller_host: 'openevse-bench32.local',
   loadsharing_failsafe_safe_current: 6,
 }
