@@ -723,6 +723,7 @@
         "forget_confirm_pending": "Un rapport en attente d'envoi après un redémarrage est annulé.",
         "forget_confirm_unlinked": "Le chargeur reçoit un nouvel identifiant d'expéditeur : ce qu'il enverra plus tard ne sera pas relié à ces rapports.",
         "forget_confirm_yes": "Supprimer",
+        "forget_deferred": "Pas encore supprimés. Ce chargeur n'a pas de réseau ou manque de mémoire libre pour le moment ; vos rapports seront supprimés automatiquement après le prochain redémarrage.",
         "forget_deleting": "Suppression…",
         "forget_done": "{count} rapport(s) supprimé(s) chez OpenEVSE.",
         "forget_failed": "Impossible de supprimer les rapports. Rien n'a été modifié — vous pouvez réessayer."

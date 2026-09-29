@@ -328,7 +328,9 @@
     applyForget(res)
     // A refusal (no network, low memory, an upload running) leaves the state
     // where it was; the device says why.
-    if (res.forget !== 'deleting' && res.msg) forgetMessage = res.msg
+    // A deferral is not a refusal: it has its own message, so the device's
+    // reason is not shown as an error.
+    if (res.forget !== 'deleting' && res.forget !== 'deferred' && res.msg) forgetMessage = res.msg
   }
 
   async function loadUploadState() {
@@ -719,7 +721,7 @@
          itself. -->
     <ConfigSection title={$_('config.terminal.crash.reporting_title')}>
       <div class="mt-2 flex flex-col gap-3 text-sm">
-        {#if crash?.present && !uploadDeferred}
+        {#if crash?.present && !uploadDeferred && forgetState !== 'deferred'}
           <Button
             label={$_('config.terminal.crash.upload')}
             disabled={uploadBusy}
@@ -755,11 +757,16 @@
           <Button
             label={$_('config.terminal.crash.forget')}
             variant="ghost"
-            disabled={forgetState === 'deleting'}
+            disabled={forgetState === 'deleting' || forgetState === 'deferred'}
             onclick={() => (pendingForget = true)}
           />
         {/if}
-        {#if forgetState === 'deleting'}
+        {#if forgetState === 'deferred'}
+          <!-- Warning tone, like a deferred upload: nothing is deleted yet. -->
+          <div class="rounded-xl border border-warning/40 bg-warning/15 p-3 text-text">
+            <p>{$_('config.terminal.crash.forget_deferred')}</p>
+          </div>
+        {:else if forgetState === 'deleting'}
           <p class="text-text-dim">{$_('config.terminal.crash.forget_deleting')}</p>
         {:else if forgetState === 'deleted'}
           <p class="text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>

@@ -723,6 +723,7 @@
         "forget_confirm_pending": "A report waiting to be sent after a restart is cancelled.",
         "forget_confirm_unlinked": "The charger gets a new reporter ID, so anything it sends later is not linked to these reports.",
         "forget_confirm_yes": "Delete",
+        "forget_deferred": "Not deleted yet. This charger has no network or too little free memory right now; your reports will be deleted automatically after the next restart.",
         "forget_deleting": "Deleting…",
         "forget_done": "Deleted {count} report(s) from OpenEVSE.",
         "forget_failed": "Could not delete the reports. Nothing was changed — you can try again."
