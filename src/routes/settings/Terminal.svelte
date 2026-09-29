@@ -748,7 +748,8 @@
           {/if}
 
           {#if reporterId}
-            <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id')} <code class="break-all text-text">{reporterId}</code></p>
+            <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id')}</p>
+            <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id_label')} <code class="break-all text-text">{reporterId}</code></p>
             <Button
               label={$_('config.terminal.crash.forget')}
               variant="ghost"
