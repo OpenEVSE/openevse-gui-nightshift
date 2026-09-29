@@ -706,7 +706,15 @@
         "upload_done": "Elküldve. Az összeomlási jelentés törlődött erről a töltőről.",
         "upload_failed": "Nem sikerült elküldeni a jelentést. Semmi sem törlődött erről a töltőről — próbáld újra.",
         "upload_deferred": "Még nincs elküldve. A töltőnek most nincs elég szabad memóriája; a jelentés a következő újraindítás után automatikusan elküldésre kerül.",
-        "upload_cancel_deferred": "Ne küldd el"
+        "upload_cancel_deferred": "Ne küldd el",
+        "forget": "Jelentéseim törlése az OpenEVSE-nél",
+        "forget_reporter_id": "Az erről a töltőről küldött jelentések ezen a küldőazonosítón szerepelnek. Ez véletlenszerű, és nem azonosítja a töltőt:",
+        "forget_confirm_title": "Törlöd a töltő által küldött összes jelentést?",
+        "forget_confirm_body": "A töltő által az OpenEVSE-nek küldött összes összeomlási jelentés most törlődik, nem csak 90 nap után, és az újraindítás utánra várakozó jelentés küldése is elmarad. Ezután a töltő elfelejti a küldőazonosítóját, így a később küldött jelentések nem kapcsolódnak ezekhez.",
+        "forget_confirm_yes": "Törlés",
+        "forget_deleting": "Törlés…",
+        "forget_done": "{count} jelentés törölve az OpenEVSE-nél.",
+        "forget_failed": "Nem sikerült törölni a jelentéseket. Semmi sem változott — próbáld újra."
       },
       "now": "Most",
       "min": "Min",

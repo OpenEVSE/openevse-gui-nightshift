@@ -706,7 +706,15 @@
         "upload_done": "Enviado. El informe de fallo se ha borrado de este cargador.",
         "upload_failed": "No se pudo enviar el informe. No se ha borrado nada de este cargador; puedes volver a intentarlo.",
         "upload_deferred": "Aún no se ha enviado. Este cargador no tiene suficiente memoria libre ahora mismo; el informe se enviará automáticamente tras el próximo reinicio.",
-        "upload_cancel_deferred": "No enviarlo"
+        "upload_cancel_deferred": "No enviarlo",
+        "forget": "Eliminar mis informes de OpenEVSE",
+        "forget_reporter_id": "Los informes enviados desde este cargador se archivan con este ID de remitente. Es aleatorio y no identifica el cargador:",
+        "forget_confirm_title": "¿Eliminar todos los informes que ha enviado este cargador?",
+        "forget_confirm_body": "Todos los informes de fallo que este cargador ha enviado a OpenEVSE se borran ahora, en lugar de a los 90 días, y se cancela cualquier informe pendiente de enviar tras un reinicio. Después, el cargador olvida su ID de remitente, así que lo que envíe más adelante no queda vinculado a estos informes.",
+        "forget_confirm_yes": "Eliminar",
+        "forget_deleting": "Eliminando…",
+        "forget_done": "Se han eliminado {count} informe(s) de OpenEVSE.",
+        "forget_failed": "No se pudieron eliminar los informes. No se ha cambiado nada; puedes volver a intentarlo."
       },
       "now": "Ahora",
       "min": "Mín",

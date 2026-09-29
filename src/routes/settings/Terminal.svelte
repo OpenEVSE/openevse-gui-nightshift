@@ -295,6 +295,38 @@
     if (typeof res.deferred === 'boolean') uploadDeferred = res.deferred
     if (res.sent != null) uploadSent = res.sent
     if (res.total != null) uploadTotal = res.total
+    applyForget(res)
+  }
+
+  // ── Deleting sent reports (GDPR Art. 17; Art. 7(3)) ──────────────────────
+  // Withdrawing consent is as easy as giving it: one click, from the page the
+  // report was sent from. The device holds the delete key and presents it to
+  // OpenEVSE itself; this page never sees it. null reporter id = nothing sent.
+  let reporterId = $state(null)
+  let forgetState = $state('idle')
+  let forgetDeleted = $state(0)
+  let forgetMessage = $state('')
+  let pendingForget = $state(false)
+
+  function applyForget(res) {
+    if ('reporter_id' in res) reporterId = res.reporter_id
+    if (typeof res.forget === 'string') forgetState = res.forget
+    if (res.forget_deleted != null) forgetDeleted = res.forget_deleted
+  }
+
+  async function startForget() {
+    pendingForget = false
+    forgetMessage = ''
+    lastForgetEvent = $status_store?.crash_forget
+    const res = await serialQueue.add(() => httpAPI('DELETE', '/debug/crash/reports'))
+    if (!res || res === 'error') {
+      forgetState = 'failed'
+      return
+    }
+    applyForget(res)
+    // A refusal (no network, low memory, an upload running) leaves the state
+    // where it was; the device says why.
+    if (res.forget !== 'deleting' && res.msg) forgetMessage = res.msg
   }
 
   async function loadUploadState() {
@@ -342,6 +374,19 @@
       // The device erased the dump after the broker confirmed it; refresh
       // rather than assume.
       loadCrash()
+    }
+  })
+  // Same change-only rule as the upload events above.
+  let lastForgetEvent = $status_store?.crash_forget
+  $effect(() => {
+    const st = $status_store?.crash_forget
+    if (typeof st !== 'string' || st === lastForgetEvent) return
+    lastForgetEvent = st
+    forgetState = st
+    if (st === 'deleted') {
+      // The device discarded its reporter id with the reports.
+      reporterId = null
+      forgetDeleted = $status_store?.crash_forget_deleted ?? 0
     }
   })
   $effect(() => {
@@ -696,6 +741,32 @@
     {:else if uploadState === 'failed'}
       <p class="mt-2 text-sm text-error">{$_('config.terminal.crash.upload_failed')}</p>
     {/if}
+
+    {#if reporterId || forgetState !== 'idle'}
+      <div class="mt-4 text-sm text-text-dim">
+        {#if reporterId}
+          <p>{$_('config.terminal.crash.forget_reporter_id')} <code class="break-all text-text">{reporterId}</code></p>
+          <div class="mt-2">
+            <Button
+              label={$_('config.terminal.crash.forget')}
+              variant="ghost"
+              disabled={forgetState === 'deleting'}
+              onclick={() => (pendingForget = true)}
+            />
+          </div>
+        {/if}
+        {#if forgetState === 'deleting'}
+          <p class="mt-2">{$_('config.terminal.crash.forget_deleting')}</p>
+        {:else if forgetState === 'deleted'}
+          <p class="mt-2 text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>
+        {:else if forgetState === 'failed'}
+          <p class="mt-2 text-error">{$_('config.terminal.crash.forget_failed')}</p>
+        {/if}
+        {#if forgetMessage}
+          <p class="mt-2 text-error">{forgetMessage}</p>
+        {/if}
+      </div>
+    {/if}
   {/if}
 
   <ConfigSection title={$_('config.terminal.labs')}>
@@ -804,6 +875,16 @@
   <div class="flex gap-2">
     <Button label={$_('config.terminal.crash.upload_confirm_yes')} onclick={startUpload} />
     <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingUpload = false)} />
+  </div>
+</Modal>
+
+<!-- Delete sent reports confirmation -->
+<Modal visible={pendingForget} onclose={() => (pendingForget = false)}>
+  <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.crash.forget_confirm_title')}</h2>
+  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.crash.forget_confirm_body')}</p>
+  <div class="flex gap-2">
+    <Button label={$_('config.terminal.crash.forget_confirm_yes')} onclick={startForget} />
+    <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingForget = false)} />
   </div>
 </Modal>
 
