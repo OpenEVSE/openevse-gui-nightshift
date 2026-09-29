@@ -11,7 +11,7 @@ const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
   'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
-  'forget', 'forget_reporter_id', 'forget_confirm_title', 'forget_confirm_body',
+  'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
   'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_failed',
 ]
 
@@ -71,5 +71,11 @@ describe('crash upload strings', () => {
     for (const [name, l] of Object.entries({ en, es, fr, hu })) {
       expect(l.config.terminal.crash.sent_title, name).toBeUndefined()
     }
+  })
+
+  it('explains the reporter id, then labels it on its own line', () => {
+    expect(en.config.terminal.crash.forget_reporter_id).toBe(
+      'Reports sent from this charger are filed under a random reporter ID which cannot be used to identify the charger.')
+    expect(en.config.terminal.crash.forget_reporter_id_label).toBe('Current reporter ID:')
   })
 })

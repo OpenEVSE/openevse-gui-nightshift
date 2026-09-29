@@ -542,7 +542,10 @@ describe('Terminal — Deleting sent crash reports', () => {
   it('shows the reporter id, even with no dump stored, and deletes only after confirming', async () => {
     mockReports()
     const { findByText, getByText } = render(Terminal)
-    expect(await findByText(RID, { exact: false })).toBeInTheDocument()
+    // The id sits on its own labelled line, not at the end of the sentence.
+    const id = await findByText(RID)
+    expect(id.parentElement.textContent).toContain('config.terminal.crash.forget_reporter_id_label')
+    expect(id.parentElement.textContent).not.toContain('config.terminal.crash.forget_reporter_id ')
     await fireEvent.click(await findByText('config.terminal.crash.forget'))
     expect(getByText('config.terminal.crash.forget_confirm_body')).toBeInTheDocument()
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
