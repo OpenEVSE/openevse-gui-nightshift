@@ -11,6 +11,8 @@ const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
   'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
+  'forget', 'forget_reporter_id', 'forget_confirm_title', 'forget_confirm_body',
+  'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_failed',
 ]
 
 describe('crash upload strings', () => {
@@ -25,7 +27,7 @@ describe('crash upload strings', () => {
     '%s is translated, not English copied across', (_name, locale) => {
       // A missing translation falls back to English at runtime anyway; an
       // English string pasted into another catalog hides that it is missing.
-      for (const k of ['upload', 'upload_confirm_body', 'upload_deferred']) {
+      for (const k of ['upload', 'upload_confirm_body', 'upload_deferred', 'forget', 'forget_confirm_body']) {
         expect(locale.config.terminal.crash[k], k)
           .not.toBe(en.config.terminal.crash[k])
       }
@@ -54,6 +56,12 @@ describe('crash upload strings', () => {
       const s = l.config.terminal.crash.upload_progress
       expect(s, name).toContain('{sent}')
       expect(s, name).toContain('{total}')
+    }
+  })
+
+  it('the deletion result carries its count, in every locale', () => {
+    for (const [name, l] of Object.entries({ en, es, fr, hu })) {
+      expect(l.config.terminal.crash.forget_done, name).toContain('{count}')
     }
   })
 })

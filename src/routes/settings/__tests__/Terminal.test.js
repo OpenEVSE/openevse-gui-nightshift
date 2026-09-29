@@ -274,6 +274,8 @@ describe('Terminal — Memory & health', () => {
   })
 })
 
+const RID = '0123456789abcdef0123456789abcdef'
+
 describe('Terminal — Crash core dump', () => {
   // Mirrors the device: addresses arrive as pre-formatted hex strings.
   const CRASH = {
@@ -368,7 +370,8 @@ describe('Terminal — Crash core dump', () => {
   // Route both crash endpoints. `up` is what GET /debug/crash/upload answers;
   // `post` is the reply to starting an upload.
   function mockUpload({ up = { state: 'idle', sent: 0, total: 0, deferred: false },
-                        post = { msg: 'uploading', state: 'metadata', deferred: false } } = {}) {
+                        post = { msg: 'uploading', state: 'metadata', deferred: false },
+                        forget = { msg: 'deleting', reporter_id: RID, forget: 'deleting' } } = {}) {
     httpAPI.mockImplementation((method, url) => {
       if (url === '/debug/crash') return Promise.resolve(CRASH)
       if (url === '/debug/crash/upload') {
@@ -376,6 +379,7 @@ describe('Terminal — Crash core dump', () => {
         if (method === 'DELETE') return Promise.resolve({ msg: 'cancelled' })
         return Promise.resolve(up)
       }
+      if (url === '/debug/crash/reports' && method === 'DELETE') return Promise.resolve(forget)
       return Promise.resolve({ cmd: '', ret: '' })
     })
   }
@@ -495,6 +499,73 @@ describe('Terminal — Crash core dump', () => {
     for (let i = 0; i < 5; i++) status_store.update((s) => ({ ...s, amp: i }))
     await new Promise((r) => setTimeout(r, 20))
     expect(fetches()).toBe(before)
+  })
+})
+
+describe('Terminal — Deleting sent crash reports', () => {
+  const idle = { state: 'idle', sent: 0, total: 0, deferred: false, forget: 'idle', forget_deleted: 0 }
+
+  function mockReports({ rid = RID, forget = { msg: 'deleting', reporter_id: RID, forget: 'deleting' } } = {}) {
+    httpAPI.mockImplementation((method, url) => {
+      if (url === '/debug/crash') return Promise.resolve({ present: false })
+      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: rid })
+      if (url === '/debug/crash/reports' && method === 'DELETE') return Promise.resolve(forget)
+      return Promise.resolve({ cmd: '', ret: '' })
+    })
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    status_store.set({})
+  })
+
+  it('offers nothing until this charger has sent a report', async () => {
+    mockReports({ rid: null })
+    const { queryByText, findByText } = render(Terminal)
+    await findByText('config.terminal.labs')
+    await new Promise((r) => setTimeout(r, 0))
+    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
+  })
+
+  it('shows the reporter id, even with no dump stored, and deletes only after confirming', async () => {
+    mockReports()
+    const { findByText, getByText } = render(Terminal)
+    expect(await findByText(RID, { exact: false })).toBeInTheDocument()
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    expect(getByText('config.terminal.crash.forget_confirm_body')).toBeInTheDocument()
+    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
+    expect(await findByText('config.terminal.crash.forget_deleting')).toBeInTheDocument()
+  })
+
+  it('follows the deletion from the device event stream', async () => {
+    mockReports()
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    status_store.set({ crash_forget: 'deleted', crash_forget_deleted: 3 })
+    expect(await findByText('config.terminal.crash.forget_done')).toBeInTheDocument()
+    // The device discarded its identity: nothing left to delete.
+    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
+  })
+
+  it("shows the device's reason when it refuses", async () => {
+    mockReports({ forget: { msg: 'not enough free memory right now', reporter_id: RID, forget: 'idle' } })
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await findByText('not enough free memory right now', { exact: false })).toBeInTheDocument()
+  })
+
+  it('reports a failed deletion and keeps the button so it can be retried', async () => {
+    mockReports()
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    status_store.set({ crash_forget: 'failed' })
+    expect(await findByText('config.terminal.crash.forget_failed')).toBeInTheDocument()
+    expect(getByText('config.terminal.crash.forget')).toBeInTheDocument()
   })
 })
 
