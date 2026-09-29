@@ -676,7 +676,7 @@
         "unknown": "Inconnu"
       },
       "crash": {
-        "title": "Vidage de plantage",
+        "title": "Rapports de plantage",
         "desc": "L'appareil a enregistré un vidage mémoire du dernier plantage. Téléchargez-le pour l'analyser avec esp-coredump.",
         "reason": "Cause du plantage",
         "reason_unknown": "Plantage détecté",
@@ -707,7 +707,6 @@
         "upload_failed": "Impossible d'envoyer le rapport. Rien n'a été effacé de ce chargeur — vous pouvez réessayer.",
         "upload_deferred": "Pas encore envoyé. Ce chargeur n'a pas assez de mémoire libre pour le moment ; le rapport sera envoyé automatiquement après le prochain redémarrage.",
         "upload_cancel_deferred": "Ne pas l'envoyer",
-        "sent_title": "Rapports envoyés à OpenEVSE",
         "forget": "Supprimer mes rapports chez OpenEVSE",
         "forget_reporter_id": "Les rapports envoyés par ce chargeur sont classés sous cet identifiant d'expéditeur. Il est aléatoire et n'identifie pas le chargeur :",
         "forget_confirm_title": "Supprimer tous les rapports envoyés par ce chargeur ?",

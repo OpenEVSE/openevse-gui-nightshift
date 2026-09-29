@@ -432,15 +432,16 @@ describe('Terminal — Crash core dump', () => {
     expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
   })
 
-  it('shows the send result inside the sent-reports card', async () => {
-    mockUpload()
-    const { findByText, getByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.upload'))
-    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
-    status_store.set({ crash_upload: 'done' })
-    const done = await findByText('config.terminal.crash.upload_done')
-    expect(done.closest('div.mb-4, [class*="mb-4"]')?.textContent)
-      .toContain('config.terminal.crash.sent_title')
+  it('keeps the dump and the send result in one Crash reporting card', async () => {
+    // One section for everything crash-related, rather than a second card
+    // that appears under the first once something has been sent.
+    mockUpload({ up: { state: 'idle', sent: 0, total: 0, deferred: false, reporter_id: RID } })
+    const { findByText, getAllByText } = render(Terminal)
+    const upload = await findByText('config.terminal.crash.upload')
+    expect(getAllByText('config.terminal.crash.title')).toHaveLength(1)
+    const card = (await findByText('config.terminal.crash.title')).parentElement
+    expect(card.contains(upload)).toBe(true)
+    expect(card.textContent).toContain(RID)
   })
 
   it('follows progress and completion from the device event stream', async () => {
@@ -550,13 +551,13 @@ describe('Terminal — Deleting sent crash reports', () => {
     expect(await findByText('config.terminal.crash.forget_deleting')).toBeInTheDocument()
   })
 
-  it('keeps the send result and the reporter id together in their own card', async () => {
+  it('shows the reporter id in the Crash reporting card with no dump stored', async () => {
     // Loose text between cards read as half-placed, and the delete button sat
     // flush against the next section.
     mockReports()
     status_store.set({})
     const { findByText } = render(Terminal)
-    const title = await findByText('config.terminal.crash.sent_title')
+    const title = await findByText('config.terminal.crash.title')
     const card = title.parentElement
     expect(card.textContent).toContain(RID)
     expect(card.textContent).toContain('config.terminal.crash.forget')
