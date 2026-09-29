@@ -875,7 +875,13 @@
      that can carry the Wi-Fi password (spec section 8). -->
 <Modal visible={pendingUpload} onclose={() => (pendingUpload = false)}>
   <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.crash.upload_confirm_title')}</h2>
-  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.crash.upload_confirm_body')}</p>
+  <p class="mb-2 text-sm text-text">{$_('config.terminal.crash.upload_confirm_body')}</p>
+  <ul class="mb-4 flex list-disc flex-col gap-1.5 pl-5 text-sm text-text-dim">
+    <li><span class="font-semibold text-text">{$_('config.terminal.crash.upload_confirm_sent_label')}</span> <span>{$_('config.terminal.crash.upload_confirm_sent')}</span></li>
+    <li><span class="font-semibold text-text">{$_('config.terminal.crash.upload_confirm_not_sent_label')}</span> <span>{$_('config.terminal.crash.upload_confirm_not_sent')}</span></li>
+    <li>{$_('config.terminal.crash.upload_confirm_kept')}</li>
+    <li>{$_('config.terminal.crash.upload_confirm_removed')}</li>
+  </ul>
   <div class="flex gap-2">
     <Button label={$_('config.terminal.crash.upload_confirm_yes')} onclick={startUpload} />
     <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingUpload = false)} />
@@ -885,7 +891,12 @@
 <!-- Delete sent reports confirmation -->
 <Modal visible={pendingForget} onclose={() => (pendingForget = false)}>
   <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.crash.forget_confirm_title')}</h2>
-  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.crash.forget_confirm_body')}</p>
+  <p class="mb-2 text-sm text-text">{$_('config.terminal.crash.forget_confirm_body')}</p>
+  <ul class="mb-4 flex list-disc flex-col gap-1.5 pl-5 text-sm text-text-dim">
+    <li>{$_('config.terminal.crash.forget_confirm_now')}</li>
+    <li>{$_('config.terminal.crash.forget_confirm_pending')}</li>
+    <li>{$_('config.terminal.crash.forget_confirm_unlinked')}</li>
+  </ul>
   <div class="flex gap-2">
     <Button label={$_('config.terminal.crash.forget_confirm_yes')} onclick={startForget} />
     <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingForget = false)} />

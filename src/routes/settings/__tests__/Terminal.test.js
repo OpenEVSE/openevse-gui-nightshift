@@ -390,6 +390,10 @@ describe('Terminal — Crash core dump', () => {
     await fireEvent.click(await findByText('config.terminal.crash.upload'))
     // The warning is shown before anything is sent (spec section 8).
     expect(getByText('config.terminal.crash.upload_confirm_body')).toBeInTheDocument()
+    // One fact per point, not a paragraph: what goes, what stays, for how long.
+    for (const k of ['upload_confirm_sent', 'upload_confirm_not_sent', 'upload_confirm_kept', 'upload_confirm_removed']) {
+      expect(getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
+    }
     expect(httpAPI).not.toHaveBeenCalledWith('POST', '/debug/crash/upload', expect.anything())
     await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
     // With a body: mongoose 6 holds a POST that has no Content-Length until
@@ -549,6 +553,9 @@ describe('Terminal — Deleting sent crash reports', () => {
     expect(id.parentElement.textContent).not.toContain('config.terminal.crash.forget_reporter_id ')
     await fireEvent.click(await findByText('config.terminal.crash.forget'))
     expect(getByText('config.terminal.crash.forget_confirm_body')).toBeInTheDocument()
+    for (const k of ['forget_confirm_now', 'forget_confirm_pending', 'forget_confirm_unlinked']) {
+      expect(getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
+    }
     expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
     await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
     expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
