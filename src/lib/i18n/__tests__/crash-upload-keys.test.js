@@ -9,6 +9,9 @@ import hu from '../source/hu.json'
 
 const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
+  'upload_confirm_sent_label', 'upload_confirm_sent', 'upload_confirm_not_sent_label', 'upload_confirm_not_sent',
+  'upload_confirm_kept', 'upload_confirm_removed',
+  'forget_confirm_now', 'forget_confirm_pending', 'forget_confirm_unlinked',
   'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
   'reporting_title', 'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
@@ -39,16 +42,19 @@ describe('crash upload strings', () => {
     // (spec section 8), and in particular that credentials are not -- so every
     // locale must name Wi-Fi and say the memory copy is not sent.
     const says = {
-      en: [/wi-?fi/i, /not/i], es: [/wi-?fi/i, /no /i],
-      fr: [/wi-?fi/i, /pas/i], hu: [/wi-?fi/i, /nem/i],
+      en: [/wi[-\u2011]?fi/i, /not/i], es: [/wi[-\u2011]?fi/i, /no /i],
+      fr: [/wi[-\u2011]?fi/i, /pas/i], hu: [/wi[-\u2011]?fi/i, /nem/i],
     }
+    // The consent is now a list; the 'Not sent' point is where it is said.
     for (const [name, l] of Object.entries({ en, es, fr, hu })) {
+      const c = l.config.terminal.crash
+      const notSent = c.upload_confirm_not_sent_label + ' ' + c.upload_confirm_not_sent
       for (const re of says[name]) {
-        expect(l.config.terminal.crash.upload_confirm_body, name).toMatch(re)
+        expect(notSent, name).toMatch(re)
       }
     }
     // The old wording promised the reverse; it must not survive in any locale.
-    expect(en.config.terminal.crash.upload_confirm_body).not.toMatch(/can contain your Wi-Fi/i)
+    expect(JSON.stringify(en.config.terminal.crash)).not.toMatch(/can contain your Wi-Fi/i)
   })
 
   it('the progress string carries both placeholders', () => {
