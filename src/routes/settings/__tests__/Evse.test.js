@@ -70,7 +70,7 @@ describe('EVSE page', () => {
     config_store.set({ ...BASE })
     const { queryByText, rerender } = render(Evse)
     expect(queryByText('config.evse.front_button')).not.toBeInTheDocument()
-    config_store.set({ ...BASE, button_enabled: true })
+    config_store.set({ ...BASE, front_button: true })
     await rerender({})
     await vi.waitFor(() => {
       expect(queryByText('config.evse.front_button')).toBeInTheDocument()
@@ -78,10 +78,10 @@ describe('EVSE page', () => {
   })
 
   it('saves the front-button toggle as a boolean', async () => {
-    config_store.set({ ...BASE, button_enabled: true })
+    config_store.set({ ...BASE, front_button: true })
     const { getByLabelText } = render(Evse)
     await fireEvent.click(getByLabelText('config.evse.front_button'))
-    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ button_enabled: false }))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ front_button: false }))
   })
 
   it('shows the led-brightness slider only when the device reports it', async () => {

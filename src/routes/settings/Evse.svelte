@@ -180,16 +180,16 @@
         onchange={(v) => form.saveField('pause_uses_disabled', v)}
       />
     </FormField>
-    {#if $config_store?.button_enabled !== undefined}
+    {#if $config_store?.front_button !== undefined}
       <FormField
         label={$_('config.evse.front_button')}
         description={$_('config.evse.front_button_desc')}
-        status={$ss.button_enabled ?? 'idle'}
+        status={$ss.front_button ?? 'idle'}
       >
         <Toggle
-          checked={!!$config_store?.button_enabled}
+          checked={!!$config_store?.front_button}
           label={$_('config.evse.front_button')}
-          onchange={(v) => form.saveField('button_enabled', v)}
+          onchange={(v) => form.saveField('front_button', v)}
         />
       </FormField>
     {/if}
