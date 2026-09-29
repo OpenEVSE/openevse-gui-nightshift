@@ -723,6 +723,7 @@
         "forget_confirm_pending": "Az újraindítás utánra várakozó jelentés küldése elmarad.",
         "forget_confirm_unlinked": "A töltő új küldőazonosítót kap, így a később küldött jelentések nem kapcsolódnak ezekhez.",
         "forget_confirm_yes": "Törlés",
+        "forget_deferred": "Még nincsenek törölve. A töltőnek most nincs hálózata, vagy kevés a szabad memóriája; a jelentéseid a következő újraindítás után automatikusan törlődnek.",
         "forget_deleting": "Törlés…",
         "forget_done": "{count} jelentés törölve az OpenEVSE-nél.",
         "forget_failed": "Nem sikerült törölni a jelentéseket. Semmi sem változott — próbáld újra."

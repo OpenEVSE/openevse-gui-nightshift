@@ -723,6 +723,7 @@
         "forget_confirm_pending": "Se cancela cualquier informe pendiente de enviar tras un reinicio.",
         "forget_confirm_unlinked": "El cargador obtiene un nuevo ID de remitente, así que lo que envíe más adelante no queda vinculado a estos informes.",
         "forget_confirm_yes": "Eliminar",
+        "forget_deferred": "Aún no se han eliminado. Este cargador no tiene red o le falta memoria libre ahora mismo; tus informes se eliminarán automáticamente tras el próximo reinicio.",
         "forget_deleting": "Eliminando…",
         "forget_done": "Se han eliminado {count} informe(s) de OpenEVSE.",
         "forget_failed": "No se pudieron eliminar los informes. No se ha cambiado nada; puedes volver a intentarlo."

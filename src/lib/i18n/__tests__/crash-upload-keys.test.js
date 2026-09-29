@@ -15,7 +15,7 @@ const KEYS = [
   'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
   'reporting_title', 'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
-  'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_failed',
+  'forget_confirm_yes', 'forget_deferred', 'forget_deleting', 'forget_done', 'forget_failed',
 ]
 
 describe('crash upload strings', () => {

@@ -593,6 +593,30 @@ describe('Terminal — Deleting sent crash reports', () => {
     expect(await findByText('not enough free memory right now', { exact: false })).toBeInTheDocument()
   })
 
+  it('says a deferred deletion will happen after the restart, as a warning not an error', async () => {
+    mockReports({ forget: { msg: 'not enough free memory right now -- will delete after the next restart',
+                            reporter_id: RID, forget: 'deferred' } })
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await findByText('config.terminal.crash.forget_deferred')).toBeInTheDocument()
+    // The device's reason is not shown as a failure: nothing failed.
+    expect(queryByText('not enough free memory', { exact: false })).not.toBeInTheDocument()
+    expect(getByText('config.terminal.crash.forget').closest('button')).toBeDisabled()
+  })
+
+  it('shows a deletion already waiting for the restart, and offers no Send meanwhile', async () => {
+    httpAPI.mockImplementation((method, url) => {
+      if (url === '/debug/crash') return Promise.resolve({ present: true, size: 65536, task: 'loopTask', pc: 1074, bt: ['0x400d4b38'] })
+      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: RID, forget: 'deferred' })
+      return Promise.resolve({ cmd: '', ret: '' })
+    })
+    const { findByText, queryByText } = render(Terminal)
+    expect(await findByText('config.terminal.crash.forget_deferred')).toBeInTheDocument()
+    // The firmware refuses a send while a deletion waits; do not offer one.
+    expect(queryByText('config.terminal.crash.upload')).not.toBeInTheDocument()
+  })
+
   it('reports a failed deletion and keeps the button so it can be retried', async () => {
     mockReports()
     const { findByText, getByText } = render(Terminal)
