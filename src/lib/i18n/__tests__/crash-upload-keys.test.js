@@ -11,7 +11,7 @@ const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
   'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
-  'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
+  'reporting_title', 'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
   'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_failed',
 ]
 
@@ -65,12 +65,9 @@ describe('crash upload strings', () => {
     }
   })
 
-  it('the section is called Crash reporting, not after the dump alone', () => {
-    // It now holds the dump, the send result and the reporter id.
-    expect(en.config.terminal.crash.title).toBe('Crash reporting')
-    for (const [name, l] of Object.entries({ en, es, fr, hu })) {
-      expect(l.config.terminal.crash.sent_title, name).toBeUndefined()
-    }
+  it('the dump card keeps its title; sending has its own Crash reporting card', () => {
+    expect(en.config.terminal.crash.title).toBe('Crash core dump')
+    expect(en.config.terminal.crash.reporting_title).toBe('Crash reporting')
   })
 
   it('explains the reporter id, then labels it on its own line', () => {

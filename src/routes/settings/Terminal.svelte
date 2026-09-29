@@ -658,35 +658,32 @@
     </ConfigSection>
   {/if}
 
-  {#if crash?.present || showSent}
-    <!-- One section for everything crash-related: the stored dump, and what has
-         been (or is being) sent from this charger. -->
+  {#if crash?.present}
     <ConfigSection title={$_('config.terminal.crash.title')}>
-      {#if crash?.present}
-        <p class="mb-2 text-sm text-text-dim">{$_('config.terminal.crash.desc')}</p>
+      <p class="mb-2 text-sm text-text-dim">{$_('config.terminal.crash.desc')}</p>
 
-        <!-- A present dump always means the last boot crashed, so the summary
-             rows tone error. panic_reason is absent on IDF 4.4 builds — fall
-             back to a generic "crash detected" so the row is never blank. -->
+      <!-- A present dump always means the last boot crashed, so the summary
+           rows tone error. panic_reason is absent on IDF 4.4 builds — fall
+           back to a generic "crash detected" so the row is never blank. -->
+      <ReadOnlyRow
+        label={$_('config.terminal.crash.reason')}
+        value={crash.panic_reason || $_('config.terminal.crash.reason_unknown')}
+        tone="error"
+      />
+      <ReadOnlyRow label={$_('config.terminal.crash.task')} value={crash.task} />
+      <ReadOnlyRow label={$_('config.terminal.crash.pc')} value={hex(crash.pc)} />
+      <ReadOnlyRow label={$_('config.terminal.crash.size')} value={formatBytes(crash.size)} />
+
+      <!-- A stored dump carries its own checksum. When it fails the decode is
+           still returned, but the PC and backtrace are plausible nonsense —
+           say so rather than letting them be trusted. -->
+      {#if crash.valid === false}
         <ReadOnlyRow
-          label={$_('config.terminal.crash.reason')}
-          value={crash.panic_reason || $_('config.terminal.crash.reason_unknown')}
-          tone="error"
+          label={$_('config.terminal.crash.integrity')}
+          value={$_('config.terminal.crash.integrity_bad')}
+          tone="warn"
+          detail={$_('config.terminal.crash.integrity_detail')}
         />
-        <ReadOnlyRow label={$_('config.terminal.crash.task')} value={crash.task} />
-        <ReadOnlyRow label={$_('config.terminal.crash.pc')} value={hex(crash.pc)} />
-        <ReadOnlyRow label={$_('config.terminal.crash.size')} value={formatBytes(crash.size)} />
-
-        <!-- A stored dump carries its own checksum. When it fails the decode is
-             still returned, but the PC and backtrace are plausible nonsense —
-             say so rather than letting them be trusted. -->
-        {#if crash.valid === false}
-          <ReadOnlyRow
-            label={$_('config.terminal.crash.integrity')}
-            value={$_('config.terminal.crash.integrity_bad')}
-            tone="warn"
-            detail={$_('config.terminal.crash.integrity_detail')}
-          />
       {/if}
 
       {#if backtrace}
@@ -712,63 +709,67 @@
           <Button label={$_('config.terminal.crash.download_summary')} variant="ghost" onclick={downloadCrashSummary} />
           <Button label={$_('config.terminal.crash.clear')} variant="ghost" onclick={() => (pendingClear = true)} />
         </div>
-        {#if uploadSupported && !uploadDeferred}
+      </div>
+    </ConfigSection>
+  {/if}
+
+  {#if uploadSupported && (crash?.present || showSent)}
+    <!-- What goes to OpenEVSE: sending the stored dump, where that has got
+         to, and erasing what was sent. The dump card above is about the dump
+         itself. -->
+    <ConfigSection title={$_('config.terminal.crash.reporting_title')}>
+      <div class="mt-2 flex flex-col gap-3 text-sm">
+        {#if crash?.present && !uploadDeferred}
           <Button
             label={$_('config.terminal.crash.upload')}
             disabled={uploadBusy}
             onclick={() => (pendingUpload = true)}
           />
         {/if}
-      </div>
-      {/if}
-
-      {#if showSent}
-        <div class="flex flex-col gap-3 text-sm {crash?.present ? 'mt-4 border-t border-border pt-4' : 'mt-2'}">
-          {#if uploadDeferred}
-            <!-- Warning tone: the report has NOT been sent. -->
-            <div class="rounded-xl border border-warning/40 bg-warning/15 p-3 text-text">
-              <p>{$_('config.terminal.crash.upload_deferred')}</p>
-              <div class="mt-2">
-                <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
-              </div>
+        {#if uploadDeferred}
+          <!-- Warning tone: the report has NOT been sent. -->
+          <div class="rounded-xl border border-warning/40 bg-warning/15 p-3 text-text">
+            <p>{$_('config.terminal.crash.upload_deferred')}</p>
+            <div class="mt-2">
+              <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
             </div>
-          {:else if uploadState === 'uploading'}
-            <p class="text-text-dim">
-              {$_('config.terminal.crash.upload_progress', {
-                values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
-              })}
-            </p>
-          {:else if uploadBusy}
-            <!-- A summary-only report counts no bytes: metadata goes straight to done. -->
-            <p class="text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
-          {:else if uploadState === 'done'}
-            <p class="text-text">{$_('config.terminal.crash.upload_done')}</p>
-          {:else if uploadState === 'failed'}
-            <p class="text-error">{$_('config.terminal.crash.upload_failed')}</p>
-          {/if}
+          </div>
+        {:else if uploadState === 'uploading'}
+          <p class="text-text-dim">
+            {$_('config.terminal.crash.upload_progress', {
+              values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
+            })}
+          </p>
+        {:else if uploadBusy}
+          <!-- A summary-only report counts no bytes: metadata goes straight to done. -->
+          <p class="text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
+        {:else if uploadState === 'done'}
+          <p class="text-text">{$_('config.terminal.crash.upload_done')}</p>
+        {:else if uploadState === 'failed'}
+          <p class="text-error">{$_('config.terminal.crash.upload_failed')}</p>
+        {/if}
 
-          {#if reporterId}
-            <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id')}</p>
-            <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id_label')} <code class="break-all text-text">{reporterId}</code></p>
-            <Button
-              label={$_('config.terminal.crash.forget')}
-              variant="ghost"
-              disabled={forgetState === 'deleting'}
-              onclick={() => (pendingForget = true)}
-            />
-          {/if}
-          {#if forgetState === 'deleting'}
-            <p class="text-text-dim">{$_('config.terminal.crash.forget_deleting')}</p>
-          {:else if forgetState === 'deleted'}
-            <p class="text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>
-          {:else if forgetState === 'failed'}
-            <p class="text-error">{$_('config.terminal.crash.forget_failed')}</p>
-          {/if}
-          {#if forgetMessage}
-            <p class="text-error">{forgetMessage}</p>
-          {/if}
-        </div>
-      {/if}
+        {#if reporterId}
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id')}</p>
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id_label')} <code class="break-all text-text">{reporterId}</code></p>
+          <Button
+            label={$_('config.terminal.crash.forget')}
+            variant="ghost"
+            disabled={forgetState === 'deleting'}
+            onclick={() => (pendingForget = true)}
+          />
+        {/if}
+        {#if forgetState === 'deleting'}
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_deleting')}</p>
+        {:else if forgetState === 'deleted'}
+          <p class="text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>
+        {:else if forgetState === 'failed'}
+          <p class="text-error">{$_('config.terminal.crash.forget_failed')}</p>
+        {/if}
+        {#if forgetMessage}
+          <p class="text-error">{forgetMessage}</p>
+        {/if}
+      </div>
     </ConfigSection>
   {/if}
 

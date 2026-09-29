@@ -676,7 +676,7 @@
         "unknown": "Unknown"
       },
       "crash": {
-        "title": "Crash reporting",
+        "title": "Crash core dump",
         "desc": "The device saved a core dump from the last crash. Download it to analyse with esp-coredump.",
         "reason": "Panic reason",
         "reason_unknown": "Crash detected",
@@ -707,6 +707,7 @@
         "upload_failed": "Could not send the report. Nothing was removed from this charger — you can try again.",
         "upload_deferred": "Not sent yet. This charger does not have enough free memory right now; the report will be sent automatically after the next restart.",
         "upload_cancel_deferred": "Don't send it",
+        "reporting_title": "Crash reporting",
         "forget": "Delete my reports from OpenEVSE",
         "forget_reporter_id": "Reports sent from this charger are filed under a random reporter ID which cannot be used to identify the charger.",
         "forget_reporter_id_label": "Current reporter ID:",
