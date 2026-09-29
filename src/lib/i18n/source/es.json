@@ -676,7 +676,7 @@
         "unknown": "Desconocido"
       },
       "crash": {
-        "title": "Informes de fallos",
+        "title": "Volcado de fallo",
         "desc": "El dispositivo guardó un volcado del último fallo. Descárgalo para analizarlo con esp-coredump.",
         "reason": "Motivo del fallo",
         "reason_unknown": "Fallo detectado",
@@ -707,6 +707,7 @@
         "upload_failed": "No se pudo enviar el informe. No se ha borrado nada de este cargador; puedes volver a intentarlo.",
         "upload_deferred": "Aún no se ha enviado. Este cargador no tiene suficiente memoria libre ahora mismo; el informe se enviará automáticamente tras el próximo reinicio.",
         "upload_cancel_deferred": "No enviarlo",
+        "reporting_title": "Informes de fallos",
         "forget": "Eliminar mis informes de OpenEVSE",
         "forget_reporter_id": "Los informes enviados desde este cargador se archivan con un ID de remitente aleatorio que no permite identificar el cargador.",
         "forget_reporter_id_label": "ID de remitente actual:",
