@@ -432,6 +432,17 @@ describe('Terminal — Crash core dump', () => {
     expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
   })
 
+  it('shows the send result inside the sent-reports card', async () => {
+    mockUpload()
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.upload'))
+    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
+    status_store.set({ crash_upload: 'done' })
+    const done = await findByText('config.terminal.crash.upload_done')
+    expect(done.closest('div.mb-4, [class*="mb-4"]')?.textContent)
+      .toContain('config.terminal.crash.sent_title')
+  })
+
   it('follows progress and completion from the device event stream', async () => {
     mockUpload()
     const { findByText, getByText } = render(Terminal)
@@ -537,6 +548,18 @@ describe('Terminal — Deleting sent crash reports', () => {
     await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
     expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
     expect(await findByText('config.terminal.crash.forget_deleting')).toBeInTheDocument()
+  })
+
+  it('keeps the send result and the reporter id together in their own card', async () => {
+    // Loose text between cards read as half-placed, and the delete button sat
+    // flush against the next section.
+    mockReports()
+    status_store.set({})
+    const { findByText } = render(Terminal)
+    const title = await findByText('config.terminal.crash.sent_title')
+    const card = title.parentElement
+    expect(card.textContent).toContain(RID)
+    expect(card.textContent).toContain('config.terminal.crash.forget')
   })
 
   it('follows the deletion from the device event stream', async () => {

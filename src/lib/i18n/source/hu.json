@@ -707,6 +707,7 @@
         "upload_failed": "Nem sikerült elküldeni a jelentést. Semmi sem törlődött erről a töltőről — próbáld újra.",
         "upload_deferred": "Még nincs elküldve. A töltőnek most nincs elég szabad memóriája; a jelentés a következő újraindítás után automatikusan elküldésre kerül.",
         "upload_cancel_deferred": "Ne küldd el",
+        "sent_title": "Az OpenEVSE-nek küldött jelentések",
         "forget": "Jelentéseim törlése az OpenEVSE-nél",
         "forget_reporter_id": "Az erről a töltőről küldött jelentések ezen a küldőazonosítón szerepelnek. Ez véletlenszerű, és nem azonosítja a töltőt:",
         "forget_confirm_title": "Törlöd a töltő által küldött összes jelentést?",

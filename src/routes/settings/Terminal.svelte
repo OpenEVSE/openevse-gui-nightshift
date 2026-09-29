@@ -288,6 +288,7 @@
   let pendingUpload = $state(false) // credentials warning open
   let uploadSupported = $derived(uploadState !== 'unknown' && uploadState !== 'unsupported')
   let uploadBusy = $derived(['metadata', 'uploading', 'completing'].includes(uploadState))
+  let showUploadStatus = $derived(uploadDeferred || uploadBusy || uploadState === 'done' || uploadState === 'failed')
 
   function applyUpload(res) {
     if (!res || res === 'error' || typeof res.state !== 'string') return
@@ -718,55 +719,55 @@
     </ConfigSection>
   {/if}
 
-  {#if uploadSupported}
-    {#if uploadDeferred}
-      <!-- Warning tone: the report has NOT been sent. -->
-      <div class="mt-2 rounded-xl border border-warning/40 bg-warning/15 p-3 text-sm text-text">
-        <p>{$_('config.terminal.crash.upload_deferred')}</p>
-        <div class="mt-2">
-          <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
-        </div>
-      </div>
-    {:else if uploadState === 'uploading'}
-      <p class="mt-2 text-sm text-text-dim">
-        {$_('config.terminal.crash.upload_progress', {
-          values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
-        })}
-      </p>
-    {:else if uploadBusy}
-      <!-- A summary-only report counts no bytes: metadata goes straight to done. -->
-      <p class="mt-2 text-sm text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
-    {:else if uploadState === 'done'}
-      <p class="mt-2 text-sm text-text">{$_('config.terminal.crash.upload_done')}</p>
-    {:else if uploadState === 'failed'}
-      <p class="mt-2 text-sm text-error">{$_('config.terminal.crash.upload_failed')}</p>
-    {/if}
-
-    {#if reporterId || forgetState !== 'idle'}
-      <div class="mt-4 text-sm text-text-dim">
-        {#if reporterId}
-          <p>{$_('config.terminal.crash.forget_reporter_id')} <code class="break-all text-text">{reporterId}</code></p>
-          <div class="mt-2">
-            <Button
-              label={$_('config.terminal.crash.forget')}
-              variant="ghost"
-              disabled={forgetState === 'deleting'}
-              onclick={() => (pendingForget = true)}
-            />
+  {#if uploadSupported && (showUploadStatus || reporterId || forgetState !== 'idle')}
+    <!-- Everything about reports that have left, or are leaving, this charger:
+         one card, so the result of a send never floats between sections. -->
+    <ConfigSection title={$_('config.terminal.crash.sent_title')}>
+      <div class="flex flex-col gap-3 text-sm">
+        {#if uploadDeferred}
+          <!-- Warning tone: the report has NOT been sent. -->
+          <div class="rounded-xl border border-warning/40 bg-warning/15 p-3 text-text">
+            <p>{$_('config.terminal.crash.upload_deferred')}</p>
+            <div class="mt-2">
+              <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
+            </div>
           </div>
+        {:else if uploadState === 'uploading'}
+          <p class="text-text-dim">
+            {$_('config.terminal.crash.upload_progress', {
+              values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
+            })}
+          </p>
+        {:else if uploadBusy}
+          <!-- A summary-only report counts no bytes: metadata goes straight to done. -->
+          <p class="text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
+        {:else if uploadState === 'done'}
+          <p class="text-text">{$_('config.terminal.crash.upload_done')}</p>
+        {:else if uploadState === 'failed'}
+          <p class="text-error">{$_('config.terminal.crash.upload_failed')}</p>
+        {/if}
+
+        {#if reporterId}
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id')} <code class="break-all text-text">{reporterId}</code></p>
+          <Button
+            label={$_('config.terminal.crash.forget')}
+            variant="ghost"
+            disabled={forgetState === 'deleting'}
+            onclick={() => (pendingForget = true)}
+          />
         {/if}
         {#if forgetState === 'deleting'}
-          <p class="mt-2">{$_('config.terminal.crash.forget_deleting')}</p>
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_deleting')}</p>
         {:else if forgetState === 'deleted'}
-          <p class="mt-2 text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>
+          <p class="text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>
         {:else if forgetState === 'failed'}
-          <p class="mt-2 text-error">{$_('config.terminal.crash.forget_failed')}</p>
+          <p class="text-error">{$_('config.terminal.crash.forget_failed')}</p>
         {/if}
         {#if forgetMessage}
-          <p class="mt-2 text-error">{forgetMessage}</p>
+          <p class="text-error">{forgetMessage}</p>
         {/if}
       </div>
-    {/if}
+    </ConfigSection>
   {/if}
 
   <ConfigSection title={$_('config.terminal.labs')}>
