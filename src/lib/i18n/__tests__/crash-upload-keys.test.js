@@ -11,7 +11,7 @@ const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
   'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
-  'forget', 'forget_reporter_id', 'forget_confirm_title', 'forget_confirm_body',
+  'sent_title', 'forget', 'forget_reporter_id', 'forget_confirm_title', 'forget_confirm_body',
   'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_failed',
 ]
 
