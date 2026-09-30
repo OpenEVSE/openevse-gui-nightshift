@@ -288,6 +288,7 @@
   let pendingUpload = $state(false) // credentials warning open
   let uploadSupported = $derived(uploadState !== 'unknown' && uploadState !== 'unsupported')
   let uploadBusy = $derived(['metadata', 'uploading', 'completing'].includes(uploadState))
+  let showUploadStatus = $derived(uploadDeferred || uploadBusy || uploadState === 'done' || uploadState === 'failed')
 
   function applyUpload(res) {
     if (!res || res === 'error' || typeof res.state !== 'string') return
@@ -295,6 +296,48 @@
     if (typeof res.deferred === 'boolean') uploadDeferred = res.deferred
     if (res.sent != null) uploadSent = res.sent
     if (res.total != null) uploadTotal = res.total
+    applyForget(res)
+  }
+
+  // ── Deleting sent reports (GDPR Art. 17; Art. 7(3)) ──────────────────────
+  // Withdrawing consent is as easy as giving it: one click, from the page the
+  // report was sent from. The device holds the delete key and presents it to
+  // OpenEVSE itself; this page never sees it. null reporter id = nothing sent.
+  let reporterId = $state(null)
+  let forgetState = $state('idle')
+  let forgetDeleted = $state(0)
+  let forgetMessage = $state('')
+  let pendingForget = $state(false)
+  let showSent = $derived(uploadSupported && (showUploadStatus || !!reporterId || forgetState !== 'idle'))
+
+  function applyForget(res) {
+    if ('reporter_id' in res) reporterId = res.reporter_id
+    if (typeof res.forget === 'string') forgetState = res.forget
+    if (res.forget_deleted != null) forgetDeleted = res.forget_deleted
+  }
+
+  async function startForget() {
+    pendingForget = false
+    forgetMessage = ''
+    lastForgetEvent = $status_store?.crash_forget
+    const res = await serialQueue.add(() => httpAPI('DELETE', '/debug/crash/reports'))
+    if (!res || res === 'error') {
+      forgetState = 'failed'
+      return
+    }
+    applyForget(res)
+    // A refusal (no network, low memory, an upload running) leaves the state
+    // where it was; the device says why.
+    // A deferral is not a refusal: it has its own message, so the device's
+    // reason is not shown as an error.
+    if (res.forget !== 'deleting' && res.forget !== 'deferred' && res.msg) forgetMessage = res.msg
+  }
+
+  // /reports, not /upload: that answers the upload state too, and its idle
+  // would overwrite a 'done' the user is still looking at.
+  async function loadReporter() {
+    const res = await serialQueue.add(() => httpAPI('GET', '/debug/crash/reports'))
+    if (res && res !== 'error' && typeof res === 'object') applyForget(res)
   }
 
   async function loadUploadState() {
@@ -342,6 +385,22 @@
       // The device erased the dump after the broker confirmed it; refresh
       // rather than assume.
       loadCrash()
+      // The reporter id is minted mid-upload, after the POST answered, so
+      // the first upload is the one that makes Delete available.
+      loadReporter()
+    }
+  })
+  // Same change-only rule as the upload events above.
+  let lastForgetEvent = $status_store?.crash_forget
+  $effect(() => {
+    const st = $status_store?.crash_forget
+    if (typeof st !== 'string' || st === lastForgetEvent) return
+    lastForgetEvent = st
+    forgetState = st
+    if (st === 'deleted') {
+      // The device discarded its reporter id with the reports.
+      reporterId = null
+      forgetDeleted = $status_store?.crash_forget_deleted ?? 0
     }
   })
   $effect(() => {
@@ -662,40 +721,73 @@
           <Button label={$_('config.terminal.crash.download_summary')} variant="ghost" onclick={downloadCrashSummary} />
           <Button label={$_('config.terminal.crash.clear')} variant="ghost" onclick={() => (pendingClear = true)} />
         </div>
-        {#if uploadSupported && !uploadDeferred}
+      </div>
+    </ConfigSection>
+  {/if}
+
+  {#if uploadSupported && (crash?.present || showSent)}
+    <!-- What goes to OpenEVSE: sending the stored dump, where that has got
+         to, and erasing what was sent. The dump card above is about the dump
+         itself. -->
+    <ConfigSection title={$_('config.terminal.crash.reporting_title')}>
+      <div class="mt-2 flex flex-col gap-3 text-sm">
+        {#if crash?.present && !uploadDeferred && forgetState !== 'deferred'}
           <Button
             label={$_('config.terminal.crash.upload')}
             disabled={uploadBusy}
             onclick={() => (pendingUpload = true)}
           />
         {/if}
+        {#if uploadDeferred}
+          <!-- Warning tone: the report has NOT been sent. -->
+          <div class="rounded-xl border border-warning/40 bg-warning/15 p-3 text-text">
+            <p>{$_('config.terminal.crash.upload_deferred')}</p>
+            <div class="mt-2">
+              <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
+            </div>
+          </div>
+        {:else if uploadState === 'uploading'}
+          <p class="text-text-dim">
+            {$_('config.terminal.crash.upload_progress', {
+              values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
+            })}
+          </p>
+        {:else if uploadBusy}
+          <!-- A summary-only report counts no bytes: metadata goes straight to done. -->
+          <p class="text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
+        {:else if uploadState === 'done'}
+          <p class="text-text">{$_('config.terminal.crash.upload_done')}</p>
+        {:else if uploadState === 'failed'}
+          <p class="text-error">{$_('config.terminal.crash.upload_failed')}</p>
+        {/if}
+
+        {#if reporterId}
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id')}</p>
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_reporter_id_label')} <code class="break-all text-text">{reporterId}</code></p>
+          <Button
+            label={$_('config.terminal.crash.forget')}
+            variant="ghost"
+            disabled={forgetState === 'deleting' || forgetState === 'deferred'}
+            onclick={() => (pendingForget = true)}
+          />
+        {/if}
+        {#if forgetState === 'deferred'}
+          <!-- Warning tone, like a deferred upload: nothing is deleted yet. -->
+          <div class="rounded-xl border border-warning/40 bg-warning/15 p-3 text-text">
+            <p>{$_('config.terminal.crash.forget_deferred')}</p>
+          </div>
+        {:else if forgetState === 'deleting'}
+          <p class="text-text-dim">{$_('config.terminal.crash.forget_deleting')}</p>
+        {:else if forgetState === 'deleted'}
+          <p class="text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>
+        {:else if forgetState === 'failed'}
+          <p class="text-error">{$_('config.terminal.crash.forget_failed')}</p>
+        {/if}
+        {#if forgetMessage}
+          <p class="text-error">{forgetMessage}</p>
+        {/if}
       </div>
     </ConfigSection>
-  {/if}
-
-  {#if uploadSupported}
-    {#if uploadDeferred}
-      <!-- Warning tone: the report has NOT been sent. -->
-      <div class="mt-2 rounded-xl border border-warning/40 bg-warning/15 p-3 text-sm text-text">
-        <p>{$_('config.terminal.crash.upload_deferred')}</p>
-        <div class="mt-2">
-          <Button label={$_('config.terminal.crash.upload_cancel_deferred')} variant="ghost" onclick={cancelDeferred} />
-        </div>
-      </div>
-    {:else if uploadState === 'uploading'}
-      <p class="mt-2 text-sm text-text-dim">
-        {$_('config.terminal.crash.upload_progress', {
-          values: { sent: Math.round(uploadSent / 1024), total: Math.round(uploadTotal / 1024) },
-        })}
-      </p>
-    {:else if uploadBusy}
-      <!-- A summary-only report counts no bytes: metadata goes straight to done. -->
-      <p class="mt-2 text-sm text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
-    {:else if uploadState === 'done'}
-      <p class="mt-2 text-sm text-text">{$_('config.terminal.crash.upload_done')}</p>
-    {:else if uploadState === 'failed'}
-      <p class="mt-2 text-sm text-error">{$_('config.terminal.crash.upload_failed')}</p>
-    {/if}
   {/if}
 
   <ConfigSection title={$_('config.terminal.labs')}>
@@ -800,10 +892,31 @@
      that can carry the Wi-Fi password (spec section 8). -->
 <Modal visible={pendingUpload} onclose={() => (pendingUpload = false)}>
   <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.crash.upload_confirm_title')}</h2>
-  <p class="mb-4 text-sm text-text-dim">{$_('config.terminal.crash.upload_confirm_body')}</p>
+  <p class="mb-2 text-sm text-text">{$_('config.terminal.crash.upload_confirm_body')}</p>
+  <ul class="mb-4 flex list-disc flex-col gap-1.5 pl-5 text-sm text-text-dim">
+    <li><span class="font-semibold text-text">{$_('config.terminal.crash.upload_confirm_sent_label')}</span> <span>{$_('config.terminal.crash.upload_confirm_sent')}</span></li>
+    <li><span class="font-semibold text-text">{$_('config.terminal.crash.upload_confirm_not_sent_label')}</span> <span>{$_('config.terminal.crash.upload_confirm_not_sent')}</span></li>
+    <li>{$_('config.terminal.crash.upload_confirm_kept')}</li>
+    <li>{$_('config.terminal.crash.upload_confirm_removed')}</li>
+  </ul>
   <div class="flex gap-2">
     <Button label={$_('config.terminal.crash.upload_confirm_yes')} onclick={startUpload} />
     <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingUpload = false)} />
+  </div>
+</Modal>
+
+<!-- Delete sent reports confirmation -->
+<Modal visible={pendingForget} onclose={() => (pendingForget = false)}>
+  <h2 class="mb-2 text-base font-semibold text-text">{$_('config.terminal.crash.forget_confirm_title')}</h2>
+  <p class="mb-2 text-sm text-text">{$_('config.terminal.crash.forget_confirm_body')}</p>
+  <ul class="mb-4 flex list-disc flex-col gap-1.5 pl-5 text-sm text-text-dim">
+    <li>{$_('config.terminal.crash.forget_confirm_now')}</li>
+    <li>{$_('config.terminal.crash.forget_confirm_pending')}</li>
+    <li>{$_('config.terminal.crash.forget_confirm_unlinked')}</li>
+  </ul>
+  <div class="flex gap-2">
+    <Button label={$_('config.terminal.crash.forget_confirm_yes')} onclick={startForget} />
+    <Button label={$_('config.terminal.crash.clear_confirm_no')} variant="ghost" onclick={() => (pendingForget = false)} />
   </div>
 </Modal>
 
