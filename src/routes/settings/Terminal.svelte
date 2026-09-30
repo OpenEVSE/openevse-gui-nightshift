@@ -333,6 +333,13 @@
     if (res.forget !== 'deleting' && res.forget !== 'deferred' && res.msg) forgetMessage = res.msg
   }
 
+  // /reports, not /upload: that answers the upload state too, and its idle
+  // would overwrite a 'done' the user is still looking at.
+  async function loadReporter() {
+    const res = await serialQueue.add(() => httpAPI('GET', '/debug/crash/reports'))
+    if (res && res !== 'error' && typeof res === 'object') applyForget(res)
+  }
+
   async function loadUploadState() {
     applyUpload(await serialQueue.add(() => httpAPI('GET', '/debug/crash/upload')))
   }
@@ -378,6 +385,9 @@
       // The device erased the dump after the broker confirmed it; refresh
       // rather than assume.
       loadCrash()
+      // The reporter id is minted mid-upload, after the POST answered, so
+      // the first upload is the one that makes Delete available.
+      loadReporter()
     }
   })
   // Same change-only rule as the upload events above.
