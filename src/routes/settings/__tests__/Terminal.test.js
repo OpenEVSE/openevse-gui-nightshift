@@ -274,6 +274,8 @@ describe('Terminal — Memory & health', () => {
   })
 })
 
+const RID = '0123456789abcdef0123456789abcdef'
+
 describe('Terminal — Crash core dump', () => {
   // Mirrors the device: addresses arrive as pre-formatted hex strings.
   const CRASH = {
@@ -368,7 +370,8 @@ describe('Terminal — Crash core dump', () => {
   // Route both crash endpoints. `up` is what GET /debug/crash/upload answers;
   // `post` is the reply to starting an upload.
   function mockUpload({ up = { state: 'idle', sent: 0, total: 0, deferred: false },
-                        post = { msg: 'uploading', state: 'metadata', deferred: false } } = {}) {
+                        post = { msg: 'uploading', state: 'metadata', deferred: false },
+                        forget = { msg: 'deleting', reporter_id: RID, forget: 'deleting' } } = {}) {
     httpAPI.mockImplementation((method, url) => {
       if (url === '/debug/crash') return Promise.resolve(CRASH)
       if (url === '/debug/crash/upload') {
@@ -376,6 +379,7 @@ describe('Terminal — Crash core dump', () => {
         if (method === 'DELETE') return Promise.resolve({ msg: 'cancelled' })
         return Promise.resolve(up)
       }
+      if (url === '/debug/crash/reports' && method === 'DELETE') return Promise.resolve(forget)
       return Promise.resolve({ cmd: '', ret: '' })
     })
   }
@@ -386,6 +390,10 @@ describe('Terminal — Crash core dump', () => {
     await fireEvent.click(await findByText('config.terminal.crash.upload'))
     // The warning is shown before anything is sent (spec section 8).
     expect(getByText('config.terminal.crash.upload_confirm_body')).toBeInTheDocument()
+    // One fact per point, not a paragraph: what goes, what stays, for how long.
+    for (const k of ['upload_confirm_sent', 'upload_confirm_not_sent', 'upload_confirm_kept', 'upload_confirm_removed']) {
+      expect(getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
+    }
     expect(httpAPI).not.toHaveBeenCalledWith('POST', '/debug/crash/upload', expect.anything())
     await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
     // With a body: mongoose 6 holds a POST that has no Content-Length until
@@ -426,6 +434,19 @@ describe('Terminal — Crash core dump', () => {
     mockUpload({ up: { state: 'deferred', sent: 0, total: 0, deferred: true } })
     const { findByText } = render(Terminal)
     expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
+  })
+
+  it('puts Send in the Crash reporting card, not in the dump card', async () => {
+    // The dump card is about the dump (read it, download it, clear it); the
+    // reporting card is about what goes to OpenEVSE, so Send lives there.
+    mockUpload({ up: { state: 'idle', sent: 0, total: 0, deferred: false, reporter_id: RID } })
+    const { findByText } = render(Terminal)
+    const upload = await findByText('config.terminal.crash.upload')
+    const dumpCard = (await findByText('config.terminal.crash.title')).parentElement
+    const reportCard = (await findByText('config.terminal.crash.reporting_title')).parentElement
+    expect(dumpCard.contains(upload)).toBe(false)
+    expect(reportCard.contains(upload)).toBe(true)
+    expect(reportCard.textContent).toContain(RID)
   })
 
   it('follows progress and completion from the device event stream', async () => {
@@ -495,6 +516,142 @@ describe('Terminal — Crash core dump', () => {
     for (let i = 0; i < 5; i++) status_store.update((s) => ({ ...s, amp: i }))
     await new Promise((r) => setTimeout(r, 20))
     expect(fetches()).toBe(before)
+  })
+})
+
+describe('Terminal — Deleting sent crash reports', () => {
+  const idle = { state: 'idle', sent: 0, total: 0, deferred: false, forget: 'idle', forget_deleted: 0 }
+
+  function mockReports({ rid = RID, forget = { msg: 'deleting', reporter_id: RID, forget: 'deleting' } } = {}) {
+    httpAPI.mockImplementation((method, url) => {
+      if (url === '/debug/crash') return Promise.resolve({ present: false })
+      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: rid })
+      if (url === '/debug/crash/reports' && method === 'DELETE') return Promise.resolve(forget)
+      return Promise.resolve({ cmd: '', ret: '' })
+    })
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    status_store.set({})
+  })
+
+  it('offers nothing until this charger has sent a report', async () => {
+    mockReports({ rid: null })
+    const { queryByText, findByText } = render(Terminal)
+    await findByText('config.terminal.labs')
+    await new Promise((r) => setTimeout(r, 0))
+    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
+  })
+
+  it('offers deletion as soon as the first upload finishes, without a reload', async () => {
+    // The device mints its reporter id mid-upload, after the POST has already
+    // answered, so neither that reply nor the 'done' event carries it. The
+    // page has to ask -- and must ask /reports, not /upload, whose idle state
+    // would overwrite the visible 'done'.
+    let rid = null
+    httpAPI.mockImplementation((method, url) => {
+      if (url === '/debug/crash') return Promise.resolve({ present: false })
+      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: rid })
+      if (url === '/debug/crash/reports') return Promise.resolve({ reporter_id: rid, forget: 'idle', forget_deleted: 0 })
+      return Promise.resolve({ cmd: '', ret: '' })
+    })
+    const { findByText, queryByText } = render(Terminal)
+    await findByText('config.terminal.labs')
+    await new Promise((r) => setTimeout(r, 0))
+    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
+
+    const upGets = () => httpAPI.mock.calls.filter(([m, u]) => m === 'GET' && u === '/debug/crash/upload').length
+    const before = upGets()
+    rid = RID
+    status_store.set({ crash_upload: 'done' })
+    expect(await findByText('config.terminal.crash.forget')).toBeInTheDocument()
+    expect(await findByText(RID)).toBeInTheDocument()
+    expect(upGets()).toBe(before)
+    expect(queryByText('config.terminal.crash.upload_done')).toBeInTheDocument()
+  })
+
+  it('shows the reporter id, even with no dump stored, and deletes only after confirming', async () => {
+    mockReports()
+    const { findByText, getByText } = render(Terminal)
+    // The id sits on its own labelled line, not at the end of the sentence.
+    const id = await findByText(RID)
+    expect(id.parentElement.textContent).toContain('config.terminal.crash.forget_reporter_id_label')
+    expect(id.parentElement.textContent).not.toContain('config.terminal.crash.forget_reporter_id ')
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    expect(getByText('config.terminal.crash.forget_confirm_body')).toBeInTheDocument()
+    for (const k of ['forget_confirm_now', 'forget_confirm_pending', 'forget_confirm_unlinked']) {
+      expect(getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
+    }
+    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
+    expect(await findByText('config.terminal.crash.forget_deleting')).toBeInTheDocument()
+  })
+
+  it('shows the Crash reporting card with no dump stored, once something was sent', async () => {
+    // Loose text between cards read as half-placed, and the delete button sat
+    // flush against the next section.
+    mockReports()
+    status_store.set({})
+    const { findByText } = render(Terminal)
+    const title = await findByText('config.terminal.crash.reporting_title')
+    const card = title.parentElement
+    expect(card.textContent).toContain(RID)
+    expect(card.textContent).toContain('config.terminal.crash.forget')
+  })
+
+  it('follows the deletion from the device event stream', async () => {
+    mockReports()
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    status_store.set({ crash_forget: 'deleted', crash_forget_deleted: 3 })
+    expect(await findByText('config.terminal.crash.forget_done')).toBeInTheDocument()
+    // The device discarded its identity: nothing left to delete.
+    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
+  })
+
+  it("shows the device's reason when it refuses", async () => {
+    mockReports({ forget: { msg: 'not enough free memory right now', reporter_id: RID, forget: 'idle' } })
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await findByText('not enough free memory right now', { exact: false })).toBeInTheDocument()
+  })
+
+  it('says a deferred deletion will happen after the restart, as a warning not an error', async () => {
+    mockReports({ forget: { msg: 'not enough free memory right now -- will delete after the next restart',
+                            reporter_id: RID, forget: 'deferred' } })
+    const { findByText, getByText, queryByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await findByText('config.terminal.crash.forget_deferred')).toBeInTheDocument()
+    // The device's reason is not shown as a failure: nothing failed.
+    expect(queryByText('not enough free memory', { exact: false })).not.toBeInTheDocument()
+    expect(getByText('config.terminal.crash.forget').closest('button')).toBeDisabled()
+  })
+
+  it('shows a deletion already waiting for the restart, and offers no Send meanwhile', async () => {
+    httpAPI.mockImplementation((method, url) => {
+      if (url === '/debug/crash') return Promise.resolve({ present: true, size: 65536, task: 'loopTask', pc: 1074, bt: ['0x400d4b38'] })
+      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: RID, forget: 'deferred' })
+      return Promise.resolve({ cmd: '', ret: '' })
+    })
+    const { findByText, queryByText } = render(Terminal)
+    expect(await findByText('config.terminal.crash.forget_deferred')).toBeInTheDocument()
+    // The firmware refuses a send while a deletion waits; do not offer one.
+    expect(queryByText('config.terminal.crash.upload')).not.toBeInTheDocument()
+  })
+
+  it('reports a failed deletion and keeps the button so it can be retried', async () => {
+    mockReports()
+    const { findByText, getByText } = render(Terminal)
+    await fireEvent.click(await findByText('config.terminal.crash.forget'))
+    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
+    status_store.set({ crash_forget: 'failed' })
+    expect(await findByText('config.terminal.crash.forget_failed')).toBeInTheDocument()
+    expect(getByText('config.terminal.crash.forget')).toBeInTheDocument()
   })
 })
 

@@ -9,8 +9,13 @@ import hu from '../source/hu.json'
 
 const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
+  'upload_confirm_sent_label', 'upload_confirm_sent', 'upload_confirm_not_sent_label', 'upload_confirm_not_sent',
+  'upload_confirm_kept', 'upload_confirm_removed',
+  'forget_confirm_now', 'forget_confirm_pending', 'forget_confirm_unlinked',
   'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
   'upload_deferred', 'upload_cancel_deferred',
+  'reporting_title', 'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
+  'forget_confirm_yes', 'forget_deferred', 'forget_deleting', 'forget_done', 'forget_failed',
 ]
 
 describe('crash upload strings', () => {
@@ -25,7 +30,7 @@ describe('crash upload strings', () => {
     '%s is translated, not English copied across', (_name, locale) => {
       // A missing translation falls back to English at runtime anyway; an
       // English string pasted into another catalog hides that it is missing.
-      for (const k of ['upload', 'upload_confirm_body', 'upload_deferred']) {
+      for (const k of ['upload', 'upload_confirm_body', 'upload_deferred', 'forget', 'forget_confirm_body']) {
         expect(locale.config.terminal.crash[k], k)
           .not.toBe(en.config.terminal.crash[k])
       }
@@ -37,16 +42,19 @@ describe('crash upload strings', () => {
     // (spec section 8), and in particular that credentials are not -- so every
     // locale must name Wi-Fi and say the memory copy is not sent.
     const says = {
-      en: [/wi-?fi/i, /not/i], es: [/wi-?fi/i, /no /i],
-      fr: [/wi-?fi/i, /pas/i], hu: [/wi-?fi/i, /nem/i],
+      en: [/wi[-\u2011]?fi/i, /not/i], es: [/wi[-\u2011]?fi/i, /no /i],
+      fr: [/wi[-\u2011]?fi/i, /pas/i], hu: [/wi[-\u2011]?fi/i, /nem/i],
     }
+    // The consent is now a list; the 'Not sent' point is where it is said.
     for (const [name, l] of Object.entries({ en, es, fr, hu })) {
+      const c = l.config.terminal.crash
+      const notSent = c.upload_confirm_not_sent_label + ' ' + c.upload_confirm_not_sent
       for (const re of says[name]) {
-        expect(l.config.terminal.crash.upload_confirm_body, name).toMatch(re)
+        expect(notSent, name).toMatch(re)
       }
     }
     // The old wording promised the reverse; it must not survive in any locale.
-    expect(en.config.terminal.crash.upload_confirm_body).not.toMatch(/can contain your Wi-Fi/i)
+    expect(JSON.stringify(en.config.terminal.crash)).not.toMatch(/can contain your Wi-Fi/i)
   })
 
   it('the progress string carries both placeholders', () => {
@@ -55,5 +63,22 @@ describe('crash upload strings', () => {
       expect(s, name).toContain('{sent}')
       expect(s, name).toContain('{total}')
     }
+  })
+
+  it('the deletion result carries its count, in every locale', () => {
+    for (const [name, l] of Object.entries({ en, es, fr, hu })) {
+      expect(l.config.terminal.crash.forget_done, name).toContain('{count}')
+    }
+  })
+
+  it('the dump card keeps its title; sending has its own Crash reporting card', () => {
+    expect(en.config.terminal.crash.title).toBe('Crash core dump')
+    expect(en.config.terminal.crash.reporting_title).toBe('Crash reporting')
+  })
+
+  it('explains the reporter id, then labels it on its own line', () => {
+    expect(en.config.terminal.crash.forget_reporter_id).toBe(
+      'Reports sent from this charger are filed under a random reporter ID which cannot be used to identify the charger.')
+    expect(en.config.terminal.crash.forget_reporter_id_label).toBe('Current reporter ID:')
   })
 })
