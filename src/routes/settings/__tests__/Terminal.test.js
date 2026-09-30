@@ -544,6 +544,33 @@ describe('Terminal — Deleting sent crash reports', () => {
     expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
   })
 
+  it('offers deletion as soon as the first upload finishes, without a reload', async () => {
+    // The device mints its reporter id mid-upload, after the POST has already
+    // answered, so neither that reply nor the 'done' event carries it. The
+    // page has to ask -- and must ask /reports, not /upload, whose idle state
+    // would overwrite the visible 'done'.
+    let rid = null
+    httpAPI.mockImplementation((method, url) => {
+      if (url === '/debug/crash') return Promise.resolve({ present: false })
+      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: rid })
+      if (url === '/debug/crash/reports') return Promise.resolve({ reporter_id: rid, forget: 'idle', forget_deleted: 0 })
+      return Promise.resolve({ cmd: '', ret: '' })
+    })
+    const { findByText, queryByText } = render(Terminal)
+    await findByText('config.terminal.labs')
+    await new Promise((r) => setTimeout(r, 0))
+    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
+
+    const upGets = () => httpAPI.mock.calls.filter(([m, u]) => m === 'GET' && u === '/debug/crash/upload').length
+    const before = upGets()
+    rid = RID
+    status_store.set({ crash_upload: 'done' })
+    expect(await findByText('config.terminal.crash.forget')).toBeInTheDocument()
+    expect(await findByText(RID)).toBeInTheDocument()
+    expect(upGets()).toBe(before)
+    expect(queryByText('config.terminal.crash.upload_done')).toBeInTheDocument()
+  })
+
   it('shows the reporter id, even with no dump stored, and deletes only after confirming', async () => {
     mockReports()
     const { findByText, getByText } = render(Terminal)
