@@ -11,11 +11,10 @@ const KEYS = [
   'upload', 'upload_confirm_title', 'upload_confirm_body', 'upload_confirm_yes',
   'upload_confirm_sent_label', 'upload_confirm_sent', 'upload_confirm_not_sent_label', 'upload_confirm_not_sent',
   'upload_confirm_kept', 'upload_confirm_removed',
-  'forget_confirm_now', 'forget_confirm_pending', 'forget_confirm_unlinked',
-  'upload_progress', 'upload_sending', 'upload_done', 'upload_failed',
-  'upload_deferred', 'upload_cancel_deferred',
+  'forget_confirm_now', 'forget_confirm_unlinked',
+  'upload_sending', 'upload_done', 'upload_failed', 'upload_unreachable',
   'reporting_title', 'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
-  'forget_confirm_yes', 'forget_deferred', 'forget_deleting', 'forget_done', 'forget_failed',
+  'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_failed', 'forget_unreachable',
 ]
 
 describe('crash upload strings', () => {
@@ -30,7 +29,7 @@ describe('crash upload strings', () => {
     '%s is translated, not English copied across', (_name, locale) => {
       // A missing translation falls back to English at runtime anyway; an
       // English string pasted into another catalog hides that it is missing.
-      for (const k of ['upload', 'upload_confirm_body', 'upload_deferred', 'forget', 'forget_confirm_body']) {
+      for (const k of ['upload', 'upload_confirm_body', 'upload_unreachable', 'forget', 'forget_confirm_body', 'forget_unreachable']) {
         expect(locale.config.terminal.crash[k], k)
           .not.toBe(en.config.terminal.crash[k])
       }
@@ -57,14 +56,6 @@ describe('crash upload strings', () => {
     expect(JSON.stringify(en.config.terminal.crash)).not.toMatch(/can contain your Wi-Fi/i)
   })
 
-  it('the progress string carries both placeholders', () => {
-    for (const [name, l] of Object.entries({ en, es, fr, hu })) {
-      const s = l.config.terminal.crash.upload_progress
-      expect(s, name).toContain('{sent}')
-      expect(s, name).toContain('{total}')
-    }
-  })
-
   it('the deletion result carries its count, in every locale', () => {
     for (const [name, l] of Object.entries({ en, es, fr, hu })) {
       expect(l.config.terminal.crash.forget_done, name).toContain('{count}')
@@ -81,4 +72,16 @@ describe('crash upload strings', () => {
       'Reports sent from this charger are filed under a random reporter ID which cannot be used to identify the charger.')
     expect(en.config.terminal.crash.forget_reporter_id_label).toBe('Current reporter ID:')
   })
+})
+
+describe('retired crash upload strings', () => {
+  // The charger no longer sends reports itself, so nothing waits for a
+  // restart and there is no byte count to show.
+  it.each([['en', en], ['es', es], ['fr', fr], ['hu', hu]])(
+    '%s no longer carries them', (_name, locale) => {
+      for (const k of ['upload_progress', 'upload_deferred', 'upload_cancel_deferred',
+                       'forget_deferred', 'forget_confirm_pending']) {
+        expect(locale.config.terminal.crash[k], k).toBeUndefined()
+      }
+    })
 })
