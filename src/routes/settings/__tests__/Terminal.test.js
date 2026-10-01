@@ -384,8 +384,10 @@ describe('Terminal — Crash reporting', () => {
   let posted     // bodies POSTed to the device, by url
   let crash      // current /debug/crash answer
 
+  // `id` is the stored identity; GET returns its delete key only with ?key=1.
   function device({ id = { reporter_id: RID, delete_key: KEY, broker: BROKER },
-                    dump = CRASH, report = { status: 200, body: REPORT } } = {}) {
+                    dump = CRASH, report = { status: 200, body: REPORT },
+                    eraseStatus = 200, forgetStatus = 200, storeStatus = 200, raced = null } = {}) {
     identity = id
     crash = dump
     calls = []
@@ -395,21 +397,30 @@ describe('Terminal — Crash reporting', () => {
       if (body) posted[url] = body
       const reply = (status, b) => Promise.resolve(opts.raw ? { status, body: b } : b)
       if (url === '/debug/crash') {
-        if (method === 'DELETE') { crash = { present: false }; return reply(200, { msg: 'erased' }) }
+        if (method === 'DELETE') {
+          if (eraseStatus !== 200) return reply(eraseStatus, { msg: 'error' })
+          crash = { present: false }
+          return reply(200, { msg: 'erased' })
+        }
         return reply(200, crash)
       }
-      if (url === '/debug/crash/identity') {
+      if (url.startsWith('/debug/crash/identity')) {
         if (identity === 'error') return Promise.resolve('error')
         if (method === 'POST') {
+          // Another tab got there first: the charger keeps that identity.
+          if (raced) { identity = { ...identity, ...raced }; return reply(409, { msg: 'a different identity is already set' }) }
+          if (storeStatus !== 200) return reply(storeStatus, { msg: 'error' })
           const b = JSON.parse(body)
           identity = { ...identity, reporter_id: b.reporter_id, delete_key: b.delete_key }
           return reply(200, { msg: 'stored' })
         }
         if (method === 'DELETE') {
+          if (forgetStatus !== 200) return reply(forgetStatus, { msg: 'error' })
           identity = { ...identity, reporter_id: null, delete_key: null }
           return reply(200, { msg: 'forgotten' })
         }
-        return reply(200, identity)
+        const { delete_key, ...rest } = identity
+        return reply(200, url.endsWith('?key=1') ? identity : rest)
       }
       if (url === '/debug/crash/report') return reply(report.status, report.body)
       return reply(200, { cmd: '', ret: '' })
@@ -578,6 +589,60 @@ describe('Terminal — Crash reporting', () => {
     await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
     expect(await utils.findByText('config.terminal.crash.forget_failed')).toBeInTheDocument()
     expect(calls).not.toContain('DELETE /debug/crash/identity')
+  })
+
+  it('fetches the delete key only when Delete is pressed', async () => {
+    // It erases this charger's reports; it is not needed to show the page or
+    // to send one, so it is not on the wire until it is.
+    device()
+    const utils = render(Terminal)
+    await send(utils)
+    await utils.findByText('config.terminal.crash.upload_done')
+    expect(calls.some((c) => c.includes('?key='))).toBe(false)
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget'))
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
+    await utils.findByText('config.terminal.crash.forget_done')
+    expect(calls).toContain('GET /debug/crash/identity?key=1')
+  })
+
+  it('says so when the report was sent but the charger could not remove its copy', async () => {
+    // Saying "removed" here would invite sending the same report again.
+    device({ eraseStatus: 500 })
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_not_erased')).toBeInTheDocument()
+    expect(utils.queryByText('config.terminal.crash.upload_done')).not.toBeInTheDocument()
+  })
+
+  it('says so when the reports were erased but the charger kept its id, and offers Delete again', async () => {
+    // Otherwise the next report would quietly reuse the old id, linking it to
+    // the erased ones. Deleting again is safe: nothing is left to erase.
+    device({ dump: { present: false }, forgetStatus: 500 })
+    const utils = render(Terminal)
+    await fireEvent.click(await utils.findByText('config.terminal.crash.forget'))
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await utils.findByText('config.terminal.crash.forget_not_forgotten')).toBeInTheDocument()
+    expect(utils.queryByText('config.terminal.crash.forget_done')).not.toBeInTheDocument()
+    expect(utils.getByText(RID)).toBeInTheDocument()
+    expect(utils.getByText('config.terminal.crash.forget')).toBeInTheDocument()
+  })
+
+  it('a tab that lost the race to set the identity carries on with the stored one', async () => {
+    const OTHER = 'fedcba9876543210fedcba9876543210'
+    device({ id: { reporter_id: null, delete_key: null, broker: BROKER },
+             raced: { reporter_id: OTHER, delete_key: KEY } })
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_done')).toBeInTheDocument()
+    expect(utils.getByText(OTHER)).toBeInTheDocument()
+  })
+
+  it('reports a failure when the charger cannot store the identity', async () => {
+    device({ id: { reporter_id: null, delete_key: null, broker: BROKER }, storeStatus: 500 })
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_failed')).toBeInTheDocument()
+    expect(broker).not.toHaveBeenCalled()
   })
 })
 

@@ -709,8 +709,9 @@
         "upload_confirm_yes": "Envoyer",
         "upload_sending": "Envoi…",
         "upload_done": "Envoyé. Le rapport de plantage a été effacé de ce chargeur.",
+        "upload_not_erased": "Envoyé, mais ce chargeur n'a pas pu effacer sa copie. Inutile de le renvoyer — effacez-le depuis la carte « Vidage de plantage ».",
         "upload_failed": "Impossible d'envoyer le rapport. Rien n'a été effacé de ce chargeur — vous pouvez réessayer.",
-        "upload_unreachable": "Ce navigateur n'a pas pu joindre OpenEVSE. Rien n'a été effacé de ce chargeur — réessayez depuis un navigateur connecté à Internet.",
+        "upload_unreachable": "Impossible de joindre OpenEVSE — ce navigateur est peut-être hors ligne, ou le service momentanément indisponible. Rien n'a été effacé de ce chargeur ; réessayez plus tard.",
         "reporting_title": "Rapports de plantage",
         "forget": "Supprimer mes rapports chez OpenEVSE",
         "forget_reporter_id": "Les rapports envoyés par ce chargeur sont classés sous un identifiant d'expéditeur aléatoire qui ne permet pas d'identifier le chargeur.",
@@ -722,8 +723,9 @@
         "forget_confirm_yes": "Supprimer",
         "forget_deleting": "Suppression…",
         "forget_done": "{count} rapport(s) supprimé(s) chez OpenEVSE.",
+        "forget_not_forgotten": "Vos rapports ont été supprimés, mais ce chargeur n'a pas pu oublier son identifiant de rapporteur. Appuyez de nouveau sur Supprimer pour que les prochains rapports ne soient pas liés à ceux supprimés.",
         "forget_failed": "Impossible de supprimer les rapports. Rien n'a été modifié — vous pouvez réessayer.",
-        "forget_unreachable": "Ce navigateur n'a pas pu joindre OpenEVSE. Rien n'a été supprimé — réessayez depuis un navigateur connecté à Internet."
+        "forget_unreachable": "Impossible de joindre OpenEVSE — ce navigateur est peut-être hors ligne, ou le service momentanément indisponible. Rien n'a été supprimé ; réessayez plus tard."
       },
       "now": "Actuel",
       "min": "Min",

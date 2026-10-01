@@ -709,8 +709,9 @@
         "upload_confirm_yes": "Send",
         "upload_sending": "Sending…",
         "upload_done": "Sent. The crash report has been removed from this charger.",
+        "upload_not_erased": "Sent, but this charger could not remove its copy. You don't need to send it again — clear it from the Crash core dump card.",
         "upload_failed": "Could not send the report. Nothing was removed from this charger — you can try again.",
-        "upload_unreachable": "This browser could not reach OpenEVSE. Nothing was removed from this charger — try again from a browser with internet access.",
+        "upload_unreachable": "Could not reach OpenEVSE — this browser may be offline, or the service briefly unavailable. Nothing was removed from this charger; try again later.",
         "reporting_title": "Crash reporting",
         "forget": "Delete my reports from OpenEVSE",
         "forget_reporter_id": "Reports sent from this charger are filed under a random reporter ID which cannot be used to identify the charger.",
@@ -722,8 +723,9 @@
         "forget_confirm_yes": "Delete",
         "forget_deleting": "Deleting…",
         "forget_done": "Deleted {count} report(s) from OpenEVSE.",
+        "forget_not_forgotten": "Your reports were deleted, but this charger could not forget its reporter ID. Press Delete again so later reports are not linked to the deleted ones.",
         "forget_failed": "Could not delete the reports. Nothing was changed — you can try again.",
-        "forget_unreachable": "This browser could not reach OpenEVSE. Nothing was deleted — try again from a browser with internet access."
+        "forget_unreachable": "Could not reach OpenEVSE — this browser may be offline, or the service briefly unavailable. Nothing was deleted; try again later."
       },
       "now": "Now",
       "min": "Min",

@@ -709,8 +709,9 @@
         "upload_confirm_yes": "Enviar",
         "upload_sending": "Enviando…",
         "upload_done": "Enviado. El informe de fallo se ha borrado de este cargador.",
+        "upload_not_erased": "Enviado, pero este cargador no pudo borrar su copia. No hace falta volver a enviarlo: bórralo desde la tarjeta «Volcado de fallo».",
         "upload_failed": "No se pudo enviar el informe. No se ha borrado nada de este cargador; puedes volver a intentarlo.",
-        "upload_unreachable": "Este navegador no pudo conectar con OpenEVSE. No se ha borrado nada de este cargador; vuelve a intentarlo desde un navegador con acceso a internet.",
+        "upload_unreachable": "No se pudo conectar con OpenEVSE: puede que este navegador no tenga conexión o que el servicio no esté disponible por el momento. No se ha borrado nada de este cargador; vuelve a intentarlo más tarde.",
         "reporting_title": "Informes de fallos",
         "forget": "Eliminar mis informes de OpenEVSE",
         "forget_reporter_id": "Los informes enviados desde este cargador se archivan con un ID de remitente aleatorio que no permite identificar el cargador.",
@@ -722,8 +723,9 @@
         "forget_confirm_yes": "Eliminar",
         "forget_deleting": "Eliminando…",
         "forget_done": "Se han eliminado {count} informe(s) de OpenEVSE.",
+        "forget_not_forgotten": "Tus informes se han eliminado, pero este cargador no pudo olvidar su ID de informante. Vuelve a pulsar Eliminar para que los informes futuros no queden vinculados a los eliminados.",
         "forget_failed": "No se pudieron eliminar los informes. No se ha cambiado nada; puedes volver a intentarlo.",
-        "forget_unreachable": "Este navegador no pudo conectar con OpenEVSE. No se ha eliminado nada; vuelve a intentarlo desde un navegador con acceso a internet."
+        "forget_unreachable": "No se pudo conectar con OpenEVSE: puede que este navegador no tenga conexión o que el servicio no esté disponible por el momento. No se ha eliminado nada; vuelve a intentarlo más tarde."
       },
       "now": "Ahora",
       "min": "Mín",

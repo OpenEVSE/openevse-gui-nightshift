@@ -12,9 +12,9 @@ const KEYS = [
   'upload_confirm_sent_label', 'upload_confirm_sent', 'upload_confirm_not_sent_label', 'upload_confirm_not_sent',
   'upload_confirm_kept', 'upload_confirm_removed',
   'forget_confirm_now', 'forget_confirm_unlinked',
-  'upload_sending', 'upload_done', 'upload_failed', 'upload_unreachable',
+  'upload_sending', 'upload_done', 'upload_not_erased', 'upload_failed', 'upload_unreachable',
   'reporting_title', 'forget', 'forget_reporter_id', 'forget_reporter_id_label', 'forget_confirm_title', 'forget_confirm_body',
-  'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_failed', 'forget_unreachable',
+  'forget_confirm_yes', 'forget_deleting', 'forget_done', 'forget_not_forgotten', 'forget_failed', 'forget_unreachable',
 ]
 
 describe('crash upload strings', () => {
@@ -85,3 +85,14 @@ describe('retired crash upload strings', () => {
       }
     })
 })
+
+describe('unreachable means OpenEVSE could not be reached, for whatever reason', () => {
+  // fetch() fails the same way whether this browser is offline or the service
+  // is briefly down, so the message must not blame the browser alone.
+  it.each([['en', en]])('%s does not claim the browser is offline', (_name, l) => {
+    for (const k of ['upload_unreachable', 'forget_unreachable']) {
+      expect(l.config.terminal.crash[k], k).toMatch(/unavailable/)
+    }
+  })
+})
+

@@ -283,16 +283,19 @@
   // firmware without crash reporting it never does, and nothing is shown.
   let broker = $state(null)
   let reporterId = $state(null)
-  let uploadState = $state('idle')   // idle | sending | done | failed | unreachable
+  let uploadState = $state('idle')   // idle | sending | done | not_erased | failed | unreachable
   let pendingUpload = $state(false)  // credentials warning open
-  let forgetState = $state('idle')   // idle | deleting | deleted | failed | unreachable
+  let forgetState = $state('idle')   // idle | deleting | deleted | not_forgotten | failed | unreachable
   let forgetDeleted = $state(0)
   let pendingForget = $state(false)
   let uploadSupported = $derived(!!broker)
   let showSent = $derived(uploadSupported && (!!reporterId || uploadState !== 'idle' || forgetState !== 'idle'))
 
-  async function loadIdentity() {
-    const res = await serialQueue.add(() => httpAPI('GET', '/debug/crash/identity'))
+  // The delete key comes back only when asked for (withKey), which only
+  // Delete does: it is not needed to show the page or to send a report.
+  async function loadIdentity(withKey = false) {
+    const url = '/debug/crash/identity' + (withKey ? '?key=1' : '')
+    const res = await serialQueue.add(() => httpAPI('GET', url))
     if (!res || res === 'error' || typeof res.broker !== 'string') return null
     broker = res.broker
     reporterId = res.reporter_id || null
@@ -344,11 +347,20 @@
       const fresh = { reporter_id: randomHex(16), delete_key: randomHex(32) }
       const stored = await serialQueue.add(() =>
         httpAPI('POST', '/debug/crash/identity', JSON.stringify(fresh), 'json', 60000, { raw: true }))
-      if (stored?.status !== 200) {
+      if (stored?.status === 409) {
+        // Another tab set one first. The charger keeps that one; carry on
+        // with it rather than fail a send that would work.
+        const again = await loadIdentity()
+        if (!again?.reporter_id) {
+          uploadState = 'failed'
+          return
+        }
+      } else if (stored?.status !== 200) {
         uploadState = 'failed'
         return
+      } else {
+        reporterId = fresh.reporter_id
       }
-      reporterId = fresh.reporter_id
     }
     const report = await serialQueue.add(() =>
       httpAPI('GET', '/debug/crash/report', null, 'json', 60000, { raw: true }))
@@ -361,10 +373,12 @@
       uploadState = sent || 'failed'
       return
     }
-    // Only now that the broker has it.
-    await serialQueue.add(() => httpAPI('DELETE', '/debug/crash'))
+    // Only now that the broker has it. If the charger cannot erase its copy,
+    // say so: "removed" would invite sending the same report again.
+    const erased = await serialQueue.add(() =>
+      httpAPI('DELETE', '/debug/crash', null, 'json', 60000, { raw: true }))
     await loadCrash()
-    uploadState = 'done'
+    uploadState = erased?.status === 200 ? 'done' : 'not_erased'
   }
 
   // ── Deleting sent reports (GDPR Art. 17; Art. 7(3)) ──────────────────────
@@ -376,7 +390,7 @@
     pendingForget = false
     forgetState = 'deleting'
     uploadState = 'idle'
-    const id = await loadIdentity()
+    const id = await loadIdentity(true)
     if (!id?.reporter_id || !id.delete_key) {
       forgetState = id ? 'idle' : 'failed'
       return
@@ -386,8 +400,16 @@
       forgetState = res || 'failed'
       return
     }
-    await serialQueue.add(() => httpAPI('DELETE', '/debug/crash/identity'))
     forgetDeleted = typeof res.deleted === 'number' ? res.deleted : 0
+    // The reports are gone. If the charger cannot forget its id, the next
+    // report would reuse it and be linked to the erased ones -- so say so and
+    // keep Delete there; deleting again is safe, with nothing left to erase.
+    const forgot = await serialQueue.add(() =>
+      httpAPI('DELETE', '/debug/crash/identity', null, 'json', 60000, { raw: true }))
+    if (forgot?.status !== 200) {
+      forgetState = 'not_forgotten'
+      return
+    }
     reporterId = null
     forgetState = 'deleted'
   }
@@ -722,6 +744,8 @@
           <p class="text-text-dim">{$_('config.terminal.crash.upload_sending')}</p>
         {:else if uploadState === 'done'}
           <p class="text-text">{$_('config.terminal.crash.upload_done')}</p>
+        {:else if uploadState === 'not_erased'}
+          <p class="text-warning">{$_('config.terminal.crash.upload_not_erased')}</p>
         {:else if uploadState === 'unreachable'}
           <p class="text-error">{$_('config.terminal.crash.upload_unreachable')}</p>
         {:else if uploadState === 'failed'}
@@ -742,6 +766,8 @@
           <p class="text-text-dim">{$_('config.terminal.crash.forget_deleting')}</p>
         {:else if forgetState === 'deleted'}
           <p class="text-text">{$_('config.terminal.crash.forget_done', { values: { count: forgetDeleted } })}</p>
+        {:else if forgetState === 'not_forgotten'}
+          <p class="text-warning">{$_('config.terminal.crash.forget_not_forgotten')}</p>
         {:else if forgetState === 'unreachable'}
           <p class="text-error">{$_('config.terminal.crash.forget_unreachable')}</p>
         {:else if forgetState === 'failed'}

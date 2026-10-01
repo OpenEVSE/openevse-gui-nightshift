@@ -709,8 +709,9 @@
         "upload_confirm_yes": "Küldés",
         "upload_sending": "Küldés…",
         "upload_done": "Elküldve. Az összeomlási jelentés törlődött erről a töltőről.",
+        "upload_not_erased": "Elküldve, de ez a töltő nem tudta törölni a saját példányát. Nem kell újra elküldeni — töröld az „Összeomlási memóriakép” kártyán.",
         "upload_failed": "Nem sikerült elküldeni a jelentést. Semmi sem törlődött erről a töltőről — próbáld újra.",
-        "upload_unreachable": "Ez a böngésző nem érte el az OpenEVSE-t. Semmi sem törlődött erről a töltőről — próbáld újra egy internetkapcsolattal rendelkező böngészőből.",
+        "upload_unreachable": "Nem sikerült elérni az OpenEVSE-t — lehet, hogy ez a böngésző offline, vagy a szolgáltatás átmenetileg nem érhető el. Semmi sem törlődött erről a töltőről; próbáld újra később.",
         "reporting_title": "Összeomlás-jelentés",
         "forget": "Jelentéseim törlése az OpenEVSE-nél",
         "forget_reporter_id": "Az erről a töltőről küldött jelentések egy véletlenszerű küldőazonosító alatt szerepelnek, amely nem alkalmas a töltő azonosítására.",
@@ -722,8 +723,9 @@
         "forget_confirm_yes": "Törlés",
         "forget_deleting": "Törlés…",
         "forget_done": "{count} jelentés törölve az OpenEVSE-nél.",
+        "forget_not_forgotten": "A jelentéseid törlődtek, de ez a töltő nem tudta elfelejteni a jelentő azonosítóját. Nyomd meg újra a Törlés gombot, hogy a későbbi jelentések ne kapcsolódjanak a törölt jelentésekhez.",
         "forget_failed": "Nem sikerült törölni a jelentéseket. Semmi sem változott — próbáld újra.",
-        "forget_unreachable": "Ez a böngésző nem érte el az OpenEVSE-t. Semmi sem törlődött — próbáld újra egy internetkapcsolattal rendelkező böngészőből."
+        "forget_unreachable": "Nem sikerült elérni az OpenEVSE-t — lehet, hogy ez a böngésző offline, vagy a szolgáltatás átmenetileg nem érhető el. Semmi sem törlődött; próbáld újra később."
       },
       "now": "Most",
       "min": "Min",
