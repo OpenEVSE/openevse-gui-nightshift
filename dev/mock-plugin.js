@@ -141,9 +141,10 @@ export function mockPlugin() {
   // #1210). Starts present so the section is visible; DELETE flips it off so
   // the "Clear dump" flow can be exercised without hardware.
   let crashPresent = true
-  // The random reporter id a real charger creates at its first upload; the
-  // mock starts as if one report has already gone.
+  // The reporter identity the browser generates before a charger's first
+  // report and stores on it; the mock starts as if one report has gone.
   let reporterId = '5f0c2a9e41d87b3e6a1c09d4f2b7e815'
+  let deleteKey = '9d1c4e7a2b0f38d5c6e1a4f7b2d9083e5c1a7f4d2e9b0c38a6d1f5e7b3c2a940'
 
   // Advisory acks laid over whatever fixture/scenario is live. The firmware
   // persists these; here they live for the dev-server run and are dropped when
@@ -398,40 +399,46 @@ export function mockPlugin() {
             : { present: false }))
           return
         }
-        // One-click crash report upload. The real device runs three requests
-        // and streams progress over the websocket; the preview skips straight
-        // to the outcome, which is what the page renders after them anyway.
-        if (url === '/api/debug/crash/upload') {
-          res.writeHead(crashPresent || req.method !== 'POST' ? 200 : 409,
-            { 'Content-Type': 'application/json' })
+        // Crash reporting. The browser sends the report itself: the charger
+        // builds it and keeps the reporter identity. `broker` points the page
+        // at the mock broker below, never at crash.openevse.com.
+        if (url === '/api/debug/crash/identity') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
           if (req.method === 'POST') {
-            const had = crashPresent
-            crashPresent = false
-            if (had && !reporterId) reporterId = 'a3e19c7b05d24f86b1e0c5d9a7f24b60'
-            res.end(JSON.stringify(had
-              ? { msg: 'uploading', state: 'done', deferred: false }
-              : { msg: 'no crash dump stored', state: 'idle', deferred: false }))
-          } else if (req.method === 'DELETE') {
-            res.end(JSON.stringify({ msg: 'cancelled' }))
-          } else {
-            res.end(JSON.stringify({ state: 'idle', sent: 0, total: 0, deferred: false,
-                                     reporter_id: reporterId, forget: 'idle', forget_deleted: 0 }))
+            let body = ''
+            req.on('data', (c) => { body += c })
+            req.on('end', () => {
+              const b = JSON.parse(body || '{}')
+              if (!reporterId) { reporterId = b.reporter_id; deleteKey = b.delete_key }
+              res.end(JSON.stringify({ msg: 'stored' }))
+            })
+            return
           }
+          if (req.method === 'DELETE') {
+            reporterId = null
+            deleteKey = null
+            res.end(JSON.stringify({ msg: 'forgotten' }))
+            return
+          }
+          res.end(JSON.stringify({ reporter_id: reporterId, delete_key: deleteKey, broker: '/api/mock-broker' }))
           return
         }
-        // Delete my reports: the device presents its key and forgets its id.
-        if (url === '/api/debug/crash/reports') {
-          res.writeHead(req.method !== 'DELETE' || reporterId ? 200 : 409,
-            { 'Content-Type': 'application/json' })
-          if (req.method === 'DELETE') {
-            const had = reporterId
-            reporterId = null
-            res.end(JSON.stringify(had
-              ? { msg: 'deleting', reporter_id: null, forget: 'deleted', forget_deleted: 2 }
-              : { msg: 'nothing has been sent from this charger', reporter_id: null, forget: 'idle', forget_deleted: 0 }))
-          } else {
-            res.end(JSON.stringify({ reporter_id: reporterId, forget: 'idle', forget_deleted: 0 }))
-          }
+        if (url === '/api/debug/crash/report') {
+          const status = !crashPresent ? 404 : !reporterId ? 409 : 200
+          res.writeHead(status, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify(status === 200
+            ? { version: 'mock_12345678', buildenv: 'mock', reporter_id: reporterId, summary: { panic_reason: 'abort()' } }
+            : { msg: status === 404 ? 'no crash dump stored' : 'no reporter identity' }))
+          return
+        }
+        if (url === '/api/mock-broker/v1/reports' && req.method === 'POST') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ report_id: 'mock-report', status: 'symbolized' }))
+          return
+        }
+        if (/^\/api\/mock-broker\/v1\/reporters\/[0-9a-f]{32}\/delete$/.test(url) && req.method === 'POST') {
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ deleted: 2 }))
           return
         }
         if (url === '/api/debug/crash/raw') {

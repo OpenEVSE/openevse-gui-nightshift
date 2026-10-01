@@ -1,5 +1,5 @@
 // src/routes/settings/__tests__/Terminal.test.js
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, fireEvent } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
@@ -367,79 +367,171 @@ describe('Terminal — Crash core dump', () => {
     expect(getByText('config.terminal.crash.title')).toBeInTheDocument()
   })
 
-  // Route both crash endpoints. `up` is what GET /debug/crash/upload answers;
-  // `post` is the reply to starting an upload.
-  function mockUpload({ up = { state: 'idle', sent: 0, total: 0, deferred: false },
-                        post = { msg: 'uploading', state: 'metadata', deferred: false },
-                        forget = { msg: 'deleting', reporter_id: RID, forget: 'deleting' } } = {}) {
-    httpAPI.mockImplementation((method, url) => {
-      if (url === '/debug/crash') return Promise.resolve(CRASH)
-      if (url === '/debug/crash/upload') {
-        if (method === 'POST') return Promise.resolve(post)
-        if (method === 'DELETE') return Promise.resolve({ msg: 'cancelled' })
-        return Promise.resolve(up)
+})
+
+// Crash reporting: the browser sends the report to OpenEVSE itself. The
+// charger only builds it (GET /debug/crash/report) and keeps the reporter
+// identity (/debug/crash/identity); the broker is reached with fetch().
+describe('Terminal — Crash reporting', () => {
+  const BROKER = 'https://broker.test'
+  const KEY = '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff'
+  const CRASH = { present: true, valid: true, size: 65536, panic_reason: 'abort()', task: 'loopTask',
+                  pc: '0x400d4b38', bt: ['0x400d4b38'], elf_sha256: 'abc123def' }
+  const REPORT = { version: 'master_12345678', summary: { panic_reason: 'abort()' }, reporter_id: RID }
+
+  let identity   // what GET /debug/crash/identity answers
+  let calls      // device calls, as "METHOD url"
+  let posted     // bodies POSTed to the device, by url
+  let crash      // current /debug/crash answer
+
+  // `id` is the stored identity; GET returns its delete key only with ?key=1.
+  function device({ id = { reporter_id: RID, delete_key: KEY, broker: BROKER },
+                    dump = CRASH, report = { status: 200, body: REPORT },
+                    eraseStatus = 200, forgetStatus = 200, storeStatus = 200, raced = null } = {}) {
+    identity = id
+    crash = dump
+    calls = []
+    posted = {}
+    httpAPI.mockImplementation((method, url, body, _type, _timeout, opts = {}) => {
+      calls.push(method + ' ' + url)
+      if (body) posted[url] = body
+      const reply = (status, b) => Promise.resolve(opts.raw ? { status, body: b } : b)
+      if (url === '/debug/crash') {
+        if (method === 'DELETE') {
+          if (eraseStatus !== 200) return reply(eraseStatus, { msg: 'error' })
+          crash = { present: false }
+          return reply(200, { msg: 'erased' })
+        }
+        return reply(200, crash)
       }
-      if (url === '/debug/crash/reports' && method === 'DELETE') return Promise.resolve(forget)
-      return Promise.resolve({ cmd: '', ret: '' })
+      if (url.startsWith('/debug/crash/identity')) {
+        if (identity === 'error') return Promise.resolve('error')
+        if (method === 'POST') {
+          // Another tab got there first: the charger keeps that identity.
+          if (raced) { identity = { ...identity, ...raced }; return reply(409, { msg: 'a different identity is already set' }) }
+          if (storeStatus !== 200) return reply(storeStatus, { msg: 'error' })
+          const b = JSON.parse(body)
+          identity = { ...identity, reporter_id: b.reporter_id, delete_key: b.delete_key }
+          return reply(200, { msg: 'stored' })
+        }
+        if (method === 'DELETE') {
+          if (forgetStatus !== 200) return reply(forgetStatus, { msg: 'error' })
+          identity = { ...identity, reporter_id: null, delete_key: null }
+          return reply(200, { msg: 'forgotten' })
+        }
+        const { delete_key, ...rest } = identity
+        return reply(200, url.endsWith('?key=1') ? identity : rest)
+      }
+      if (url === '/debug/crash/report') return reply(report.status, report.body)
+      return reply(200, { cmd: '', ret: '' })
     })
   }
 
-  it('offers to send the dump, and POSTs only after the credentials warning is confirmed', async () => {
-    mockUpload()
-    const { findByText, getByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.upload'))
-    // The warning is shown before anything is sent (spec section 8).
-    expect(getByText('config.terminal.crash.upload_confirm_body')).toBeInTheDocument()
-    // One fact per point, not a paragraph: what goes, what stays, for how long.
+  // The broker, as fetch() sees it. `answer` is a function of (url, init).
+  let broker
+  function brokerAnswers(answer) {
+    broker = vi.fn(answer)
+    vi.stubGlobal('fetch', broker)
+  }
+  const ok = (body) => () => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(body) })
+
+  beforeEach(() => {
+    status_store.set({})
+    brokerAnswers(ok({ report_id: 'r-1', status: 'symbolized', deleted: 2 }))
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  async function send(utils) {
+    await fireEvent.click(await utils.findByText('config.terminal.crash.upload'))
+    await fireEvent.click(utils.getByText('config.terminal.crash.upload_confirm_yes'))
+  }
+
+  it('sends only after the warning is confirmed, from the browser, then erases the dump', async () => {
+    device()
+    const utils = render(Terminal)
+    await fireEvent.click(await utils.findByText('config.terminal.crash.upload'))
+    // What goes, what stays, for how long: one fact per point.
     for (const k of ['upload_confirm_sent', 'upload_confirm_not_sent', 'upload_confirm_kept', 'upload_confirm_removed']) {
-      expect(getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
+      expect(utils.getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
     }
-    expect(httpAPI).not.toHaveBeenCalledWith('POST', '/debug/crash/upload', expect.anything())
-    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
-    // With a body: mongoose 6 holds a POST that has no Content-Length until
-    // the client closes the socket, so a bodyless request can hang.
-    expect(httpAPI).toHaveBeenCalledWith('POST', '/debug/crash/upload', '{}')
+    expect(broker).not.toHaveBeenCalled()
+    await fireEvent.click(utils.getByText('config.terminal.crash.upload_confirm_yes'))
+    expect(await utils.findByText('config.terminal.crash.upload_done')).toBeInTheDocument()
+    const [url, init] = broker.mock.calls[0]
+    expect(url).toBe(BROKER + '/v1/reports')
+    expect(init.method).toBe('POST')
+    expect(JSON.parse(init.body)).toEqual(REPORT)
+    // Only once the broker has it.
+    expect(calls).toContain('DELETE /debug/crash')
+    expect(calls.indexOf('DELETE /debug/crash')).toBeGreaterThan(calls.indexOf('GET /debug/crash/report'))
   })
 
-  it('hides the button on builds without the uploader', async () => {
-    // 4 MB boards compile the stubs, which report "unsupported"; firmware
-    // older than the route answers a non-JSON 404, which httpAPI turns into
-    // 'error'. Neither may show a button that cannot work.
-    for (const up of [{ state: 'unsupported' }, 'error']) {
-      mockUpload({ up })
-      const { findByText, queryByText, unmount } = render(Terminal)
-      await findByText('config.terminal.crash.title')
-      await vi.waitFor(() =>
-        expect(httpAPI).toHaveBeenCalledWith('GET', '/debug/crash/upload'))
-      expect(queryByText('config.terminal.crash.upload')).not.toBeInTheDocument()
-      unmount()
+  it('creates a random identity in the browser and stores it before the first report', async () => {
+    device({ id: { reporter_id: null, delete_key: null, broker: BROKER } })
+    const utils = render(Terminal)
+    await send(utils)
+    await utils.findByText('config.terminal.crash.upload_done')
+    const stored = JSON.parse(posted['/debug/crash/identity'])
+    expect(stored.reporter_id).toMatch(/^[0-9a-f]{32}$/)
+    expect(stored.delete_key).toMatch(/^[0-9a-f]{64}$/)
+    expect(calls.indexOf('POST /debug/crash/identity')).toBeLessThan(calls.indexOf('GET /debug/crash/report'))
+    // And Delete is offered straight away, under that id.
+    expect(await utils.findByText(stored.reporter_id)).toBeInTheDocument()
+    expect(utils.getByText('config.terminal.crash.forget')).toBeInTheDocument()
+  })
+
+  it('two new identities are never the same', async () => {
+    const seen = new Set()
+    for (let i = 0; i < 2; i++) {
+      device({ id: { reporter_id: null, delete_key: null, broker: BROKER } })
+      const utils = render(Terminal)
+      await send(utils)
+      await utils.findByText('config.terminal.crash.upload_done')
+      seen.add(JSON.parse(posted['/debug/crash/identity']).delete_key)
+      utils.unmount()
     }
+    expect(seen.size).toBe(2)
   })
 
-  it('says a deferred upload has NOT happened yet, and offers to cancel it', async () => {
-    mockUpload({ post: { msg: 'not enough contiguous memory', state: 'deferred', deferred: true } })
-    const { findByText, getByText, queryByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.upload'))
-    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
-    expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
-    expect(queryByText('config.terminal.crash.upload_done')).not.toBeInTheDocument()
-
-    await fireEvent.click(getByText('config.terminal.crash.upload_cancel_deferred'))
-    expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash/upload')
-    await vi.waitFor(() =>
-      expect(queryByText('config.terminal.crash.upload_deferred')).not.toBeInTheDocument())
+  it('shows nothing on firmware without crash reporting', async () => {
+    device({ id: 'error' })
+    const utils = render(Terminal)
+    await utils.findByText('config.terminal.crash.title')
+    await new Promise((r) => setTimeout(r, 0))
+    expect(utils.queryByText('config.terminal.crash.upload')).not.toBeInTheDocument()
+    expect(utils.queryByText('config.terminal.crash.reporting_title')).not.toBeInTheDocument()
   })
 
-  it('shows a deferral already armed on an earlier visit', async () => {
-    mockUpload({ up: { state: 'deferred', sent: 0, total: 0, deferred: true } })
-    const { findByText } = render(Terminal)
-    expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
+  it('says when this browser cannot reach OpenEVSE, and keeps the dump', async () => {
+    // A phone on the charger's own hotspot has no internet.
+    device()
+    brokerAnswers(() => Promise.reject(new TypeError('Failed to fetch')))
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_unreachable')).toBeInTheDocument()
+    expect(calls).not.toContain('DELETE /debug/crash')
+    expect(utils.getByText('config.terminal.crash.upload')).toBeInTheDocument()
+  })
+
+  it('reports a refused upload, and keeps the dump to try again', async () => {
+    device()
+    brokerAnswers(() => Promise.resolve({ ok: false, status: 400, json: () => Promise.resolve({}) }))
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_failed')).toBeInTheDocument()
+    expect(calls).not.toContain('DELETE /debug/crash')
+  })
+
+  it('sends nothing when the charger cannot build the report', async () => {
+    device({ report: { status: 409, body: { msg: 'no reporter identity' } } })
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_failed')).toBeInTheDocument()
+    expect(broker).not.toHaveBeenCalled()
   })
 
   it('puts Send in the Crash reporting card, not in the dump card', async () => {
-    // The dump card is about the dump (read it, download it, clear it); the
-    // reporting card is about what goes to OpenEVSE, so Send lives there.
-    mockUpload({ up: { state: 'idle', sent: 0, total: 0, deferred: false, reporter_id: RID } })
+    device()
     const { findByText } = render(Terminal)
     const upload = await findByText('config.terminal.crash.upload')
     const dumpCard = (await findByText('config.terminal.crash.title')).parentElement
@@ -449,209 +541,108 @@ describe('Terminal — Crash core dump', () => {
     expect(reportCard.textContent).toContain(RID)
   })
 
-  it('follows progress and completion from the device event stream', async () => {
-    mockUpload()
-    const { findByText, getByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.upload'))
-    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
-
-    status_store.set({ crash_upload: 'uploading', crash_upload_sent: 8192, crash_upload_total: 26084 })
-    expect(await findByText('config.terminal.crash.upload_progress')).toBeInTheDocument()
-
-    status_store.set({ crash_upload: 'done' })
-    expect(await findByText('config.terminal.crash.upload_done')).toBeInTheDocument()
-  })
-
-  it('shows plain progress, not a byte count, while only the summary is sent', async () => {
-    // A summary-only upload goes metadata -> done with no bytes counted; a
-    // "0 of 20 KB" line would look stuck.
-    mockUpload()
-    const { findByText, getByText, queryByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.upload'))
-    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
-
-    status_store.set({ crash_upload: 'metadata', crash_upload_sent: 0, crash_upload_total: 20100 })
-    expect(await findByText('config.terminal.crash.upload_sending')).toBeInTheDocument()
-    expect(queryByText('config.terminal.crash.upload_progress')).not.toBeInTheDocument()
-  })
-
-  it('reports a failed upload and keeps the button so it can be retried', async () => {
-    mockUpload()
-    const { findByText, getByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.upload'))
-    await fireEvent.click(getByText('config.terminal.crash.upload_confirm_yes'))
-    status_store.set({ crash_upload: 'failed', crash_upload_error: 'timed out' })
-    expect(await findByText('config.terminal.crash.upload_failed')).toBeInTheDocument()
-    expect(getByText('config.terminal.crash.upload')).toBeInTheDocument()
-  })
-
-  it('a cancelled deferral stays cancelled when unrelated status frames arrive', async () => {
-    // Every websocket frame is merged into status_store, so a 'deferred' seen
-    // once stays in the store for the session. Re-applying it on the next
-    // EVSE reading would tell the user the report will still be sent after
-    // they withdrew it -- and the device's flag is already gone.
-    mockUpload()
-    const { findByText, getByText, queryByText } = render(Terminal)
-    await findByText('config.terminal.crash.upload')
-    status_store.set({ crash_upload: 'deferred' })
-    expect(await findByText('config.terminal.crash.upload_deferred')).toBeInTheDocument()
-
-    await fireEvent.click(getByText('config.terminal.crash.upload_cancel_deferred'))
-    await vi.waitFor(() =>
-      expect(queryByText('config.terminal.crash.upload_deferred')).not.toBeInTheDocument())
-
-    status_store.update((s) => ({ ...s, amp: 16000 }))   // an ordinary reading
-    await new Promise((r) => setTimeout(r, 20))
-    expect(queryByText('config.terminal.crash.upload_deferred')).not.toBeInTheDocument()
-  })
-
-  it('does not re-fetch the crash summary on every frame after an upload finishes', async () => {
-    mockUpload()
-    const { findByText } = render(Terminal)
-    await findByText('config.terminal.crash.upload')
-    status_store.set({ crash_upload: 'done' })
-    await findByText('config.terminal.crash.upload_done')
-    const fetches = () => httpAPI.mock.calls.filter(([m, u]) => m === 'GET' && u === '/debug/crash').length
-    const before = fetches()
-    for (let i = 0; i < 5; i++) status_store.update((s) => ({ ...s, amp: i }))
-    await new Promise((r) => setTimeout(r, 20))
-    expect(fetches()).toBe(before)
-  })
-})
-
-describe('Terminal — Deleting sent crash reports', () => {
-  const idle = { state: 'idle', sent: 0, total: 0, deferred: false, forget: 'idle', forget_deleted: 0 }
-
-  function mockReports({ rid = RID, forget = { msg: 'deleting', reporter_id: RID, forget: 'deleting' } } = {}) {
-    httpAPI.mockImplementation((method, url) => {
-      if (url === '/debug/crash') return Promise.resolve({ present: false })
-      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: rid })
-      if (url === '/debug/crash/reports' && method === 'DELETE') return Promise.resolve(forget)
-      return Promise.resolve({ cmd: '', ret: '' })
-    })
-  }
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-    status_store.set({})
-  })
-
-  it('offers nothing until this charger has sent a report', async () => {
-    mockReports({ rid: null })
+  it('offers no deletion until this charger has an identity', async () => {
+    device({ id: { reporter_id: null, delete_key: null, broker: BROKER }, dump: { present: false } })
     const { queryByText, findByText } = render(Terminal)
     await findByText('config.terminal.labs')
     await new Promise((r) => setTimeout(r, 0))
     expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
   })
 
-  it('offers deletion as soon as the first upload finishes, without a reload', async () => {
-    // The device mints its reporter id mid-upload, after the POST has already
-    // answered, so neither that reply nor the 'done' event carries it. The
-    // page has to ask -- and must ask /reports, not /upload, whose idle state
-    // would overwrite the visible 'done'.
-    let rid = null
-    httpAPI.mockImplementation((method, url) => {
-      if (url === '/debug/crash') return Promise.resolve({ present: false })
-      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: rid })
-      if (url === '/debug/crash/reports') return Promise.resolve({ reporter_id: rid, forget: 'idle', forget_deleted: 0 })
-      return Promise.resolve({ cmd: '', ret: '' })
-    })
-    const { findByText, queryByText } = render(Terminal)
-    await findByText('config.terminal.labs')
-    await new Promise((r) => setTimeout(r, 0))
-    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
-
-    const upGets = () => httpAPI.mock.calls.filter(([m, u]) => m === 'GET' && u === '/debug/crash/upload').length
-    const before = upGets()
-    rid = RID
-    status_store.set({ crash_upload: 'done' })
-    expect(await findByText('config.terminal.crash.forget')).toBeInTheDocument()
-    expect(await findByText(RID)).toBeInTheDocument()
-    expect(upGets()).toBe(before)
-    expect(queryByText('config.terminal.crash.upload_done')).toBeInTheDocument()
-  })
-
-  it('shows the reporter id, even with no dump stored, and deletes only after confirming', async () => {
-    mockReports()
-    const { findByText, getByText } = render(Terminal)
-    // The id sits on its own labelled line, not at the end of the sentence.
-    const id = await findByText(RID)
+  it('shows the reporter id with no dump stored, and deletes from the browser after confirming', async () => {
+    device({ dump: { present: false } })
+    const utils = render(Terminal)
+    const id = await utils.findByText(RID)
     expect(id.parentElement.textContent).toContain('config.terminal.crash.forget_reporter_id_label')
-    expect(id.parentElement.textContent).not.toContain('config.terminal.crash.forget_reporter_id ')
-    await fireEvent.click(await findByText('config.terminal.crash.forget'))
-    expect(getByText('config.terminal.crash.forget_confirm_body')).toBeInTheDocument()
-    for (const k of ['forget_confirm_now', 'forget_confirm_pending', 'forget_confirm_unlinked']) {
-      expect(getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget'))
+    for (const k of ['forget_confirm_now', 'forget_confirm_unlinked']) {
+      expect(utils.getByText('config.terminal.crash.' + k).closest('li'), k).not.toBeNull()
     }
-    expect(httpAPI).not.toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
-    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
-    expect(httpAPI).toHaveBeenCalledWith('DELETE', '/debug/crash/reports')
-    expect(await findByText('config.terminal.crash.forget_deleting')).toBeInTheDocument()
+    expect(broker).not.toHaveBeenCalled()
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await utils.findByText('config.terminal.crash.forget_done')).toBeInTheDocument()
+    const [url, init] = broker.mock.calls[0]
+    expect(url).toBe(`${BROKER}/v1/reporters/${RID}/delete`)
+    expect(init.method).toBe('POST')
+    expect(JSON.parse(init.body)).toEqual({ delete_key: KEY })
+    // The identity goes only after the broker has erased the reports.
+    expect(calls).toContain('DELETE /debug/crash/identity')
+    expect(utils.queryByText(RID)).not.toBeInTheDocument()
   })
 
-  it('shows the Crash reporting card with no dump stored, once something was sent', async () => {
-    // Loose text between cards read as half-placed, and the delete button sat
-    // flush against the next section.
-    mockReports()
-    status_store.set({})
-    const { findByText } = render(Terminal)
-    const title = await findByText('config.terminal.crash.reporting_title')
-    const card = title.parentElement
-    expect(card.textContent).toContain(RID)
-    expect(card.textContent).toContain('config.terminal.crash.forget')
+  it('keeps the identity when the broker cannot be reached, so Delete can be retried', async () => {
+    device({ dump: { present: false } })
+    brokerAnswers(() => Promise.reject(new TypeError('Failed to fetch')))
+    const utils = render(Terminal)
+    await fireEvent.click(await utils.findByText('config.terminal.crash.forget'))
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await utils.findByText('config.terminal.crash.forget_unreachable')).toBeInTheDocument()
+    expect(calls).not.toContain('DELETE /debug/crash/identity')
+    expect(utils.getByText(RID)).toBeInTheDocument()
   })
 
-  it('follows the deletion from the device event stream', async () => {
-    mockReports()
-    const { findByText, getByText, queryByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.forget'))
-    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
-    status_store.set({ crash_forget: 'deleted', crash_forget_deleted: 3 })
-    expect(await findByText('config.terminal.crash.forget_done')).toBeInTheDocument()
-    // The device discarded its identity: nothing left to delete.
-    expect(queryByText('config.terminal.crash.forget')).not.toBeInTheDocument()
+  it('keeps the identity when the broker refuses the deletion', async () => {
+    device({ dump: { present: false } })
+    brokerAnswers(() => Promise.resolve({ ok: false, status: 400, json: () => Promise.resolve({}) }))
+    const utils = render(Terminal)
+    await fireEvent.click(await utils.findByText('config.terminal.crash.forget'))
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await utils.findByText('config.terminal.crash.forget_failed')).toBeInTheDocument()
+    expect(calls).not.toContain('DELETE /debug/crash/identity')
   })
 
-  it("shows the device's reason when it refuses", async () => {
-    mockReports({ forget: { msg: 'not enough free memory right now', reporter_id: RID, forget: 'idle' } })
-    const { findByText, getByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.forget'))
-    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
-    expect(await findByText('not enough free memory right now', { exact: false })).toBeInTheDocument()
+  it('fetches the delete key only when Delete is pressed', async () => {
+    // It erases this charger's reports; it is not needed to show the page or
+    // to send one, so it is not on the wire until it is.
+    device()
+    const utils = render(Terminal)
+    await send(utils)
+    await utils.findByText('config.terminal.crash.upload_done')
+    expect(calls.some((c) => c.includes('?key='))).toBe(false)
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget'))
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
+    await utils.findByText('config.terminal.crash.forget_done')
+    expect(calls).toContain('GET /debug/crash/identity?key=1')
   })
 
-  it('says a deferred deletion will happen after the restart, as a warning not an error', async () => {
-    mockReports({ forget: { msg: 'not enough free memory right now -- will delete after the next restart',
-                            reporter_id: RID, forget: 'deferred' } })
-    const { findByText, getByText, queryByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.forget'))
-    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
-    expect(await findByText('config.terminal.crash.forget_deferred')).toBeInTheDocument()
-    // The device's reason is not shown as a failure: nothing failed.
-    expect(queryByText('not enough free memory', { exact: false })).not.toBeInTheDocument()
-    expect(getByText('config.terminal.crash.forget').closest('button')).toBeDisabled()
+  it('says so when the report was sent but the charger could not remove its copy', async () => {
+    // Saying "removed" here would invite sending the same report again.
+    device({ eraseStatus: 500 })
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_not_erased')).toBeInTheDocument()
+    expect(utils.queryByText('config.terminal.crash.upload_done')).not.toBeInTheDocument()
   })
 
-  it('shows a deletion already waiting for the restart, and offers no Send meanwhile', async () => {
-    httpAPI.mockImplementation((method, url) => {
-      if (url === '/debug/crash') return Promise.resolve({ present: true, size: 65536, task: 'loopTask', pc: 1074, bt: ['0x400d4b38'] })
-      if (url === '/debug/crash/upload') return Promise.resolve({ ...idle, reporter_id: RID, forget: 'deferred' })
-      return Promise.resolve({ cmd: '', ret: '' })
-    })
-    const { findByText, queryByText } = render(Terminal)
-    expect(await findByText('config.terminal.crash.forget_deferred')).toBeInTheDocument()
-    // The firmware refuses a send while a deletion waits; do not offer one.
-    expect(queryByText('config.terminal.crash.upload')).not.toBeInTheDocument()
+  it('says so when the reports were erased but the charger kept its id, and offers Delete again', async () => {
+    // Otherwise the next report would quietly reuse the old id, linking it to
+    // the erased ones. Deleting again is safe: nothing is left to erase.
+    device({ dump: { present: false }, forgetStatus: 500 })
+    const utils = render(Terminal)
+    await fireEvent.click(await utils.findByText('config.terminal.crash.forget'))
+    await fireEvent.click(utils.getByText('config.terminal.crash.forget_confirm_yes'))
+    expect(await utils.findByText('config.terminal.crash.forget_not_forgotten')).toBeInTheDocument()
+    expect(utils.queryByText('config.terminal.crash.forget_done')).not.toBeInTheDocument()
+    expect(utils.getByText(RID)).toBeInTheDocument()
+    expect(utils.getByText('config.terminal.crash.forget')).toBeInTheDocument()
   })
 
-  it('reports a failed deletion and keeps the button so it can be retried', async () => {
-    mockReports()
-    const { findByText, getByText } = render(Terminal)
-    await fireEvent.click(await findByText('config.terminal.crash.forget'))
-    await fireEvent.click(getByText('config.terminal.crash.forget_confirm_yes'))
-    status_store.set({ crash_forget: 'failed' })
-    expect(await findByText('config.terminal.crash.forget_failed')).toBeInTheDocument()
-    expect(getByText('config.terminal.crash.forget')).toBeInTheDocument()
+  it('a tab that lost the race to set the identity carries on with the stored one', async () => {
+    const OTHER = 'fedcba9876543210fedcba9876543210'
+    device({ id: { reporter_id: null, delete_key: null, broker: BROKER },
+             raced: { reporter_id: OTHER, delete_key: KEY } })
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_done')).toBeInTheDocument()
+    expect(utils.getByText(OTHER)).toBeInTheDocument()
+  })
+
+  it('reports a failure when the charger cannot store the identity', async () => {
+    device({ id: { reporter_id: null, delete_key: null, broker: BROKER }, storeStatus: 500 })
+    const utils = render(Terminal)
+    await send(utils)
+    expect(await utils.findByText('config.terminal.crash.upload_failed')).toBeInTheDocument()
+    expect(broker).not.toHaveBeenCalled()
   })
 })
 
