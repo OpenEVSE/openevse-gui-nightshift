@@ -29,6 +29,7 @@
   }
   const ROUTE_LABEL = {
     '/settings/safety': 'notifications.link.safety',
+    '/settings/installer': 'notifications.link.installer',
     '/monitoring/health': 'notifications.link.health',
   }
 

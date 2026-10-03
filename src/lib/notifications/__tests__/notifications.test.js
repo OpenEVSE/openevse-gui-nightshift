@@ -58,8 +58,8 @@ describe('severity', () => {
 })
 
 describe('the advisory catalogue', () => {
-  it('covers all sixteen ids the firmware can raise', () => {
-    expect(KNOWN_ADVISORY_IDS).toHaveLength(16)
+  it('covers all fifteen ids the firmware can raise', () => {
+    expect(KNOWN_ADVISORY_IDS).toHaveLength(15)
   })
 
   it('gives every safety advisory the config key of the switch it is about', () => {

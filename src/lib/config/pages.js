@@ -27,6 +27,9 @@ export const SETTINGS_PAGES = [
   { key: 'firmware', route: '/settings/firmware', icon: 'mdi:chip', labelKey: 'config.pages.firmware', section: 'system' },
   { key: 'certificates', route: '/settings/certificates', icon: 'mdi:certificate', labelKey: 'config.pages.certificates', section: 'system' },
   { key: 'terminal', route: '/settings/terminal', icon: 'mdi:console', labelKey: 'config.pages.terminal', section: 'system' },
+  // Installer-password gated: commissioning controls (hardware current limit,
+  // safety checks). The gate is in the page itself.
+  { key: 'installer', route: '/settings/installer', icon: 'mdi:wrench', labelKey: 'config.pages.installer', section: 'system' },
   // Shown for either kind of on-device display. `tft_theme` only appears in
   // /config on LVGL-TFT builds; `lcd_type` appears on every build whose
   // controller might carry the 2-line character LCD (classic V6, JuiceBox v2

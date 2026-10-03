@@ -45,12 +45,11 @@ export function maxSeverity(items) {
  * warn), so it is read from the payload, never from a table.
  */
 export const ADVISORIES = {
-  'safety.ground_check': { category: 'safety', setting: 'ground_check', route: '/settings/safety' },
-  'safety.gfci_check': { category: 'safety', setting: 'gfci_check', route: '/settings/safety' },
-  'safety.relay_check': { category: 'safety', setting: 'relay_check', route: '/settings/safety' },
-  'safety.diode_check': { category: 'safety', setting: 'diode_check', route: '/settings/safety' },
-  'safety.vent_check': { category: 'safety', setting: 'vent_check', route: '/settings/safety' },
-  'safety.temp_check': { category: 'safety', setting: 'temp_check', route: '/settings/safety' },
+  'safety.ground_check': { category: 'safety', setting: 'ground_check', route: '/settings/installer' },
+  'safety.relay_check': { category: 'safety', setting: 'relay_check', route: '/settings/installer' },
+  'safety.diode_check': { category: 'safety', setting: 'diode_check', route: '/settings/installer' },
+  'safety.vent_check': { category: 'safety', setting: 'vent_check', route: '/settings/installer' },
+  'safety.temp_check': { category: 'safety', setting: 'temp_check', route: '/settings/installer' },
   'fault.gfci_tripped': { category: 'fault', route: '/monitoring/health' },
   'fault.no_ground': { category: 'fault', route: '/monitoring/health' },
   'fault.stuck_relay': { category: 'fault', route: '/monitoring/health' },

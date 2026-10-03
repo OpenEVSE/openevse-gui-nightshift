@@ -23,6 +23,7 @@ import Emoncms from '../routes/settings/Emoncms.svelte'
 import Firmware from '../routes/settings/Firmware.svelte'
 import Certificates from '../routes/settings/Certificates.svelte'
 import Terminal from '../routes/settings/Terminal.svelte'
+import Installer from '../routes/settings/Installer.svelte'
 import Display from '../routes/settings/Display.svelte'
 import About from '../routes/settings/About.svelte'
 
@@ -69,6 +70,7 @@ routes['/settings/emoncms'] = Emoncms
 routes['/settings/firmware'] = Firmware
 routes['/settings/certificates'] = Certificates
 routes['/settings/terminal'] = Terminal
+routes['/settings/installer'] = Installer
 routes['/settings/display'] = Display
 routes['/settings/about'] = About
 
