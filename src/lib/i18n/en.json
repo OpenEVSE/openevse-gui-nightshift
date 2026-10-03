@@ -24,11 +24,11 @@
     },
     "link": {
       "safety": "Safety settings",
-      "health": "Relay health"
+      "health": "Relay health",
+      "installer": "Installer tools"
     },
     "title": {
       "safety.ground_check": "Ground monitoring is off",
-      "safety.gfci_check": "GFCI self-test is off",
       "safety.relay_check": "Stuck-relay detection is off",
       "safety.diode_check": "Diode check is off",
       "safety.vent_check": "Ventilation check is off",
@@ -46,7 +46,6 @@
     },
     "detail": {
       "safety.ground_check": "The charger will not check for a missing earth connection before it starts.",
-      "safety.gfci_check": "The charger will not test its residual-current detection at the start of a session.",
       "safety.relay_check": "The charger will not check that its relay actually opened.",
       "safety.diode_check": "The charger will not verify the vehicle's pilot diode before charging.",
       "safety.vent_check": "The charger will not require ventilation for vehicles that ask for it.",
@@ -223,7 +222,8 @@
       "certificates": "Certificates",
       "terminal": "Developer Tools",
       "display": "Display",
-      "about": "About"
+      "about": "About",
+      "installer": "Installer Tools"
     },
     "display": {
       "panel": "On-device display",
@@ -325,7 +325,8 @@
       "temp_throttle": "Temperature throttle",
       "temp_throttle_enable": "Enable temperature throttle",
       "temp_throttle_setpoint": "Setpoint",
-      "temp_throttle_desc": "Reduce charge current automatically when the EVSE reaches the setpoint temperature."
+      "temp_throttle_desc": "Reduce charge current automatically when the EVSE reaches the setpoint temperature.",
+      "gfci_check_desc": "Disable if the circuit is protected by a GFCI."
     },
     "cabletemp": {
       "title": "Cable temperature",
@@ -821,7 +822,40 @@
       "guides": "Guides",
       "discord": "Community support on Discord"
     },
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "installer": {
+      "lock_title": "Installer password required",
+      "lock_desc": "These settings are for the installer. Enter the installer password to continue.",
+      "password": "Installer password",
+      "unlock": "Unlock",
+      "lock": "Lock installer tools",
+      "wrong": "Incorrect installer password.",
+      "locked": "Too many attempts. Try again in {sec} seconds.",
+      "unreachable": "Could not reach the charger.",
+      "maxcurrent_title": "Hardware maximum current",
+      "maxcurrent_current": "Current hardware maximum",
+      "maxcurrent_note_title": "One-time setting — use caution",
+      "maxcurrent_note": "This command is one-time only. Once written, the hardware maximum current cannot be changed or erased. Use caution and set it to the station maximum or the circuit maximum, whichever is lower.",
+      "maxcurrent_note_nec": "The circuit maximum is the branch-circuit breaker rating reduced to 80% for a continuous load, as an EV charging load is treated under NEC 210.19(A)(1), 210.20(A) and 625.42. Follow the NEC edition and local code adopted where the charger is installed.",
+      "maxcurrent_input": "New hardware maximum (A)",
+      "maxcurrent_set": "Set hardware maximum",
+      "maxcurrent_sending": "Sending…",
+      "maxcurrent_applied": "Hardware maximum is now {amps} A.",
+      "maxcurrent_unchanged": "The charger did not accept the change. The hardware maximum may already have been set; it cannot be changed again.",
+      "confirm_title": "Set hardware maximum?",
+      "confirm_body": "This will permanently set the hardware maximum current to {amps} A.",
+      "confirm_yes": "Set permanently",
+      "confirm_no": "Cancel",
+      "password_title": "Installer password",
+      "password_desc": "Change the password that unlocks this page.",
+      "password_current": "Current password",
+      "password_new": "New password",
+      "password_confirm": "Confirm new password",
+      "password_change": "Change password",
+      "password_invalid": "Use {min} to {max} printable characters.",
+      "password_mismatch": "The new passwords do not match.",
+      "password_done": "Installer password changed."
+    }
   },
   "nav": {
     "home": "Home",
