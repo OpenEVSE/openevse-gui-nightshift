@@ -7,6 +7,7 @@ import {
   actionToFeatureKey,
   timerStateToAction,
   formatWindow,
+  alwaysOnConfig,
 } from '../rules.js'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -419,5 +420,28 @@ describe('formatWindow', () => {
   })
   it('appends (next day) when stop is before start', () => {
     expect(formatWindow('23:00', '06:00')).toBe('11:00 PM – 6:00 AM (next day)')
+  })
+})
+
+describe('alwaysOnConfig', () => {
+  it('turns Eco divert on in Eco, and keeps it there across a reboot', () => {
+    // The firmware boots into Eco only when divert_enabled AND charge_mode is
+    // eco (#1342): divert_enabled alone comes back in Auto.
+    expect(alwaysOnConfig('eco_divert', true)).toEqual({ charge_mode: 'eco', divert_enabled: true })
+  })
+
+  it('turns Eco divert off and drops the Eco default with it', () => {
+    expect(alwaysOnConfig('eco_divert', false)).toEqual({ divert_enabled: false, charge_mode: 'fast' })
+  })
+
+  it('maps the other always-on features to their enable flag alone', () => {
+    expect(alwaysOnConfig('shaper', true)).toEqual({ current_shaper_enabled: true })
+    expect(alwaysOnConfig('rfid', false)).toEqual({ rfid_enabled: false })
+    expect(alwaysOnConfig('ocpp', true)).toEqual({ ocpp_enabled: true })
+  })
+
+  it('has nothing for actions that are not an on/off feature', () => {
+    expect(alwaysOnConfig('charge', true)).toBeNull()
+    expect(alwaysOnConfig('session_limit', true)).toBeNull()
   })
 })

@@ -53,6 +53,30 @@ export function actionToFeatureKey(action) {
 }
 
 /**
+ * The config write that turns an Always Active feature on or off, or null for
+ * actions with no on/off flag (session limit, charge, disable).
+ *
+ * Eco divert needs two keys: the firmware starts in Eco after a reboot only
+ * when divert_enabled is set AND charge_mode is 'eco'. divert_enabled alone
+ * comes back in Auto (openevse_esp32_firmware#1342). Both go in one write.
+ * @param {string} action
+ * @param {boolean} on
+ * @returns {Record<string, string|boolean>|null}
+ */
+export function alwaysOnConfig(action, on) {
+  switch (action) {
+    case 'eco_divert':
+      return on
+        ? { charge_mode: 'eco', divert_enabled: true }
+        : { divert_enabled: false, charge_mode: 'fast' }
+    case 'shaper': return { current_shaper_enabled: on }
+    case 'rfid':   return { rfid_enabled: on }
+    case 'ocpp':   return { ocpp_enabled: on }
+    default:       return null
+  }
+}
+
+/**
  * Maps a timer `state` + optional `feature` back to a Rule action.
  * `state === 'eco'` handles old-format timers stored before this format change.
  * @param {string} state
