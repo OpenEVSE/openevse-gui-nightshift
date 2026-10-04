@@ -1,6 +1,6 @@
 # openevse-gui-nightshift
 
-A replacement web UI for the [OpenEVSE](https://www.openevse.com/) WiFi module —
+A new replacement web UI for v6.x+ the [OpenEVSE](https://www.openevse.com/) WiFi module —
 a from-scratch rewrite built with **Svelte 5, Vite 8 and Tailwind 4**.
 
 The app is a pure client of the OpenEVSE device's HTTP + WebSocket API; it has no
