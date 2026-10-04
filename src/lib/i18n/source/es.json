@@ -499,6 +499,12 @@
       "smoothing_desc": "Constante de tiempo del filtro para la lectura de potencia en vivo."
     },
     "shellylnm": {
+      "title": "Shelly LNM",
+      "field_single": "contador monofásico (EM / EM Pro / EM Mini)",
+      "field_total": "total trifásico",
+      "field_phase_a": "fase A",
+      "field_phase_b": "fase B",
+      "field_phase_c": "fase C",
       "enable": "Usar Shelly LNM",
       "desc": "Lee la potencia y la tensión de la red localmente desde un contador Shelly mediante multicast UDP (Local Network Messaging). Mientras esté activado sustituye a los topics MQTT de importación/exportación de red (Producción propia), potencia instantánea (Limitador de carga) y tensión (MQTT).",
       "state": "Escucha",
@@ -519,7 +525,7 @@
       "device": "ID de dispositivo (opcional)",
       "device_desc": "Acepta solo mensajes de este dispositivo, p. ej. shellypro3em-8813bfe1ab68. Déjelo vacío para aceptar cualquier dispositivo del grupo multicast.",
       "setup": "Configuración del Shelly",
-      "setup_desc": "Cree una instancia LNM en el Shelly y haga que transmita el componente del contador (ajuste la IP y el componente a su contador):",
+      "setup_desc": "Cree una instancia LNM en el Shelly y haga que transmita el componente del contador (ajuste la IP y el componente a su contador).",
       "sign_note": "La potencia de red debe ser positiva al importar y negativa al exportar."
     },
     "loadsharing": {

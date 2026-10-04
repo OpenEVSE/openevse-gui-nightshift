@@ -499,6 +499,12 @@
       "smoothing_desc": "Filter time constant for the live power reading."
     },
     "shellylnm": {
+      "title": "Shelly LNM",
+      "field_single": "single-phase meter (EM / EM Pro / EM Mini)",
+      "field_total": "3-phase total",
+      "field_phase_a": "phase A",
+      "field_phase_b": "phase B",
+      "field_phase_c": "phase C",
       "enable": "Use Shelly LNM",
       "desc": "Read grid power and voltage locally from a Shelly energy meter over UDP multicast (Local Network Messaging). While enabled it replaces the MQTT topics for grid import/export (Self-production), live power (Load Shaper) and voltage (MQTT).",
       "state": "Listener",
@@ -519,7 +525,7 @@
       "device": "Device ID (optional)",
       "device_desc": "Only accept messages from this device, e.g. shellypro3em-8813bfe1ab68. Leave empty to accept any device on the multicast group.",
       "setup": "Shelly setup",
-      "setup_desc": "Create an LNM instance on the Shelly and have it transmit the energy meter component (adjust the IP and the component to your meter):",
+      "setup_desc": "Create an LNM instance on the Shelly and have it transmit the energy meter component (adjust the IP and the component to your meter).",
       "sign_note": "Grid power must be positive when importing and negative when exporting."
     },
     "loadsharing": {

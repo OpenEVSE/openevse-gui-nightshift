@@ -20,18 +20,16 @@
   const NO_DATA = 4294967295
 
   const powerFields = [
-    { value: 'act_power', label: 'act_power — Shelly EM / EM Pro / EM Mini' },
-    { value: 'total_act_power', label: 'total_act_power — Shelly 3EM total' },
-    { value: 'a_act_power', label: 'a_act_power — Shelly 3EM phase A' },
-    { value: 'b_act_power', label: 'b_act_power — Shelly 3EM phase B' },
-    { value: 'c_act_power', label: 'c_act_power — Shelly 3EM phase C' },
+    ['act_power', 'field_single'], ['total_act_power', 'field_total'],
+    ['a_act_power', 'field_phase_a'], ['b_act_power', 'field_phase_b'], ['c_act_power', 'field_phase_c'],
   ]
   const voltageFields = [
-    { value: 'voltage', label: 'voltage — Shelly EM / EM Pro / EM Mini' },
-    { value: 'a_voltage', label: 'a_voltage — Shelly 3EM phase A' },
-    { value: 'b_voltage', label: 'b_voltage — Shelly 3EM phase B' },
-    { value: 'c_voltage', label: 'c_voltage — Shelly 3EM phase C' },
+    ['voltage', 'field_single'],
+    ['a_voltage', 'field_phase_a'], ['b_voltage', 'field_phase_b'], ['c_voltage', 'field_phase_c'],
   ]
+  const options = (fields) => fields.map(([value, key]) => ({ value, label: `${value} — ${$_('config.shellylnm.' + key)}` }))
+  let powerOptions = $derived(options(powerFields))
+  let voltageOptions = $derived(options(voltageFields))
 
   let enabled = $derived(!!$config_store?.shelly_lnm_enabled)
   let listening = $derived($status_store?.shelly_lnm_listening === 1)
@@ -40,12 +38,10 @@
   let ageTone = $derived(!hasData ? 'error' : age <= 5000 ? 'ok' : age > 10000 ? 'error' : 'warn')
   let power = $derived($status_store?.shelly_lnm_power)
   let voltage = $derived($status_store?.shelly_lnm_voltage)
-  let addr = $derived($config_store?.shelly_lnm_addr ?? '239.255.55.55')
-  let port = $derived($config_store?.shelly_lnm_port ?? 5555)
 </script>
 
 <ConfigPage title={$_('config.pages.shellylnm')}>
-  <ConfigSection>
+  <ConfigSection title={$_('config.shellylnm.title')}>
     <FormField label={$_('config.shellylnm.enable')} description={$_('config.shellylnm.desc')}>
       <Toggle
         checked={enabled}
@@ -109,7 +105,7 @@
         status={$ss.shelly_lnm_power_field ?? 'idle'}
       >
         <Select
-          options={powerFields}
+          options={powerOptions}
           value={$config_store?.shelly_lnm_power_field ?? 'act_power'}
           onchange={(v) => form.saveField('shelly_lnm_power_field', v)}
         />
@@ -120,7 +116,7 @@
         status={$ss.shelly_lnm_voltage_field ?? 'idle'}
       >
         <Select
-          options={voltageFields}
+          options={voltageOptions}
           value={$config_store?.shelly_lnm_voltage_field ?? 'voltage'}
           onchange={(v) => form.saveField('shelly_lnm_voltage_field', v)}
         />
@@ -141,9 +137,7 @@
 
     <ConfigSection title={$_('config.shellylnm.setup')}>
       <p class="mb-2 text-sm text-text-dim">{$_('config.shellylnm.setup_desc')}</p>
-      <pre class="overflow-x-auto rounded-xl bg-surface-2 p-3 text-xs text-text">http://SHELLY_IP/rpc/LNM.Create?config={`{"addr":"${addr}:${port}"}`}
-http://SHELLY_IP/rpc/LNM.SetConfig?id=200&amp;config={`{"tx":{"enable":true,"components":["em1:0"]}}`}</pre>
-      <p class="mt-2 text-xs text-text-dim">{$_('config.shellylnm.sign_note')}</p>
+      <p class="text-xs text-text-dim">{$_('config.shellylnm.sign_note')}</p>
     </ConfigSection>
   {/if}
 </ConfigPage>

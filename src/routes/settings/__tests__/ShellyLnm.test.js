@@ -60,7 +60,7 @@ describe('Shelly LNM page', () => {
     status_store.set({ shelly_lnm_listening: 0, shelly_lnm_data_age: 4294967295, shelly_lnm_power: null, shelly_lnm_voltage: null })
     const { getByText, queryByText, getAllByText } = render(ShellyLnm)
     expect(getByText('config.shellylnm.not_listening')).toBeInTheDocument()
-    expect(queryByText('4294967295 ms')).not.toBeInTheDocument()
+    expect(queryByText('4294967s')).not.toBeInTheDocument()
     expect(getAllByText('—')).toHaveLength(3)
   })
 
@@ -85,11 +85,5 @@ describe('Shelly LNM page', () => {
     await fireEvent.input(input, { target: { value: 'shellypro3em-aabbcc' } })
     await fireEvent.blur(input)
     expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ shelly_lnm_device: 'shellypro3em-aabbcc' }))
-  })
-
-  it('builds the Shelly setup URLs from the configured address and port', () => {
-    config_store.set({ ...base, shelly_lnm_addr: '239.1.2.3', shelly_lnm_port: 6000 })
-    const { container } = render(ShellyLnm)
-    expect(container.querySelector('pre').textContent).toContain('LNM.Create?config={"addr":"239.1.2.3:6000"}')
   })
 })

@@ -9,6 +9,8 @@ export const SETTINGS_PAGES = [
   { key: 'network', route: '/settings/network', icon: 'mdi:wifi', labelKey: 'config.pages.network', section: 'connectivity' },
   { key: 'http', route: '/settings/http', icon: 'mdi:web', labelKey: 'config.pages.http', section: 'connectivity' },
   { key: 'mqtt', route: '/settings/mqtt', icon: 'mdi:transit-connection-variant', labelKey: 'config.pages.mqtt', section: 'connectivity' },
+  // Needs firmware with Shelly LNM; `shelly_lnm_addr` is always present (non-empty default) there.
+  { key: 'shellylnm', route: '/settings/shellylnm', icon: 'mdi:meter-electric-outline', labelKey: 'config.pages.shellylnm', section: 'connectivity', requires: 'shelly_lnm_addr' },
   { key: 'ocpp', route: '/settings/ocpp', icon: 'mdi:ev-station', labelKey: 'config.pages.ocpp', section: 'connectivity' },
   // Charger
   { key: 'evse', route: '/settings/evse', icon: 'mdi:car-electric', labelKey: 'config.pages.evse', section: 'charger' },
@@ -21,8 +23,6 @@ export const SETTINGS_PAGES = [
   // Labs-gated: in-development, depends on matching firmware. Hidden from the
   // nav (and its route redirects) until the OpenEVSE Labs switch is on.
   { key: 'loadsharing', route: '/settings/loadsharing', icon: 'mdi:connection', labelKey: 'config.pages.loadsharing', section: 'energy', labs: true },
-  // Needs firmware with Shelly LNM; `shelly_lnm_addr` is always present (non-empty default) there.
-  { key: 'shellylnm', route: '/settings/shellylnm', icon: 'mdi:meter-electric-outline', labelKey: 'config.pages.shellylnm', section: 'energy', requires: 'shelly_lnm_addr' },
   { key: 'shaper', route: '/settings/shaper', icon: 'mdi:chart-bell-curve', labelKey: 'config.pages.shaper', section: 'energy' },
   { key: 'emoncms', route: '/settings/emoncms', icon: 'mdi:chart-box-outline', labelKey: 'config.pages.emoncms', section: 'energy' },
   // System

@@ -499,6 +499,12 @@
       "smoothing_desc": "Az élő teljesítmény leolvasás szűrőjének időállandója."
     },
     "shellylnm": {
+      "title": "Shelly LNM",
+      "field_single": "egyfázisú mérő (EM / EM Pro / EM Mini)",
+      "field_total": "háromfázisú összes",
+      "field_phase_a": "A fázis",
+      "field_phase_b": "B fázis",
+      "field_phase_c": "C fázis",
       "enable": "Shelly LNM használata",
       "desc": "A hálózati teljesítmény és feszültség helyi beolvasása Shelly mérőből UDP multicasttal (Local Network Messaging). Engedélyezve helyettesíti az MQTT témákat a hálózati importhoz/exporthoz (Saját termelés), az élő teljesítményhez (Terheléscsökkentő) és a feszültséghez (MQTT).",
       "state": "Figyelő",
@@ -519,7 +525,7 @@
       "device": "Eszközazonosító (opcionális)",
       "device_desc": "Csak ettől az eszköztől fogad üzeneteket, pl. shellypro3em-8813bfe1ab68. Hagyja üresen, ha a multicast csoport bármely eszközét el kell fogadni.",
       "setup": "Shelly beállítása",
-      "setup_desc": "Hozzon létre egy LNM példányt a Shellyn, és küldesse el a mérő komponenst (igazítsa az IP-t és a komponenst a mérőjéhez):",
+      "setup_desc": "Hozzon létre egy LNM példányt a Shellyn, és küldesse el a mérő komponenst (igazítsa az IP-t és a komponenst a mérőjéhez).",
       "sign_note": "A hálózati teljesítmény importáláskor pozitív, exportáláskor negatív."
     },
     "loadsharing": {
