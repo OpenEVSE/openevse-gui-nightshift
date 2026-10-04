@@ -109,5 +109,9 @@
   "probe3_max": 0,
   "probe3_n": 0,
   "reset_reason": 3,
-  "reset_reason_name": "sw"
+  "reset_reason_name": "sw",
+  "shelly_lnm_listening": 1,
+  "shelly_lnm_data_age": 420,
+  "shelly_lnm_power": -1731,
+  "shelly_lnm_voltage": 240.2
 }

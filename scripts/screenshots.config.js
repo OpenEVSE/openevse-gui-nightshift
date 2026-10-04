@@ -50,6 +50,7 @@ const entries = [
   { name: 'settings-http', route: '/settings/http' },
   { name: 'settings-mqtt', route: '/settings/mqtt' },
   { name: 'settings-ocpp', route: '/settings/ocpp' },
+  { name: 'settings-shellylnm', route: '/settings/shellylnm' },
   { name: 'settings-evse', route: '/settings/evse' },
   { name: 'settings-safety', route: '/settings/safety' },
   { name: 'settings-safety-advisories', route: '/settings/safety', scenario: 'notifications' },

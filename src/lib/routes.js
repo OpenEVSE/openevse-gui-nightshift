@@ -11,6 +11,7 @@ import Network from '../routes/settings/Network.svelte'
 import Http from '../routes/settings/Http.svelte'
 import Mqtt from '../routes/settings/Mqtt.svelte'
 import Ocpp from '../routes/settings/Ocpp.svelte'
+import ShellyLnm from '../routes/settings/ShellyLnm.svelte'
 import Evse from '../routes/settings/Evse.svelte'
 import Safety from '../routes/settings/Safety.svelte'
 import Time from '../routes/settings/Time.svelte'
@@ -50,6 +51,7 @@ for (const page of SETTINGS_PAGES) {
 routes['/settings/network'] = Network
 routes['/settings/http'] = Http
 routes['/settings/mqtt'] = Mqtt
+routes['/settings/shellylnm'] = ShellyLnm
 routes['/settings/ocpp'] = Ocpp
 
 // Charger pages — override the placeholders set above.

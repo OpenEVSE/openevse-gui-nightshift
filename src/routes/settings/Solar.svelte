@@ -83,18 +83,22 @@
         />
       </FormField>
     {:else}
-      <FormField
-        label={$_('config.solar.feed_grid')}
-        description={$_('config.solar.feed_grid_desc')}
-        status={$ss.mqtt_grid_ie ?? 'idle'}
-      >
-        <TextInput
-          value={$config_store?.mqtt_grid_ie ?? ''}
-          placeholder="topic/grid_ie"
-          revert={form.revert}
-          onchange={(v) => form.saveField('mqtt_grid_ie', v)}
-        />
-      </FormField>
+      {#if $config_store?.shelly_lnm_enabled}
+        <p class="py-2 text-sm text-text-dim">{$_('config.solar.feed_shelly')}</p>
+      {:else}
+        <FormField
+          label={$_('config.solar.feed_grid')}
+          description={$_('config.solar.feed_grid_desc')}
+          status={$ss.mqtt_grid_ie ?? 'idle'}
+        >
+          <TextInput
+            value={$config_store?.mqtt_grid_ie ?? ''}
+            placeholder="topic/grid_ie"
+            revert={form.revert}
+            onchange={(v) => form.saveField('mqtt_grid_ie', v)}
+          />
+        </FormField>
+      {/if}
     {/if}
   </ConfigSection>
 

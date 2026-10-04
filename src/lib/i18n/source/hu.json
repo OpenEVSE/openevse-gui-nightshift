@@ -177,7 +177,8 @@
       "err_version": "Nem támogatott protokollverzió",
       "err_network": "A kiszolgáló nem válaszol",
       "err_timeout": "A kapcsolat időtúllépése",
-      "err_dns": "DNS-feloldás sikertelen"
+      "err_dns": "DNS-feloldás sikertelen",
+      "vrms_shelly": "A feszültséget a Shelly LNM szolgáltatja, amíg engedélyezve van."
     },
     "ocpp": {
       "enable": "OCPP engedélyezése",
@@ -223,7 +224,8 @@
       "certificates": "Tanúsítványok",
       "terminal": "Fejlesztői eszközök",
       "display": "Kijelző",
-      "about": "Névjegy"
+      "about": "Névjegy",
+      "shellylnm": "Shelly LNM"
     },
     "display": {
       "panel": "Eszköz kijelzője",
@@ -476,7 +478,8 @@
       "battery_soc_topic": "Akkumulátor töltöttség téma",
       "battery_power_topic": "Akkumulátor teljesítmény téma",
       "battery_soc": "Akkumulátor töltöttség",
-      "battery_power": "Akkumulátor teljesítmény"
+      "battery_power": "Akkumulátor teljesítmény",
+      "feed_shelly": "A hálózati teljesítményt a Shelly LNM szolgáltatja, amíg engedélyezve van."
     },
     "shaper": {
       "enable": "Terheléscsökkentő engedélyezése",
@@ -492,7 +495,8 @@
       "max_interval": "Maximális adatintervallum",
       "max_interval_desc": "Biztonsági korlát, ha ennyi másodpercen belül nem érkezik élő adat.",
       "smoothing": "Bemeneti simítás",
-      "smoothing_desc": "Az élő teljesítmény leolvasás szűrőjének időállandója."
+      "smoothing_desc": "Az élő teljesítmény leolvasás szűrőjének időállandója.",
+      "live_shelly": "Az élő teljesítményterhelést a Shelly LNM szolgáltatja, amíg engedélyezve van."
     },
     "loadsharing": {
       "enable": "Terheléselosztás bekapcsolása",
@@ -821,7 +825,25 @@
       "guides": "Útmutatók",
       "discord": "Közösségi támogatás a Discordon"
     },
-    "logout": "Kijelentkezés"
+    "logout": "Kijelentkezés",
+    "shellylnm": {
+      "listening": "Shelly LNM csomagok figyelése",
+      "notlistening": "Nincs figyelés",
+      "lastupdated": "Utolsó frissítés",
+      "addr": "Multicast cím",
+      "addr-desc": "Az UDP multicast csoport, amelyre a Shelly eszközök az LNM állapotukat küldik, pl. 239.255.55.55",
+      "port": "Multicast port",
+      "port-desc": "Az LNM multicast csoport UDP portja",
+      "powerfield": "Teljesítmény mező",
+      "powerfield-desc": "Az aktív teljesítmény JSON mezője az LNM állapot komponensben, pl. act_power (Shelly EM / EM Mini), total_act_power (Shelly 3EM), a_act_power / b_act_power / c_act_power (fázisonként)",
+      "voltagefield": "Feszültség mező",
+      "voltagefield-desc": "Válassza ki az LNM állapotkomponens feszültségének JSON-mezőjét.",
+      "desc": "A hálózati teljesítmény és feszültség helyi beolvasása Shelly mérőből Shelly Local Network Messaging (UDP multicast) segítségével. Engedélyezés után ezek a helyi mérések helyettesítik az MQTT témákat a termelési többlethez (Saját termelés), az élő teljesítményhez (Shaper) és a feszültséghez (MQTT).",
+      "enable": "Shelly LNM engedélyezése",
+      "power": "Hálózati teljesítmény",
+      "voltage": "Hálózati feszültség",
+      "help-note": "A hálózati teljesítmény importáláskor pozitív, exportáláskor negatív, akárcsak az MQTT többletfolyam."
+    }
   },
   "nav": {
     "home": "Kezdőlap",

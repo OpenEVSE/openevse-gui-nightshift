@@ -177,7 +177,8 @@
       "err_version": "Versión de protocolo no admitida",
       "err_network": "El servidor no responde",
       "err_timeout": "Tiempo de conexión agotado",
-      "err_dns": "Fallo en la resolución DNS"
+      "err_dns": "Fallo en la resolución DNS",
+      "vrms_shelly": "Shelly LNM proporciona el voltaje mientras esté activado."
     },
     "ocpp": {
       "enable": "Activar OCPP",
@@ -223,7 +224,8 @@
       "certificates": "Certificados",
       "terminal": "Herramientas de desarrollo",
       "display": "Pantalla",
-      "about": "Acerca de"
+      "about": "Acerca de",
+      "shellylnm": "Shelly LNM"
     },
     "display": {
       "panel": "Pantalla del dispositivo",
@@ -476,7 +478,8 @@
       "battery_soc_topic": "Topic de SoC de la batería",
       "battery_power_topic": "Topic de potencia de la batería",
       "battery_soc": "SoC de la batería",
-      "battery_power": "Potencia de la batería"
+      "battery_power": "Potencia de la batería",
+      "feed_shelly": "Shelly LNM proporciona la potencia de red mientras esté activado."
     },
     "shaper": {
       "enable": "Activar limitador de carga",
@@ -492,7 +495,8 @@
       "max_interval": "Intervalo máximo de datos",
       "max_interval_desc": "Tiempo de seguridad si no llegan datos en vivo en este número de segundos.",
       "smoothing": "Suavizado de entrada",
-      "smoothing_desc": "Constante de tiempo del filtro para la lectura de potencia en vivo."
+      "smoothing_desc": "Constante de tiempo del filtro para la lectura de potencia en vivo.",
+      "live_shelly": "Shelly LNM proporciona la carga de potencia mientras esté activado."
     },
     "loadsharing": {
       "enable": "Activar el reparto de carga",
@@ -821,7 +825,25 @@
       "guides": "Guías",
       "discord": "Soporte de la comunidad en Discord"
     },
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "shellylnm": {
+      "listening": "Escuchando paquetes Shelly LNM",
+      "notlistening": "No escuchando",
+      "lastupdated": "Última actualización",
+      "addr": "Dirección multicast",
+      "addr-desc": "Grupo multicast UDP al que los dispositivos Shelly envían su estado LNM, p. ej. 239.255.55.55",
+      "port": "Puerto multicast",
+      "port-desc": "Puerto UDP del grupo multicast LNM",
+      "powerfield": "Campo de potencia",
+      "powerfield-desc": "Campo JSON de la potencia activa en el componente de estado LNM, p. ej. act_power (Shelly EM / EM Mini), total_act_power (Shelly 3EM), a_act_power / b_act_power / c_act_power (por fase)",
+      "voltagefield": "Campo de tensión",
+      "voltagefield-desc": "Seleccione el campo JSON del voltaje en el componente de estado LNM.",
+      "desc": "Lee la potencia y la tensión de la red localmente desde un contador Shelly mediante Shelly Local Network Messaging (multicast UDP). Una vez activado, estas medidas locales sustituyen a los topics MQTT para el exceso de producción (Auto-producción), la potencia instantánea (Shaper) y la tensión (MQTT).",
+      "enable": "Activar Shelly LNM",
+      "power": "Potencia de red",
+      "voltage": "Tensión de red",
+      "help-note": "La potencia de red es positiva al importar de la red y negativa al exportar, igual que el flujo de exceso MQTT."
+    }
   },
   "nav": {
     "home": "Inicio",

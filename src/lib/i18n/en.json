@@ -177,7 +177,8 @@
       "err_version": "Unsupported protocol version",
       "err_network": "Server not responding",
       "err_timeout": "Connection timed out",
-      "err_dns": "DNS lookup failed"
+      "err_dns": "DNS lookup failed",
+      "vrms_shelly": "Shelly LNM supplies voltage while it is enabled."
     },
     "ocpp": {
       "enable": "Enable OCPP",
@@ -223,7 +224,8 @@
       "certificates": "Certificates",
       "terminal": "Developer Tools",
       "display": "Display",
-      "about": "About"
+      "about": "About",
+      "shellylnm": "Shelly LNM"
     },
     "display": {
       "panel": "On-device display",
@@ -476,7 +478,8 @@
       "battery_soc_topic": "Battery SoC topic",
       "battery_power_topic": "Battery power topic",
       "battery_soc": "Battery SoC",
-      "battery_power": "Battery power"
+      "battery_power": "Battery power",
+      "feed_shelly": "Shelly LNM supplies grid power while it is enabled."
     },
     "shaper": {
       "enable": "Enable load shaper",
@@ -492,7 +495,8 @@
       "max_interval": "Maximum data interval",
       "max_interval_desc": "Failsafe if no live data arrives within this many seconds.",
       "smoothing": "Input smoothing",
-      "smoothing_desc": "Filter time constant for the live power reading."
+      "smoothing_desc": "Filter time constant for the live power reading.",
+      "live_shelly": "Shelly LNM supplies the live power load while it is enabled."
     },
     "loadsharing": {
       "enable": "Enable load sharing",
@@ -821,7 +825,25 @@
       "guides": "Guides",
       "discord": "Community support on Discord"
     },
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "shellylnm": {
+      "listening": "Listening for Shelly LNM packets",
+      "notlistening": "Not listening",
+      "lastupdated": "Last update",
+      "addr": "Multicast address",
+      "addr-desc": "UDP multicast group the Shelly devices send their LNM status to, e.g. 239.255.55.55",
+      "port": "Multicast port",
+      "port-desc": "UDP port of the LNM multicast group",
+      "powerfield": "Power field",
+      "powerfield-desc": "JSON field of the active power in the LNM status component, e.g. act_power (Shelly EM / EM Mini), total_act_power (Shelly 3EM), a_act_power / b_act_power / c_act_power (per phase)",
+      "voltagefield": "Voltage field",
+      "voltagefield-desc": "Select the voltage JSON field in the LNM status component.",
+      "desc": "Read grid power and voltage locally from Shelly energy meters using Shelly Local Network Messaging (UDP multicast). When enabled, these local measurements replace the MQTT topics for grid excess (Self Production), live power load (Shaper) and voltage (MQTT).",
+      "enable": "Enable Shelly LNM",
+      "power": "Grid power",
+      "voltage": "Grid voltage",
+      "help-note": "Grid power is expected positive when importing from the grid and negative when exporting, as the MQTT excess feed does."
+    }
   },
   "nav": {
     "home": "Home",

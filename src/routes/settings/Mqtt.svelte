@@ -324,18 +324,22 @@
           onchange={(v) => form.saveField('mqtt_retained', v)}
         />
       </FormField>
-      <FormField
-        label={$_('config.mqtt.vrms')}
-        description={$_('config.mqtt.vrms_desc')}
-        status={$ss.mqtt_vrms ?? 'idle'}
-      >
-        <TextInput
-          value={$config_store?.mqtt_vrms ?? ''}
-          placeholder="topic/voltage"
-          revert={form.revert}
-          onchange={(v) => form.saveField('mqtt_vrms', v)}
-        />
-      </FormField>
+      {#if $config_store?.shelly_lnm_enabled}
+        <p class="py-2 text-sm text-text-dim">{$_('config.mqtt.vrms_shelly')}</p>
+      {:else}
+        <FormField
+          label={$_('config.mqtt.vrms')}
+          description={$_('config.mqtt.vrms_desc')}
+          status={$ss.mqtt_vrms ?? 'idle'}
+        >
+          <TextInput
+            value={$config_store?.mqtt_vrms ?? ''}
+            placeholder="topic/voltage"
+            revert={form.revert}
+            onchange={(v) => form.saveField('mqtt_vrms', v)}
+          />
+        </FormField>
+      {/if}
     </ConfigSection>
   {/if}
 </ConfigPage>
