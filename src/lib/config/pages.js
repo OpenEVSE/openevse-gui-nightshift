@@ -21,6 +21,8 @@ export const SETTINGS_PAGES = [
   // Labs-gated: in-development, depends on matching firmware. Hidden from the
   // nav (and its route redirects) until the OpenEVSE Labs switch is on.
   { key: 'loadsharing', route: '/settings/loadsharing', icon: 'mdi:connection', labelKey: 'config.pages.loadsharing', section: 'energy', labs: true },
+  // Needs firmware with Shelly LNM; `shelly_lnm_addr` is always present (non-empty default) there.
+  { key: 'shellylnm', route: '/settings/shellylnm', icon: 'mdi:meter-electric-outline', labelKey: 'config.pages.shellylnm', section: 'energy', requires: 'shelly_lnm_addr' },
   { key: 'shaper', route: '/settings/shaper', icon: 'mdi:chart-bell-curve', labelKey: 'config.pages.shaper', section: 'energy' },
   { key: 'emoncms', route: '/settings/emoncms', icon: 'mdi:chart-box-outline', labelKey: 'config.pages.emoncms', section: 'energy' },
   // System
