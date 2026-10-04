@@ -246,6 +246,18 @@
           showWriteError()
           return
         }
+        // /divertmode only changes the runtime mode and is lost on reboot;
+        // persist the choice as charge_mode so Eco survives a restart.
+        const chargeMode = seg === 'eco' ? 'eco' : 'fast'
+        if ($config_store?.charge_mode !== chargeMode) {
+          const saved = await serialQueue.add(() =>
+            config_store.saveParam('charge_mode', chargeMode),
+          )
+          if (!saved) {
+            showWriteError()
+            return
+          }
+        }
         const dm = seg === 'eco' ? 2 : 1
         const res = await serialQueue.add(() =>
           httpAPI('POST', '/divertmode', `divertmode=${dm}`, 'text'),

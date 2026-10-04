@@ -158,11 +158,13 @@ describe('Dashboard', () => {
   it('drives /divertmode when the Eco segment is selected', async () => {
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
     config_store.set({ max_current_soft: 48, divert_enabled: true, current_shaper_enabled: false })
+    httpAPI.mockResolvedValue({ msg: 'done' })
     const { getByText } = render(Dashboard)
     // Click the Eco segment button in ChargeControls — setSegment('eco') releases the
-    // override then POSTs divertmode=2.
+    // override, persists charge_mode, then POSTs divertmode=2.
     await fireEvent.click(getByText('dashboard.eco'))
     await vi.waitFor(() => {
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ charge_mode: 'eco' }))
       expect(httpAPI).toHaveBeenCalledWith('POST', '/divertmode', 'divertmode=2', 'text')
     })
   })
