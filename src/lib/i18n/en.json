@@ -842,6 +842,7 @@
       "maxcurrent_sending": "Sending…",
       "maxcurrent_applied": "Hardware maximum is now {amps} A.",
       "maxcurrent_unchanged": "The charger did not accept the change. The hardware maximum may already have been set; it cannot be changed again.",
+      "maxcurrent_out_of_range": "Enter a whole number of amps from {min} to {max}. The limit can only be lowered.",
       "confirm_title": "Set hardware maximum?",
       "confirm_body": "This will permanently set the hardware maximum current to {amps} A.",
       "confirm_yes": "Set permanently",

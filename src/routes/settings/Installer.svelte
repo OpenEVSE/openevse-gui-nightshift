@@ -20,7 +20,6 @@
   import ReadOnlyRow from '../../lib/components/config/ReadOnlyRow.svelte'
   import SafetyChecksCard from '../../lib/components/config/SafetyChecksCard.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
-  import Card from '../../lib/components/ui/Card.svelte'
   import Modal from '../../lib/components/ui/Modal.svelte'
   import NumberInput from '../../lib/components/ui/NumberInput.svelte'
   import PasswordInput from '../../lib/components/ui/PasswordInput.svelte'
@@ -94,7 +93,13 @@
     if (amps === null && typeof hardMax === 'number' && hardMax >= MIN_AMPS) amps = hardMax
   })
 
-  let ampsValid = $derived(Number.isInteger(amps) && amps >= MIN_AMPS && amps <= MAX_AMPS)
+  // The limit can only come down: the charger refuses anything above what the
+  // controller reports now, since writing a higher value would quietly spend
+  // the one-time write on the old one.
+  let ampsMax = $derived(
+    typeof hardMax === 'number' && hardMax >= MIN_AMPS ? Math.min(hardMax, MAX_AMPS) : MAX_AMPS,
+  )
+  let ampsValid = $derived(Number.isInteger(amps) && amps >= MIN_AMPS && amps <= ampsMax)
 
   async function setHardMax() {
     pendingSet = false
@@ -104,6 +109,13 @@
     const requested = amps
     try {
       const res = await post('/installer/maxcurrent', { password, amps: requested })
+      if (res?.status === 400) {
+        maxResult = {
+          kind: 'error',
+          text: $_('config.installer.maxcurrent_out_of_range', { values: { min: MIN_AMPS, max: ampsMax } }),
+        }
+        return
+      }
       if (res?.status !== 200) {
         maxResult = { kind: 'error', text: passwordError(res) }
         return
@@ -165,8 +177,7 @@
 
 <ConfigPage title={$_('config.pages.installer')}>
   {#if !unlocked}
-    <Card class="mb-4 p-4">
-      <h2 class="mb-1 text-sm font-semibold text-text">{$_('config.installer.lock_title')}</h2>
+    <ConfigSection title={$_('config.installer.lock_title')}>
       <p class="mb-3 text-sm text-text-dim">{$_('config.installer.lock_desc')}</p>
       <form
         onsubmit={(e) => {
@@ -186,9 +197,12 @@
         {#if lockError}
           <p class="text-sm text-error" role="alert">{lockError}</p>
         {/if}
-        <Button type="submit" label={$_('config.installer.unlock')} disabled={busy} onclick={unlock} />
+        <!-- No onclick: Enter makes the browser click this button while the
+             field still has focus, before it has committed its value. The
+             form's submit handler blurs first and is the only caller. -->
+        <Button type="submit" label={$_('config.installer.unlock')} disabled={busy} />
       </form>
-    </Card>
+    </ConfigSection>
   {:else}
     <ConfigSection title={$_('config.installer.maxcurrent_title')}>
       <ReadOnlyRow
@@ -198,9 +212,9 @@
 
       <!-- The one-time warning sits above the control, in warning colours,
            because it is what the installer must read before touching it. -->
-      <div class="mt-3 rounded-xl border border-warning/40 bg-warning/5 p-3" role="note">
-        <p class="mb-1 text-sm font-semibold text-warning">{$_('config.installer.maxcurrent_note_title')}</p>
-        <p class="text-sm text-text">{$_('config.installer.maxcurrent_note')}</p>
+      <div class="mt-3 mb-3 rounded-xl border border-warning/40 bg-warning/5 p-3" role="note">
+        <p class="mb-1 text-sm font-medium text-text">{$_('config.installer.maxcurrent_note_title')}</p>
+        <p class="text-sm text-text-dim">{$_('config.installer.maxcurrent_note')}</p>
         <p class="mt-2 text-xs text-text-dim">{$_('config.installer.maxcurrent_note_nec')}</p>
       </div>
 
@@ -208,7 +222,7 @@
         <NumberInput
           value={amps}
           min={MIN_AMPS}
-          max={MAX_AMPS}
+          max={ampsMax}
           step={1}
           disabled={setting}
           onchange={(v) => (amps = v)}
@@ -221,7 +235,7 @@
       />
       {#if maxResult}
         <p
-          class="mt-2 text-sm {maxResult.kind === 'applied' ? 'text-text' : maxResult.kind === 'unchanged' ? 'text-warning' : 'text-error'}"
+          class="mt-2 text-sm {maxResult.kind === 'applied' ? 'text-text-dim' : maxResult.kind === 'unchanged' ? 'text-warning' : 'text-error'}"
           role="status"
         >{maxResult.text}</p>
       {/if}
@@ -242,7 +256,7 @@
       </FormField>
       <Button label={$_('config.installer.password_change')} disabled={pwBusy} onclick={changePassword} />
       {#if pwResult}
-        <p class="mt-2 text-sm {pwResult.kind === 'ok' ? 'text-text' : 'text-error'}" role="status">{pwResult.text}</p>
+        <p class="mt-2 text-sm {pwResult.kind === 'ok' ? 'text-text-dim' : 'text-error'}" role="status">{pwResult.text}</p>
       {/if}
     </ConfigSection>
 
@@ -255,7 +269,7 @@
 <!-- Hardware maximum confirmation: repeats the one-time warning with the value. -->
 <Modal visible={pendingSet} onclose={() => (pendingSet = false)}>
   <h2 class="mb-2 text-base font-semibold text-text">{$_('config.installer.confirm_title')}</h2>
-  <p class="mb-2 text-sm text-text">{$_('config.installer.confirm_body', { values: { amps } })}</p>
+  <p class="mb-3 text-sm text-text-dim">{$_('config.installer.confirm_body', { values: { amps } })}</p>
   <p class="mb-4 text-sm font-medium text-warning">{$_('config.installer.maxcurrent_note')}</p>
   <div class="flex gap-2">
     <Button label={$_('config.installer.confirm_yes')} onclick={setHardMax} />

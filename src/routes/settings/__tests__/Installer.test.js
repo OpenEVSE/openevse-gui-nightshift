@@ -97,6 +97,19 @@ describe('Installer Tools — password gate', () => {
       expect(utils.getByRole('alert')).toHaveTextContent('config.installer.locked:{"sec":17}'))
   })
 
+  it('sends the typed password when Enter submits the form', async () => {
+    // Enter in a form: the browser clicks the submit button while the field
+    // still has focus -- it has not blurred, so it has not committed its value.
+    const utils = render(Installer)
+    const input = utils.container.querySelector('input[type="password"]')
+    input.focus()
+    await fireEvent.focus(input)
+    await fireEvent.input(input, { target: { value: 'installer' } })
+    utils.container.querySelector('button[type="submit"]').click()
+    await vi.waitFor(() => expect(utils.queryByText('config.installer.unlock')).toBeNull())
+    expect(posts('/installer/verify').map((c) => c[2])).toEqual([JSON.stringify({ password: 'installer' })])
+  })
+
   it('does not unlock when the charger cannot be reached', async () => {
     replies['/installer/verify'] = 'error'
     const utils = render(Installer)
@@ -185,6 +198,26 @@ describe('Installer Tools — hardware maximum current', () => {
     await fireEvent.input(amps, { target: { value: '95' } })
     await fireEvent.blur(amps)
     expect(utils.getByText('config.installer.maxcurrent_set').closest('button')).toBeDisabled()
+  })
+
+  it('does not offer a value above the current hardware maximum', async () => {
+    // The limit only comes down; the charger refuses anything higher.
+    const utils = render(Installer) // the charger reports 32
+    await unlock(utils)
+    const amps = utils.getByRole('spinbutton')
+    await fireEvent.input(amps, { target: { value: '40' } })
+    await fireEvent.blur(amps)
+    expect(utils.getByText('config.installer.maxcurrent_set').closest('button')).toBeDisabled()
+  })
+
+  it('explains an amps refusal rather than calling the charger unreachable', async () => {
+    replies['/installer/maxcurrent'] = { status: 400, body: { msg: 'amps out of range' } }
+    const utils = render(Installer)
+    await unlock(utils)
+    await fireEvent.click(utils.getByText('config.installer.maxcurrent_set'))
+    await fireEvent.click(utils.getByText('config.installer.confirm_yes'))
+    await vi.waitFor(() =>
+      expect(utils.getByRole('status')).toHaveTextContent('config.installer.maxcurrent_out_of_range:{"min":6,"max":32}'))
   })
 
   it('surfaces a refusal from the charger', async () => {

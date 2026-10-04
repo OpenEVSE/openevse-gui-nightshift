@@ -842,6 +842,7 @@
       "maxcurrent_sending": "Küldés…",
       "maxcurrent_applied": "A hardveres maximum mostantól {amps} A.",
       "maxcurrent_unchanged": "A töltő nem fogadta el a módosítást. Lehet, hogy a hardveres maximumot már beállították; nem módosítható újra.",
+      "maxcurrent_out_of_range": "Adjon meg egy egész amperértéket {min} és {max} között. A határ csak csökkenthető.",
       "confirm_title": "Beállítja a hardveres maximumot?",
       "confirm_body": "Ez véglegesen {amps} A-re állítja a hardveres maximális áramot.",
       "confirm_yes": "Végleges beállítás",

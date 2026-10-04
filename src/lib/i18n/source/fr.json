@@ -842,6 +842,7 @@
       "maxcurrent_sending": "Envoi…",
       "maxcurrent_applied": "Le maximum matériel est maintenant de {amps} A.",
       "maxcurrent_unchanged": "Le chargeur n'a pas accepté la modification. Le maximum matériel a peut-être déjà été défini ; il ne peut plus être modifié.",
+      "maxcurrent_out_of_range": "Saisissez un nombre entier d'ampères entre {min} et {max}. La limite ne peut qu'être abaissée.",
       "confirm_title": "Définir le maximum matériel ?",
       "confirm_body": "Le courant maximal matériel sera défini de façon permanente à {amps} A.",
       "confirm_yes": "Définir définitivement",
