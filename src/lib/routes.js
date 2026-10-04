@@ -19,6 +19,7 @@ import Vehicle from '../routes/settings/Vehicle.svelte'
 import Solar from '../routes/settings/Solar.svelte'
 import LoadSharing from '../routes/settings/LoadSharing.svelte'
 import Shaper from '../routes/settings/Shaper.svelte'
+import ShellyLnm from '../routes/settings/ShellyLnm.svelte'
 import Emoncms from '../routes/settings/Emoncms.svelte'
 import Firmware from '../routes/settings/Firmware.svelte'
 import Certificates from '../routes/settings/Certificates.svelte'
@@ -63,6 +64,7 @@ routes['/settings/vehicle'] = Vehicle
 routes['/settings/solar'] = Solar
 routes['/settings/loadsharing'] = LoadSharing
 routes['/settings/shaper'] = Shaper
+routes['/settings/shellylnm'] = ShellyLnm
 routes['/settings/emoncms'] = Emoncms
 
 // System pages — override the placeholders set above.
@@ -91,7 +93,7 @@ export const LEGACY_ROUTES = {
 }
 for (const page of [
   'safety', 'evse', 'mqtt', 'http', 'ocpp', 'network', 'firmware', 'time',
-  'shaper', 'loadsharing', 'vehicle', 'emoncms', 'about',
+  'shaper', 'shellylnm', 'loadsharing', 'vehicle', 'emoncms', 'about',
 ]) {
   LEGACY_ROUTES['/configuration/' + page] = '/settings/' + page
 }
