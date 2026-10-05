@@ -8,6 +8,7 @@ import {
   timerStateToAction,
   formatWindow,
   alwaysOnConfig,
+  ecoDivertAlwaysOn,
 } from '../rules.js'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -424,14 +425,15 @@ describe('formatWindow', () => {
 })
 
 describe('alwaysOnConfig', () => {
-  it('turns Eco divert on in Eco, and keeps it there across a reboot', () => {
-    // The firmware boots into Eco only when divert_enabled AND charge_mode is
-    // eco (#1342): divert_enabled alone comes back in Auto.
-    expect(alwaysOnConfig('eco_divert', true)).toEqual({ charge_mode: 'eco', divert_enabled: true })
+  it('turns Eco divert on with charge_mode alone, so it survives a reboot', () => {
+    // The firmware boots into Eco when divert_enabled AND charge_mode is eco
+    // (#1342). divert_enabled is the Solar page's "feature set up" switch and
+    // is not the Charge Manager's to change.
+    expect(alwaysOnConfig('eco_divert', true)).toEqual({ charge_mode: 'eco' })
   })
 
-  it('turns Eco divert off and drops the Eco default with it', () => {
-    expect(alwaysOnConfig('eco_divert', false)).toEqual({ divert_enabled: false, charge_mode: 'fast' })
+  it('turns Eco divert off without disabling the solar divert feature', () => {
+    expect(alwaysOnConfig('eco_divert', false)).toEqual({ charge_mode: 'fast' })
   })
 
   it('maps the other always-on features to their enable flag alone', () => {
@@ -443,5 +445,23 @@ describe('alwaysOnConfig', () => {
   it('has nothing for actions that are not an on/off feature', () => {
     expect(alwaysOnConfig('charge', true)).toBeNull()
     expect(alwaysOnConfig('session_limit', true)).toBeNull()
+  })
+})
+
+describe('ecoDivertAlwaysOn', () => {
+  it('is on when divert is set up and the default charge mode is Eco', () => {
+    expect(ecoDivertAlwaysOn({ divert_enabled: true, charge_mode: 'eco' })).toBe(true)
+  })
+
+  it('is off when divert is set up but the default charge mode is Fast', () => {
+    expect(ecoDivertAlwaysOn({ divert_enabled: true, charge_mode: 'fast' })).toBe(false)
+  })
+
+  it('is off when divert is not set up, whatever charge_mode says', () => {
+    expect(ecoDivertAlwaysOn({ divert_enabled: false, charge_mode: 'eco' })).toBe(false)
+  })
+
+  it('is off before config has loaded', () => {
+    expect(ecoDivertAlwaysOn(undefined)).toBe(false)
   })
 })

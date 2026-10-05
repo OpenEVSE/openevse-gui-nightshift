@@ -911,6 +911,7 @@
     "feature_ocpp_unavailable": "Aucun serveur OCPP configuré",
     "feature_ocpp_not_implemented": "L'OCPP planifié n'est pas encore pris en charge",
     "feature_rfid_unavailable": "Aucun lecteur RFID détecté",
+    "feature_divert_unavailable": "Activez le surplus solaire dans Paramètres › Auto-production",
     "limit_soc_unavailable": "Aucune source de données véhicule",
     "limit_range_unavailable": "Aucune source de données véhicule",
     "feature_charge_current": "Courant de charge",

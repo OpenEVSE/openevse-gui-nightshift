@@ -13,7 +13,7 @@
   import { serialQueue } from '../lib/queue.js'
   import { showWriteError } from '../lib/alerts.js'
   import { DAYS } from '../lib/schedule/timers.js'
-  import { timersToRules, rulesToTimers, ruleDeleteIds, actionToFeatureKey, alwaysOnConfig } from '../lib/charge_manager/rules.js'
+  import { timersToRules, rulesToTimers, ruleDeleteIds, actionToFeatureKey, alwaysOnConfig, ecoDivertAlwaysOn } from '../lib/charge_manager/rules.js'
   import { vehicleLimitAvailability } from '../lib/charge_manager/vehicle.js'
   import { allRequiredSafetyChecksOn } from '../lib/config/safety.js'
   import GlobalSection from '../lib/components/charge_manager/GlobalSection.svelte'
@@ -40,6 +40,7 @@
   let limitDefaultType  = $derived($config_store?.limit_default_type || 'none')
   let limitDefaultValue = $derived(Number($config_store?.limit_default_value ?? 0))
   let divertEnabled  = $derived(!!$config_store?.divert_enabled)
+  let ecoAlwaysOn    = $derived(ecoDivertAlwaysOn($config_store))
   let shapingEnabled = $derived(!!$config_store?.current_shaper_enabled)
   let rfidEnabled    = $derived(!!$config_store?.rfid_enabled)
   let ocppEnabled    = $derived(!!$config_store?.ocpp_enabled)
@@ -96,20 +97,22 @@
     session_limit: () => limitDefaultType !== 'none',
     ocpp:          () => ocppEnabled,
     rfid:          () => rfidEnabled,
-    eco_divert:    () => divertEnabled,
+    eco_divert:    () => ecoAlwaysOn,
   }
 
   let enabledGlobalFeatures = $derived(
     FEATURE_PRIORITY_ORDER.filter((k) => FEATURE_ACTIVE[k]?.())
   )
 
-  // OCPP needs a server configured; RFID needs a reader on the I2C bus. Used to
-  // grey these out in both the feature picker and the Edit Rule action list.
+  // OCPP needs a server configured; RFID needs a reader on the I2C bus; Eco
+  // divert needs solar divert set up on the Solar page. Used to grey these out
+  // in both the feature picker and the Edit Rule action list.
   let ocppAvailable = $derived(!!$config_store?.ocpp_server)
   let rfidAvailable = $derived(!!$status_store?.rfid_reader)
   let pickerUnavailable = $derived({
     ...(ocppAvailable ? {} : { ocpp: 'charge_manager.feature_ocpp_unavailable' }),
     ...(rfidAvailable ? {} : { rfid: 'charge_manager.feature_rfid_unavailable' }),
+    ...(divertEnabled ? {} : { eco_divert: 'charge_manager.feature_divert_unavailable' }),
   })
 
   // ── UI state ──────────────────────────────────────────────────────────────
@@ -460,6 +463,7 @@
   {rangeMiles}
   {ocppAvailable}
   {rfidAvailable}
+  divertAvailable={divertEnabled}
   {minCurrent}
   {maxCurrent}
   {bootLockSupported}
