@@ -24,11 +24,11 @@
     },
     "link": {
       "safety": "Biztonsági beállítások",
-      "health": "Relé állapota"
+      "health": "Relé állapota",
+      "installer": "Szerelői eszközök"
     },
     "title": {
       "safety.ground_check": "A földelésfigyelés ki van kapcsolva",
-      "safety.gfci_check": "Az áram-védőkapcsoló önteszt ki van kapcsolva",
       "safety.relay_check": "A beragadt relé érzékelése ki van kapcsolva",
       "safety.diode_check": "A diódaellenőrzés ki van kapcsolva",
       "safety.vent_check": "A szellőzésellenőrzés ki van kapcsolva",
@@ -46,7 +46,6 @@
     },
     "detail": {
       "safety.ground_check": "A töltő indulás előtt nem ellenőrzi a hiányzó földelést.",
-      "safety.gfci_check": "A töltő a munkamenet elején nem teszteli az áramkülönbség-érzékelést.",
       "safety.relay_check": "A töltő nem ellenőrzi, hogy a relé valóban kinyitott-e.",
       "safety.diode_check": "A töltő töltés előtt nem ellenőrzi a jármű pilot diódáját.",
       "safety.vent_check": "A töltő nem követel meg szellőzést az azt kérő járműveknél.",
@@ -225,7 +224,8 @@
       "certificates": "Tanúsítványok",
       "terminal": "Fejlesztői eszközök",
       "display": "Kijelző",
-      "about": "Névjegy"
+      "about": "Névjegy",
+      "installer": "Szerelői eszközök"
     },
     "display": {
       "panel": "Eszköz kijelzője",
@@ -327,7 +327,8 @@
       "temp_throttle": "Hőmérséklet-szabályozás",
       "temp_throttle_enable": "Hőmérséklet-szabályozás bekapcsolása",
       "temp_throttle_setpoint": "Beállított érték",
-      "temp_throttle_desc": "Automatikusan csökkenti a töltőáramot, ha az EVSE eléri a beállított hőmérsékletet."
+      "temp_throttle_desc": "Automatikusan csökkenti a töltőáramot, ha az EVSE eléri a beállított hőmérsékletet.",
+      "gfci_check_desc": "Kapcsolja ki, ha az áramkört GFCI védi."
     },
     "cabletemp": {
       "title": "Kábelhőmérséklet",
@@ -855,7 +856,41 @@
       "guides": "Útmutatók",
       "discord": "Közösségi támogatás a Discordon"
     },
-    "logout": "Kijelentkezés"
+    "logout": "Kijelentkezés",
+    "installer": {
+      "lock_title": "Szerelői jelszó szükséges",
+      "lock_desc": "Ezek a beállítások a szerelőnek szólnak. A folytatáshoz adja meg a szerelői jelszót.",
+      "password": "Szerelői jelszó",
+      "unlock": "Feloldás",
+      "lock": "Szerelői eszközök zárolása",
+      "wrong": "Helytelen szerelői jelszó.",
+      "locked": "Túl sok próbálkozás. Próbálja újra {sec} másodperc múlva.",
+      "unreachable": "A töltő nem érhető el.",
+      "maxcurrent_title": "Hardveres maximális áram",
+      "maxcurrent_current": "Jelenlegi hardveres maximum",
+      "maxcurrent_note_title": "Egyszeri beállítás — óvatosan",
+      "maxcurrent_note": "Ez a parancs csak egyszer hajtható végre. Miután beírták, a hardveres maximális áram nem módosítható és nem törölhető. Legyen óvatos, és az állomás maximumára vagy az áramkör maximumára állítsa be, amelyik alacsonyabb.",
+      "maxcurrent_note_nec": "Az áramkör maximuma az ágáramköri megszakító névleges értékének 80%-a folyamatos terhelés esetén, ahogyan az elektromosautó-töltés terhelését az NEC 210.19(A)(1), 210.20(A) és 625.42 kezeli. Tartsa be a töltő telepítési helyén érvényes NEC-kiadást és helyi előírásokat.",
+      "maxcurrent_input": "Új hardveres maximum (A)",
+      "maxcurrent_set": "Hardveres maximum beállítása",
+      "maxcurrent_sending": "Küldés…",
+      "maxcurrent_applied": "A hardveres maximum mostantól {amps} A.",
+      "maxcurrent_unchanged": "A töltő nem fogadta el a módosítást. Lehet, hogy a hardveres maximumot már beállították; nem módosítható újra.",
+      "maxcurrent_out_of_range": "Adjon meg egy egész amperértéket {min} és {max} között. A határ csak csökkenthető.",
+      "confirm_title": "Beállítja a hardveres maximumot?",
+      "confirm_body": "Ez véglegesen {amps} A-re állítja a hardveres maximális áramot.",
+      "confirm_yes": "Végleges beállítás",
+      "confirm_no": "Mégse",
+      "password_title": "Szerelői jelszó",
+      "password_desc": "Módosítsa az oldalt feloldó jelszót.",
+      "password_current": "Jelenlegi jelszó",
+      "password_new": "Új jelszó",
+      "password_confirm": "Új jelszó megerősítése",
+      "password_change": "Jelszó módosítása",
+      "password_invalid": "Használjon {min}–{max} nyomtatható karaktert.",
+      "password_mismatch": "Az új jelszavak nem egyeznek.",
+      "password_done": "A szerelői jelszó módosítva."
+    }
   },
   "nav": {
     "home": "Kezdőlap",

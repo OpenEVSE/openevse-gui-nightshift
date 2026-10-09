@@ -97,7 +97,7 @@ describe('NotificationPanel', () => {
   it('links each advisory to the page that acts on it', () => {
     seed([item('safety.ground_check'), item('wear.relay_life', { first_seen: 1779300000 })])
     const { getByText } = render(NotificationPanel, { props: { visible: true } })
-    expect(getByText('notifications.link.safety').getAttribute('href')).toBe('#/settings/safety')
+    expect(getByText('notifications.link.installer').getAttribute('href')).toBe('#/settings/installer')
     expect(getByText('notifications.link.health').getAttribute('href')).toBe('#/monitoring/health')
   })
 

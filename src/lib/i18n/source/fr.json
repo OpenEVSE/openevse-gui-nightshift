@@ -24,11 +24,11 @@
     },
     "link": {
       "safety": "Réglages de sécurité",
-      "health": "État du relais"
+      "health": "État du relais",
+      "installer": "Outils de l'installateur"
     },
     "title": {
       "safety.ground_check": "La surveillance de la terre est désactivée",
-      "safety.gfci_check": "L'autotest du différentiel est désactivé",
       "safety.relay_check": "La détection de relais collé est désactivée",
       "safety.diode_check": "Le contrôle de la diode est désactivé",
       "safety.vent_check": "Le contrôle de ventilation est désactivé",
@@ -46,7 +46,6 @@
     },
     "detail": {
       "safety.ground_check": "Le chargeur ne vérifiera pas l'absence de mise à la terre avant de démarrer.",
-      "safety.gfci_check": "Le chargeur ne testera pas sa détection de courant résiduel au début d'une session.",
       "safety.relay_check": "Le chargeur ne vérifiera pas que son relais s'est réellement ouvert.",
       "safety.diode_check": "Le chargeur ne vérifiera pas la diode pilote du véhicule avant de charger.",
       "safety.vent_check": "Le chargeur n'exigera pas de ventilation pour les véhicules qui la demandent.",
@@ -225,7 +224,8 @@
       "certificates": "Certificats",
       "terminal": "Outils développeur",
       "display": "Écran",
-      "about": "À propos"
+      "about": "À propos",
+      "installer": "Outils de l'installateur"
     },
     "display": {
       "panel": "Écran de l'appareil",
@@ -327,7 +327,8 @@
       "temp_throttle": "Limitation thermique",
       "temp_throttle_enable": "Activer la limitation thermique",
       "temp_throttle_setpoint": "Seuil",
-      "temp_throttle_desc": "Réduit automatiquement le courant de charge lorsque l'EVSE atteint la température définie."
+      "temp_throttle_desc": "Réduit automatiquement le courant de charge lorsque l'EVSE atteint la température définie.",
+      "gfci_check_desc": "À désactiver si le circuit est protégé par un GFCI."
     },
     "cabletemp": {
       "title": "Température du câble",
@@ -855,7 +856,41 @@
       "guides": "Guides",
       "discord": "Assistance de la communauté sur Discord"
     },
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "installer": {
+      "lock_title": "Mot de passe installateur requis",
+      "lock_desc": "Ces réglages sont destinés à l'installateur. Saisissez le mot de passe installateur pour continuer.",
+      "password": "Mot de passe installateur",
+      "unlock": "Déverrouiller",
+      "lock": "Verrouiller les outils de l'installateur",
+      "wrong": "Mot de passe installateur incorrect.",
+      "locked": "Trop de tentatives. Réessayez dans {sec} secondes.",
+      "unreachable": "Impossible de joindre le chargeur.",
+      "maxcurrent_title": "Courant maximal matériel",
+      "maxcurrent_current": "Maximum matériel actuel",
+      "maxcurrent_note_title": "Réglage unique — prudence",
+      "maxcurrent_note": "Cette commande ne peut être exécutée qu'une seule fois. Une fois écrit, le courant maximal matériel ne peut plus être modifié ni effacé. Soyez prudent et réglez-le sur le maximum de la borne ou sur le maximum du circuit, selon le plus bas des deux.",
+      "maxcurrent_note_nec": "Le maximum du circuit correspond au calibre du disjoncteur du circuit terminal réduit à 80 % pour une charge continue, comme l'est une charge de recharge de véhicule électrique selon NEC 210.19(A)(1), 210.20(A) et 625.42. Respectez l'édition du NEC et le code local en vigueur là où le chargeur est installé.",
+      "maxcurrent_input": "Nouveau maximum matériel (A)",
+      "maxcurrent_set": "Définir le maximum matériel",
+      "maxcurrent_sending": "Envoi…",
+      "maxcurrent_applied": "Le maximum matériel est maintenant de {amps} A.",
+      "maxcurrent_unchanged": "Le chargeur n'a pas accepté la modification. Le maximum matériel a peut-être déjà été défini ; il ne peut plus être modifié.",
+      "maxcurrent_out_of_range": "Saisissez un nombre entier d'ampères entre {min} et {max}. La limite ne peut qu'être abaissée.",
+      "confirm_title": "Définir le maximum matériel ?",
+      "confirm_body": "Le courant maximal matériel sera défini de façon permanente à {amps} A.",
+      "confirm_yes": "Définir définitivement",
+      "confirm_no": "Annuler",
+      "password_title": "Mot de passe installateur",
+      "password_desc": "Modifiez le mot de passe qui déverrouille cette page.",
+      "password_current": "Mot de passe actuel",
+      "password_new": "Nouveau mot de passe",
+      "password_confirm": "Confirmer le nouveau mot de passe",
+      "password_change": "Changer le mot de passe",
+      "password_invalid": "Utilisez de {min} à {max} caractères imprimables.",
+      "password_mismatch": "Les nouveaux mots de passe ne correspondent pas.",
+      "password_done": "Mot de passe installateur modifié."
+    }
   },
   "nav": {
     "home": "Accueil",
