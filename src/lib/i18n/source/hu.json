@@ -980,7 +980,6 @@
     "feature_ocpp_unavailable": "Nincs OCPP-kiszolgáló beállítva",
     "feature_ocpp_not_implemented": "Az ütemezett OCPP még nem támogatott",
     "feature_rfid_unavailable": "Nem található RFID-olvasó",
-    "feature_divert_unavailable": "Kapcsolja be a napelemes töltést: Beállítások › Saját termelés",
     "limit_soc_unavailable": "Nincs járműadat-forrás",
     "limit_range_unavailable": "Nincs járműadat-forrás",
     "feature_charge_current": "Töltőáram",

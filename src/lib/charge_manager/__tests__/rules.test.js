@@ -425,11 +425,11 @@ describe('formatWindow', () => {
 })
 
 describe('alwaysOnConfig', () => {
-  it('turns Eco divert on with charge_mode alone, so it survives a reboot', () => {
-    // The firmware boots into Eco when divert_enabled AND charge_mode is eco
-    // (#1342). divert_enabled is the Solar page's "feature set up" switch and
-    // is not the Charge Manager's to change.
-    expect(alwaysOnConfig('eco_divert', true)).toEqual({ charge_mode: 'eco' })
+  it('turns Eco divert on with both flags, so it survives a reboot', () => {
+    // The firmware boots into Eco only when divert_enabled AND charge_mode is
+    // eco (#1342). divert_enabled defaults off and nothing else in the UI sets
+    // it, so turning Eco on has to write both.
+    expect(alwaysOnConfig('eco_divert', true)).toEqual({ divert_enabled: true, charge_mode: 'eco' })
   })
 
   it('turns Eco divert off without disabling the solar divert feature', () => {

@@ -66,16 +66,18 @@ export function ecoDivertAlwaysOn(config) {
  * The config write that turns an Always Active feature on or off, or null for
  * actions with no on/off flag (session limit, charge, disable).
  *
- * Eco divert is charge_mode alone. divert_enabled says solar divert is set up
- * (the Solar page owns it); charge_mode is what puts the charger in Eco, and
- * the firmware boots into Eco when both are set (openevse_esp32_firmware#1342).
+ * The firmware boots into Eco only when divert_enabled and charge_mode is eco
+ * (openevse_esp32_firmware#1342), so turning Eco divert on writes both.
+ * divert_enabled defaults off and nothing else in the UI sets it. Turning it
+ * off writes charge_mode alone and leaves divert_enabled set, so the
+ * dashboard's Eco button stays available.
  * @param {string} action
  * @param {boolean} on
  * @returns {Record<string, string|boolean>|null}
  */
 export function alwaysOnConfig(action, on) {
   switch (action) {
-    case 'eco_divert': return { charge_mode: on ? 'eco' : 'fast' }
+    case 'eco_divert': return on ? { divert_enabled: true, charge_mode: 'eco' } : { charge_mode: 'fast' }
     case 'shaper': return { current_shaper_enabled: on }
     case 'rfid':   return { rfid_enabled: on }
     case 'ocpp':   return { ocpp_enabled: on }

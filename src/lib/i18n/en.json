@@ -980,7 +980,6 @@
     "feature_ocpp_unavailable": "No OCPP server configured",
     "feature_ocpp_not_implemented": "Scheduled OCPP is not supported yet",
     "feature_rfid_unavailable": "No RFID reader found",
-    "feature_divert_unavailable": "Enable solar divert in Settings › Self-production",
     "limit_soc_unavailable": "No vehicle data source",
     "limit_range_unavailable": "No vehicle data source",
     "feature_charge_current": "Charge Current",

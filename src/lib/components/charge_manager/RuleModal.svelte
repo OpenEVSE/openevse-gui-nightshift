@@ -19,7 +19,6 @@
     // Feature availability — greys out the matching action option when false.
     ocppAvailable = true,
     rfidAvailable = true,
-    divertAvailable = true,
     minCurrent = 6,
     maxCurrent = 80,
     // Global safety config surfaced contextually on certain action cards.
@@ -192,9 +191,7 @@
       </span>
       <select bind:value={action} class={SELECT_CLASS}>
         <option value="charge">{$_('charge_manager.rule_action_charge')}</option>
-        <option value="eco_divert" disabled={!divertAvailable}>
-          {$_('charge_manager.rule_action_eco_divert')}{!divertAvailable ? ' — ' + $_('charge_manager.feature_divert_unavailable') : ''}
-        </option>
+        <option value="eco_divert">{$_('charge_manager.rule_action_eco_divert')}</option>
         <option value="shaper">{$_('charge_manager.rule_action_shaper')}</option>
         <option value="rfid" disabled={!rfidAvailable}>
           {$_('charge_manager.rule_action_rfid')}{!rfidAvailable ? ' — ' + $_('charge_manager.feature_rfid_unavailable') : ''}
