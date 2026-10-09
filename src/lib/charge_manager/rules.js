@@ -53,6 +53,39 @@ export function actionToFeatureKey(action) {
 }
 
 /**
+ * Whether Eco divert is Always Active: solar divert is set up and the default
+ * charge mode is Eco, which is also what the firmware boots into.
+ * @param {Record<string, any>|undefined} config
+ * @returns {boolean}
+ */
+export function ecoDivertAlwaysOn(config) {
+  return !!config?.divert_enabled && config?.charge_mode === 'eco'
+}
+
+/**
+ * The config write that turns an Always Active feature on or off, or null for
+ * actions with no on/off flag (session limit, charge, disable).
+ *
+ * The firmware boots into Eco only when divert_enabled and charge_mode is eco
+ * (openevse_esp32_firmware#1342), so turning Eco divert on writes both.
+ * divert_enabled defaults off and nothing else in the UI sets it. Turning it
+ * off writes charge_mode alone and leaves divert_enabled set, so the
+ * dashboard's Eco button stays available.
+ * @param {string} action
+ * @param {boolean} on
+ * @returns {Record<string, string|boolean>|null}
+ */
+export function alwaysOnConfig(action, on) {
+  switch (action) {
+    case 'eco_divert': return on ? { divert_enabled: true, charge_mode: 'eco' } : { charge_mode: 'fast' }
+    case 'shaper': return { current_shaper_enabled: on }
+    case 'rfid':   return { rfid_enabled: on }
+    case 'ocpp':   return { ocpp_enabled: on }
+    default:       return null
+  }
+}
+
+/**
  * Maps a timer `state` + optional `feature` back to a Rule action.
  * `state === 'eco'` handles old-format timers stored before this format change.
  * @param {string} state

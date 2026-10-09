@@ -13,7 +13,7 @@
   import { serialQueue } from '../lib/queue.js'
   import { showWriteError } from '../lib/alerts.js'
   import { DAYS } from '../lib/schedule/timers.js'
-  import { timersToRules, rulesToTimers, ruleDeleteIds, actionToFeatureKey } from '../lib/charge_manager/rules.js'
+  import { timersToRules, rulesToTimers, ruleDeleteIds, actionToFeatureKey, alwaysOnConfig, ecoDivertAlwaysOn } from '../lib/charge_manager/rules.js'
   import { vehicleLimitAvailability } from '../lib/charge_manager/vehicle.js'
   import { allRequiredSafetyChecksOn } from '../lib/config/safety.js'
   import GlobalSection from '../lib/components/charge_manager/GlobalSection.svelte'
@@ -39,7 +39,7 @@
   let limit          = $derived($limit_store ?? { type: 'none', value: 0, auto_release: true })
   let limitDefaultType  = $derived($config_store?.limit_default_type || 'none')
   let limitDefaultValue = $derived(Number($config_store?.limit_default_value ?? 0))
-  let divertEnabled  = $derived(!!$config_store?.divert_enabled)
+  let ecoAlwaysOn    = $derived(ecoDivertAlwaysOn($config_store))
   let shapingEnabled = $derived(!!$config_store?.current_shaper_enabled)
   let rfidEnabled    = $derived(!!$config_store?.rfid_enabled)
   let ocppEnabled    = $derived(!!$config_store?.ocpp_enabled)
@@ -96,7 +96,7 @@
     session_limit: () => limitDefaultType !== 'none',
     ocpp:          () => ocppEnabled,
     rfid:          () => rfidEnabled,
-    eco_divert:    () => divertEnabled,
+    eco_divert:    () => ecoAlwaysOn,
   }
 
   let enabledGlobalFeatures = $derived(
@@ -175,53 +175,40 @@
   }
 
   // ── Always-on API helpers ─────────────────────────────────────────────────
+  // One config write per feature change, merged into the store on success.
+  async function saveAlwaysOn(data) {
+    const ok = await serialQueue.add(() => config_store.upload(data))
+    if (ok) config_store.update((c) => ({ ...c, ...data }))
+    return ok
+  }
+
   async function applyAlwaysOnAction(action, rule) {
-    switch (action) {
-      case 'eco_divert':
-        return await serialQueue.add(() => config_store.saveParam('divert_enabled', true))
-      case 'shaper':
-        return await serialQueue.add(() => config_store.saveParam('current_shaper_enabled', true))
-      case 'rfid':
-        return await serialQueue.add(() => config_store.saveParam('rfid_enabled', true))
-      case 'ocpp':
-        return await serialQueue.add(() => config_store.saveParam('ocpp_enabled', true))
-      default: {
-        // Session limit: a missing/zero limit writes nothing — report it as a
-        // failure instead of pretending the save happened. (The modal already
-        // validates this; this is the backstop.)
-        if (!(rule.limit && rule.limit.type !== 'none' && rule.limit.value > 0)) return false
-        let ok = await serialQueue.add(() =>
-          config_store.saveParam('limit_default_type', rule.limit.type)
-        )
-        if (ok) ok = await serialQueue.add(() =>
-          config_store.saveParam('limit_default_value', rule.limit.value)
-        )
-        if (ok) await serialQueue.add(() => limit_store.download())
-        return ok
-      }
-    }
+    const data = alwaysOnConfig(action, true)
+    if (data) return await saveAlwaysOn(data)
+    // Session limit: a missing/zero limit writes nothing — report it as a
+    // failure instead of pretending the save happened. (The modal already
+    // validates this; this is the backstop.)
+    if (!(rule.limit && rule.limit.type !== 'none' && rule.limit.value > 0)) return false
+    let ok = await serialQueue.add(() =>
+      config_store.saveParam('limit_default_type', rule.limit.type)
+    )
+    if (ok) ok = await serialQueue.add(() =>
+      config_store.saveParam('limit_default_value', rule.limit.value)
+    )
+    if (ok) await serialQueue.add(() => limit_store.download())
+    return ok
   }
 
   async function clearAlwaysOnAction(action) {
-    switch (action) {
-      case 'eco_divert':
-        return await serialQueue.add(() => config_store.saveParam('divert_enabled', false))
-      case 'shaper':
-        return await serialQueue.add(() => config_store.saveParam('current_shaper_enabled', false))
-      case 'rfid':
-        return await serialQueue.add(() => config_store.saveParam('rfid_enabled', false))
-      case 'ocpp':
-        return await serialQueue.add(() => config_store.saveParam('ocpp_enabled', false))
-      default: {
-        // Report config/limit write failures; removeProp stays best-effort —
-        // it returns false for the common no-override-set case too.
-        let ok = await serialQueue.add(() => config_store.saveParam('limit_default_type', 'none'))
-        if (!(await serialQueue.add(() => limit_store.remove()))) ok = false
-        await serialQueue.add(() => override_store.removeProp('charge_current'))
-        await serialQueue.add(() => limit_store.download())
-        return ok
-      }
-    }
+    const data = alwaysOnConfig(action, false)
+    if (data) return await saveAlwaysOn(data)
+    // Session limit. Report config/limit write failures; removeProp stays
+    // best-effort — it returns false for the common no-override-set case too.
+    let ok = await serialQueue.add(() => config_store.saveParam('limit_default_type', 'none'))
+    if (!(await serialQueue.add(() => limit_store.remove()))) ok = false
+    await serialQueue.add(() => override_store.removeProp('charge_current'))
+    await serialQueue.add(() => limit_store.download())
+    return ok
   }
 
   // ── Single-param config save (busy-guarded) ───────────────────────────────
