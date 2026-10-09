@@ -108,11 +108,13 @@
       {/if}
 
       <div class="mt-2">
+        <!-- No onclick: Enter makes the browser click this button while the
+             focused field has not yet committed its value. The form's submit
+             handler blurs first and is the only caller. -->
         <Button
           type="submit"
           label={$_('login.submit')}
           disabled={busy}
-          onclick={submit}
         />
       </div>
     </form>
