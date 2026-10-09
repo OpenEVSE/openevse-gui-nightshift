@@ -82,6 +82,8 @@
           onchange={(v) => form.saveField('mqtt_solar', v)}
         />
       </FormField>
+    {:else if $config_store?.shelly_lnm_enabled}
+      <FormField label={$_('config.solar.feed_grid')} description={$_('config.solar.feed_grid_shelly')} />
     {:else}
       <FormField
         label={$_('config.solar.feed_grid')}

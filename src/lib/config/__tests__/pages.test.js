@@ -3,8 +3,14 @@ import { describe, it, expect } from 'vitest'
 import { SETTINGS_PAGES, SECTIONS, pagesBySection } from '../pages.js'
 
 describe('SETTINGS_PAGES', () => {
-  it('lists all 18 config pages', () => {
-    expect(SETTINGS_PAGES).toHaveLength(18)
+  it('puts Installer Tools in the system group, right below Developer Tools', () => {
+    const keys = SETTINGS_PAGES.map((p) => p.key)
+    expect(keys.indexOf('installer')).toBe(keys.indexOf('terminal') + 1)
+    expect(SETTINGS_PAGES.find((p) => p.key === 'installer').section).toBe('system')
+  })
+
+  it('lists all 20 config pages', () => {
+    expect(SETTINGS_PAGES).toHaveLength(20)
   })
   it('every page has key, route, icon, labelKey, section', () => {
     for (const p of SETTINGS_PAGES) {
@@ -43,7 +49,7 @@ describe('pagesBySection', () => {
       expect(g.pages.length).toBeGreaterThan(0)
       total += g.pages.length
     }
-    expect(total).toBe(18)
+    expect(total).toBe(19)
   })
   it('gates the Display page on either display key being present', () => {
     // A TFT build sends tft_theme; a controller with the 2-line character LCD
@@ -60,6 +66,12 @@ describe('pagesBySection', () => {
     expect(keysFor({ labs_enabled: false })).not.toContain('loadsharing')
     expect(keysFor(undefined)).not.toContain('loadsharing')
     expect(keysFor({ labs_enabled: true })).toContain('loadsharing')
+  })
+  it('gates the Shelly LNM page on firmware support (shelly_lnm_addr)', () => {
+    const keysFor = (config) => pagesBySection(config).flatMap((g) => g.pages.map((p) => p.key))
+    expect(keysFor({})).not.toContain('shellylnm')
+    expect(keysFor(undefined)).not.toContain('shellylnm')
+    expect(keysFor({ shelly_lnm_addr: '239.255.55.55' })).toContain('shellylnm')
   })
   it('preserves section order', () => {
     expect(pagesBySection({}).map((g) => g.section)).toEqual(SECTIONS)

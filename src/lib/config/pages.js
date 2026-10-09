@@ -9,6 +9,8 @@ export const SETTINGS_PAGES = [
   { key: 'network', route: '/settings/network', icon: 'mdi:wifi', labelKey: 'config.pages.network', section: 'connectivity' },
   { key: 'http', route: '/settings/http', icon: 'mdi:web', labelKey: 'config.pages.http', section: 'connectivity' },
   { key: 'mqtt', route: '/settings/mqtt', icon: 'mdi:transit-connection-variant', labelKey: 'config.pages.mqtt', section: 'connectivity' },
+  // Needs firmware with Shelly LNM; `shelly_lnm_addr` is always present (non-empty default) there.
+  { key: 'shellylnm', route: '/settings/shellylnm', icon: 'mdi:meter-electric-outline', labelKey: 'config.pages.shellylnm', section: 'connectivity', requires: 'shelly_lnm_addr' },
   { key: 'ocpp', route: '/settings/ocpp', icon: 'mdi:ev-station', labelKey: 'config.pages.ocpp', section: 'connectivity' },
   // Charger
   { key: 'evse', route: '/settings/evse', icon: 'mdi:car-electric', labelKey: 'config.pages.evse', section: 'charger' },
@@ -27,6 +29,9 @@ export const SETTINGS_PAGES = [
   { key: 'firmware', route: '/settings/firmware', icon: 'mdi:chip', labelKey: 'config.pages.firmware', section: 'system' },
   { key: 'certificates', route: '/settings/certificates', icon: 'mdi:certificate', labelKey: 'config.pages.certificates', section: 'system' },
   { key: 'terminal', route: '/settings/terminal', icon: 'mdi:console', labelKey: 'config.pages.terminal', section: 'system' },
+  // Installer-password gated: commissioning controls (hardware current limit,
+  // safety checks). The gate is in the page itself.
+  { key: 'installer', route: '/settings/installer', icon: 'mdi:wrench', labelKey: 'config.pages.installer', section: 'system' },
   // Shown for either kind of on-device display. `tft_theme` only appears in
   // /config on LVGL-TFT builds; `lcd_type` appears on every build whose
   // controller might carry the 2-line character LCD (classic V6, JuiceBox v2

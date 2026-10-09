@@ -55,7 +55,7 @@ describe('AdvisoryStrip', () => {
     const { getByRole, getByText } = render(AdvisoryStrip)
     expect(getByRole('alert')).toBeInTheDocument()
     expect(getByText('notifications.title.safety.ground_check')).toBeInTheDocument()
-    expect(getByText('notifications.strip_action').getAttribute('href')).toBe('#/settings/safety')
+    expect(getByText('notifications.strip_action').getAttribute('href')).toBe('#/settings/installer')
   })
 
   it('dismisses', async () => {
