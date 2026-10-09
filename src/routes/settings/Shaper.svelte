@@ -44,14 +44,18 @@
         onchange={(v) => form.saveField('current_shaper_max_pwr', v)}
       />
     </FormField>
-    <FormField label={$_('config.shaper.live_topic')} status={$ss.mqtt_live_pwr ?? 'idle'}>
-      <TextInput
-        value={$config_store?.mqtt_live_pwr ?? ''}
-        placeholder="topic/powerload"
-        revert={form.revert}
-        onchange={(v) => form.saveField('mqtt_live_pwr', v)}
-      />
-    </FormField>
+    {#if $config_store?.shelly_lnm_enabled}
+      <FormField label={$_('config.shaper.live_topic')} description={$_('config.shaper.live_shelly')} />
+    {:else}
+      <FormField label={$_('config.shaper.live_topic')} status={$ss.mqtt_live_pwr ?? 'idle'}>
+        <TextInput
+          value={$config_store?.mqtt_live_pwr ?? ''}
+          placeholder="topic/powerload"
+          revert={form.revert}
+          onchange={(v) => form.saveField('mqtt_live_pwr', v)}
+        />
+      </FormField>
+    {/if}
     <FormField label={$_('config.shaper.min_pause')} status={$ss.current_shaper_min_pause_time ?? 'idle'}>
       <NumberInput
         value={$config_store?.current_shaper_min_pause_time ?? null}

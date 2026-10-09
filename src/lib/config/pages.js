@@ -9,6 +9,8 @@ export const SETTINGS_PAGES = [
   { key: 'network', route: '/settings/network', icon: 'mdi:wifi', labelKey: 'config.pages.network', section: 'connectivity' },
   { key: 'http', route: '/settings/http', icon: 'mdi:web', labelKey: 'config.pages.http', section: 'connectivity' },
   { key: 'mqtt', route: '/settings/mqtt', icon: 'mdi:transit-connection-variant', labelKey: 'config.pages.mqtt', section: 'connectivity' },
+  // Needs firmware with Shelly LNM; `shelly_lnm_addr` is always present (non-empty default) there.
+  { key: 'shellylnm', route: '/settings/shellylnm', icon: 'mdi:meter-electric-outline', labelKey: 'config.pages.shellylnm', section: 'connectivity', requires: 'shelly_lnm_addr' },
   { key: 'ocpp', route: '/settings/ocpp', icon: 'mdi:ev-station', labelKey: 'config.pages.ocpp', section: 'connectivity' },
   // Charger
   { key: 'evse', route: '/settings/evse', icon: 'mdi:car-electric', labelKey: 'config.pages.evse', section: 'charger' },
