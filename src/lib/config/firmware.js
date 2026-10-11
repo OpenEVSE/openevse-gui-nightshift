@@ -3,7 +3,7 @@
 import { compareVersion } from '../utils.js'
 
 const RELEASES_URL =
-  'https://api.github.com/repos/OpenEVSE/ESP32_WiFi_V4.x/releases'
+  'https://api.github.com/repos/OpenEVSE/openevse_esp32_firmware/releases'
 
 /** Fetch the GitHub releases. Returns [] on any failure (never throws). */
 export async function fetchReleases() {
@@ -30,18 +30,15 @@ export function classifyReleases(releases) {
   }
 }
 
-/** The release asset whose name starts with buildenv and ends with .bin. */
+/**
+ * The release asset named exactly `${buildenv}.bin`. A prefix match would also
+ * pick e.g. `openevse_wifi_v1_16mb.bin` for `openevse_wifi_v1`, and flashing a
+ * 16MB-layout image onto a 4MB board can brick it.
+ */
 export function findAsset(release, buildenv) {
   if (!release || !Array.isArray(release.assets) || !buildenv) return null
-  return (
-    release.assets.find(
-      (a) =>
-        a &&
-        typeof a.name === 'string' &&
-        a.name.startsWith(buildenv) &&
-        a.name.endsWith('.bin'),
-    ) ?? null
-  )
+  const name = `${buildenv}.bin`
+  return release.assets.find((a) => a && a.name === name) ?? null
 }
 
 /** True only when `latestName` is a strictly newer parseable version. */

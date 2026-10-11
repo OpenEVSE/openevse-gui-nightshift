@@ -27,6 +27,16 @@ describe('findAsset', () => {
   it('matches an asset by buildenv prefix and .bin suffix', () => {
     expect(findAsset(RELEASES[0], 'esp32-gw').name).toBe('esp32-gw.bin')
   })
+  it('never picks a 16MB image for the 4MB build, in either asset order', () => {
+    const small = { name: 'openevse_wifi_v1.bin' }
+    const big = { name: 'openevse_wifi_v1_16mb.bin' }
+    for (const assets of [[small, big], [big, small]]) {
+      const release = { assets }
+      expect(findAsset(release, 'openevse_wifi_v1')).toBe(small)
+      expect(findAsset(release, 'openevse_wifi_v1_16mb')).toBe(big)
+    }
+    expect(findAsset({ assets: [big] }, 'openevse_wifi_v1')).toBe(null)
+  })
   it('returns null when nothing matches', () => {
     expect(findAsset(RELEASES[0], 'other-board')).toBe(null)
     expect(findAsset(RELEASES[1], 'esp32-gw')).toBe(null)
