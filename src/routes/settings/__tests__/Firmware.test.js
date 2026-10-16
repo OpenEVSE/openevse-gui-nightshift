@@ -258,6 +258,9 @@ describe('Firmware page', () => {
     expect(url).toMatch(/\/update$/)
     expect(init.method).toBe('POST')
     expect(init.headers['X-Requested-With']).toBe('OpenEVSE')
-    expect(init.body).toBeInstanceOf(FormData)
+    // Raw body, never multipart: the firmware cannot buffer a multipart image.
+    expect(init.body).toBe(file)
+    expect(init.body).not.toBeInstanceOf(FormData)
+    expect(init.headers['Content-Type']).toBe('application/octet-stream')
   })
 })

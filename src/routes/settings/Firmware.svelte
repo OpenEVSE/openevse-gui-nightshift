@@ -34,7 +34,7 @@
   // ota state.
   let failedDismissed = $state(false)
 
-  // /update is multipart; in dev the mock lives behind the /api proxy prefix.
+  // /update takes the raw image as the body; in dev the mock lives behind the /api proxy prefix.
   const updateUrl = import.meta.env.DEV ? '/api/update' : '/update'
 
   let otaState = $derived($status_store?.ota)
@@ -167,18 +167,23 @@
     uploading = true
     serialQueue.pause()
     try {
-      const fd = new FormData()
-      fd.append('update', firmwareFile)
-      // This is a raw fetch rather than httpAPI() because the body is a
-      // FormData upload, so it has to set X-Requested-With itself: the
-      // firmware's CSRF guard rejects any non-GET request authenticated by the
-      // session cookie that arrives without it. Missing this header made the
-      // upload fail with 403 {"msg":"csrf"} for every logged-in user on a
-      // password-protected device.
+      // The image goes up as the raw request body, not multipart/form-data.
+      // The firmware's HTTP server (Mongoose 7) buffers a whole multipart body
+      // in RAM before handing it over, which an ESP32 cannot do for a ~2 MB
+      // image -- the connection drops a second or two in. A raw body is
+      // streamed straight to flash and declares the exact image size.
+      //
+      // This is a raw fetch rather than httpAPI() so it can send a File body,
+      // so it has to set X-Requested-With itself: the firmware's CSRF guard
+      // rejects any non-GET request authenticated by the session cookie that
+      // arrives without it (403 {"msg":"csrf"}).
       const res = await fetch(updateUrl, {
         method: 'POST',
-        body: fd,
-        headers: { 'X-Requested-With': 'OpenEVSE' },
+        body: firmwareFile,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'X-Requested-With': 'OpenEVSE',
+        },
       })
       if (!res.ok) showWriteError()
     } catch {
