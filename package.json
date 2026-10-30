@@ -27,7 +27,7 @@
     "sharp": "^0.35.5",
     "svelte": "^5.57.2",
     "tailwindcss": "^4.3.2",
-    "vite": "^8.3.4",
+    "vite": "^8.3.5",
     "vite-plugin-compression2": "^2.5.3",
     "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.0",
