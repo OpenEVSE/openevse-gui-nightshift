@@ -12,6 +12,7 @@
   import FormField from '../../lib/components/config/FormField.svelte'
   import ReadOnlyRow from '../../lib/components/config/ReadOnlyRow.svelte'
   import NumberInput from '../../lib/components/ui/NumberInput.svelte'
+  import PasswordInput from '../../lib/components/ui/PasswordInput.svelte'
   import Select from '../../lib/components/ui/Select.svelte'
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import Toggle from '../../lib/components/ui/Toggle.svelte'
@@ -33,6 +34,7 @@
   let detailsPeer = $state(null)
   let priorityRevert = $state(0)
   let leaveGroupOpen = $state(false)
+  let generatedKey = $state('')
 
   let enabled = $derived(!!$config_store?.loadsharing_enabled)
   // loadsharing_role is a bool on the wire: false = controller (the
@@ -114,11 +116,20 @@
       3: $_('config.loadsharing.state_charging'),
       254: $_('config.loadsharing.state_sleeping'),
     }
+    if (peer?.error === 'auth_failed') return $_('config.loadsharing.auth_failed')
     if (peer?.status?.state !== undefined) {
       return states[peer.status.state] ?? $_('config.loadsharing.unknown')
     }
     if (peer?.joined) return $_('config.loadsharing.joined')
     return $_('config.loadsharing.discovered')
+  }
+
+  // The device only ever reports this key back as a placeholder, so this is the
+  // one moment it can be shown for copying onto the other chargers.
+  async function generateGroupKey() {
+    const bytes = crypto.getRandomValues(new Uint8Array(24))
+    const key = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+    if (await form.saveField('loadsharing_group_key', key)) generatedKey = key
   }
 
   async function addPeer(host) {
@@ -327,6 +338,34 @@
       </FormField>
     </ConfigSection>
     {/if}
+
+    <!-- Shown to members too: this is entered on each device by hand, because
+         the controller cannot sign anything until both ends hold the key. -->
+    <ConfigSection title={$_('config.loadsharing.security')}>
+      <FormField
+        label={$_('config.loadsharing.group_key')}
+        description={$_('config.loadsharing.group_key_desc')}
+        status={$ss.loadsharing_group_key ?? 'idle'}
+      >
+        <PasswordInput
+          value={$config_store?.loadsharing_group_key ?? ''}
+          maxlength={64}
+          revert={form.revert}
+          onchange={(v) => form.saveField('loadsharing_group_key', v)}
+        />
+      </FormField>
+      <div class="mt-3">
+        <Button
+          label={$_('config.loadsharing.group_key_generate')}
+          variant="ghost"
+          onclick={generateGroupKey}
+        />
+      </div>
+      {#if generatedKey}
+        <p class="mt-3 text-sm text-text-dim">{$_('config.loadsharing.group_key_generated')}</p>
+        <p class="mt-1 break-all font-mono text-sm text-text">{generatedKey}</p>
+      {/if}
+    </ConfigSection>
 
     <ConfigSection title={$_('config.loadsharing.runtime_status')}>
       <ReadOnlyRow
