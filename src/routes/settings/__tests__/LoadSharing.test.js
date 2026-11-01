@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, fireEvent } from '@testing-library/svelte'
+import { render, fireEvent, waitFor } from '@testing-library/svelte'
 
 vi.mock('svelte-i18n', () => {
   const t = (k) => k
@@ -74,6 +74,47 @@ describe('LoadSharing page', () => {
     // Role is a read-only row in Group status now, not a selectable field.
     expect(getByText('config.loadsharing.role')).toBeInTheDocument()
     expect(getByText('config.loadsharing.role_controller')).toBeInTheDocument()
+  })
+
+  it('offers the group key to a member, which holds its own copy', () => {
+    config_store.set({
+      loadsharing_enabled: true,
+      loadsharing_role: true,
+      loadsharing_controller_host: 'controller.local',
+    })
+    const { getByText } = render(LoadSharing)
+    expect(getByText('config.loadsharing.group_key')).toBeInTheDocument()
+    expect(getByText('config.loadsharing.group_key_generate')).toBeInTheDocument()
+  })
+
+  it('shows a generated key once it has been saved, and never before', async () => {
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false })
+    httpAPI.mockImplementation((method, path) =>
+      Promise.resolve(method === 'POST' && path === '/config' ? { msg: 'done' } : []),
+    )
+    const { getByText, queryByText } = render(LoadSharing)
+    expect(queryByText('config.loadsharing.group_key_generated')).not.toBeInTheDocument()
+
+    await fireEvent.click(getByText('config.loadsharing.group_key_generate'))
+
+    await waitFor(() =>
+      expect(getByText('config.loadsharing.group_key_generated')).toBeInTheDocument(),
+    )
+    const post = httpAPI.mock.calls.find(([m, p]) => m === 'POST' && p === '/config')
+    const { loadsharing_group_key: key } = JSON.parse(post[2])
+    expect(key).toMatch(/^[0-9a-f]{48}$/)
+    expect(getByText(key)).toBeInTheDocument()
+  })
+
+  it('names a group key mismatch instead of a generic peer state', async () => {
+    loadsharing_store.set({
+      status: {
+        peers: [{ host: 'peer.local', joined: true, online: false, error: 'auth_failed' }],
+      },
+    })
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false })
+    const { findByText } = render(LoadSharing)
+    expect(await findByText('config.loadsharing.auth_failed')).toBeInTheDocument()
   })
 
   it('renders peer management for controller role', async () => {
