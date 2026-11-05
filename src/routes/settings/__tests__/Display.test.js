@@ -64,6 +64,21 @@ describe('Display page', () => {
     expect(getByText('config.display.lcd_mono')).toHaveAttribute('aria-pressed', 'true')
   })
 
+  it('hides the LEDs-in-standby switch on firmware without tft_standby_leds_off', () => {
+    config_store.set({ tft_theme: 'dark' })
+    const { queryByRole } = render(Display)
+    expect(queryByRole('switch', { name: 'config.display.standby_leds_off' })).toBeNull()
+  })
+
+  it('writes tft_standby_leds_off when the LEDs-in-standby switch is flipped', async () => {
+    config_store.set({ tft_theme: 'dark', tft_standby_leds_off: false })
+    const { getByRole } = render(Display)
+    const sw = getByRole('switch', { name: 'config.display.standby_leds_off' })
+    expect(sw).toHaveAttribute('aria-checked', 'false')
+    await fireEvent.click(sw)
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ tft_standby_leds_off: true }))
+  })
+
   it('shows the backlight timeout in the LCD section on an LCD-only charger', async () => {
     // Issue #8: the char-LCD driver honours lcd_backlight_timeout too, so a
     // classic V6 with no TFT gets the same slider, described for a backlight

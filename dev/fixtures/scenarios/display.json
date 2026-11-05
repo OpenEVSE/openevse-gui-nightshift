@@ -3,6 +3,7 @@
     "tft_theme": "dark",
     "tft_brightness": 100,
     "tft_standby_brightness": 15,
+    "tft_standby_leds_off": false,
     "lcd_backlight_timeout": 600
   }
 }

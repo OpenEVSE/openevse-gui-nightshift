@@ -242,6 +242,8 @@
       "standby": "Brillo en reposo",
       "standby_desc": "Brillo de la pantalla cuando está inactiva. El 0 % apaga la retroiluminación.",
       "standby_off": "Apagado",
+      "standby_leds_off": "LED de estado apagados en reposo",
+      "standby_leds_off_desc": "Apaga los LED de estado mientras la pantalla está en reposo. Se vuelven a encender cuando la pantalla se activa.",
       "timeout": "Tiempo de inactividad",
       "timeout_desc": "Cuánto tiempo permanece encendida la pantalla antes de atenuarse al modo de reposo. Permanece a pleno brillo mientras carga o en caso de fallo.",
       "never": "Nunca",
