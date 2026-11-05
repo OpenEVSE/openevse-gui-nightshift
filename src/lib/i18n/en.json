@@ -242,6 +242,8 @@
       "standby": "Standby brightness",
       "standby_desc": "Screen brightness when idle. 0% turns the backlight off.",
       "standby_off": "Off",
+      "standby_leds_off": "Status LEDs off in standby",
+      "standby_leds_off_desc": "Turn the status LEDs off while the screen is in standby. They come back on whenever the screen wakes.",
       "timeout": "Idle timeout",
       "timeout_desc": "How long the screen stays bright before dimming to standby. It stays full-bright while charging or in a fault.",
       "never": "Never",
