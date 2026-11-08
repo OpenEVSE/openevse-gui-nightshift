@@ -28,6 +28,7 @@
   let hasBrightness = $derived('tft_brightness' in cfg)
   let hasStandby = $derived('tft_standby_brightness' in cfg)
   let hasTimeout = $derived('lcd_backlight_timeout' in cfg)
+  let hasStandbyLeds = $derived('tft_standby_leds_off' in cfg)
   let hasLcdType = $derived('lcd_type' in cfg)
 
   // On-device LVGL panel theme (config key `tft_theme`) — distinct from the web
@@ -161,6 +162,20 @@
 
     {#if hasTimeout}
       {@render timeoutField($_('config.display.timeout_desc'))}
+    {/if}
+
+    {#if hasStandbyLeds}
+      <FormField
+        label={$_('config.display.standby_leds_off')}
+        description={$_('config.display.standby_leds_off_desc')}
+        status={$ss.tft_standby_leds_off ?? 'idle'}
+      >
+        <Toggle
+          checked={!!cfg.tft_standby_leds_off}
+          label={$_('config.display.standby_leds_off')}
+          onchange={(v) => form.saveField('tft_standby_leds_off', v)}
+        />
+      </FormField>
     {/if}
   </ConfigSection>
   {/if}

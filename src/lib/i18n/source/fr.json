@@ -242,6 +242,8 @@
       "standby": "Luminosité en veille",
       "standby_desc": "Luminosité de l'écran au repos. 0 % éteint le rétroéclairage.",
       "standby_off": "Éteint",
+      "standby_leds_off": "LED d'état éteintes en veille",
+      "standby_leds_off_desc": "Éteint les LED d'état lorsque l'écran est en veille. Elles se rallument dès que l'écran se réveille.",
       "timeout": "Délai d'inactivité",
       "timeout_desc": "Durée pendant laquelle l'écran reste allumé avant de passer en veille. Il reste à pleine luminosité pendant la charge ou en cas de défaut.",
       "never": "Jamais",
