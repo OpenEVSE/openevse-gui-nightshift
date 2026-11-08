@@ -242,6 +242,8 @@
       "standby": "Készenléti fényerő",
       "standby_desc": "A kijelző fényereje tétlen állapotban. A 0% kikapcsolja a háttérvilágítást.",
       "standby_off": "Ki",
+      "standby_leds_off": "Állapot-LED-ek kikapcsolása készenlétben",
+      "standby_leds_off_desc": "Kikapcsolja az állapotjelző LED-eket, amíg a kijelző készenlétben van. A kijelző felébredésekor újra világítanak.",
       "timeout": "Tétlenségi időkorlát",
       "timeout_desc": "Mennyi ideig marad világos a kijelző, mielőtt készenléti állapotba halványul. Töltés közben vagy hiba esetén teljes fényerőn marad.",
       "never": "Soha",
