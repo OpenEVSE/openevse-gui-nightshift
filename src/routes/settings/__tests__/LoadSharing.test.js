@@ -81,6 +81,7 @@ describe('LoadSharing page', () => {
       loadsharing_enabled: true,
       loadsharing_role: true,
       loadsharing_controller_host: 'controller.local',
+      loadsharing_group_key: '',
     })
     const { getByText } = render(LoadSharing)
     expect(getByText('config.loadsharing.group_key')).toBeInTheDocument()
@@ -88,7 +89,7 @@ describe('LoadSharing page', () => {
   })
 
   it('shows a generated key once it has been saved, and never before', async () => {
-    config_store.set({ loadsharing_enabled: true, loadsharing_role: false })
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false, loadsharing_group_key: '' })
     httpAPI.mockImplementation((method, path) =>
       Promise.resolve(method === 'POST' && path === '/config' ? { msg: 'done' } : []),
     )
@@ -104,6 +105,67 @@ describe('LoadSharing page', () => {
     const { loadsharing_group_key: key } = JSON.parse(post[2])
     expect(key).toMatch(/^[0-9a-f]{48}$/)
     expect(getByText(key)).toBeInTheDocument()
+  })
+
+  it('hides the group key on firmware that does not report one', () => {
+    // Older firmware ignores the key, so Generate would "save" a key that
+    // protects nothing and invite the user to copy it everywhere.
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false })
+    const { queryByText } = render(LoadSharing)
+    expect(queryByText('config.loadsharing.group_key')).not.toBeInTheDocument()
+    expect(queryByText('config.loadsharing.group_key_generate')).not.toBeInTheDocument()
+  })
+
+  it('asks before replacing a key that is already set', async () => {
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false, loadsharing_group_key: '_DUMMY_PASSWORD' })
+    httpAPI.mockImplementation((method, path) =>
+      Promise.resolve(method === 'POST' && path === '/config' ? { msg: 'done' } : []),
+    )
+    const { getByText, getByRole } = render(LoadSharing)
+
+    await fireEvent.click(getByText('config.loadsharing.group_key_generate'))
+    expect(getByText('config.loadsharing.group_key_replace_warning')).toBeInTheDocument()
+    expect(httpAPI.mock.calls.some(([m, p]) => m === 'POST' && p === '/config')).toBe(false)
+
+    await fireEvent.click(getByRole('button', { name: 'config.loadsharing.group_key_replace' }))
+    await waitFor(() =>
+      expect(getByText('config.loadsharing.group_key_generated')).toBeInTheDocument(),
+    )
+    const post = httpAPI.mock.calls.find(([m, p]) => m === 'POST' && p === '/config')
+    expect(JSON.parse(post[2]).loadsharing_group_key).toMatch(/^[0-9a-f]{48}$/)
+  })
+
+  it('removes a set key after confirmation', async () => {
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false, loadsharing_group_key: '_DUMMY_PASSWORD' })
+    httpAPI.mockImplementation((method, path) =>
+      Promise.resolve(method === 'POST' && path === '/config' ? { msg: 'done' } : []),
+    )
+    const { getByText, getAllByText } = render(LoadSharing)
+
+    await fireEvent.click(getByText('config.loadsharing.group_key_remove'))
+    expect(getByText('config.loadsharing.group_key_remove_warning')).toBeInTheDocument()
+    const buttons = getAllByText('config.loadsharing.group_key_remove')
+    await fireEvent.click(buttons[buttons.length - 1])
+    await waitFor(() =>
+      expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ loadsharing_group_key: '' })),
+    )
+  })
+
+  it('offers no Remove when no key is set', () => {
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false, loadsharing_group_key: '' })
+    const { queryByText } = render(LoadSharing)
+    expect(queryByText('config.loadsharing.group_key_remove')).not.toBeInTheDocument()
+  })
+
+  it('refuses a key shorter than the firmware accepts', async () => {
+    config_store.set({ loadsharing_enabled: true, loadsharing_role: false, loadsharing_group_key: '' })
+    const { container, getByText } = render(LoadSharing)
+    const input = container.querySelector('input[type="password"][maxlength="64"]')
+    await fireEvent.focus(input)
+    await fireEvent.input(input, { target: { value: 'too-short' } })
+    await fireEvent.blur(input)
+    expect(getByText('config.loadsharing.group_key_length')).toBeInTheDocument()
+    expect(httpAPI.mock.calls.some(([m, p]) => m === 'POST' && p === '/config')).toBe(false)
   })
 
   it('names a group key mismatch instead of a generic peer state', async () => {

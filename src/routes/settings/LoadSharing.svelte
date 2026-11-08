@@ -13,6 +13,7 @@
   import ReadOnlyRow from '../../lib/components/config/ReadOnlyRow.svelte'
   import NumberInput from '../../lib/components/ui/NumberInput.svelte'
   import PasswordInput from '../../lib/components/ui/PasswordInput.svelte'
+  import { isDummyPassword } from '../../lib/config/validate.js'
   import Select from '../../lib/components/ui/Select.svelte'
   import TextInput from '../../lib/components/ui/TextInput.svelte'
   import Toggle from '../../lib/components/ui/Toggle.svelte'
@@ -35,8 +36,18 @@
   let priorityRevert = $state(0)
   let leaveGroupOpen = $state(false)
   let generatedKey = $state('')
+  // 'replace' or 'remove' while the group key confirmation is open
+  let keyConfirm = $state(null)
+  let keyLengthError = $state(false)
 
   let enabled = $derived(!!$config_store?.loadsharing_enabled)
+  // Firmware without group key support doesn't report the key at all; firmware
+  // with it reports '' or the masking sentinel. Gate on presence, so older
+  // firmware isn't offered a key it would silently ignore.
+  let hasGroupKey = $derived($config_store != null && 'loadsharing_group_key' in $config_store)
+  let groupKeySet = $derived(
+    isDummyPassword($config_store?.loadsharing_group_key) || !!$config_store?.loadsharing_group_key,
+  )
   // loadsharing_role is a bool on the wire: false = controller (the
   // default -- no manual selection needed), true = member (set
   // automatically when this device is joined into another charger's
@@ -127,9 +138,28 @@
   // The device only ever reports this key back as a placeholder, so this is the
   // one moment it can be shown for copying onto the other chargers.
   async function generateGroupKey() {
+    keyConfirm = null
     const bytes = crypto.getRandomValues(new Uint8Array(24))
     const key = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
     if (await form.saveField('loadsharing_group_key', key)) generatedKey = key
+  }
+
+  // Replacing or removing the key cuts this charger off from the rest of the
+  // group until every other charger is changed to match, so both ask first.
+  function requestGenerate() {
+    if (groupKeySet) keyConfirm = 'replace'
+    else generateGroupKey()
+  }
+
+  async function removeGroupKey() {
+    keyConfirm = null
+    if (await form.saveField('loadsharing_group_key', '')) generatedKey = ''
+  }
+
+  // The firmware accepts an empty key (none) or 16 to 64 characters.
+  function saveGroupKey(v) {
+    keyLengthError = v !== '' && v.length < 16
+    if (!keyLengthError) form.saveField('loadsharing_group_key', v)
   }
 
   async function addPeer(host) {
@@ -341,6 +371,7 @@
 
     <!-- Shown to members too: this is entered on each device by hand, because
          the controller cannot sign anything until both ends hold the key. -->
+    {#if hasGroupKey}
     <ConfigSection title={$_('config.loadsharing.security')}>
       <FormField
         label={$_('config.loadsharing.group_key')}
@@ -351,21 +382,32 @@
           value={$config_store?.loadsharing_group_key ?? ''}
           maxlength={64}
           revert={form.revert}
-          onchange={(v) => form.saveField('loadsharing_group_key', v)}
+          onchange={saveGroupKey}
         />
+        {#if keyLengthError}
+          <p class="mt-1 text-xs text-error">{$_('config.loadsharing.group_key_length')}</p>
+        {/if}
       </FormField>
-      <div class="mt-3">
+      <div class="mt-3 flex flex-wrap gap-2">
         <Button
           label={$_('config.loadsharing.group_key_generate')}
           variant="ghost"
-          onclick={generateGroupKey}
+          onclick={requestGenerate}
         />
+        {#if groupKeySet}
+          <Button
+            label={$_('config.loadsharing.group_key_remove')}
+            variant="ghost"
+            onclick={() => (keyConfirm = 'remove')}
+          />
+        {/if}
       </div>
       {#if generatedKey}
         <p class="mt-3 text-sm text-text-dim">{$_('config.loadsharing.group_key_generated')}</p>
         <p class="mt-1 break-all font-mono text-sm text-text">{generatedKey}</p>
       {/if}
     </ConfigSection>
+    {/if}
 
     <ConfigSection title={$_('config.loadsharing.runtime_status')}>
       <ReadOnlyRow
@@ -580,6 +622,28 @@
         </div>
       </div>
     {/if}
+  </Modal>
+
+  <Modal visible={keyConfirm !== null} closable={true} onclose={() => (keyConfirm = null)}>
+    <div class="p-4">
+      <h2 class="mb-4 text-base font-semibold text-text">
+        {$_(keyConfirm === 'remove' ? 'config.loadsharing.group_key_remove' : 'config.loadsharing.group_key_replace')}
+      </h2>
+      <p class="text-sm text-text-dim">
+        {$_(keyConfirm === 'remove' ? 'config.loadsharing.group_key_remove_warning' : 'config.loadsharing.group_key_replace_warning')}
+      </p>
+      <div class="mt-5 flex flex-col gap-2">
+        <Button
+          label={$_(keyConfirm === 'remove' ? 'config.loadsharing.group_key_remove' : 'config.loadsharing.group_key_replace')}
+          onclick={keyConfirm === 'remove' ? removeGroupKey : generateGroupKey}
+        />
+        <Button
+          label={$_('config.loadsharing.close')}
+          variant="ghost"
+          onclick={() => (keyConfirm = null)}
+        />
+      </div>
+    </div>
   </Modal>
 
   <Modal visible={leaveGroupOpen} closable={true} onclose={() => (leaveGroupOpen = false)}>
