@@ -31,7 +31,7 @@
     "vite-plugin-compression2": "^2.5.4",
     "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.0",
-    "ws": "^8.22.1"
+    "ws": "^8.22.2"
   },
   "dependencies": {
     "iconify-icon": "^3.0.5",
