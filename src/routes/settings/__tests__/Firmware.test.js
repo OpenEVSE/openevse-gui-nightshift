@@ -1,6 +1,6 @@
 // src/routes/settings/__tests__/Firmware.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, fireEvent } from '@testing-library/svelte'
+import { render, fireEvent, within } from '@testing-library/svelte'
 import { get } from 'svelte/store'
 
 vi.mock('svelte-i18n', () => {
@@ -200,6 +200,64 @@ describe('Firmware page', () => {
     })
     expect(getByText('config.firmware.installed_badge')).toBeInTheDocument()
     expect(queryByText('config.firmware.install_online')).toBeNull()
+  })
+
+  // Stable v5.1.5 and pre-release v6.0.0, both with a build for this device.
+  function mockStableAndPrerelease() {
+    const asset = [{ name: 'openevse_s3_lcd.bin', browser_download_url: 'u' }]
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve([
+            { tag_name: 'v6.0.0', name: 'v6.0.0', prerelease: true, assets: asset },
+            { tag_name: 'v5.1.5', name: 'v5.1.5', prerelease: false, assets: asset },
+          ]),
+      }),
+    )
+  }
+
+  // The row (channel name, description, action) holding a channel's label.
+  function row(getByText, key) {
+    return within(getByText('config.firmware.channel_' + key).closest('.py-2'))
+  }
+
+  it('badges the pre-release row, not Stable, when the pre-release is installed', async () => {
+    mockStableAndPrerelease()
+    config_store.set({ firmware: '9.4.0', version: 'v6.0.0', buildenv: 'openevse_s3_lcd' })
+    const { getByText, queryByText } = render(Firmware)
+    await vi.waitFor(() => {
+      expect(getByText('config.firmware.channel_prerelease')).toBeInTheDocument()
+    })
+    expect(row(getByText, 'prerelease').getByText('config.firmware.installed_badge')).toBeInTheDocument()
+    expect(row(getByText, 'release').getByText('config.firmware.install_online')).toBeInTheDocument()
+    expect(queryByText('config.firmware.up_to_date')).toBeNull()
+    expect(getByText('config.firmware.on_prerelease')).toBeInTheDocument()
+  })
+
+  it('badges only Stable when Stable is installed', async () => {
+    mockStableAndPrerelease()
+    config_store.set({ firmware: '9.4.0', version: 'v5.1.5', buildenv: 'openevse_s3_lcd' })
+    const { getByText, getAllByText } = render(Firmware)
+    await vi.waitFor(() => {
+      expect(getByText('config.firmware.channel_release')).toBeInTheDocument()
+    })
+    expect(getAllByText('config.firmware.installed_badge')).toHaveLength(1)
+    expect(row(getByText, 'release').getByText('config.firmware.installed_badge')).toBeInTheDocument()
+    expect(getByText('config.firmware.up_to_date')).toBeInTheDocument()
+  })
+
+  it('claims no channel for a release newer than every channel', async () => {
+    mockStableAndPrerelease()
+    config_store.set({ firmware: '9.4.0', version: 'v6.0.1', buildenv: 'openevse_s3_lcd' })
+    const { getByText, queryByText } = render(Firmware)
+    await vi.waitFor(() => {
+      expect(getByText('config.firmware.channel_release')).toBeInTheDocument()
+    })
+    expect(queryByText('config.firmware.installed_badge')).toBeNull()
+    expect(queryByText('config.firmware.up_to_date')).toBeNull()
+    expect(queryByText('config.firmware.on_prerelease')).toBeNull()
+    expect(queryByText('config.firmware.update_found')).toBeNull()
   })
 
   it('a self-built firmware version gets an Install button, not the Installed badge', async () => {

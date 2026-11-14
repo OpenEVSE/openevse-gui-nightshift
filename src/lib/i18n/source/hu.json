@@ -845,6 +845,7 @@
       "github_error": "Ehhez az eszközhöz nincs elérhető verzió, vagy a GitHub nem érhető el.",
       "update_found": "Elérhető egy frissítés.",
       "up_to_date": "A legújabb stabil verziót használja.",
+      "on_prerelease": "A legújabb előzetes verziót használja.",
       "dev_build": "Egyéni fordítást használ — bármelyik csatorna telepítésével visszatérhet egy kiadott verzióhoz.",
       "channel_release": "Stabil",
       "channel_release_desc": "Mindennapi használatra ajánlott.",

@@ -845,6 +845,7 @@
       "github_error": "No hay versión para este dispositivo o GitHub no está disponible.",
       "update_found": "Hay una actualización disponible.",
       "up_to_date": "Tienes la última versión estable.",
+      "on_prerelease": "Tienes la última versión preliminar.",
       "dev_build": "Estás usando una compilación personalizada — instala cualquier canal para volver a una versión publicada.",
       "channel_release": "Estable",
       "channel_release_desc": "Recomendado para uso diario.",
