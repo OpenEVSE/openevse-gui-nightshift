@@ -2,7 +2,7 @@
 <script>
   import { _, } from 'svelte-i18n'
   import { onMount } from 'svelte'
-  import { classifyReleases, findAsset, updateAvailable, fetchReleases }
+  import { classifyReleases, findAsset, updateAvailable, fetchReleases, sameVersion }
     from '../../lib/config/firmware.js'
   import { config_store } from '../../lib/stores/config.js'
   import { status_store } from '../../lib/stores/status.js'
@@ -93,10 +93,16 @@
   // Installed — so version claims are gated on a parseable release version.
   let installedIsRelease = $derived(/^v\d+\.\d+/.test(installed))
 
-  /** True when this channel's published version matches what's installed. */
+  /**
+   * True when this channel's published version is the installed one. Equal,
+   * not merely "no update": a pre-release newer than Stable is not Stable.
+   * The daily channel is named "Development Build", never a version.
+   */
   function isInstalled(ch) {
-    return ch.key === 'release' && installedIsRelease && !updateAvailable(ch.version, installed)
+    return ch.key !== 'daily' && installedIsRelease && sameVersion(ch.version, installed)
   }
+
+  let installedChannel = $derived(channels().find((ch) => isInstalled(ch))?.key ?? null)
 
   let hasUpdate = $derived(
     channels().some(
@@ -233,9 +239,11 @@
     {:else}
       {#if hasUpdate}
         <p class="mb-1 text-sm text-accent">{$_('config.firmware.update_found')}</p>
-      {:else if installedIsRelease}
+      {:else if installedChannel === 'release'}
         <p class="mb-1 text-sm text-success">{$_('config.firmware.up_to_date')}</p>
-      {:else}
+      {:else if installedChannel === 'prerelease'}
+        <p class="mb-1 text-sm text-success">{$_('config.firmware.on_prerelease')}</p>
+      {:else if !installedIsRelease}
         <p class="mb-1 text-sm text-text-dim">{$_('config.firmware.dev_build')}</p>
       {/if}
       {#each channels() as ch}

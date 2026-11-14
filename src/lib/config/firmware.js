@@ -50,3 +50,13 @@ export function updateAvailable(latestName, installedVersion) {
     return false
   }
 }
+
+/** True only when both are parseable versions and compare equal. */
+export function sameVersion(a, b) {
+  if (!a || !b) return false
+  try {
+    return compareVersion(a, b) === 0
+  } catch {
+    return false
+  }
+}

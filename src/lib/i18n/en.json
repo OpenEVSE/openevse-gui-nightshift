@@ -845,6 +845,7 @@
       "github_error": "No build for this device, or GitHub is unreachable.",
       "update_found": "An update is available.",
       "up_to_date": "You're on the latest stable release.",
+      "on_prerelease": "You're on the latest pre-release.",
       "dev_build": "You're running a custom build — install any channel to return to a published release.",
       "channel_release": "Stable",
       "channel_release_desc": "Recommended for daily use.",

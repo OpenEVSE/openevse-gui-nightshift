@@ -845,6 +845,7 @@
       "github_error": "Aucune version pour cet appareil, ou GitHub est inaccessible.",
       "update_found": "Une mise à jour est disponible.",
       "up_to_date": "Vous disposez de la dernière version stable.",
+      "on_prerelease": "Vous disposez de la dernière préversion.",
       "dev_build": "Vous utilisez une version compilée sur mesure — installez un canal pour revenir à une version publiée.",
       "channel_release": "Stable",
       "channel_release_desc": "Recommandée pour un usage quotidien.",
