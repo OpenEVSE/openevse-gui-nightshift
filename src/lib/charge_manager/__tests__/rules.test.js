@@ -465,3 +465,39 @@ describe('ecoDivertAlwaysOn', () => {
     expect(ecoDivertAlwaysOn(undefined)).toBe(false)
   })
 })
+
+describe('rule on/off switch (#1403)', () => {
+  const DAYS = ['monday']
+  const start = { id: 3, state: 'active', time: '23:00', days: DAYS, feature: 'current', feature_value: 40 }
+  const stop  = { id: 4, state: 'disabled', time: '05:00', days: ['tuesday'] }
+
+  it('treats a rule as on, and not switchable, when the firmware has no flag', () => {
+    const [r] = timersToRules([start, stop])
+    expect(r.enabled).toBe(true)
+    expect(r.canDisable).toBe(false)
+  })
+
+  it('reads the flag from the start timer and keeps the pair together', () => {
+    const [r] = timersToRules([{ ...start, enabled: false }, { ...stop, enabled: false }])
+    expect(r.enabled).toBe(false)
+    expect(r.canDisable).toBe(true)
+    expect(r._stopEventId).toBe(4)
+    expect(r.chargeCurrent).toBe(40)
+  })
+
+  it('writes the flag to both timers, keeping ids and settings', () => {
+    const timers = [{ ...start, enabled: true }, { ...stop, enabled: true }]
+    const [r] = timersToRules(timers)
+    const { add, remove } = rulesToTimers({ ...r, enabled: false }, timers)
+    expect(remove).toEqual([])
+    expect(add).toHaveLength(2)
+    expect(add[0]).toMatchObject({ id: 3, enabled: false, feature: 'current', feature_value: 40 })
+    expect(add[1]).toMatchObject({ id: 4, enabled: false, state: 'disabled' })
+  })
+
+  it('writes enabled: true for a new rule', () => {
+    const { add } = rulesToTimers({ action: 'charge', days: DAYS, startTime: '08:00', stopTime: '09:00',
+      _startEventId: null, _stopEventId: null }, [])
+    expect(add.every((t) => t.enabled === true)).toBe(true)
+  })
+})

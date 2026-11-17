@@ -50,16 +50,15 @@
   // While charging, show the session chart hero (it polls /energy/raw); every
   // other state keeps the PowerRing.
   let showChart = $derived(charging)
-  // Rate pill slider stops at the configured soft max (Settings > Charger), so
-  // the home page can't request — or display — more current than the user has
-  // allowed. Falls back to the hardware ceiling when the soft max is unset —
-  // and past a hardware ceiling the firmware has not read yet (0), which
-  // would otherwise pin the pill at 0 A (see hardMaxCurrent).
+  // The rate pill is a temporary override: its slider runs to the hardware
+  // ceiling, not to the default current (max_current_soft, the boot default
+  // set in Charge Manager), and choosing a rate never changes that default
+  // (#1403). The firmware applies an override above the default as a
+  // volatile pilot. Until the firmware has read the hardware ceiling (0, see
+  // hardMaxCurrent) the slider stops at the default instead.
   let minAmps = $derived($config_store?.min_current_hard ?? 6)
-  let maxAmps = $derived(
-    Math.min($config_store?.max_current_soft ?? Infinity, hardMaxCurrent($config_store, 48)),
-  )
-  let defaultAmps = $derived($config_store?.max_current_soft ?? maxAmps)
+  let maxAmps = $derived(hardMaxCurrent($config_store, $config_store?.max_current_soft ?? 48))
+  let defaultAmps = $derived(Math.min($config_store?.max_current_soft ?? maxAmps, maxAmps))
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
 
   let socRangeLimit = $derived($limit_store?.type === 'soc' || $limit_store?.type === 'range')
@@ -111,11 +110,20 @@
     ),
   )
 
-  let chargeAmps = $derived(
-    $claims_target_store?.properties?.charge_current
-      ? Math.min($claims_target_store.properties.charge_current, maxAmps)
-      : defaultAmps,
-  )
+  // The rate shown on the pill. A manual override (this pill) may sit above
+  // the default, up to the hardware max. Any other claim's charge current is
+  // what the firmware was asked for, not what it applied (a schedule rule
+  // without its own current asks for the hardware max and is held at the
+  // default), so show the pilot it actually set.
+  let chargeAmps = $derived.by(() => {
+    const target = $claims_target_store?.properties?.charge_current
+    if (!target) return defaultAmps
+    if ($claims_target_store?.claims?.charge_current === EvseClients.manual.id) {
+      return Math.min(target, maxAmps)
+    }
+    const pilot = Number($status_store?.pilot)
+    return pilot > 0 ? Math.min(pilot, maxAmps) : Math.min(target, defaultAmps)
+  })
   let rateClaimedBy = $derived(
     $claims_target_store?.claims?.charge_current &&
     $claims_target_store.claims.charge_current !== EvseClients.manual.id
@@ -143,7 +151,8 @@
           status: $status_store,
           claimsTarget: $claims_target_store,
           lsStatus: $loadsharing_store?.status ?? null,
-          localMax: maxAmps,
+          // This unit's own ceiling without an override: the default current.
+          localMax: defaultAmps,
         })
       : null,
   )

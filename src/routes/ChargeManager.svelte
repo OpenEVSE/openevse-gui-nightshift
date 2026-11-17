@@ -357,6 +357,28 @@
     }
   }
 
+  // ── Switch a scheduled rule on/off (#1403) ────────────────────────────────
+  // Rewrites the rule's start and stop timers with the flag; the firmware
+  // keeps a switched-off rule but leaves it out of its plan.
+  async function setRuleEnabled(rule, enabled) {
+    if (busy) return
+    busy = true
+    try {
+      const timers = Array.isArray($schedule_store) ? $schedule_store : []
+      const { add } = rulesToTimers({ ...rule, enabled }, timers)
+      let ok = true
+      for (const timer of add) {
+        ok = await serialQueue.add(() => schedule_store.upload(timer))
+        if (!ok) break
+      }
+      // Refresh even after a failure so the UI reflects partial writes.
+      await serialQueue.add(() => schedule_store.download())
+      if (!ok) showWriteError()
+    } finally {
+      busy = false
+    }
+  }
+
   // ── Delete scheduled rule ────────────────────────────────────────────────
   async function deleteRule(rule) {
     if (busy) return
@@ -432,6 +454,7 @@
     {busy}
     onedit={openRuleEdit}
     ondelete={deleteRule}
+    onenabledchange={setRuleEnabled}
   />
 
   <!-- Claims manager (mirror of Monitoring → Manager) -->
