@@ -113,7 +113,7 @@
       <NumberInput
         value={$config_store?.divert_data_maxinterval ?? null}
         min={0}
-        placeholder="600"
+        placeholder="3600"
         revert={form.revert}
         onchange={(v) => form.saveField('divert_data_maxinterval', v)}
       />
