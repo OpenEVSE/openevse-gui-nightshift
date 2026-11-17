@@ -105,6 +105,19 @@
         />
       </FormField>
     {/if}
+    <FormField
+      label={$_('config.solar.max_interval')}
+      description={$_('config.solar.max_interval_desc')}
+      status={$ss.divert_data_maxinterval ?? 'idle'}
+    >
+      <NumberInput
+        value={$config_store?.divert_data_maxinterval ?? null}
+        min={0}
+        placeholder="120"
+        revert={form.revert}
+        onchange={(v) => form.saveField('divert_data_maxinterval', v)}
+      />
+    </FormField>
   </ConfigSection>
 
   <ConfigSection title={$_('config.solar.tuning')}>
@@ -142,19 +155,6 @@
         placeholder="600"
         revert={form.revert}
         onchange={(v) => form.saveField('divert_min_charge_time', v)}
-      />
-    </FormField>
-    <FormField
-      label={$_('config.solar.max_interval')}
-      description={$_('config.solar.max_interval_desc')}
-      status={$ss.divert_data_maxinterval ?? 'idle'}
-    >
-      <NumberInput
-        value={$config_store?.divert_data_maxinterval ?? null}
-        min={0}
-        placeholder="120"
-        revert={form.revert}
-        onchange={(v) => form.saveField('divert_data_maxinterval', v)}
       />
     </FormField>
     <FormField
