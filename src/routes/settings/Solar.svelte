@@ -55,7 +55,7 @@
     <ReadOnlyRow label={$_('config.solar.charge_rate')} value={`${$status_store?.charge_rate ?? 0} A`} />
     {#if $status_store?.divert_stale}
       <ReadOnlyRow
-        label={$_('config.shaper.state')}
+        label={$_('config.solar.feed_state')}
         value={$_('config.solar.feed_stale')}
         tone="error"
       />
@@ -105,19 +105,21 @@
         />
       </FormField>
     {/if}
-    <FormField
-      label={$_('config.solar.max_interval')}
-      description={$_('config.solar.max_interval_desc')}
-      status={$ss.divert_data_maxinterval ?? 'idle'}
-    >
-      <NumberInput
-        value={$config_store?.divert_data_maxinterval ?? null}
-        min={0}
-        placeholder="3600"
-        revert={form.revert}
-        onchange={(v) => form.saveField('divert_data_maxinterval', v)}
-      />
-    </FormField>
+    {#if $config_store != null && 'divert_data_maxinterval' in $config_store}
+      <FormField
+        label={$_('config.solar.max_interval')}
+        description={$_('config.solar.max_interval_desc')}
+        status={$ss.divert_data_maxinterval ?? 'idle'}
+      >
+        <NumberInput
+          value={$config_store.divert_data_maxinterval ?? null}
+          min={0}
+          placeholder="3600"
+          revert={form.revert}
+          onchange={(v) => form.saveField('divert_data_maxinterval', v)}
+        />
+      </FormField>
+    {/if}
   </ConfigSection>
 
   <ConfigSection title={$_('config.solar.tuning')}>

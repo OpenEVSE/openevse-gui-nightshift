@@ -476,6 +476,7 @@
       "min_charge_desc": "Másodpercek száma, amíg a töltés folytatódik az indítás után.",
       "max_interval": "Maximális adatintervallum",
       "max_interval_desc": "Másodperc nap- vagy hálózati adat nélkül, mielőtt a töltés szünetel. A 0 kikapcsolja.",
+      "feed_state": "Élő adatok",
       "feed_stale": "Szünetel — nincs friss adat",
       "attack": "Simítás — attack",
       "attack_desc": "Másodperc az elérhető teljesítmény csökkenésére való reagáláshoz.",

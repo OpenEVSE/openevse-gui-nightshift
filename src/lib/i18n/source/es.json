@@ -476,6 +476,7 @@
       "min_charge_desc": "Segundos que se mantiene la carga una vez iniciada.",
       "max_interval": "Intervalo máximo de datos",
       "max_interval_desc": "Segundos sin datos solares o de red antes de pausar la carga. 0 lo desactiva.",
+      "feed_state": "Datos en vivo",
       "feed_stale": "En pausa — sin datos recientes",
       "attack": "Suavizado — ataque",
       "attack_desc": "Segundos para reaccionar ante una caída de potencia disponible.",

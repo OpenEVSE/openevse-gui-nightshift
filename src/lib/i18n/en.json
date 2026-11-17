@@ -476,6 +476,7 @@
       "min_charge_desc": "Seconds to keep charging once started.",
       "max_interval": "Maximum data interval",
       "max_interval_desc": "Seconds without solar or grid data before charging pauses. 0 disables.",
+      "feed_state": "Live data",
       "feed_stale": "Paused — no recent data",
       "attack": "Smoothing — attack",
       "attack_desc": "Seconds to react to falling available power.",
