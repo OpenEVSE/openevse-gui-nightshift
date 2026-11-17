@@ -78,6 +78,17 @@ describe('Solar page', () => {
     expect(getByText('config.solar.battery_power')).toBeInTheDocument()
   })
 
+  it('shows a stale-feed warning and saves the data interval', async () => {
+    config_store.set({ divert_enabled: true, divert_type: 1, divert_data_maxinterval: 120 })
+    status_store.set({ solar: 0, grid_ie: -4000, charge_rate: 16, divert_stale: true })
+    const { getByText, getByPlaceholderText } = render(Solar)
+    expect(getByText('config.solar.feed_stale')).toBeInTheDocument()
+    const input = getByPlaceholderText('120')
+    await fireEvent.input(input, { target: { value: '0' } })
+    await fireEvent.blur(input)
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ divert_data_maxinterval: 0 }))
+  })
+
   it('saves all four params when a preset is chosen', async () => {
     config_store.set({ divert_enabled: true, divert_type: 0, divert_PV_ratio: 2 })
     const { getByText } = render(Solar)

@@ -65,6 +65,7 @@
   "charge_rate": 32,
   "divert_update": 617,
   "divert_active": true,
+  "divert_stale": false,
   "smoothed_available_current": 18,
   "shaper": 0,
   "shelly_lnm_listening": 0,
