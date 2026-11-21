@@ -53,6 +53,13 @@
       value={`${divertType === 1 ? ($status_store?.grid_ie ?? 0) : ($status_store?.solar ?? 0)} W`}
     />
     <ReadOnlyRow label={$_('config.solar.charge_rate')} value={`${$status_store?.charge_rate ?? 0} A`} />
+    {#if $status_store?.divert_stale}
+      <ReadOnlyRow
+        label={$_('config.solar.feed_state')}
+        value={$_('config.solar.feed_stale')}
+        tone="error"
+      />
+    {/if}
     {#if $status_store?.divert_active}
       <ReadOnlyRow
         label={$_('config.solar.smoothed')}
@@ -95,6 +102,21 @@
           placeholder="topic/grid_ie"
           revert={form.revert}
           onchange={(v) => form.saveField('mqtt_grid_ie', v)}
+        />
+      </FormField>
+    {/if}
+    {#if $config_store != null && 'divert_data_maxinterval' in $config_store}
+      <FormField
+        label={$_('config.solar.max_interval')}
+        description={$_('config.solar.max_interval_desc')}
+        status={$ss.divert_data_maxinterval ?? 'idle'}
+      >
+        <NumberInput
+          value={$config_store.divert_data_maxinterval ?? null}
+          min={0}
+          placeholder="3600"
+          revert={form.revert}
+          onchange={(v) => form.saveField('divert_data_maxinterval', v)}
         />
       </FormField>
     {/if}
