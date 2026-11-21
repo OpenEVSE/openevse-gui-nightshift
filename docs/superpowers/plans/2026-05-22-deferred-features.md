@@ -890,10 +890,10 @@ test asserted the tokens are always visible — remove it; the new tests replace
 
 ```json
 [
-  { "ssid": "Hamkins-IOT", "rssi": -43, "encryption": "wpa2" },
+  { "ssid": "HomeNetwork", "rssi": -43, "encryption": "wpa2" },
   { "ssid": "Neighbour 5G", "rssi": -67, "encryption": "wpa2" },
   { "ssid": "CoffeeShop", "rssi": -78, "encryption": "open" },
-  { "ssid": "Hamkins-IOT", "rssi": -55, "encryption": "wpa2" }
+  { "ssid": "HomeNetwork", "rssi": -55, "encryption": "wpa2" }
 ]
 ```
 

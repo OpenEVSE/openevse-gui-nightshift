@@ -64,7 +64,7 @@ Point the dev server at a charger by setting `VITE_OPENEVSEHOST` in a `.env` fil
 (copy `.env.example`; default `openevse.local`):
 
 ```bash
-cp .env.example .env        # then edit VITE_OPENEVSEHOST, e.g. 10.75.1.144
+cp .env.example .env        # then edit VITE_OPENEVSEHOST, e.g. 192.168.1.50
 npm install
 npm run dev
 ```
