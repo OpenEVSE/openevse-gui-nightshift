@@ -302,6 +302,38 @@ export function rulesToTimers(rule, existingTimers) {
 }
 
 /**
+ * The timer writes that switch a scheduled rule on or off, in a safe order.
+ *
+ * Switching off writes the start first: if the stop write then fails, the
+ * rule no longer starts, and a lone disabled stop does nothing. Switching on
+ * writes the stop first, because the reverse would leave an enabled start
+ * with a disabled stop: the rule would start and never stop, and the card
+ * (which reads the flag from the start timer) would show it as on.
+ * @param {any} rule
+ * @param {boolean} enabled
+ * @param {any[]} existingTimers
+ * @returns {any[]}
+ */
+export function ruleEnableWrites(rule, enabled, existingTimers) {
+  const { add } = rulesToTimers({ ...rule, enabled }, existingTimers)
+  return enabled ? [...add].reverse() : add
+}
+
+/**
+ * Whether the firmware reports the rule on/off flag on its timers.
+ *
+ * Firmware that has the flag (openevse_esp32_firmware#1412) is also the
+ * firmware that applies an override above the default current, so this
+ * doubles as that capability signal. An empty schedule gives no signal and
+ * reads as false, which keeps the older, safe behaviour.
+ * @param {any[]|undefined} timers
+ * @returns {boolean}
+ */
+export function scheduleReportsEnabled(timers) {
+  return Array.isArray(timers) && timers.some((t) => t && 'enabled' in t)
+}
+
+/**
  * IDs to DELETE when a rule is removed entirely.
  * @param {any} rule
  */

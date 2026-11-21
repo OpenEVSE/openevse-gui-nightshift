@@ -12,6 +12,8 @@
   import { uistates_store } from '../lib/stores/uistates.js'
   import { uisettings_store } from '../lib/stores/uisettings.js'
   import { loadsharing_store } from '../lib/stores/loadsharing.js'
+  import { schedule_store } from '../lib/stores/schedule.js'
+  import { scheduleReportsEnabled } from '../lib/charge_manager/rules.js'
   import { httpAPI } from '../lib/api/httpAPI.js'
   import { serialQueue } from '../lib/queue.js'
   import { EvseClients } from '../lib/vars.js'
@@ -56,8 +58,20 @@
   // (#1403). The firmware applies an override above the default as a
   // volatile pilot. Until the firmware has read the hardware ceiling (0, see
   // hardMaxCurrent) the slider stops at the default instead.
+  // Older firmware caps every claim at the default, so there the slider keeps
+  // stopping at it. There is no capability flag; firmware that applies an
+  // override above the default is the firmware that reports the rule on/off
+  // flag on its timers (see scheduleReportsEnabled).
   let minAmps = $derived($config_store?.min_current_hard ?? 6)
-  let maxAmps = $derived(hardMaxCurrent($config_store, $config_store?.max_current_soft ?? 48))
+  let aboveDefault = $derived(scheduleReportsEnabled($schedule_store))
+  let maxAmps = $derived(
+    aboveDefault
+      ? hardMaxCurrent($config_store, $config_store?.max_current_soft ?? 48)
+      : Math.min(
+          $config_store?.max_current_soft ?? Infinity,
+          hardMaxCurrent($config_store, $config_store?.max_current_soft ?? 48),
+        ),
+  )
   let defaultAmps = $derived(Math.min($config_store?.max_current_soft ?? maxAmps, maxAmps))
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
 
@@ -115,13 +129,15 @@
   // what the firmware was asked for, not what it applied (a schedule rule
   // without its own current asks for the hardware max and is held at the
   // default), so show the pilot it actually set.
+  // A manual override is stored as requested, too: a controller older than
+  // D9.4.2 holds it at its saved value, so show the pilot when it is lower.
   let chargeAmps = $derived.by(() => {
     const target = $claims_target_store?.properties?.charge_current
     if (!target) return defaultAmps
-    if ($claims_target_store?.claims?.charge_current === EvseClients.manual.id) {
-      return Math.min(target, maxAmps)
-    }
     const pilot = Number($status_store?.pilot)
+    if ($claims_target_store?.claims?.charge_current === EvseClients.manual.id) {
+      return pilot > 0 ? Math.min(target, pilot, maxAmps) : Math.min(target, maxAmps)
+    }
     return pilot > 0 ? Math.min(pilot, maxAmps) : Math.min(target, defaultAmps)
   })
   let rateClaimedBy = $derived(
@@ -152,6 +168,9 @@
           claimsTarget: $claims_target_store,
           lsStatus: $loadsharing_store?.status ?? null,
           // This unit's own ceiling without an override: the default current.
+          // Deliberately not the pill's rate. A manual override above the
+          // default is temporary, so while one is in force the unit can draw
+          // more than the local max shown here (#1403).
           localMax: defaultAmps,
         })
       : null,

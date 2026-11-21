@@ -9,6 +9,8 @@ import {
   formatWindow,
   alwaysOnConfig,
   ecoDivertAlwaysOn,
+  ruleEnableWrites,
+  scheduleReportsEnabled,
 } from '../rules.js'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -499,5 +501,44 @@ describe('rule on/off switch (#1403)', () => {
     const { add } = rulesToTimers({ action: 'charge', days: DAYS, startTime: '08:00', stopTime: '09:00',
       _startEventId: null, _stopEventId: null }, [])
     expect(add.every((t) => t.enabled === true)).toBe(true)
+  })
+})
+
+describe('ruleEnableWrites', () => {
+  const DAYS = ['monday']
+  const timers = [
+    { id: 1, time: '08:00', state: 'active', days: DAYS, enabled: true },
+    { id: 2, time: '09:00', state: 'disabled', days: DAYS, enabled: true },
+  ]
+  const [rule] = timersToRules(timers)
+
+  it('writes the start timer first when switching a rule off', () => {
+    // A failure after the first write leaves the start off: the rule no
+    // longer starts, and a stray stop on its own does nothing harmful.
+    const writes = ruleEnableWrites(rule, false, timers)
+    expect(writes.map((t) => t.id)).toEqual([1, 2])
+    expect(writes.every((t) => t.enabled === false)).toBe(true)
+  })
+
+  it('writes the stop timer first when switching a rule on', () => {
+    // Start first would leave an enabled start with a disabled stop if the
+    // second write failed: the rule would start and never stop, and the card
+    // (which reads the start's flag) would show it as on.
+    const off = timers.map((t) => ({ ...t, enabled: false }))
+    const writes = ruleEnableWrites({ ...rule, enabled: false }, true, off)
+    expect(writes.map((t) => t.id)).toEqual([2, 1])
+    expect(writes.every((t) => t.enabled === true)).toBe(true)
+  })
+})
+
+describe('scheduleReportsEnabled', () => {
+  it('is true when the firmware reports the on/off flag on its timers', () => {
+    expect(scheduleReportsEnabled([{ id: 1, time: '08:00', state: 'active', enabled: true }])).toBe(true)
+  })
+
+  it('is false for older firmware, an empty schedule, or no schedule yet', () => {
+    expect(scheduleReportsEnabled([{ id: 1, time: '08:00', state: 'active' }])).toBe(false)
+    expect(scheduleReportsEnabled([])).toBe(false)
+    expect(scheduleReportsEnabled(undefined)).toBe(false)
   })
 })
