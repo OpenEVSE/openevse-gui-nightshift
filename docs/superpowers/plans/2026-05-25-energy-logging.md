@@ -1478,7 +1478,7 @@ git push -u origin feat/energy-logging
 - [ ] `npm test` — all green
 - [ ] `npm run build` — clean build with `dist/assets/charts-*.js` chunk present
 - [ ] Visual check in `npm run dev:mock`: Monitoring → Energy tab shows chart with mock data; Safety → throttle toggle reveals slider; Dashboard renders cleanly (badge stays hidden until real hardware claim).
-- [ ] Hardware verification deferred: requires firmware PR #1083 merged + flashed onto `10.75.1.144`. Re-test:
+- [ ] Hardware verification deferred: requires firmware PR #1083 merged + flashed onto `192.168.1.50`. Re-test:
   - Live chart populates with real samples
   - "← Older" pages backward, "Current →" snaps forward, "No earlier data" appears at end
   - Daily/Monthly/Annual show data once accumulated

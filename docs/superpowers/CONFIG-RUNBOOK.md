@@ -171,7 +171,7 @@ Do the batches in order: **Foundation → Connectivity → Charger → Energy �
   v2: `Certificates.svelte` + `CertificatesModal.svelte`.
 
 For each: if a device endpoint genuinely cannot be represented by the dev mock AND
-the real device (`10.75.1.144`) is unreachable, build the UI against v2's known
+the real device (`192.168.1.50`) is unreachable, build the UI against v2's known
 response shapes, document the assumption in the spec/plan, and proceed — do not
 block. Add mock routes to `dev/mock-plugin.js` where feasible.
 
@@ -181,7 +181,7 @@ block. Add mock routes to `dev/mock-plugin.js` where feasible.
 form pages read it as-is. Pages needing data the current fixtures lack (e.g.
 Certificates needs a `/certificates` list, Firmware a version-check response) must
 add a route to `dev/mock-plugin.js` + a representative fixture. Capture from
-`10.75.1.144` where possible; otherwise hand-build to match v2's response shapes.
+`192.168.1.50` where possible; otherwise hand-build to match v2's response shapes.
 
 ## Verification gate before each merge
 

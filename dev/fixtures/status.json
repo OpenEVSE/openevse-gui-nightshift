@@ -3,7 +3,7 @@
   "wifi_client_connected": 1,
   "eth_connected": 0,
   "net_connected": 1,
-  "ipaddress": "10.75.1.144",
+  "ipaddress": "192.168.1.50",
   "macaddress": "AA:BB:CC:DD:EE:FF",
   "emoncms_connected": 0,
   "packets_sent": 0,

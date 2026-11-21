@@ -153,7 +153,7 @@ endpoints + a mock WebSocket. Screens needing data the current fixtures lack mus
   representative log fixture.
 - **Schedule** uses `/schedule` and `/schedule/plan` (already served) — enrich the
   `schedule.json` fixture with representative timers so the screen is viewable.
-Capture from the real device at `10.75.1.144` where possible (it may be unreachable or
+Capture from the real device at `192.168.1.50` where possible (it may be unreachable or
 in any state — fall back to hand-built representative fixtures that match v2's response
 shapes).
 
