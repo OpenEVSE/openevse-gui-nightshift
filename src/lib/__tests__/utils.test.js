@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { Settings } from 'luxon'
 
 // Mock svelte-i18n
 vi.mock('svelte-i18n', () => {
@@ -452,5 +453,44 @@ describe('hardMaxCurrent', () => {
     expect(hardMaxCurrent({})).toBe(32)
     expect(hardMaxCurrent(undefined, 48)).toBe(48)
     expect(hardMaxCurrent({ max_current_hard: 'x' })).toBe(32)
+  })
+})
+
+describe('formatDate', () => {
+  const t = '2026-11-21T12:52:05Z'
+  const tz = 'Europe/Oslo|CET-1CEST,M3.5.0,M10.5.0/3'
+  const saved = Settings.defaultLocale
+  afterEach(() => { Settings.defaultLocale = saved })
+
+  it('keeps the date in locales that do not separate with "/"', () => {
+    for (const loc of ['nb-NO', 'de-DE', 'sv-SE']) {
+      Settings.defaultLocale = loc
+      expect(formatDate(t, tz, 'short')).toMatch(/21/)
+      expect(formatDate(t, tz, 'short')).toMatch(/11/)
+      expect(formatDate(t, tz)).toMatch(/2026/)
+      expect(formatDate(t, tz)).toMatch(/13:52/)
+    }
+  })
+
+  it('formats Norwegian dates', () => {
+    Settings.defaultLocale = 'nb-NO'
+    expect(formatDate(t, tz)).toBe('21.11.2026 13:52')
+    expect(formatDate(t, tz, 'short')).toBe('21.11. 13:52')
+  })
+
+  it('keeps the zero-padded US layout', () => {
+    Settings.defaultLocale = 'en-US'
+    expect(formatDate(t, tz)).toBe('11/21/2026 1:52 PM')
+    expect(formatDate(t, tz, 'short')).toBe('11/21 1:52 PM')
+    expect(formatDate('2026-03-05T08:04:00Z', 'Europe/Oslo', 'short')).toBe('03/05 9:04 AM')
+  })
+
+  it('converts to the configured time zone', () => {
+    Settings.defaultLocale = 'en-GB'
+    expect(formatDate(t, 'America/New_York|EST5EDT', 'short')).toBe('21/11 07:52')
+  })
+
+  it('returns an empty string for an unparseable time', () => {
+    expect(formatDate('not a time', tz)).toBe('')
   })
 })

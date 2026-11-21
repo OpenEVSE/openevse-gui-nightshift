@@ -25,28 +25,19 @@ export function sec2time(sec) {
 	return hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }) + ':' + minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }) + ':' + seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })
 }
 
+// Date + time in the viewer's locale, e.g. "11/21/2026 1:52 PM" (en-US) or
+// "21.11.2026 13:52" (nb-NO); format "short" drops the year.
+// The date and time parts are asked of Intl separately rather than cutting
+// up DATETIME_SHORT: that string's separators are locale-specific, and the
+// previous split on "/" dropped the date entirely in locales that use "."
+// or "-" (nb, de, sv, ...).
 export function formatDate(t,z,format=null) {
-	let d
-	if (z) {
-		let tz = z.split("|")[0]
-		d = DateTime.fromISO(t, {zone: tz})
-	}
-	else d = DateTime.fromISO(t)
-	const arr = d.toLocaleString(DateTime.DATETIME_SHORT).split(" ")
-	let datearr = arr[0].split("/")
-	if (format=="short") {
-		//remove year
-		datearr.pop()
-	}
-	// fixing missing trailing 0 luxxon bug on US locale
-	datearr[0] = datearr[0]?.length == 1?"0"+datearr[0]:datearr[0]
-	datearr[1] = datearr[1]?.length == 1?"0"+datearr[1]:datearr[1]
-	const date = datearr.join("/")
-	let time = arr[1]
-	if (arr[2]) 
-		time += " " + arr[2]
-
-	return date + " " + time
+	const d = z ? DateTime.fromISO(t, {zone: z.split("|")[0]}) : DateTime.fromISO(t)
+	if (!d.isValid) return ''
+	const dateOpts = format == "short"
+		? { month: '2-digit', day: '2-digit' }
+		: { year: 'numeric', month: '2-digit', day: '2-digit' }
+	return d.toLocaleString(dateOpts) + " " + d.toLocaleString(DateTime.TIME_SIMPLE)
 }
 
 export function displayTime(t) {
