@@ -13,7 +13,7 @@
   import { serialQueue } from '../lib/queue.js'
   import { showWriteError } from '../lib/alerts.js'
   import { DAYS } from '../lib/schedule/timers.js'
-  import { timersToRules, rulesToTimers, ruleDeleteIds, actionToFeatureKey, alwaysOnConfig, ecoDivertAlwaysOn } from '../lib/charge_manager/rules.js'
+  import { timersToRules, rulesToTimers, ruleEnableWrites, ruleDeleteIds, actionToFeatureKey, alwaysOnConfig, ecoDivertAlwaysOn } from '../lib/charge_manager/rules.js'
   import { vehicleLimitAvailability } from '../lib/charge_manager/vehicle.js'
   import { allRequiredSafetyChecksOn } from '../lib/config/safety.js'
   import GlobalSection from '../lib/components/charge_manager/GlobalSection.svelte'
@@ -357,6 +357,27 @@
     }
   }
 
+  // ── Switch a scheduled rule on/off (#1403) ────────────────────────────────
+  // Rewrites the rule's start and stop timers with the flag; the firmware
+  // keeps a switched-off rule but leaves it out of its plan.
+  async function setRuleEnabled(rule, enabled) {
+    if (busy) return
+    busy = true
+    try {
+      const timers = Array.isArray($schedule_store) ? $schedule_store : []
+      let ok = true
+      for (const timer of ruleEnableWrites(rule, enabled, timers)) {
+        ok = await serialQueue.add(() => schedule_store.upload(timer))
+        if (!ok) break
+      }
+      // Refresh even after a failure so the UI reflects partial writes.
+      await serialQueue.add(() => schedule_store.download())
+      if (!ok) showWriteError()
+    } finally {
+      busy = false
+    }
+  }
+
   // ── Delete scheduled rule ────────────────────────────────────────────────
   async function deleteRule(rule) {
     if (busy) return
@@ -432,6 +453,7 @@
     {busy}
     onedit={openRuleEdit}
     ondelete={deleteRule}
+    onenabledchange={setRuleEnabled}
   />
 
   <!-- Claims manager (mirror of Monitoring → Manager) -->

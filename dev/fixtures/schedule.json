@@ -1,5 +1,5 @@
 [
-  { "id": 1, "state": "active", "time": "23:00", "days": ["monday", "tuesday", "wednesday", "thursday", "friday"] },
-  { "id": 2, "state": "active", "time": "09:30", "days": ["saturday", "sunday"] },
-  { "id": 3, "state": "disabled", "time": "06:15", "days": ["monday", "wednesday", "friday"] }
+  { "id": 1, "state": "active", "time": "23:00", "days": ["monday", "tuesday", "wednesday", "thursday", "friday"], "enabled": true },
+  { "id": 2, "state": "active", "time": "09:30", "days": ["saturday", "sunday"], "enabled": true },
+  { "id": 3, "state": "disabled", "time": "06:15", "days": ["monday", "wednesday", "friday"], "enabled": true }
 ]

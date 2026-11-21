@@ -9,6 +9,8 @@ import {
   formatWindow,
   alwaysOnConfig,
   ecoDivertAlwaysOn,
+  ruleEnableWrites,
+  scheduleReportsEnabled,
 } from '../rules.js'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -463,5 +465,80 @@ describe('ecoDivertAlwaysOn', () => {
 
   it('is off before config has loaded', () => {
     expect(ecoDivertAlwaysOn(undefined)).toBe(false)
+  })
+})
+
+describe('rule on/off switch (#1403)', () => {
+  const DAYS = ['monday']
+  const start = { id: 3, state: 'active', time: '23:00', days: DAYS, feature: 'current', feature_value: 40 }
+  const stop  = { id: 4, state: 'disabled', time: '05:00', days: ['tuesday'] }
+
+  it('treats a rule as on, and not switchable, when the firmware has no flag', () => {
+    const [r] = timersToRules([start, stop])
+    expect(r.enabled).toBe(true)
+    expect(r.canDisable).toBe(false)
+  })
+
+  it('reads the flag from the start timer and keeps the pair together', () => {
+    const [r] = timersToRules([{ ...start, enabled: false }, { ...stop, enabled: false }])
+    expect(r.enabled).toBe(false)
+    expect(r.canDisable).toBe(true)
+    expect(r._stopEventId).toBe(4)
+    expect(r.chargeCurrent).toBe(40)
+  })
+
+  it('writes the flag to both timers, keeping ids and settings', () => {
+    const timers = [{ ...start, enabled: true }, { ...stop, enabled: true }]
+    const [r] = timersToRules(timers)
+    const { add, remove } = rulesToTimers({ ...r, enabled: false }, timers)
+    expect(remove).toEqual([])
+    expect(add).toHaveLength(2)
+    expect(add[0]).toMatchObject({ id: 3, enabled: false, feature: 'current', feature_value: 40 })
+    expect(add[1]).toMatchObject({ id: 4, enabled: false, state: 'disabled' })
+  })
+
+  it('writes enabled: true for a new rule', () => {
+    const { add } = rulesToTimers({ action: 'charge', days: DAYS, startTime: '08:00', stopTime: '09:00',
+      _startEventId: null, _stopEventId: null }, [])
+    expect(add.every((t) => t.enabled === true)).toBe(true)
+  })
+})
+
+describe('ruleEnableWrites', () => {
+  const DAYS = ['monday']
+  const timers = [
+    { id: 1, time: '08:00', state: 'active', days: DAYS, enabled: true },
+    { id: 2, time: '09:00', state: 'disabled', days: DAYS, enabled: true },
+  ]
+  const [rule] = timersToRules(timers)
+
+  it('writes the start timer first when switching a rule off', () => {
+    // A failure after the first write leaves the start off: the rule no
+    // longer starts, and a stray stop on its own does nothing harmful.
+    const writes = ruleEnableWrites(rule, false, timers)
+    expect(writes.map((t) => t.id)).toEqual([1, 2])
+    expect(writes.every((t) => t.enabled === false)).toBe(true)
+  })
+
+  it('writes the stop timer first when switching a rule on', () => {
+    // Start first would leave an enabled start with a disabled stop if the
+    // second write failed: the rule would start and never stop, and the card
+    // (which reads the start's flag) would show it as on.
+    const off = timers.map((t) => ({ ...t, enabled: false }))
+    const writes = ruleEnableWrites({ ...rule, enabled: false }, true, off)
+    expect(writes.map((t) => t.id)).toEqual([2, 1])
+    expect(writes.every((t) => t.enabled === true)).toBe(true)
+  })
+})
+
+describe('scheduleReportsEnabled', () => {
+  it('is true when the firmware reports the on/off flag on its timers', () => {
+    expect(scheduleReportsEnabled([{ id: 1, time: '08:00', state: 'active', enabled: true }])).toBe(true)
+  })
+
+  it('is false for older firmware, an empty schedule, or no schedule yet', () => {
+    expect(scheduleReportsEnabled([{ id: 1, time: '08:00', state: 'active' }])).toBe(false)
+    expect(scheduleReportsEnabled([])).toBe(false)
+    expect(scheduleReportsEnabled(undefined)).toBe(false)
   })
 })

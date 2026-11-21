@@ -2,11 +2,23 @@
   import { _ } from 'svelte-i18n'
   import Card from '../ui/Card.svelte'
   import IconButton from '../ui/IconButton.svelte'
+  import Toggle from '../ui/Toggle.svelte'
   import Icon from '../../icons/Icon.svelte'
   import { formatDayChips } from '../../schedule/timers.js'
   import { formatWindow } from '../../charge_manager/rules.js'
 
-  let { rule, active = false, removing = false, disabled = false, onedit = () => {}, ondelete = () => {} } = $props()
+  let {
+    rule,
+    active = false,
+    removing = false,
+    disabled = false,
+    onedit = () => {},
+    ondelete = () => {},
+    onenabledchange = () => {}, // called with the new on/off value
+  } = $props()
+
+  // A switched-off rule is kept but out of the firmware's plan (#1403).
+  let off = $derived(rule?.enabled === false)
 
   let chips  = $derived(formatDayChips(rule?.days))
   let window = $derived(formatWindow(rule?.startTime, rule?.stopTime))
@@ -34,13 +46,17 @@
 
 <Card class="mb-3 p-4">
   <div class="flex items-start justify-between gap-2">
-    <!-- Left: action title + schedule details -->
-    <button type="button" onclick={onedit} class="min-w-0 flex-1 text-left">
+    <!-- Left: action title + schedule details (dimmed while switched off) -->
+    <button type="button" onclick={onedit} class="min-w-0 flex-1 text-left transition {off ? 'opacity-50' : ''}">
       <div class="flex items-center gap-2">
         <div class="text-sm font-semibold text-text">
           {actionLabel(rule?.action)}
         </div>
-        {#if active}
+        {#if off}
+          <span class="rounded-full bg-surface-3 px-2 py-0.5 text-[10px] font-semibold text-text-dim">
+            {$_('charge_manager.rule_off')}
+          </span>
+        {:else if active}
           <span class="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
             <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
             {$_('charge_manager.active')}
@@ -77,8 +93,18 @@
       </div>
     </button>
 
-    <!-- Right: edit + delete -->
+    <!-- Right: on/off switch + edit + delete -->
     <div class="flex shrink-0 items-center gap-1">
+      {#if rule?.canDisable}
+        <span class="mr-1 flex items-center">
+          <Toggle
+            checked={!off}
+            {disabled}
+            label={$_('charge_manager.rule_enabled')}
+            onchange={onenabledchange}
+          />
+        </span>
+      {/if}
       <IconButton
         icon="mdi:pencil-outline"
         size={16}

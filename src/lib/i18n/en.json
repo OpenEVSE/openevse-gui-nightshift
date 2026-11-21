@@ -1033,6 +1033,8 @@
     "rule_cancel": "Cancel",
     "default_state_close": "Close",
     "rule_delete": "Delete rule",
+    "rule_enabled": "Rule enabled",
+    "rule_off": "Off",
     "rule_error_no_day": "Select at least one day",
     "rule_error_same_time": "Start and stop time must differ",
     "rule_error_no_limit": "Set a limit value first",

@@ -321,8 +321,10 @@
     </div>
   {/if}
 
-  <!-- Buttons -->
-  <div class="mt-6 flex gap-2">
+  <!-- Buttons: pinned to the bottom of the scrolling dialog so Save is always
+       reachable on a short screen (#1403). The negative margins reach the
+       dialog's padding so scrolled content never shows beneath them. -->
+  <div class="sticky -bottom-5 -mx-5 -mb-5 mt-6 flex gap-2 border-t border-border bg-surface-2 px-5 py-4">
     <Button label={$_('charge_manager.rule_save')} disabled={busy} onclick={save} />
     <Button label={$_('charge_manager.rule_cancel')} variant="ghost" disabled={busy} onclick={onclose} />
   </div>

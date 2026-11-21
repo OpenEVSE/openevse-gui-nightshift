@@ -1033,6 +1033,8 @@
     "rule_cancel": "Mégse",
     "default_state_close": "Bezárás",
     "rule_delete": "Szabály törlése",
+    "rule_enabled": "Szabály bekapcsolva",
+    "rule_off": "Kikapcsolva",
     "rule_error_no_day": "Válasszon ki legalább egy napot",
     "rule_error_same_time": "A kezdési és a befejezési időpont nem lehet azonos",
     "rule_error_no_limit": "Először állítson be egy korlátértéket",

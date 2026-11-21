@@ -9,6 +9,7 @@
     busy = false,
     onedit = () => {},    // called with rule object
     ondelete = () => {},  // called with rule object
+    onenabledchange = () => {}, // called with (rule, enabled)
   } = $props()
 </script>
 
@@ -25,11 +26,12 @@
     {#each rules as rule (rule.id)}
       <RuleCard
         {rule}
-        active={activeEventId != null && rule._startEventId === activeEventId}
+        active={activeEventId != null && rule.enabled !== false && rule._startEventId === activeEventId}
         removing={removingId === rule.id}
         disabled={busy}
         onedit={() => onedit(rule)}
         ondelete={() => ondelete(rule)}
+        onenabledchange={(on) => onenabledchange(rule, on)}
       />
     {/each}
   {/if}

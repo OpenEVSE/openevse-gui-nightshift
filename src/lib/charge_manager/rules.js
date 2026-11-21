@@ -139,6 +139,10 @@ function shiftDaysForward(days) {
  * A stop written for a feature rule carries the same feature (feature_value 0)
  * while a charge rule's stop is plain ('current' lives only on the start), so
  * candidates must also match on feature or they belong to another rule.
+ *
+ * A rule's on/off switch is the start timer's `enabled` flag (absent = on).
+ * `canDisable` is true only when the firmware reports the flag at all, so the
+ * switch is never offered by firmware that would ignore it.
  * @param {any[]} timers
  */
 export function timersToRules(timers) {
@@ -190,6 +194,8 @@ export function timersToRules(timers) {
     rules.push({
       id:            `r_${A.id}`,
       alwaysOn:      false,
+      enabled:       A.enabled !== false,
+      canDisable:    'enabled' in A,
       days:          A.days ?? [],
       startTime:     A.time,
       stopTime:      stop?.time ?? null,
@@ -207,6 +213,8 @@ export function timersToRules(timers) {
       rules.push({
         id:            `r_${B.id}`,
         alwaysOn:      false,
+        enabled:       B.enabled !== false,
+        canDisable:    'enabled' in B,
         days:          B.days ?? [],
         startTime:     B.time,
         stopTime:      null,
@@ -250,14 +258,18 @@ export function rulesToTimers(rule, existingTimers) {
     stopId = null
   }
 
-  // Build start timer
+  // Build start timer. Both timers carry the rule's on/off flag: a disabled
+  // rule drops out of the firmware's plan entirely, stop included, so the
+  // rule before it stays in force (#1403). Firmware without the flag ignores it.
   const feature = actionToTimerFeature(rule.action)
   const hasLimit = rule.limit && rule.limit.type && rule.limit.type !== 'none' && rule.limit.value > 0
+  const enabled = rule.enabled !== false
   const startTimer = {
     id: startId,
     time: rule.startTime,
     state: actionToTimerState(rule.action),
     days: rule.days,
+    enabled,
     ...(feature
       ? { feature, feature_value: 1 }
       : rule.chargeCurrent > 0
@@ -281,11 +293,44 @@ export function rulesToTimers(rule, existingTimers) {
       time: rule.stopTime,
       state: 'disabled',
       days: stopDays,
+      enabled,
       ...(feature ? { feature, feature_value: 0 } : {}),
     })
   }
 
   return { add, remove }
+}
+
+/**
+ * The timer writes that switch a scheduled rule on or off, in a safe order.
+ *
+ * Switching off writes the start first: if the stop write then fails, the
+ * rule no longer starts, and a lone disabled stop does nothing. Switching on
+ * writes the stop first, because the reverse would leave an enabled start
+ * with a disabled stop: the rule would start and never stop, and the card
+ * (which reads the flag from the start timer) would show it as on.
+ * @param {any} rule
+ * @param {boolean} enabled
+ * @param {any[]} existingTimers
+ * @returns {any[]}
+ */
+export function ruleEnableWrites(rule, enabled, existingTimers) {
+  const { add } = rulesToTimers({ ...rule, enabled }, existingTimers)
+  return enabled ? [...add].reverse() : add
+}
+
+/**
+ * Whether the firmware reports the rule on/off flag on its timers.
+ *
+ * Firmware that has the flag (openevse_esp32_firmware#1412) is also the
+ * firmware that applies an override above the default current, so this
+ * doubles as that capability signal. An empty schedule gives no signal and
+ * reads as false, which keeps the older, safe behaviour.
+ * @param {any[]|undefined} timers
+ * @returns {boolean}
+ */
+export function scheduleReportsEnabled(timers) {
+  return Array.isArray(timers) && timers.some((t) => t && 'enabled' in t)
 }
 
 /**

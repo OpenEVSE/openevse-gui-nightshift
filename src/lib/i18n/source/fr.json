@@ -1033,6 +1033,8 @@
     "rule_cancel": "Annuler",
     "default_state_close": "Fermer",
     "rule_delete": "Supprimer la règle",
+    "rule_enabled": "Règle activée",
+    "rule_off": "Désactivée",
     "rule_error_no_day": "Sélectionnez au moins un jour",
     "rule_error_same_time": "L'heure de début et de fin doivent être différentes",
     "rule_error_no_limit": "Définissez d'abord une valeur de limite",

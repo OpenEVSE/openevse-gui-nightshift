@@ -17,6 +17,7 @@ import { override_store } from '../../lib/stores/override.js'
 import { uistates_store } from '../../lib/stores/uistates.js'
 import { uisettings_store } from '../../lib/stores/uisettings.js'
 import { limit_store } from '../../lib/stores/limit.js'
+import { schedule_store } from '../../lib/stores/schedule.js'
 import { EvseClients } from '../../lib/vars.js'
 import Dashboard from '../Dashboard.svelte'
 
@@ -29,6 +30,7 @@ describe('Dashboard', () => {
     httpAPI.mockReset()
     httpAPI.mockResolvedValue({})
     limit_store.set({ type: 'none', value: 0, auto_release: true })
+    schedule_store.set([])
     // Load sharing is Labs-gated; default it off so unrelated tests are
     // deterministic. The load-sharing cases opt in explicitly.
     config_store.update((c) => ({ ...c, labs_enabled: false }))
@@ -70,15 +72,60 @@ describe('Dashboard', () => {
     expect(getByText('dashboard.plug.disconnected')).toBeInTheDocument()
   })
 
-  it('caps the rate slider at the configured soft max, not the hardware max', async () => {
-    // Settings > Charger sets max_current_soft; the home-page rate control must
-    // honour it rather than letting the user reach the hardware ceiling. The
-    // slider lives in the rate pill's popover, so open it first.
+  it('runs the rate slider to the hardware max, past the default current (#1403)', async () => {
+    // max_current_soft is the boot default (Charge Manager), not a ceiling: the
+    // rate pill is a temporary override the firmware applies as a volatile
+    // pilot, so it may go up to the hardware max. The slider lives in the rate
+    // pill's popover, so open it first.
     config_store.set({ max_current_soft: 32, max_current_hard: 48, divert_enabled: false, current_shaper_enabled: false })
     status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    // Firmware that supports overrides above the default also reports the
+    // rule on/off flag on its timers; that is the capability signal.
+    schedule_store.set([{ id: 1, time: '08:00', state: 'active', days: [], enabled: true }])
+    const { getByRole } = render(Dashboard)
+    await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
+    expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '48')
+  })
+
+  it('keeps the rate slider at the default current on firmware without overrides above it', async () => {
+    // Older firmware caps every claim at max_current_soft, so a slider past it
+    // would let the user pick a rate the firmware silently ignores.
+    config_store.set({ max_current_soft: 32, max_current_hard: 48, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0 })
+    schedule_store.set([{ id: 1, time: '08:00', state: 'active', days: [] }])
     const { getByRole } = render(Dashboard)
     await fireEvent.click(getByRole('button', { name: 'dashboard.rate.aria' }))
     expect(getByRole('slider', { name: 'dashboard.rate.aria' })).toHaveAttribute('max', '32')
+  })
+
+  it('shows a manual override above the default current', () => {
+    config_store.set({ max_current_soft: 16, max_current_hard: 40, divert_enabled: false, current_shaper_enabled: false })
+    schedule_store.set([{ id: 1, time: '08:00', state: 'active', days: [], enabled: true }])
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 40 })
+    claims_target_store.set({ properties: { charge_current: 40 }, claims: { charge_current: EvseClients.manual.id } })
+    const { getByRole } = render(Dashboard)
+    expect(getByRole('button', { name: 'dashboard.rate.aria' })).toHaveTextContent('40')
+  })
+
+  it('shows the applied pilot when the controller holds a manual override lower', () => {
+    // A controller older than D9.4.2 caps the volatile $SC at its saved
+    // value, so an override of 40 runs at 16: show what is applied.
+    config_store.set({ max_current_soft: 16, max_current_hard: 40, divert_enabled: false, current_shaper_enabled: false })
+    schedule_store.set([{ id: 1, time: '08:00', state: 'active', days: [], enabled: true }])
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
+    claims_target_store.set({ properties: { charge_current: 40 }, claims: { charge_current: EvseClients.manual.id } })
+    const { getByRole } = render(Dashboard)
+    expect(getByRole('button', { name: 'dashboard.rate.aria' })).toHaveTextContent('16')
+  })
+
+  it('shows the applied pilot when another claim asks for more than the default', () => {
+    // A schedule rule without its own current asks for the hardware max; the
+    // firmware holds it at the default, which is what the pilot reports.
+    config_store.set({ max_current_soft: 16, max_current_hard: 40, divert_enabled: false, current_shaper_enabled: false })
+    status_store.set({ state: 1, total_day: 0, total_energy: 0, pilot: 16 })
+    claims_target_store.set({ properties: { charge_current: 40 }, claims: { charge_current: EvseClients.timer.id } })
+    const { getByRole } = render(Dashboard)
+    expect(getByRole('button', { name: 'dashboard.rate.aria' })).toHaveTextContent('16')
   })
 
   it('falls back to the hardware max for the rate slider when no soft max is set', async () => {
