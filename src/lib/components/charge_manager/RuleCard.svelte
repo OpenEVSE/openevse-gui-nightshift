@@ -21,7 +21,7 @@
   let off = $derived(rule?.enabled === false)
 
   let chips  = $derived(formatDayChips(rule?.days))
-  let window = $derived(formatWindow(rule?.startTime, rule?.stopTime))
+  let window = $derived(formatWindow(rule?.startTime, rule?.stopTime, rule?.action === 'reboot'))
 
   function actionLabel(action) {
     const key = 'charge_manager.rule_action_' + action

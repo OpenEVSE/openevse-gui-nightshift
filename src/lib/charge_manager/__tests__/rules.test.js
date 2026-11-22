@@ -542,3 +542,46 @@ describe('scheduleReportsEnabled', () => {
     expect(scheduleReportsEnabled(undefined)).toBe(false)
   })
 })
+
+describe('Reboot Station rules', () => {
+  it('writes a single disabled-state timer with feature reboot and no stop', () => {
+    const rule = { action: 'reboot', days: weekdays, startTime: '03:00', stopTime: '05:00',
+      chargeCurrent: 16, limit: { type: 'time', value: 60 }, _startEventId: null, _stopEventId: null }
+    const { add, remove } = rulesToTimers(rule, [])
+    expect(remove).toEqual([])
+    expect(add).toHaveLength(1)
+    expect(add[0]).toMatchObject({ time: '03:00', state: 'disabled', days: weekdays, feature: 'reboot' })
+    expect(add[0]).not.toHaveProperty('limit')
+  })
+
+  it('drops the old stop timer when a window rule becomes a reboot', () => {
+    const rule = { action: 'reboot', days: weekdays, startTime: '03:00', stopTime: '05:00',
+      _startEventId: 4, _stopEventId: 5 }
+    const { add, remove } = rulesToTimers(rule, [])
+    expect(remove).toEqual([5])
+    expect(add.map((t) => t.id)).toEqual([4])
+  })
+
+  it('reads a reboot timer back as its own rule, never as a stop for another', () => {
+    const timers = [
+      { id: 1, time: '01:00', state: 'active', days: weekdays },
+      { id: 2, time: '03:00', state: 'disabled', days: weekdays, feature: 'reboot', feature_value: 1 },
+    ]
+    const rules = timersToRules(timers)
+    const charge = rules.find((r) => r.action === 'charge')
+    const reboot = rules.find((r) => r.action === 'reboot')
+    expect(charge.stopTime).toBeNull()
+    expect(reboot).toMatchObject({ startTime: '03:00', stopTime: null, _startEventId: 2, _stopEventId: null })
+    expect(rules).toHaveLength(2)
+  })
+
+  it('maps the action both ways', () => {
+    expect(actionToTimerState('reboot')).toBe('disabled')
+    expect(timerStateToAction('disabled', 'reboot')).toBe('reboot')
+    expect(actionToFeatureKey('reboot')).toBeNull()
+  })
+
+  it('formats as a point in time', () => {
+    expect(formatWindow('03:00', null, true)).toBe('at 3:00 AM')
+  })
+})
