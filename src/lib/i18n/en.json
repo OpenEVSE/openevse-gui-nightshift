@@ -96,6 +96,8 @@
       "apdefault": "The charger's own WiFi network, used for setup and as a fallback.",
       "apssid": "AP network name",
       "appass": "AP password",
+      "setup_prompt": "Setup prompt",
+      "setup_prompt_desc": "While the charger is on its own hotspot and idle, the screen shows a QR code for joining it and the status LEDs blink. Turn this off for a charger that will never have WiFi; the hotspot stays available.",
       "wifi": "WiFi network",
       "scan": "Scan for networks",
       "scanning": "Scanning…",

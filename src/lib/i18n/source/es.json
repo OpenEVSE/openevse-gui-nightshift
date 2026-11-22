@@ -96,6 +96,8 @@
       "apdefault": "Red WiFi propia del cargador, usada para configuración y como respaldo.",
       "apssid": "Nombre de red AP",
       "appass": "Contraseña AP",
+      "setup_prompt": "Aviso de configuración",
+      "setup_prompt_desc": "Mientras el cargador usa su propio punto de acceso y está inactivo, la pantalla muestra un código QR para conectarse y los LED de estado parpadean. Desactívelo en un cargador que nunca tendrá WiFi; el punto de acceso sigue disponible.",
       "wifi": "Red WiFi",
       "scan": "Buscar redes",
       "scanning": "Buscando…",
