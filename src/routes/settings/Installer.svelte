@@ -78,6 +78,7 @@
     password = ''
     maxResult = null
     pwResult = null
+    rapiError = ''
   }
 
   // ── Hardware maximum current ────────────────────────────────────────────
@@ -130,6 +131,39 @@
         : { kind: 'unchanged', text: $_('config.installer.maxcurrent_unchanged') }
     } finally {
       setting = false
+    }
+  }
+
+  // ── RAPI console access ─────────────────────────────────────────────────
+  // The Developer Tools console normally passes only $G, $F0 and $FB. The
+  // charger can lift that filter for the console until it next reboots; the
+  // flag lives in its RAM, so /config is the source of truth for the state.
+  let rapiUnlocked = $derived(!!$config_store?.rapi_console_unlocked)
+  // Unrestricted without the override means a build with ENABLE_FULL_RAPI:
+  // nothing here can change that, so there is no button.
+  let rapiBuildOpen = $derived(!!$config_store?.rapi_console_unrestricted && !rapiUnlocked)
+  let pendingRapi = $state(false) // confirmation dialog open
+  let rapiBusy = $state(false)
+  let rapiError = $state('')
+
+  async function setRapiUnlocked(on) {
+    pendingRapi = false
+    if (rapiBusy) return
+    rapiBusy = true
+    rapiError = ''
+    try {
+      const res = await post('/installer/rapi', { password, unlocked: on })
+      if (res?.status !== 200) {
+        rapiError = passwordError(res)
+        return
+      }
+      config_store.update((c) => ({
+        ...c,
+        rapi_console_unlocked: !!res.body?.unlocked,
+        rapi_console_unrestricted: !!res.body?.unrestricted,
+      }))
+    } finally {
+      rapiBusy = false
     }
   }
 
@@ -243,6 +277,40 @@
 
     <SafetyChecksCard />
 
+    <ConfigSection title={$_('config.installer.rapi_title')}>
+      <p class="mb-3 text-sm text-text-dim">{$_('config.installer.rapi_desc')}</p>
+      <ReadOnlyRow
+        label={$_('config.installer.rapi_state')}
+        value={rapiUnlocked
+          ? $_('config.installer.rapi_state_unlocked')
+          : rapiBuildOpen
+            ? $_('config.installer.rapi_state_build')
+            : $_('config.installer.rapi_state_restricted')}
+        tone={rapiUnlocked || rapiBuildOpen ? 'warn' : 'default'}
+      />
+      {#if !rapiBuildOpen}
+        <div class="mt-3">
+          {#if rapiUnlocked}
+            <Button
+              label={$_('config.installer.rapi_relock')}
+              variant="secondary"
+              disabled={rapiBusy}
+              onclick={() => setRapiUnlocked(false)}
+            />
+          {:else}
+            <Button
+              label={$_('config.installer.rapi_unlock')}
+              disabled={rapiBusy}
+              onclick={() => (pendingRapi = true)}
+            />
+          {/if}
+        </div>
+      {/if}
+      {#if rapiError}
+        <p class="mt-2 text-sm text-error" role="alert">{rapiError}</p>
+      {/if}
+    </ConfigSection>
+
     <ConfigSection title={$_('config.installer.password_title')}>
       <p class="mb-2 text-sm text-text-dim">{$_('config.installer.password_desc')}</p>
       <FormField label={$_('config.installer.password_current')}>
@@ -274,5 +342,16 @@
   <div class="flex gap-2">
     <Button label={$_('config.installer.confirm_yes')} onclick={setHardMax} />
     <Button label={$_('config.installer.confirm_no')} variant="ghost" onclick={() => (pendingSet = false)} />
+  </div>
+</Modal>
+
+<!-- RAPI console unlock confirmation -->
+<Modal visible={pendingRapi} onclose={() => (pendingRapi = false)}>
+  <h2 class="mb-2 text-base font-semibold text-text">{$_('config.installer.rapi_confirm_title')}</h2>
+  <p class="mb-3 text-sm text-text-dim">{$_('config.installer.rapi_confirm_body')}</p>
+  <p class="mb-4 text-sm font-medium text-warning">{$_('config.installer.rapi_warning')}</p>
+  <div class="flex gap-2">
+    <Button label={$_('config.installer.rapi_confirm_yes')} onclick={() => setRapiUnlocked(true)} />
+    <Button label={$_('config.installer.confirm_no')} variant="ghost" onclick={() => (pendingRapi = false)} />
   </div>
 </Modal>
