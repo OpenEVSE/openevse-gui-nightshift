@@ -136,8 +136,9 @@
 
   // ── RAPI console access ─────────────────────────────────────────────────
   // The Developer Tools console normally passes only $G, $F0 and $FB. The
-  // charger can lift that filter for the console until it next reboots; the
-  // flag lives in its RAM, so /config is the source of truth for the state.
+  // charger can lift that filter for the console for 30 minutes (it lapses on
+  // its own, and on reboot); the flag lives in its RAM, so /config is the
+  // source of truth for the state.
   let rapiUnlocked = $derived(!!$config_store?.rapi_console_unlocked)
   // Unrestricted without the override means a build with ENABLE_FULL_RAPI:
   // nothing here can change that, so there is no button.
@@ -161,6 +162,7 @@
         ...c,
         rapi_console_unlocked: !!res.body?.unlocked,
         rapi_console_unrestricted: !!res.body?.unrestricted,
+        rapi_console_unlock_remaining: res.body?.remaining ?? 0,
       }))
     } finally {
       rapiBusy = false

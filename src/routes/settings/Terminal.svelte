@@ -465,7 +465,7 @@
 
 <ConfigPage title={$_('config.pages.terminal')}>
   <ConfigSection title={$_('config.terminal.rapi')}>
-    <!-- Set from Installer Tools (until reboot) or by an ENABLE_FULL_RAPI build:
+    <!-- Set from Installer Tools (30 minutes, cleared by reboot) or by an ENABLE_FULL_RAPI build:
          every command goes through, so say so above the input. -->
     {#if $config_store?.rapi_console_unrestricted}
       <p class="mb-3 rounded-xl border border-warning/40 bg-warning/5 p-3 text-sm text-warning" role="note">
