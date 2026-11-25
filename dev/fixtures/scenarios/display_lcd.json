@@ -1,6 +1,7 @@
 {
   "config": {
     "lcd_type": "rgb",
+    "lcd_12h_clock": true,
     "lcd_backlight_timeout": 600
   }
 }
