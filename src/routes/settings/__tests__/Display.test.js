@@ -107,6 +107,14 @@ describe('Display page', () => {
     expect(queryByText('config.display.lcd_timeout_desc')).toBeNull()
   })
 
+  it('shows 12-hour for the character LCD and writes 24-hour when picked', async () => {
+    config_store.set({ lcd_type: 'rgb', lcd_12h_clock: true })
+    const { getByText } = render(Display)
+    expect(getByText('config.display.clock_12')).toHaveAttribute('aria-pressed', 'true')
+    await fireEvent.click(getByText('config.display.clock_24'))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ lcd_12h_clock: false }))
+  })
+
   it('defaults the 2-line LCD selector to RGB and writes on change', async () => {
     config_store.set({ lcd_type: 'rgb' })
     const { getByText } = render(Display)
