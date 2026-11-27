@@ -19,7 +19,7 @@
     "@gfx/zopfli": "^1.0.15",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/vite": "^4.3.5",
-    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/jest-dom": "^8.0.0",
     "@testing-library/svelte": "^5.4.2",
     "@vitest/coverage-v8": "^5.1.0",
     "jsdom": "^31.0.1",
