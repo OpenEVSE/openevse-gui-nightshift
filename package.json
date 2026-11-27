@@ -25,7 +25,7 @@
     "jsdom": "^31.0.1",
     "playwright": "^1.65.1",
     "sharp": "^0.35.5",
-    "svelte": "^5.57.3",
+    "svelte": "^5.59.1",
     "tailwindcss": "^4.3.5",
     "vite": "^8.3.8",
     "vite-plugin-compression2": "^2.5.4",
