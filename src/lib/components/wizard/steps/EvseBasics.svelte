@@ -26,12 +26,12 @@
 
   let liveMaxCurrent = $state(null)
   let shownMaxCurrent = $derived(
-    liveMaxCurrent ?? $config_store?.max_current_soft ?? 6,
+    liveMaxCurrent ?? $config_store?.default_current ?? 6,
   )
 
   async function saveMaxCurrent(value) {
     liveMaxCurrent = value
-    await form.saveField('max_current_soft', value)
+    await form.saveField('default_current', value)
     liveMaxCurrent = null
   }
 
@@ -62,12 +62,12 @@
     <FormField
       label={$_('config.evse.maxcurrent')}
       description={`${shownMaxCurrent} A`}
-      status={$ss.max_current_soft ?? 'idle'}
+      status={$ss.default_current ?? 'idle'}
     >
       <Slider
         min={$config_store?.min_current_hard ?? 6}
         max={hardMaxCurrent($config_store, 32)}
-        value={$config_store?.max_current_soft ?? 6}
+        value={$config_store?.default_current ?? 6}
         oninput={(v) => (liveMaxCurrent = v)}
         onchange={saveMaxCurrent}
       />

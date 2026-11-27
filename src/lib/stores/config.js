@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store'
 import { httpAPI } from '../api/httpAPI.js'
+import { defaultCurrent } from '../config/defaultCurrent.js'
 
 function createConfigStore() {
     const P  = writable()
@@ -16,7 +17,11 @@ function createConfigStore() {
             const firmware_is_eu = isEuropeanFirmware(obj.firmware)
             // EU firmware capped at 32A, otherwise 80A
             const max_current_firmware = firmware_is_eu ? 32 : 80
-            return { ...obj, firmware_is_eu, max_current_firmware }
+            // default_current (the boot current, saved with $SC) was called
+            // max_current_soft before openevse_esp32_firmware#1412. Firmware
+            // that only reports the old name still fills the new one.
+            const default_current = defaultCurrent(obj)
+            return { ...obj, firmware_is_eu, max_current_firmware, default_current }
         }
         return obj
     }

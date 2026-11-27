@@ -134,6 +134,25 @@ describe('config_store', () => {
     expect(state.hostname).toBe('newname')
   })
 
+  it('fills default_current from max_current_soft on older firmware', () => {
+    config_store.set({ firmware: 'v5.1.0', max_current_soft: 24 })
+    expect(get(config_store).default_current).toBe(24)
+  })
+
+  it('prefers default_current over the deprecated max_current_soft', () => {
+    config_store.set({ firmware: 'v5.1.0', default_current: 20, max_current_soft: 24 })
+    expect(get(config_store).default_current).toBe(20)
+  })
+
+  it('keeps a saved default_current over the stale max_current_soft', async () => {
+    config_store.set({ firmware: 'v5.1.0', default_current: 24, max_current_soft: 24 })
+    httpAPI.mockResolvedValue({ msg: 'done' })
+
+    await config_store.saveParam('default_current', 16)
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ default_current: 16 }))
+    expect(get(config_store).default_current).toBe(16)
+  })
+
   it('should return false when saveParam upload fails', async () => {
     config_store.set({ firmware: 'v5.1.0', hostname: 'openevse' })
     httpAPI.mockResolvedValue({ msg: 'error' })

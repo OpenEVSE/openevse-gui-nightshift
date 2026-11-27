@@ -10,6 +10,7 @@
 // tell an allocation from a lost controller, which is the distinction the
 // card has to get right.
 import { EvseClients } from '../vars.js'
+import { defaultCurrent } from '../config/defaultCurrent.js'
 
 const LIMIT_CLIENTS = [EvseClients.shaper.id, EvseClients.loadsharing.id]
 
@@ -48,7 +49,7 @@ export function loadSharingView({ config, status, claimsTarget, lsStatus, localM
   // up. With no ceiling at all, any allocation counts as a limit.
   const ceiling =
     num(localMax) > 0 ? num(localMax)
-    : num(c.max_current_soft) > 0 ? num(c.max_current_soft)
+    : num(defaultCurrent(c)) > 0 ? num(defaultCurrent(c))
     : num(s.max_current) > 0 ? num(s.max_current)
     : null
 

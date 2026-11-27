@@ -46,7 +46,7 @@ describe('EVSE page', () => {
     const { getByRole } = render(Evse)
     const slider = getByRole('slider')
     await fireEvent.change(slider, { target: { value: '16' } })
-    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ max_current_soft: 16 }))
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ default_current: 16 }))
   })
 
   it('shows the three-phase select only when the device reports it', async () => {

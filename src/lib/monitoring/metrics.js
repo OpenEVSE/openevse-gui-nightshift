@@ -1,5 +1,6 @@
 /** Pure helpers for the Monitoring screen. Self-contained — no store/DOM imports. */
 import { formatTemp } from '../temperature.js'
+import { defaultCurrent } from '../config/defaultCurrent.js'
 import { EvseClients } from '../vars.js'
 import { cableTempStatusKey } from '../cabletemp.js'
 
@@ -98,7 +99,7 @@ export function serviceMetrics(status, config) {
     rows: [
       { labelKey: 'monitoring.service.level', value: s.service_level ?? null, unit: '' },
       { labelKey: 'monitoring.service.min', value: c.min_current_hard ?? null, unit: 'units.amp' },
-      { labelKey: 'monitoring.service.max', value: c.max_current_soft ?? null, unit: 'units.amp' },
+      { labelKey: 'monitoring.service.max', value: defaultCurrent(c, null), unit: 'units.amp' },
     ],
   }
 }

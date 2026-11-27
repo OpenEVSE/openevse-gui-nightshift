@@ -55,7 +55,7 @@
   let minCurrent      = $derived($config_store?.min_current_hard ?? 6)
   let maxCurrent      = $derived(hardMaxCurrent($config_store, 32))
   // Soft current limit = what the DefaultStateCard slider controls
-  let defaultCurrent  = $derived($config_store?.max_current_soft ?? minCurrent)
+  let defaultCurrent  = $derived($config_store?.default_current ?? minCurrent)
 
   // Safety toggles on the Default State card (only when firmware exposes them)
   let heartbeatSupported = $derived($config_store?.heartbeat_interval !== undefined)
@@ -227,7 +227,7 @@
 
   // ── Default state ─────────────────────────────────────────────────────────
   const saveDefaultState   = (active) => saveConfigParam('default_state', active)
-  const saveDefaultCurrent = (amps)   => saveConfigParam('max_current_soft', amps)
+  const saveDefaultCurrent = (amps)   => saveConfigParam('default_current', amps)
 
   // ── Safety toggles (Default State card) ───────────────────────────────────
   const saveBootLock = (enabled) => saveConfigParam('boot_lock', enabled)
