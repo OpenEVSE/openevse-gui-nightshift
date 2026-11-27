@@ -19,6 +19,7 @@
     // Feature availability — greys out the matching action option when false.
     ocppAvailable = true,
     rfidAvailable = true,
+    rebootAvailable = false,   // firmware reports schedule_reboot in /config
     minCurrent = 6,
     maxCurrent = 80,
     // Global safety config surfaced contextually on certain action cards.
@@ -63,11 +64,19 @@
     }
   })
 
+  // Reboot is schedule-only (its option is hidden when Always On): fall back
+  // to Charge rather than leave the select on a value it no longer lists.
+  $effect(() => {
+    if (alwaysOn && action === 'reboot') action = 'charge'
+  })
+
   // ── Derived ───────────────────────────────────────────────────────────────
-  let nextDay        = $derived(hasStopTime && isNextDay(startTime, stopTime))
+  // Reboot fires once at the start time, so the stop time is greyed out.
+  let isReboot       = $derived(!alwaysOn && action === 'reboot')
+  let nextDay        = $derived(!isReboot && hasStopTime && isNextDay(startTime, stopTime))
   let isLimitFeature = $derived(alwaysOn && action === 'charge')
   let showAction     = $derived(!isLimitFeature)
-  let showLimit      = $derived(isLimitFeature || (!alwaysOn && !['disable', 'ocpp'].includes(action)))
+  let showLimit      = $derived(isLimitFeature || (!alwaysOn && !['disable', 'ocpp', 'reboot'].includes(action)))
   let showChargeCurrent = $derived(!alwaysOn && action === 'charge')
   // Boot Lock surfaces on RFID/OCPP cards; Heartbeat on Eco/Grid-shaping cards.
   let showBootLock   = $derived(bootLockSupported && ['rfid', 'ocpp'].includes(action))
@@ -84,7 +93,7 @@
   function validate() {
     if (!alwaysOn && !flags.some((f) => f)) { showDayError = true; return false }
     // Equal start/stop would silently become a 24h window (isNextDay uses <=).
-    if (!alwaysOn && hasStopTime && stopTime === startTime) { showTimeError = true; return false }
+    if (!alwaysOn && !isReboot && hasStopTime && stopTime === startTime) { showTimeError = true; return false }
     // An always-on session limit with no limit set writes nothing to the device.
     if (isLimitFeature && (limitType === 'none' || !(limitValue > 0))) { showLimitError = true; return false }
     return true
@@ -101,7 +110,7 @@
       alwaysOn,
       days,
       startTime: alwaysOn ? '00:00' : startTime,
-      stopTime:  (alwaysOn || !hasStopTime) ? null : stopTime,
+      stopTime:  (alwaysOn || isReboot || !hasStopTime) ? null : stopTime,
       action,
       chargeCurrent: (showChargeCurrent && chargeCurrent > 0) ? chargeCurrent : null,
       limit,
@@ -152,11 +161,13 @@
       />
     </label>
 
-    <!-- Stop time (optional) -->
+    <!-- Stop time (optional; greyed out for Reboot Station, which has none) -->
+    <div class={isReboot ? 'pointer-events-none opacity-40' : ''} aria-disabled={isReboot}>
     <label class="mt-4 flex cursor-pointer items-center gap-2">
       <input
         type="checkbox"
         bind:checked={hasStopTime}
+        disabled={isReboot}
         class="h-4 w-4 shrink-0 accent-[var(--color-accent)]"
       />
       <span class="text-sm text-text">{$_('charge_manager.rule_set_stop_time')}</span>
@@ -181,6 +192,7 @@
         <p class="mt-2 text-xs text-error">{$_('charge_manager.rule_error_same_time')}</p>
       {/if}
     {/if}
+    </div>
   </div>
 
   <!-- Action dropdown (hidden when Always On — limit is the only relevant setting) -->
@@ -203,7 +215,17 @@
           {$_('charge_manager.rule_action_ocpp')} — {$_('charge_manager.feature_ocpp_not_implemented')}
         </option>
         <option value="disable">{$_('charge_manager.rule_action_disable')}</option>
+        {#if !alwaysOn}
+          <!-- Disabled unless the firmware advertises schedule_reboot: older
+               firmware would store the timer as a plain stop and never reboot. -->
+          <option value="reboot" disabled={!rebootAvailable && action !== 'reboot'}>
+            {$_('charge_manager.rule_action_reboot')}{!rebootAvailable ? ' — ' + $_('charge_manager.feature_reboot_unavailable') : ''}
+          </option>
+        {/if}
       </select>
+      {#if isReboot}
+        <p class="mt-1.5 text-xs text-text-dim">{$_('charge_manager.rule_reboot_note')}</p>
+      {/if}
     </div>
   {/if}
 

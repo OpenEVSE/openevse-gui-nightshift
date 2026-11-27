@@ -18,7 +18,9 @@ export const GLOBAL_FEATURE_KEYS = [
  * @param {string} action
  */
 export function actionToTimerState(action) {
-  if (action === 'disable') return 'disabled'
+  // Reboot is stored as a disabled-state timer: firmware that predates the
+  // 'reboot' feature then reads it as a plain stop, never as a charge start.
+  if (action === 'disable' || action === 'reboot') return 'disabled'
   return 'active'
 }
 
@@ -31,7 +33,7 @@ export function actionToTimerState(action) {
  */
 function actionToTimerFeature(action) {
   /** @type {Record<string,string>} */
-  const map = { eco: 'divert', eco_divert: 'divert', shaper: 'shaper', rfid: 'rfid', ocpp: 'ocpp' }
+  const map = { eco: 'divert', eco_divert: 'divert', shaper: 'shaper', rfid: 'rfid', ocpp: 'ocpp', reboot: 'reboot' }
   return map[action] ?? null
 }
 
@@ -92,6 +94,7 @@ export function alwaysOnConfig(action, on) {
  * @param {string|null} [feature]
  */
 export function timerStateToAction(state, feature = null) {
+  if (feature === 'reboot') return 'reboot'
   if (state === 'disabled') return 'disable'
   if (state === 'eco') return 'eco_divert'   // old-format backward compat
   if (feature === 'divert') return 'eco_divert'
@@ -149,8 +152,12 @@ export function timersToRules(timers) {
   if (!Array.isArray(timers) || timers.length === 0) return []
 
   const sorted   = [...timers].sort((a, b) => a.time.localeCompare(b.time))
-  const actives  = sorted.filter((t) => t.state !== 'disabled')
-  const disableds = sorted.filter((t) => t.state === 'disabled')
+  // Reboot timers are one-shot triggers (no stop), so they are neither a
+  // window start nor a candidate stop for another rule.
+  const isReboot = (/** @type {any} */ t) => t.feature === 'reboot'
+  const reboots  = sorted.filter(isReboot)
+  const actives  = sorted.filter((t) => !isReboot(t) && t.state !== 'disabled')
+  const disableds = sorted.filter((t) => !isReboot(t) && t.state === 'disabled')
   const usedIds  = new Set()
   const stopFor  = new Map() // active timer id → its stop timer
   const rules    = []
@@ -207,6 +214,27 @@ export function timersToRules(timers) {
     })
   }
 
+  // The firmware's reboot trigger (computeNextReboot) does not read `enabled`,
+  // so a reboot rule always fires. Never offer the switch or show the rule as
+  // off, or the card would claim "off" while the station still reboots.
+  // Revisit once the firmware skips reboot events with enabled == false.
+  for (const R of reboots) {
+    rules.push({
+      id:            `r_${R.id}`,
+      alwaysOn:      false,
+      enabled:       true,
+      canDisable:    false,
+      days:          R.days ?? [],
+      startTime:     R.time,
+      stopTime:      null,
+      action:        'reboot',
+      chargeCurrent: null,
+      limit:         null,
+      _startEventId: R.id,
+      _stopEventId:  null,
+    })
+  }
+
   // Remaining unmatched disabled timers → standalone disable rules
   for (const B of disableds) {
     if (!usedIds.has(B.id)) {
@@ -240,6 +268,10 @@ export function timersToRules(timers) {
  * @param {any[]} existingTimers
  */
 export function rulesToTimers(rule, existingTimers) {
+  // A reboot fires once at its start time: never a stop, current or limit.
+  if (rule?.action === 'reboot') {
+    rule = { ...rule, stopTime: null, chargeCurrent: null, limit: null }
+  }
   const timers = Array.isArray(existingTimers) ? existingTimers : []
   const add = []
   const remove = []
@@ -355,10 +387,12 @@ function daysSetKey(days) {
 
 /**
  * Format a window time string: "1:00 PM – 6:00 PM", "from 1:00 PM", or with "(next day)" suffix.
+ * A point-in-time rule (Reboot Station) reads "at 3:00 AM".
  * @param {string} startTime
  * @param {string|null} stopTime
+ * @param {boolean} [point]
  */
-export function formatWindow(startTime, stopTime) {
+export function formatWindow(startTime, stopTime, point = false) {
   const fmt = (/** @type {string|null} */ t) => {
     if (!t) return ''
     const [h, m] = t.split(':').map(Number)
@@ -366,6 +400,7 @@ export function formatWindow(startTime, stopTime) {
     const h12 = h % 12 || 12
     return `${h12}:${String(m).padStart(2, '0')} ${period}`
   }
+  if (point) return `at ${fmt(startTime)}`
   if (stopTime) {
     const nextDay = isNextDay(startTime, stopTime)
     return `${fmt(startTime)} – ${fmt(stopTime)}${nextDay ? ' (next day)' : ''}`

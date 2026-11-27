@@ -107,6 +107,8 @@
   // grey these out in both the feature picker and the Edit Rule action list.
   let ocppAvailable = $derived(!!$config_store?.ocpp_server)
   let rfidAvailable = $derived(!!$status_store?.rfid_reader)
+  // Scheduled Reboot Station needs firmware that knows the 'reboot' feature.
+  let rebootAvailable = $derived($config_store?.schedule_reboot === true)
   let pickerUnavailable = $derived({
     ...(ocppAvailable ? {} : { ocpp: 'charge_manager.feature_ocpp_unavailable' }),
     ...(rfidAvailable ? {} : { rfid: 'charge_manager.feature_rfid_unavailable' }),
@@ -482,6 +484,7 @@
   {rangeMiles}
   {ocppAvailable}
   {rfidAvailable}
+  {rebootAvailable}
   {minCurrent}
   {maxCurrent}
   {bootLockSupported}
