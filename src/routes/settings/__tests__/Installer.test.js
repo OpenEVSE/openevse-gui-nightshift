@@ -301,3 +301,58 @@ describe('Installer Tools — change installer password', () => {
     expect(JSON.parse(posts('/installer/maxcurrent')[0][2]).password).toBe('hunter22')
   })
 })
+
+describe('Installer Tools — RAPI console access', () => {
+  it('shows the console as restricted by default', async () => {
+    const utils = render(Installer)
+    await unlock(utils)
+    expect(utils.getByText('config.installer.rapi_title')).toBeInTheDocument()
+    expect(utils.getByText('config.installer.rapi_state_restricted')).toBeInTheDocument()
+    expect(utils.getByText('config.installer.rapi_unlock')).toBeInTheDocument()
+  })
+
+  it('asks for confirmation, then sends the password and unlocked:true', async () => {
+    replies['/installer/rapi'] = { status: 200, body: { msg: 'ok', unlocked: true, unrestricted: true } }
+    const utils = render(Installer)
+    await unlock(utils, 'secret')
+    await fireEvent.click(utils.getByText('config.installer.rapi_unlock'))
+    expect(posts('/installer/rapi')).toHaveLength(0)
+    await fireEvent.click(utils.getByText('config.installer.rapi_confirm_yes'))
+    await vi.waitFor(() => expect(posts('/installer/rapi')).toHaveLength(1))
+    expect(posts('/installer/rapi')[0][2]).toBe(JSON.stringify({ password: 'secret', unlocked: true }))
+    await vi.waitFor(() =>
+      expect(utils.getByText('config.installer.rapi_state_unlocked')).toBeInTheDocument())
+    expect(utils.getByText('config.installer.rapi_relock')).toBeInTheDocument()
+  })
+
+  it('restores the restrictions without a confirmation', async () => {
+    config_store.set({ ...CONFIG, rapi_console_unlocked: true, rapi_console_unrestricted: true })
+    replies['/installer/rapi'] = { status: 200, body: { msg: 'ok', unlocked: false, unrestricted: false } }
+    const utils = render(Installer)
+    await unlock(utils)
+    await fireEvent.click(utils.getByText('config.installer.rapi_relock'))
+    await vi.waitFor(() => expect(posts('/installer/rapi')).toHaveLength(1))
+    expect(JSON.parse(posts('/installer/rapi')[0][2]).unlocked).toBe(false)
+    await vi.waitFor(() =>
+      expect(utils.getByText('config.installer.rapi_state_restricted')).toBeInTheDocument())
+  })
+
+  it('reports a refused password and leaves the state alone', async () => {
+    replies['/installer/rapi'] = { status: 403, body: { msg: 'wrong password' } }
+    const utils = render(Installer)
+    await unlock(utils)
+    await fireEvent.click(utils.getByText('config.installer.rapi_unlock'))
+    await fireEvent.click(utils.getByText('config.installer.rapi_confirm_yes'))
+    await vi.waitFor(() => expect(utils.getByText('config.installer.wrong')).toBeInTheDocument())
+    expect(utils.getByText('config.installer.rapi_state_restricted')).toBeInTheDocument()
+  })
+
+  it('offers no button when the firmware build is already unrestricted', async () => {
+    config_store.set({ ...CONFIG, rapi_console_unlocked: false, rapi_console_unrestricted: true })
+    const utils = render(Installer)
+    await unlock(utils)
+    expect(utils.getByText('config.installer.rapi_state_build')).toBeInTheDocument()
+    expect(utils.queryByText('config.installer.rapi_unlock')).toBeNull()
+    expect(utils.queryByText('config.installer.rapi_relock')).toBeNull()
+  })
+})

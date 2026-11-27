@@ -194,6 +194,20 @@
         />
       </FormField>
 
+      {#if 'lcd_12h_clock' in cfg}
+        <FormField
+          label={$_('config.display.clock')}
+          description={$_('config.display.lcd_clock_desc')}
+          status={$ss.lcd_12h_clock ?? 'idle'}
+        >
+          <SegmentedControl
+            options={clockOptions}
+            value={cfg.lcd_12h_clock === false ? '24' : '12'}
+            onchange={(v) => form.saveField('lcd_12h_clock', v === '12')}
+          />
+        </FormField>
+      {/if}
+
       {#if hasTimeout && !hasTft}
         {@render timeoutField($_('config.display.lcd_timeout_desc'))}
       {/if}

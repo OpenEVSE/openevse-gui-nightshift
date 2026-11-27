@@ -465,6 +465,15 @@
 
 <ConfigPage title={$_('config.pages.terminal')}>
   <ConfigSection title={$_('config.terminal.rapi')}>
+    <!-- Set from Installer Tools (30 minutes, cleared by reboot) or by an ENABLE_FULL_RAPI build:
+         every command goes through, so say so above the input. -->
+    {#if $config_store?.rapi_console_unrestricted}
+      <p class="mb-3 rounded-xl border border-warning/40 bg-warning/5 p-3 text-sm text-warning" role="note">
+        {$config_store?.rapi_console_unlocked
+          ? $_('config.installer.rapi_console_banner')
+          : $_('config.installer.rapi_console_banner_build')}
+      </p>
+    {/if}
     {#if results.length > 0}
       <div bind:this={logEl} class="mb-3 max-h-60 overflow-y-auto rounded-xl bg-surface-3 p-3 font-mono text-xs">
         {#each results as r}
