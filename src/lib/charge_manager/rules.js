@@ -214,12 +214,16 @@ export function timersToRules(timers) {
     })
   }
 
+  // The firmware's reboot trigger (computeNextReboot) does not read `enabled`,
+  // so a reboot rule always fires. Never offer the switch or show the rule as
+  // off, or the card would claim "off" while the station still reboots.
+  // Revisit once the firmware skips reboot events with enabled == false.
   for (const R of reboots) {
     rules.push({
       id:            `r_${R.id}`,
       alwaysOn:      false,
-      enabled:       R.enabled !== false,
-      canDisable:    'enabled' in R,
+      enabled:       true,
+      canDisable:    false,
       days:          R.days ?? [],
       startTime:     R.time,
       stopTime:      null,
