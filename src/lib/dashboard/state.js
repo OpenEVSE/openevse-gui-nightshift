@@ -1,4 +1,5 @@
 /** Pure helpers for the Dashboard. No store or DOM access — fully unit-tested. */
+import { defaultCurrent } from '../config/defaultCurrent.js'
 
 /**
  * Hard ceiling for the user-configurable energy-limit slider max, in kWh.
@@ -64,7 +65,7 @@ export function limitProgress(limit, status) {
  */
 export function maxPowerW(status, config) {
   const phases = config?.is_threephase ? 3 : 1
-  return (config?.max_current_soft ?? 0) * (status?.voltage ?? 0) * phases
+  return (defaultCurrent(config, 0)) * (status?.voltage ?? 0) * phases
 }
 
 /** Ring fill (0..1): limit progress when a limit is active, else power vs max power. */

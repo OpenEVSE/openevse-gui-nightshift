@@ -265,7 +265,7 @@
     },
     "evse": {
       "current": "Current limits",
-      "maxcurrent": "Maximum current",
+      "maxcurrent": "Default current",
       "maxcurrent_hard": "Hardware maximum",
       "behaviour": "Behaviour",
       "defaultstate": "Default state on power-up",

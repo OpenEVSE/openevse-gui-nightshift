@@ -53,7 +53,7 @@
   // other state keeps the PowerRing.
   let showChart = $derived(charging)
   // The rate pill is a temporary override: its slider runs to the hardware
-  // ceiling, not to the default current (max_current_soft, the boot default
+  // ceiling, not to the default current (default_current, the boot default
   // set in Charge Manager), and choosing a rate never changes that default
   // (#1403). The firmware applies an override above the default as a
   // volatile pilot. Until the firmware has read the hardware ceiling (0, see
@@ -66,13 +66,13 @@
   let aboveDefault = $derived(scheduleReportsEnabled($schedule_store))
   let maxAmps = $derived(
     aboveDefault
-      ? hardMaxCurrent($config_store, $config_store?.max_current_soft ?? 48)
+      ? hardMaxCurrent($config_store, $config_store?.default_current ?? 48)
       : Math.min(
-          $config_store?.max_current_soft ?? Infinity,
-          hardMaxCurrent($config_store, $config_store?.max_current_soft ?? 48),
+          $config_store?.default_current ?? Infinity,
+          hardMaxCurrent($config_store, $config_store?.default_current ?? 48),
         ),
   )
-  let defaultAmps = $derived(Math.min($config_store?.max_current_soft ?? maxAmps, maxAmps))
+  let defaultAmps = $derived(Math.min($config_store?.default_current ?? maxAmps, maxAmps))
   let fill = $derived(ringFill($status_store, $config_store, $limit_store))
 
   let socRangeLimit = $derived($limit_store?.type === 'soc' || $limit_store?.type === 'range')
@@ -246,7 +246,7 @@
         const cur = $override_store?.charge_current
         const data = {
           state: seg === 'on' ? 'active' : 'disabled',
-          charge_current: cur ?? $config_store?.max_current_soft,
+          charge_current: cur ?? $config_store?.default_current,
           auto_release: false,
         }
         ok = await serialQueue.add(() => override_store.upload(data))
