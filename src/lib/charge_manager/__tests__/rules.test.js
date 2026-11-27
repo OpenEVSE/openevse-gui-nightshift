@@ -575,16 +575,22 @@ describe('Reboot Station rules', () => {
     expect(rules).toHaveLength(2)
   })
 
-  it('never offers the on/off switch on a reboot rule, since the firmware ignores it', () => {
+  it('offers the on/off switch on a reboot rule when the firmware reports the flag', () => {
     const timers = [
       { id: 1, time: '01:00', state: 'active', days: weekdays, enabled: true },
       { id: 2, time: '03:00', state: 'disabled', days: weekdays, feature: 'reboot', feature_value: 1, enabled: false },
     ]
     const rules = timersToRules(timers)
-    const charge = rules.find((r) => r.action === 'charge')
     const reboot = rules.find((r) => r.action === 'reboot')
-    expect(charge.canDisable).toBe(true)
-    expect(reboot).toMatchObject({ canDisable: false, enabled: true })
+    expect(reboot).toMatchObject({ canDisable: true, enabled: false })
+  })
+
+  it('hides the switch on a reboot rule from firmware without the flag', () => {
+    const timers = [
+      { id: 2, time: '03:00', state: 'disabled', days: weekdays, feature: 'reboot', feature_value: 1 },
+    ]
+    const [reboot] = timersToRules(timers)
+    expect(reboot).toMatchObject({ action: 'reboot', canDisable: false, enabled: true })
   })
 
   it('maps the action both ways', () => {

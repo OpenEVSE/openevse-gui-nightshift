@@ -214,16 +214,15 @@ export function timersToRules(timers) {
     })
   }
 
-  // The firmware's reboot trigger (computeNextReboot) does not read `enabled`,
-  // so a reboot rule always fires. Never offer the switch or show the rule as
-  // off, or the card would claim "off" while the station still reboots.
-  // Revisit once the firmware skips reboot events with enabled == false.
+  // The firmware's reboot trigger skips reboot rules with enabled == false
+  // (openevse_esp32_firmware#1412), and firmware that reports the flag is
+  // firmware that honours it, so reboot rules get the switch like any other.
   for (const R of reboots) {
     rules.push({
       id:            `r_${R.id}`,
       alwaysOn:      false,
-      enabled:       true,
-      canDisable:    false,
+      enabled:       R.enabled !== false,
+      canDisable:    'enabled' in R,
       days:          R.days ?? [],
       startTime:     R.time,
       stopTime:      null,
