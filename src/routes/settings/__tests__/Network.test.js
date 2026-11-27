@@ -50,6 +50,23 @@ describe('Network page', () => {
     expect(getByText('config.network.apssid')).toBeInTheDocument()
   })
 
+  it('hides the setup-prompt switch on firmware without wifi_setup_prompt', () => {
+    config_store.set({ hostname: 'openevse-1', wizard_passed: true })
+    const { queryByRole } = render(Network)
+    expect(queryByRole('switch', { name: 'config.network.setup_prompt' })).toBeNull()
+  })
+
+  it('writes wifi_setup_prompt when the setup-prompt switch is flipped off', async () => {
+    // #213: a charger with no WiFi at the site sits on its hotspot for good;
+    // the owner can drop the TFT QR and the hotspot LED blink.
+    config_store.set({ hostname: 'openevse-1', wizard_passed: true, wifi_setup_prompt: true })
+    const { getByRole } = render(Network)
+    const sw = getByRole('switch', { name: 'config.network.setup_prompt' })
+    expect(sw).toHaveAttribute('aria-checked', 'true')
+    await fireEvent.click(sw)
+    expect(httpAPI).toHaveBeenCalledWith('POST', '/config', JSON.stringify({ wifi_setup_prompt: false }))
+  })
+
   it('surfaces the write-error alert on a failed save', async () => {
     httpAPI.mockResolvedValue('error')
     const { getByDisplayValue } = render(Network)

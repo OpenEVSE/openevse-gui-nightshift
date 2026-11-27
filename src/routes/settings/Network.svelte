@@ -16,6 +16,7 @@
   import { normalizeNetworks, signalIcon, signalPercent, isSecured } from '../../lib/config/wifi.js'
   import Icon from '../../lib/icons/Icon.svelte'
   import Button from '../../lib/components/ui/Button.svelte'
+  import Toggle from '../../lib/components/ui/Toggle.svelte'
 
   const form = createConfigForm()
   const ss = form.saveState
@@ -242,6 +243,20 @@
           onchange={(v) => form.saveField('ap_pass', v)}
         />
       </FormField>
+      <!-- Only on firmware that reports the key (it has no meaning elsewhere). -->
+      {#if 'wifi_setup_prompt' in ($config_store ?? {})}
+        <FormField
+          label={$_('config.network.setup_prompt')}
+          description={$_('config.network.setup_prompt_desc')}
+          status={$ss.wifi_setup_prompt ?? 'idle'}
+        >
+          <Toggle
+            checked={$config_store?.wifi_setup_prompt !== false}
+            label={$_('config.network.setup_prompt')}
+            onchange={(v) => form.saveField('wifi_setup_prompt', v)}
+          />
+        </FormField>
+      {/if}
     </ConfigSection>
   {/if}
 </ConfigPage>

@@ -96,6 +96,8 @@
       "apdefault": "A töltő saját WiFi hálózata, beállításhoz és tartalékként használva.",
       "apssid": "AP hálózatnév",
       "appass": "AP jelszó",
+      "setup_prompt": "Beállítási jelzés",
+      "setup_prompt_desc": "Amíg a töltő a saját hozzáférési pontját használja és tétlen, a kijelző QR-kódot mutat a csatlakozáshoz, és az állapot-LED-ek villognak. Kapcsolja ki olyan töltőnél, amelynek soha nem lesz WiFi-je; a hozzáférési pont elérhető marad.",
       "wifi": "WiFi hálózat",
       "scan": "Hálózatok keresése",
       "scanning": "Keresés…",

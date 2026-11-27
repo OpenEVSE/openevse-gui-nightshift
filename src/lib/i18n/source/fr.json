@@ -96,6 +96,8 @@
       "apdefault": "Réseau WiFi propre au chargeur, utilisé pour la configuration et en secours.",
       "apssid": "Nom du réseau AP",
       "appass": "Mot de passe AP",
+      "setup_prompt": "Invite de configuration",
+      "setup_prompt_desc": "Tant que la borne utilise son propre point d'accès et est inactive, l'écran affiche un QR code pour s'y connecter et les LED d'état clignotent. Désactivez-la pour une borne qui n'aura jamais de WiFi ; le point d'accès reste disponible.",
       "wifi": "Réseau WiFi",
       "scan": "Rechercher des réseaux",
       "scanning": "Recherche en cours…",
