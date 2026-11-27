@@ -21,7 +21,7 @@
     "@tailwindcss/vite": "^4.3.5",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/svelte": "^5.4.2",
-    "@vitest/coverage-v8": "^5.1.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "jsdom": "^31.0.1",
     "playwright": "^1.65.1",
     "sharp": "^0.35.5",
